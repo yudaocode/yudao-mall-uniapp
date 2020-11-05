@@ -7,7 +7,7 @@
 				<view class='item'><text class='iconfont icon-xuanzhong'></text>售后无忧</view>
 			</view>
 			<view class='nav acea-row row-between-wrapper'>
-				<view>购物数量 <text class='num font-color'>{{cartCount}}</text></view>
+				<view>{{footerswitch}}购物车 <text class='num font-color'>{{cartCount}}</text></view>
 				<view v-if="cartList.valid.length > 0 || cartList.invalid.length > 0" class='administrate acea-row row-center-wrapper'
 				 @click='manage'>{{ footerswitch ? '管理' : '取消'}}</view>
 			</view>
@@ -17,10 +17,10 @@
 						<block v-for="(item,index) in cartList.valid" :key="index">
 							<view class='item acea-row row-between-wrapper'>
 								<!-- #ifndef MP -->
-								<checkbox :value="(item.id).toString()" :checked="item.checked" :disabled="item.attrStatus?false:true" />
+								<checkbox :value="(item.id).toString()" :checked="item.checked" :disabled="item.attrStatus || !footerswitch ?false:true" />
 								<!-- #endif -->
 								<!-- #ifdef MP -->
-								<checkbox :value="item.id" :checked="item.checked" :disabled="item.attrStatus?false:true" />
+								<checkbox :value="item.id" :checked="item.checked" :disabled="item.attrStatus || !footerswitch ?false:true" />
 								<!-- #endif -->
 								<navigator :url='"/pages/goods_details/index?id="+item.productId' hover-class='none' class='picTxt acea-row row-between-wrapper'>
 									<view class='pictrue'>
@@ -28,15 +28,15 @@
 										<image v-else :src='item.productInfo.image'></image>
 									</view>
 									<view class='text'>
-										<view class='line1' :class="item.attrStatus?'':'reColor'">{{item.productInfo.storeName}}</view>
+										<view class='line1' :class="item.trueStock || item.trueStock > 0 ?'':'reColor'">{{item.productInfo.storeName}}</view>
 										<view class='infor line1' v-if="item.productInfo.attrInfo">属性：{{item.productInfo.attrInfo.suk}}</view>
-										<view class='money' v-if="item.attrStatus">￥{{item.truePrice}}</view>
-										<view class="reElection acea-row row-between-wrapper" v-else>
+										<view class='money' v-if="item.trueStock  || item.trueStock > 0 ">￥{{item.truePrice}}</view>
+										<view class="reElection acea-row row-between-wrapper" v-if="!item.trueStock  || item.trueStock === 0 ">
 											<view class="title">请重新选择商品规格</view>
 											<view class="reBnt cart-color acea-row row-center-wrapper" @click.stop="reElection(item)">重选</view>
 										</view>
 									</view>
-									<view class='carnum acea-row row-center-wrapper' v-if="item.attrStatus">
+									<view class='carnum acea-row row-center-wrapper' v-if="item.trueStock  || item.trueStock > 0 ">
 										<view class="reduce" :class="item.numSub ? 'on' : ''" @click.stop='subCart(index)'>-</view>
 										<view class='num'>{{item.cartNum}}</view>
 										<!-- <view class="num">
@@ -90,6 +90,7 @@
 			<view style='height:120rpx;color: #F5F5F5;'>{{selectCountPrice}}</view>
 			<view class='footer acea-row row-between-wrapper' v-if="cartList.valid.length > 0">
 				<view>
+					{{isAllSelect}}
 					<checkbox-group @change="checkboxAllChange">
 						<checkbox value="all" :checked="!!isAllSelect" /><text class='checkAll'>全选 ({{cartCount}})</text>
 					</checkbox-group>
@@ -189,7 +190,8 @@
 				attrValue: '', //已选属性
 				attrTxt: '请选择', //属性页面提示
 				cartId: 0,
-				product_id: 0
+				product_id: 0,
+				delCheck: [] // 删除选中的
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -232,6 +234,7 @@
 					},
 					this.isAllSelect = false; //全选
 				this.selectValue = []; //选中的数据
+				this.delCheck = [];
 				this.selectCountPrice = 0.00;
 				this.cartCount = 0;
 				this.isShowAuth = false;
@@ -278,7 +281,7 @@
 					})
 					.catch(res => {
 						return that.$util.Tips({
-							title: res
+							title: res.msg
 						});
 					});
 			},
@@ -441,18 +444,20 @@
 			subDel: function(event) {
 				let that = this,
 					selectValue = that.selectValue;
-				if (selectValue.length > 0)
-					cartDel(selectValue).then(res => {
-						that.loadend = false;
-						that.page = 1;
-						that.cartList.valid = [];
-						that.getCartList();
-						that.getCartNum();
-					});
-				else
-					return that.$util.Tips({
-						title: '请选择产品'
-					});
+					console.log(that.selectValue)
+				
+				// if (selectValue.length > 0)
+				// 	cartDel(selectValue).then(res => {
+				// 		that.loadend = false;
+				// 		that.page = 1;
+				// 		that.cartList.valid = [];
+				// 		that.getCartList();
+				// 		that.getCartNum();
+				// 	});
+				// else
+				// 	return that.$util.Tips({
+				// 		title: '请选择产品'
+				// 	});
 			},
 			getSelectValueProductId: function() {
 				let that = this;
@@ -473,16 +478,18 @@
 					selectValue = that.selectValue;
 				if (selectValue.length > 0) {
 					let selectValueProductId = that.getSelectValueProductId();
-					collectAll(that.getSelectValueProductId()).then(res => {
-						return that.$util.Tips({
-							title: res,
-							icon: 'success'
-						});
-					}).catch(err => {
-						return that.$util.Tips({
-							title: err
-						});
-					});
+					console.log('selectValueProductId');
+					console.log(selectValueProductId.join(','));
+					// collectAll(that.getSelectValueProductId()).then(res => {
+					// 	return that.$util.Tips({
+					// 		title: res.msg,
+					// 		icon: 'success'
+					// 	});
+					// }).catch(err => {
+					// 	return that.$util.Tips({
+					// 		title: err
+					// 	});
+					// });
 				} else {
 					return that.$util.Tips({
 						title: '请选择产品'
@@ -492,10 +499,11 @@
 			subOrder: function(event) {
 				let that = this,
 					selectValue = that.selectValue;
+					console.log(that.selectValue)
 				if (selectValue.length > 0) {
-					uni.navigateTo({
-						url: '/pages/users/order_confirm/index?new=false&cartId=' + selectValue.join(',')
-					});
+					// uni.navigateTo({
+					// 	url: '/pages/users/order_confirm/index?new=false&cartId=' + selectValue.join(',')
+					// });
 				} else {
 					return that.$util.Tips({
 						title: '请选择产品'
@@ -517,38 +525,70 @@
 				if (valid.length > 0) {
 					for (let index in valid) {
 						if (status == 1) {
-							if(valid[index].attrStatus){
+							if(that.footerswitch){
+								if(valid[index].attrStatus){
+									valid[index].checked = true;
+									selectValue.push(valid[index].id);
+								}else{
+									valid[index].checked = false;
+								}	
+							}else{
 								valid[index].checked = true;
 								selectValue.push(valid[index].id);
-							}else{
-								valid[index].checked = false;
 							}
+							
 						} else valid[index].checked = false;
 					}
 					that.$set(that.cartList, 'valid', valid);
 					that.selectValue = selectValue;
+					console.log('cartList', that.cartList)
+					console.log(that.selectValue)
 					that.switchSelect();
 				}
 			},
 			checkboxChange: function(event) {
+				console.log(event)
 				let that = this;
 				let value = event.detail.value;
 				let valid = that.cartList.valid;
+				//that.delCheck = value;
 				for (let index in valid) {
-					if (that.inArray(valid[index].id, value)){
-						if(valid[index].attrStatus){
-							valid[index].checked = true;
-						}else{
-							valid[index].checked = false;
-						}
-					} else {
-						valid[index].checked = false;
-					} 
-				}
+				     const item = valid[index]
+					 if (that.inArray(valid[index].id, value)){
+					    this.$set(item,'checked',true)
+					 }else{
+					    this.$set(item,'checked',false)
+					 }      
+				 }
+				// for (let index in valid) {
+				// 	if (that.inArray(valid[index].id, value)){
+				// 		// if(that.footerswitch && valid[index].trueStock){
+				// 		// 	valid[index].checked = true;
+				// 		// }else{
+				// 		// 	valid[index].checked = true;
+				// 		// }
+				// 		if(that.footerswitch){
+				// 			if(valid[index].attrStatus){
+				// 				valid[index].checked = true;
+				// 			}
+				// 			else{
+				// 				valid[index].checked = false;
+				// 			}
+				// 		}else{
+				// 			valid[index].checked = true;
+							
+				// 		}
+						
+				// 	} else {
+				// 		valid[index].checked = false;
+				// 	} 
+				// }
 				that.$set(that.cartList, 'valid', valid);
 				let newArr = that.cartList.valid.filter(item => item.attrStatus);
 				that.isAllSelect = value.length == newArr.length;
-				that.selectValue = value;
+				that.selectValue = value
+				console.log('选中', that.selectValue)
+				console.log('啦啦啦', that.cartList.valid)
 				that.switchSelect();
 			},
 			inArray: function(search, array) {
@@ -568,13 +608,18 @@
 					that.selectCountPrice = selectCountPrice;
 				} else {
 					for (let index in validList) {
-						if (that.inArray(validList[index].id, selectValue)) {
+						// if ((validList[index].trueStock)) {
+						// 	selectCountPrice = that.$util.$h.Add(selectCountPrice, that.$util.$h.Mul(validList[index].cartNum, validList[
+						// 		index].truePrice))
+						// }
+						if (that.inArray(validList[index].id, selectValue) && validList[index].trueStock) {
 							selectCountPrice = that.$util.$h.Add(selectCountPrice, that.$util.$h.Mul(validList[index].cartNum, validList[
 								index].truePrice))
 						}
 					}
 					that.selectCountPrice = selectCountPrice;
 				}
+				console.log(that.selectCountPrice)
 			},
 			/**
 			 * 购物车手动填写
@@ -654,9 +699,13 @@
 					isValid : true
 				}
 				getCartList(data).then(res => {
+					//console.log(that.$util.toStringValue(res.data.list))  
 					let valid = res.data.list;
 					let loadend = valid.length < that.limit;
-					let validList = that.$util.SplitArray(valid, that.cartList.valid);
+					let validList = that.$util.SplitArray(valid, that.cartList.valid)
+					console.log(validList)
+					//console.log(that.$util.toStringValue(validList)) 
+					
 					let numSub = [{
 						numSub: true
 					}, {
@@ -670,6 +719,8 @@
 						selectValue = [];
 					if (validList.length > 0) {
 						for (let index in validList) {
+							that.$set(validList[index], 'id', validList[index].id.toString());
+							//validList[index].id = validList[index].id.toString();
 							if (validList[index].cartNum == 1) {
 								validList[index].numSub = true;
 							} else {
@@ -693,20 +744,19 @@
 							}
 						}
 					}
-					that.$set(that.cartList, 'valid', validList);
+					console.log('validList', validList)
+					that.$set(that.cartList, 'valid', [...validList]);
 					that.loadend = loadend;
 					that.loadTitle = loadend ? '我也是有底线的' : '加载更多';
 					that.page = that.page + 1;
 					that.loading = false;
 					// that.goodsHidden = cartList.valid.length <= 0 ? false : true;
 					that.selectValue = selectValue;
+					that.delCheck = selectValue;
 					let newArr = validList.filter(item => item.attrStatus);
 					that.isAllSelect = newArr.length == selectValue.length && newArr.length;
 					that.switchSelect();
-				}).catch(function(err) {
-					that.$util.Tips({
-						title: err
-					});
+				}).catch(function() {
 					that.loading = false;
 					that.loadTitle = '加载更多';
 				})
@@ -755,6 +805,59 @@
 			manage: function() {
 				let that = this;
 				that.footerswitch = !that.footerswitch;
+				let valid = that.cartList.valid
+				for (let index in valid) {
+					if(that.footerswitch && !valid[index].attrStatus){
+						that.$set(valid[index],'checked',false);
+						//that.selectValue.splice(index, 1)
+					}
+					
+				}
+				// for (let index in valid) {
+				// 	for(let indexn in that.selectValue){
+				// 		if((valid[index].id = that.selectValue[indexn]) && that.footerswitch && !valid[index].attrStatus && !valid[index].checked){
+				// 			console.log(indexn)
+				// 			//that.selectValue.splice(indexn, 1)
+				// 		}
+				// 	}
+				// }
+				//that.$set(that.cartList, 'valid', valid);
+				console.log(valid)
+				// that.cartList.valid.map(item => {
+				// 	if(item.checked){
+				// 		that.$set(that.selectValue, item.id);
+				// 	}
+				// }	
+				// })
+				// let selectValue = []
+				// that.cartList.valid.map(item => {
+				// 	// if(!item.trueStock){
+				// 	// 	console.log('trueStock', item.trueStock)
+				// 	// 	if(that.footerswitch){
+				// 	// 		that.$set(item, 'attrStatus', false);
+				// 	// 		that.$set(item, 'checked', false);
+				// 	// 		console.log('item', item)
+				// 	// 	}else{
+				// 	// 		that.$set(item, 'attrStatus', true);
+				// 	// 	}
+				// 	// }
+				// 	// if(!item.trueStock && !that.footerswitch){
+				// 	// 	that.$set(item, 'attrStatus', true);
+				// 	// }
+					
+				// 	if(that.footerswitch){
+				// 		if(!item.trueStock || item.trueStock === 0){
+				// 			that.$set(item, 'attrStatus', false);
+				// 			that.$set(item, 'checked', false);
+				// 		} 
+				// 	}else{
+				// 		console.log('lala', that.footerswitch)
+				// 		if(!item.trueStock || item.trueStock === 0) {
+				// 			that.$set(item, 'attrStatus', true);
+				// 			selectValue.push(item.id);
+				// 		} 
+				// 	}
+				// });
 			},
 			unsetCart: function() {
 				let that = this,
