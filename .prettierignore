@@ -1,0 +1,7 @@
+/unpackage/*
+/node_modules/**
+/uni_modules/**
+/public/*
+/sheep/ui/su-parse/*
+**/*.svg
+**/*.sh
