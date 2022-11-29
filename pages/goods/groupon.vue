@@ -6,7 +6,10 @@
     <detailSkeleton v-if="state.skeletonLoading" />
     <!-- 空置页 -->
     <s-empty
-      v-else-if="state.goodsInfo === null || !state.goodsInfo.activity"
+      v-else-if="
+        state.goodsInfo === null ||
+        !['groupon', 'groupon_ladder'].includes(state.goodsInfo.activity_type)
+      "
       text="活动不存在或已结束"
       icon="/static/soldout-empty.png"
       showAction

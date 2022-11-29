@@ -6,8 +6,8 @@
     <detailSkeleton v-if="state.skeletonLoading" />
     <!-- 空置页 -->
     <s-empty
-      v-else-if="state.goodsInfo === null || !state.goodsInfo.activity"
-      text="商品不存在或已下架"
+      v-else-if="state.goodsInfo === null || state.goodsInfo.activity_type !== 'seckill' "
+      text="活动不存在或已结束"
       icon="/static/soldout-empty.png"
       showAction
       actionText="再逛逛"
@@ -196,7 +196,7 @@
   }
 
   const shareInfo = computed(() => {
-    if (isEmpty(state.goodsInfo)) return {};
+    if (isEmpty(state.goodsInfo?.activity)) return {};
     return sheep.$platform.share.getShareInfo(
       {
         title: state.goodsInfo.title,

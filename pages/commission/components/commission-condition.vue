@@ -18,7 +18,7 @@
         >
           <view v-if="errorData.type === 'goods'">
             <view class="item-box ss-m-b-20" v-for="item in errorData.value" :key="item.id">
-              <s-goods-item :title="item.title" :img="item.image">
+              <s-goods-item :title="item.title" :img="item.image" :price="item.price[0]" priceColor="#E1212B" @tap="sheep.$router.go('/pages/goods/index', { id: item.id })">
                 <template #groupon>
                   <view class="item-box-subtitle">{{ item.subtitle }}</view>
                 </template>

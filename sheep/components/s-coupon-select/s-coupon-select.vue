@@ -32,7 +32,14 @@
         </view>
         <view class="subtitle ss-m-t-40 ss-m-l-20">不可使用优惠券</view>
         <view v-for="item in state.couponInfo.cannot_use" :key="item.id">
-          <s-coupon-list :data="item" type="user" :disabled="true" />
+          <s-coupon-list :data="item" type="user" :disabled="true">
+            <template v-slot:reason>
+              <view class="ss-flex ss-m-t-24">
+                <view class="reason-title"> 不可用原因：</view>
+                <view class="reason-desc">{{ item.cannot_use_msg }}</view>
+              </view>
+            </template>
+          </s-coupon-list>
         </view>
       </scroll-view>
     </view>
@@ -105,5 +112,17 @@
     background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
     border-radius: 40rpx;
     color: #fff;
+  }
+  .reason-title {
+    font-weight: 600;
+    font-size: 20rpx;
+    line-height: 26rpx;
+    color: #ff0003;
+  }
+  .reason-desc {
+    font-weight: 600;
+    font-size: 20rpx;
+    line-height: 26rpx;
+    color: #434343;
   }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <view class="ss-m-20" :style="{ opacity: disabled ? '0.4' : '1' }">
+  <view class="ss-m-20" :style="{ opacity: disabled ? '0.5' : '1' }">
     <view class="content">
       <view
         class="tag ss-flex ss-row-center"
@@ -66,8 +66,14 @@
     </view>
 
     <view class="desc ss-flex ss-row-between">
-      <view class="desc-title">
-        {{ data.description }}
+      <view>
+        <view class="desc-title">
+          {{ data.description }}
+        </view>
+        <view>
+          <slot name="reason">
+          </slot>
+        </view>
       </view>
       <view>
         <slot></slot>

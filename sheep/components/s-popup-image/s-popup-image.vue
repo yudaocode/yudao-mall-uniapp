@@ -35,7 +35,7 @@
   const advHistory = modalStore.advHistory || [];
   const currentIndex = ref(0);
   const popupList = computed(() => {
-    const list = sheep.$store('app').template.basic.popupImage?.list || [];
+    const list = sheep.$store('app').template.basic?.popupImage?.list || [];
     const newList = [];
     if (list.length > 0) {
       list.forEach((adv) => {

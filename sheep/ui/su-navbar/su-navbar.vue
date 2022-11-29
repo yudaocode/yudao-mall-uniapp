@@ -58,7 +58,7 @@
               :radius="20"
               placeholder="请输入关键词"
               cancelButton="none"
-              v-model="defaultSearch"
+              v-model="searchModel"
               @confirm="onSearch"
             />
           </slot>
@@ -209,6 +209,11 @@
       margin: '0 ' + (sheep.$platform.device.windowWidth - sheep.$platform.capsule.right) + 'px',
     };
   });
+
+  const searchModel = computed(() => {
+		return props.defaultSearch
+	})
+
   const themeBgColor = computed(() => {
     if (props.dark) {
       // 默认值
