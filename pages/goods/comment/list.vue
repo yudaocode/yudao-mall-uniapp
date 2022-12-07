@@ -27,10 +27,10 @@
             </view>
           </scroll-view>
         </view>
-        <view class="ss-flex ss-row-right">
+        <!-- <view class="ss-flex ss-row-right">
           <text class="cicon-info-o"></text>
           <view class="ss-m-l-8 foot-title">举报</view>
-        </view>
+        </view> -->
       </view>
     </view>
     <s-empty v-if="state.pagination.total === 0" text="暂无数据" icon="/static/data-empty.png" />

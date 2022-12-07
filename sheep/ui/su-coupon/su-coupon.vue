@@ -11,7 +11,7 @@
         })
       "
     >
-      <view class="card-top ss-flex ss-flex-col ss-row-center ss-col-center">
+      <view class=" ss-flex ss-flex-col ss-row-center ss-col-center">
         <view class="face-value-box ss-flex ss-col-bottom ss-m-t-50 ss-m-b-28">
           <view class="value-text ss-m-r-4">{{ props.value }}</view>
           <view class="value-unit">元</view>
@@ -174,7 +174,7 @@
   // xs
   .xs-coupon-card {
     width: 227rpx;
-    height: 145px;
+    // height: 145px;
     border-radius: 10rpx;
     overflow: hidden;
 

@@ -86,6 +86,9 @@
           width: 36rpx;
           height: 36rpx;
         }
+		.title-box{
+			flex: 1;
+		}
 
         .item-title {
           font-size: 28rpx;

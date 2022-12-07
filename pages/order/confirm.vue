@@ -70,11 +70,18 @@
           <!-- <view v-if="state.orderInfo.coupon_discount_fee > 0" class="order-item ss-flex ss-col-center ss-row-between"> -->
           <view class="item-title">优惠券</view>
           <view class="ss-flex ss-col-center" @tap="state.showCoupon = true">
-            <text class="item-value text-red" v-if="state.orderPayload.coupon_id != 0"
+            <text class="item-value text-red" v-if="state.orderPayload.coupon_id"
               >-￥{{ state.orderInfo.coupon_discount_fee }}</text
             >
-            <text class="item-value text-red" v-else
-              >{{ state.couponInfo.can_use?.length }}张可用</text
+            <text
+              class="item-value"
+              :class="state.couponInfo.can_use?.length > 0 ? 'text-red' : 'text-disabled'"
+              v-else
+              >{{
+                state.couponInfo.can_use?.length > 0
+                  ? state.couponInfo.can_use?.length + '张可用'
+                  : '暂无可用优惠券'
+              }}</text
             >
 
             <text class="_icon-forward item-icon"></text>
@@ -336,6 +343,9 @@
 
     .item-value {
       font-family: OPPOSANS;
+    }
+    .text-disabled {
+      color: #bbbbbb;
     }
 
     .item-icon {

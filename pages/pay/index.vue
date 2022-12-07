@@ -41,7 +41,7 @@
         </view>
       </view>
       <!-- 工具 -->
-      <view class="modal-footer ss-flex ss-row-center ss-col-center ss-m-t-80">
+      <view class="modal-footer ss-flex ss-row-center ss-col-center ss-m-t-80 ss-m-b-40">
         <button v-if="state.payStatus === 0" class="ss-reset-button past-due-btn">
           检测支付环境中
         </button>
@@ -205,7 +205,7 @@
   }
 
   .ss-modal-box {
-    max-height: 1000rpx;
+    // max-height: 1000rpx;
 
     .modal-header {
       position: relative;
