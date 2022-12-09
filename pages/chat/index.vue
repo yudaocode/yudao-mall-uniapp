@@ -119,6 +119,7 @@
                   :current="0"
                   :src="sheep.$url.cdn(item.content.url)"
                   :height="200"
+                  :width="200"
                   mode="scaleToFill"
                 ></su-image>
               </view>

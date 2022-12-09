@@ -38,9 +38,9 @@ $ git clone https://gitee.com/sheepjs/shopro-uniapp.git
 ```
 
 ```bash
-# 2.拷贝.env.example示例配置文件 重命名为.env
+# 2.拷贝env示例配置文件 重命名为.env
 $ cd shopro-uniapp
-$ cp .env.example .env 
+$ cp env .env 
 ```
 
 ```bash
@@ -112,6 +112,12 @@ _（注意：演示环境已屏蔽管理权限和相关操作）_
 ### 近期计划
 
 - [ ] Typescript 重构；
+
+### V1.7.1 更新简介 2022/12/09
+
+1. 更新插件市场忽略文件问题
+
+2. 更改客服聊天图片样式问题
 
 ### V1.5 更新简介 2022/12/07
 
