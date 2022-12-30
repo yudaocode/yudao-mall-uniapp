@@ -83,7 +83,7 @@
   const customStyle = computed(() => {
     return {
       height: (props.height || state.imgHeight) + 'rpx',
-      width: props.width + 'rpx',
+      width: props.width ? props.width + 'rpx' : '100%',
       borderRadius: props.radius ? props.radius + 'rpx' : '',
     };
   });
