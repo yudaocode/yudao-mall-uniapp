@@ -116,8 +116,9 @@
           :show="state.showSelectSku"
           :goodsInfo="state.goodsInfo"
           :grouponAction="state.grouponAction"
-          v-model:grouponNum="state.grouponNum"
+          :grouponNum="state.defaultGrouponNum"
           @buy="onBuy"
+          @ladder="onLadder"
           @change="onSkuChange"
           @close="onSkuClose"
         />
@@ -190,16 +191,17 @@
 
   onPageScroll(() => {});
   const state = reactive({
-    skeletonLoading: true,
-    goodsId: 0,
-    goodsInfo: {},
-    goodsSwiper: [],
-    showSelectSku: false,
-    selectedSkuPrice: {},
-    grouponId: 0,
-    grouponType: '',
-    grouponNum: 0,
-    grouponAction: 'create',
+    skeletonLoading: true,  // 骨架屏
+    goodsId: 0,             // 商品ID
+    goodsInfo: {},          // 商品信息
+    goodsSwiper: [],        // 商品轮播图
+    showSelectSku: false,   // 显示规格弹框
+    selectedSkuPrice: {},   // 选中的规格价格
+    grouponId: 0,           // 团购ID
+    grouponType: '',        // 团购类型
+    defaultGrouponNum: 0,   // 默认团购人数
+    grouponNum: 0,          // 团购人数
+    grouponAction: 'create',  // 团购操作  
   });
 
   // 商品主价格
@@ -226,6 +228,11 @@
     state.selectedSkuPrice = e;
   }
 
+  // 阶梯变更
+  function onLadder(e) {
+    state.grouponNum = e
+  }
+
   function onSkuClose() {
     state.showSelectSku = false;
   }
@@ -241,6 +248,7 @@
   function onJoinGroupon(groupon) {
     state.grouponAction = 'join';
     state.grouponId = groupon.id;
+    state.defaultGrouponNum = groupon.num;
     state.grouponNum = groupon.num;
     state.showSelectSku = true;
   }
@@ -303,6 +311,7 @@
       state.goodsInfo = data;
       state.grouponType = state.goodsInfo.activity_type;
       if (state.grouponType === 'groupon') {
+        state.defaultGrouponNum = state.goodsInfo.activity.rules.team_num;
         state.grouponNum = state.goodsInfo.activity.rules.team_num;
       }
       state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.images);

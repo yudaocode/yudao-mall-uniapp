@@ -44,7 +44,7 @@
                 class="ss-reset-button spec-btn"
                 :class="[
                   {
-                    'checked-btn': grouponNum == ladder,
+                    'checked-btn': state.grouponNum == ladder,
                   },
                 ]"
                 @tap="onSelectLadder(ladder)"
@@ -91,7 +91,7 @@
         <view class="buy-box ss-flex ss-col-center ss-flex ss-col-center ss-row-center">
           <view class="ss-flex">
             <button class="ss-reset-button origin-price-btn ss-flex-col">
-              <view class="btn-title">{{ grouponNum }}人团</view>
+              <view class="btn-title">{{ state.grouponNum === 0 ? '阶梯团' : state.grouponNum + '人团' }}</view>
             </button>
             <button class="ss-reset-button btn-tox ss-flex-col" @tap="onBuy">
               <view class="btn-price">
@@ -128,7 +128,7 @@
   import { formatPrice } from '@/sheep/hooks/useGoods';
   import { isEmpty } from 'lodash';
 
-  const emits = defineEmits(['change', 'addCart', 'buy', 'close', 'update:grouponNum']);
+  const emits = defineEmits(['change', 'addCart', 'buy', 'close', 'ladder']);
   const props = defineProps({
     show: {
       type: Boolean,
@@ -150,6 +150,7 @@
   const state = reactive({
     selectedSkuPrice: {},
     currentSkuArray: [],
+    grouponNum: props.grouponNum,
   });
 
   // 默认单规格
@@ -204,7 +205,7 @@
 
   // 获取阶梯价
   function getSkuPriceByLadder() {
-    return state.selectedSkuPrice.ladders.find((item) => item.ladder == props.grouponNum);
+    return state.selectedSkuPrice.ladders.find((item) => item.ladder == state.grouponNum);
   }
 
   watch(
@@ -340,13 +341,14 @@
 
   // 选择阶梯拼团人数
   function onSelectLadder(ladder) {
-    emits('update:grouponNum', ladder);
+    state.grouponNum = ladder;
+    emits('ladder', ladder);
   }
 
   // 选择规格
   function onSelectSku(pid, skuId) {
     // 清空已选择
-    if (activityType === 'groupon_ladder' && props.grouponNum == 0) {
+    if (activityType === 'groupon_ladder' && state.grouponNum == 0) {
       sheep.$helper.toast('请选择拼团人数');
       return;
     }
