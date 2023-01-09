@@ -3,7 +3,7 @@
  * @description api模块管理，loading配置，请求拦截，错误处理
  */
 
-import Request from '@/sheep/libs/luch-request/core/Request';
+import Request from 'luch-request';
 import { baseUrl, apiPath } from '@/sheep/config';
 import $store from '@/sheep/store';
 import $platform from '@/sheep/platform';

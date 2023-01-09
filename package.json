@@ -92,6 +92,7 @@
     "@hyoga/uni-socket.io": "^1.0.1",
     "dayjs": "^1.11.6",
     "lodash": "^4.17.21",
+    "luch-request": "^3.0.8",
     "pinia": "^2.0.24",
     "pinia-plugin-persist-uni": "^1.2.0",
     "qs-canvas": "^1.0.11",

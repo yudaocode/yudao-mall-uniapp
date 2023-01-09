@@ -1,5 +1,5 @@
 <template>
-  <!-- 规格弹窗 -->
+  <!-- 拼团商品规格弹窗 -->
   <su-popup :show="show" round="10" @close="emits('close')">
     <view class="ss-modal-box bg-white ss-flex-col">
       <view class="modal-header ss-flex ss-col-center">
@@ -130,13 +130,13 @@
 
   const emits = defineEmits(['change', 'addCart', 'buy', 'close', 'update:grouponNum']);
   const props = defineProps({
-    goodsInfo: {
-      type: Object,
-      default() {},
-    },
     show: {
       type: Boolean,
       default: false,
+    },
+    goodsInfo: {
+      type: Object,
+      default() {},
     },
     grouponAction: {
       type: String,
