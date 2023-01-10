@@ -60,7 +60,7 @@
 
   // 组件样式
   const elStyles = {
-    background: `url(${sheep.$url.cdn(props.data.src)}) no-repeat top center / 100% 100%`,
+    background: `url(${sheep.$url.cdn(props.data.src)}) no-repeat top center / 100% auto`,
     height: props.styles.height + 'px',
     fontStyle: props.data.title.other.includes('italic') ? 'italic' : 'normal',
     fontWeight: props.data.title.other.includes('bold') ? 'bold' : '',
