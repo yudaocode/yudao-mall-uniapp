@@ -89,6 +89,11 @@
               立即兑换
             </button>
           </view>
+          <view class="buy-box ss-flex ss-col-center ss-p-r-20" v-else>
+            <button class="ss-reset-button disabled-btn" disabled>
+              已兑完
+            </button>
+          </view>
         </detail-tabbar>
       </block>
     </s-layout>
@@ -288,6 +293,13 @@
       height: 80rpx;
       border-radius: 40rpx;
       background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
+      color: $white;
+    }
+    .disabled-btn {
+      width: 630rpx;
+      height: 80rpx;
+      border-radius: 40rpx;
+      background: #999999;
       color: $white;
     }
   }

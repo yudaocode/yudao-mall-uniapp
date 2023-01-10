@@ -120,6 +120,9 @@
               立即购买
             </button>
           </view>
+          <view class="buy-box ss-flex ss-col-center ss-p-r-20" v-else>
+            <button class="ss-reset-button disabled-btn" disabled> 已售罄 </button>
+          </view>
         </detail-tabbar>
         <s-coupon-get
           v-model="state.couponInfo"
@@ -375,6 +378,13 @@
 
       border-radius: 0 40rpx 40rpx 0;
       background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
+      color: $white;
+    }
+    .disabled-btn {
+      width: 428rpx;
+      height: 72rpx;
+      border-radius: 40rpx;
+      background: #999999;
       color: $white;
     }
   }
