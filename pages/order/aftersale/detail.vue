@@ -1,9 +1,8 @@
 <!-- 售后详情 -->
 <template>
-  <s-layout title="售后详情" navbar="inner">
-    <view class="content_box" v-if="JSON.stringify(state.info) != '{}'">
+  <s-layout title="售后详情" :navbar="!isEmpty(state.info) && state.loading?'inner': 'normal'">
+    <view class="content_box" v-if="!isEmpty(state.info) && state.loading">
       <!-- 步骤条 -->
-      <!-- TODO-jj: 步骤条样式 -->
       <view
         class="steps-box ss-flex"
         :style="[
@@ -100,8 +99,12 @@
         </view>
       </view>
     </view>
-    <s-empty v-if="state.info === null" icon="/static/order-empty.png" text="暂无该订单售后详情" />
-    <su-fixed bottom placeholder bg="bg-white" v-if="JSON.stringify(state.info) != '{}'">
+    <s-empty
+      v-if="isEmpty(state.info) && state.loading"
+      icon="/static/order-empty.png"
+      text="暂无该订单售后详情"
+    />
+    <su-fixed bottom placeholder bg="bg-white" v-if="!isEmpty(state.info)">
       <view class="foot_box">
         <button
           class="ss-reset-button btn"
@@ -127,6 +130,7 @@
   import sheep from '@/sheep';
   import { onLoad } from '@dcloudio/uni-app';
   import { reactive } from 'vue';
+  import { isEmpty } from 'lodash';
 
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   const state = reactive({
@@ -141,6 +145,7 @@
         title: '处理中',
       },
     ],
+    loading: false,
   });
 
   function onApply(orderId) {
@@ -177,6 +182,7 @@
   };
   async function getDetail(id) {
     const { error, data } = await sheep.$api.order.aftersale.detail(id);
+    state.loading = true;
     if (error === 0) {
       state.info = data;
       if (state.info.aftersale_status === -2 || state.info.aftersale_status === -1) {

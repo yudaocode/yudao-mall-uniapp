@@ -1,7 +1,7 @@
 <template>
-  <s-layout title="拼团详情" class="detail-wrap" navbar="inner" :onShareAppMessage="shareInfo">
+  <s-layout title="拼团详情" class="detail-wrap" :navbar="state.data && !state.loading ? 'inner': 'normal'" :onShareAppMessage="shareInfo">
     <view v-if="state.loading"></view>
-    <view v-else-if="state.data && !state.loading">
+    <view v-if="state.data && !state.loading">
       <view
         class="recharge-box"
         v-if="state.data.goods"
@@ -193,7 +193,7 @@
         />
       </view>
     </view>
-    <s-empty v-else-if="!state.data && !state.loading" icon="/static/goods-empty.png"> </s-empty>
+    <s-empty v-if="!state.data && !state.loading" icon="/static/goods-empty.png"> </s-empty>
   </s-layout>
 </template>
 
