@@ -186,7 +186,7 @@
           :show="state.showSelectSku"
           :goodsInfo="state.data.goods"
           :grouponAction="state.grouponAction"
-          v-model:grouponNum="state.grouponNum"
+          :grouponNum="state.grouponNum"
           @buy="onBuy"
           @change="onSkuChange"
           @close="state.showSelectSku = false"
