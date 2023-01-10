@@ -24,7 +24,7 @@
           <view class="unit">￥</view>
           <uni-easyinput
             v-model="state.recharge_money"
-            type="number"
+            type="digit"
             placeholder="请输入充值金额"
             :inputBorder="false"
           >
@@ -75,10 +75,12 @@
     state.recharge_money = e;
   }
   async function getRechargeTabs() {
-    const list = await sheep.$api.trade.rechargeRules();
-    state.data = list;
-    state.data.status = list.status;
-    state.faceValueList = list.quick_amounts;
+    const res = await sheep.$api.trade.rechargeRules();
+    if (res.error === 0) {
+      state.data = res.data;
+      state.data.status = res.data.status;
+      state.faceValueList = res.data.quick_amounts;
+    }
   }
 
   function onChange(e) {
