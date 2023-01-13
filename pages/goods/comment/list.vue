@@ -9,28 +9,7 @@
     ></su-tabs>
     <view class="ss-m-t-20">
       <view class="list-item" v-for="item in state.pagination.data" :key="item">
-        <view class="ss-flex ss-row-between">
-          <view class="ss-flex">
-            <image class="avatar" :src="sheep.$url.static(item.user_avatar)" />
-            <view class="ss-m-l-20 ss-m-r-24 nickname">{{ item.user_nickname }}</view>
-            <view><uni-rate :readonly="true" size="16" :value="item.level" /></view>
-          </view>
-          <view class="create-time">{{ item.create_time?.substring(0, 11) }}</view>
-        </view>
-        <view class="ss-m-t-20 content-title">{{ item.content }}</view>
-        <view class="ss-m-t-40" v-if="item.images?.length">
-          <scroll-view class="scroll-box" scroll-x scroll-anchoring enable-flex>
-            <view class="ss-flex">
-              <view v-for="i in item.images" :key="i" class="ss-m-r-20"
-                ><image class="content-img" :src="sheep.$url.static(i)" />
-              </view>
-            </view>
-          </scroll-view>
-        </view>
-        <!-- <view class="ss-flex ss-row-right">
-          <text class="cicon-info-o"></text>
-          <view class="ss-m-l-8 foot-title">举报</view>
-        </view> -->
+        <comment-item :item="item"></comment-item>
       </view>
     </view>
     <s-empty v-if="state.pagination.total === 0" text="暂无数据" icon="/static/data-empty.png" />
@@ -50,6 +29,7 @@
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import { computed, reactive } from 'vue';
   import _ from 'lodash';
+  import commentItem from '../components/detail/comment-item.vue';
   const state = reactive({
     list: [],
     type: [],
@@ -62,6 +42,7 @@
     },
     commentId: 0,
     code: 'all',
+    commentImages: [],
   });
   // 切换选项卡
   function onTabsChange(e) {
@@ -98,6 +79,11 @@
       } else {
         state.pagination = res.data;
       }
+      state.pagination.data.forEach((item) => {
+        item.images.forEach((image) => {
+          state.commentImages.push(sheep.$url.cdn(image));
+        });
+      });
       if (state.pagination.current_page < state.pagination.last_page) {
         state.loadStatus = 'more';
       } else {
