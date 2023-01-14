@@ -2,7 +2,7 @@
 <template>
   <s-layout title="售后进度">
     <view class="log-box">
-      <view class="log-content-box ss-flex" v-for="(item, index) in state.info" :key="item.title">
+      <view  v-for="(item, index) in state.info" :key="item.title">
         <log-item :item="item" :index="index" :data="state.info"></log-item>
       </view>
     </view>
@@ -50,8 +50,5 @@
   .log-box {
     padding: 24rpx 24rpx 24rpx 40rpx;
     background-color: #fff;
-    .log-content-box {
-      align-items: stretch;
-    }
   }
 </style>

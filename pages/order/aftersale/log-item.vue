@@ -1,30 +1,32 @@
 <template>
-  <view class="log-icon ss-flex-col ss-col-center ss-m-r-20">
-    <text class="cicon-title" :class="index === 0 ? 'activity-color' : ''"></text>
-    <view v-if="data.length - 1 != index" class="line"></view>
-  </view>
-  <view>
-    <view class="text">{{ item.log_type_text }}</view>
-    <su-parse class="richtext" :content="item.content"></su-parse>
-    <view class="" v-if="item.images?.length">
-      <scroll-view class="scroll-box" scroll-x scroll-anchoring>
-        <view class="ss-flex">
-          <view v-for="i in item.images" :key="i" class="ss-m-r-20">
-            <su-image
-              class="content-img"
-              isPreview
-              :previewList="state.commentImages"
-              :current="index"
-              :src="i"
-              :height="120"
-              :width="120"
-              mode="aspectFit"
-            ></su-image>
-          </view>
-        </view>
-      </scroll-view>
+  <view class="log-item ss-flex">
+    <view class="log-icon ss-flex-col ss-col-center ss-m-r-20">
+      <text class="cicon-title" :class="index === 0 ? 'activity-color' : ''"></text>
+      <view v-if="data.length - 1 != index" class="line"></view>
     </view>
-    <view class="date">{{ item.create_time }}</view>
+    <view>
+      <view class="text">{{ item.log_type_text }}</view>
+      <su-parse class="richtext" :content="item.content"></su-parse>
+      <view class="" v-if="item.images?.length">
+        <scroll-view class="scroll-box" scroll-x scroll-anchoring>
+          <view class="ss-flex">
+            <view v-for="i in item.images" :key="i" class="ss-m-r-20">
+              <su-image
+                class="content-img"
+                isPreview
+                :previewList="state.commentImages"
+                :current="index"
+                :src="i"
+                :height="120"
+                :width="120"
+                mode="aspectFit"
+              ></su-image>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+      <view class="date">{{ item.create_time }}</view>
+    </view>
   </view>
 </template>
 <script setup>
@@ -52,6 +54,9 @@
   });
 </script>
 <style lang="scss" scoped>
+  .log-item {
+    align-items: stretch;
+  }
   .log-icon {
     height: inherit;
     .cicon-title {
