@@ -14,38 +14,41 @@
       class="scroll-box log-scroll"
       scroll-with-animation="true"
     >
-      <view
-        class="log-item-box ss-flex ss-row-between"
-        v-for="item in state.pagination.data"
-        :key="item.id"
-      >
-        <view class="log-item-wrap">
-          <view class="log-item ss-flex ss-ellipsis-1 ss-col-center">
-            <view class="ss-flex ss-col-center">
-              <image
-                v-if="item.oper_type === 'user'"
-                class="log-img"
-                :src="sheep.$url.cdn(item.oper?.avatar)"
-                mode="aspectFill"
-              ></image>
-              <image
-                v-else-if="item.oper_type === 'admin'"
-                class="log-img"
-                :src="sheep.$url.static('/static/img/shop/avatar/default_user.png')"
-                mode="aspectFill"
-              ></image>
-              <image
-                v-else
-                class="log-img"
-                :src="sheep.$url.static('/static/img/shop/avatar/notice.png')"
-                mode="aspectFill"
-              ></image>
+      <view v-if="state.pagination.data">
+        <view
+          class="log-item-box ss-flex ss-row-between"
+          v-for="item in state.pagination.data"
+          :key="item.id"
+        >
+          <view class="log-item-wrap">
+            <view class="log-item ss-flex ss-ellipsis-1 ss-col-center">
+              <view class="ss-flex ss-col-center">
+                <image
+                  v-if="item.oper_type === 'user'"
+                  class="log-img"
+                  :src="sheep.$url.cdn(item.oper?.avatar)"
+                  mode="aspectFill"
+                ></image>
+                <image
+                  v-else-if="item.oper_type === 'admin'"
+                  class="log-img"
+                  :src="sheep.$url.static('/static/img/shop/avatar/default_user.png')"
+                  mode="aspectFill"
+                ></image>
+                <image
+                  v-else
+                  class="log-img"
+                  :src="sheep.$url.static('/static/img/shop/avatar/notice.png')"
+                  mode="aspectFill"
+                ></image>
+              </view>
+              <view class="log-text ss-ellipsis-1">{{ item.remark }}</view>
             </view>
-            <view class="log-text ss-ellipsis-1">{{ item.remark }}</view>
           </view>
+          <text class="log-time">{{ dayjs(item.create_time).fromNow() }}</text>
         </view>
-        <text class="log-time">{{ dayjs(item.create_time).fromNow() }}</text>
       </view>
+
       <!-- 加载更多 -->
       <uni-load-more
         v-if="state.pagination.total > 0"
