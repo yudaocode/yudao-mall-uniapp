@@ -163,7 +163,7 @@
   function onChangeTime(e) {
     state.date[0] = e[0];
     state.date[1] = e[e.length - 1];
-
+    state.pagination = pagination;
     getLogList();
   }
 
