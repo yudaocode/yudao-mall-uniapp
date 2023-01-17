@@ -60,7 +60,7 @@ async function unbind() {
   const { error } = await third.wechat.unbind({
     platform: 'officialAccount',
   });
-  return !error;
+  return Promise.resolve(!error);
 }
 
 // 获取公众号登陆地址

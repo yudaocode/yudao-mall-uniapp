@@ -76,7 +76,7 @@ const unbind = async () => {
   const { error } = await third.wechat.unbind({
     platform: 'miniProgram',
   });
-  return !error;
+  return Promise.resolve(!error);
 };
 
 // 获取最新sessionId
