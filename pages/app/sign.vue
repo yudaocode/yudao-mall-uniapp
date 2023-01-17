@@ -158,6 +158,8 @@
   import { onLoad, onReady } from '@dcloudio/uni-app';
   import { computed, reactive } from 'vue';
 
+  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/app/sign.png');
+
   const state = reactive({
     data: {
       days: [], //日历
@@ -480,7 +482,7 @@
       width: 520rpx;
       height: 344rpx;
       background-size: 100% 100%;
-      background-image: v-bind('sheep.$url.css("/static/img/shop/app/sign.png")');
+      background-image: v-bind(headerBg);
       background-repeat: no-repeat;
       border-radius: 0 0 10rpx 10rpx;
 

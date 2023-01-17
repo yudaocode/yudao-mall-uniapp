@@ -207,7 +207,8 @@
   .steps-box {
     width: 100%;
     height: 190rpx;
-    background: v-bind("sheep.$url.css('/static/img/shop/order/order_bg.png')") no-repeat,
+    background: v-bind(headerBg)
+        no-repeat,
       linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
     background-size: 750rpx 100%;
     padding-left: 72rpx;

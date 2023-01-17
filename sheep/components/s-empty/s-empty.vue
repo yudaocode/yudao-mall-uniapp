@@ -84,10 +84,10 @@
   .empty-btn {
     width: 320rpx;
     height: 70rpx;
-    border: 2rpx solid v-bind('props.buttonColor');
+    border: 2rpx solid v-bind('buttonColor');
     border-radius: 35rpx;
     font-weight: 500;
-    color: v-bind('props.buttonColor');
+    color: v-bind('buttonColor');
     font-size: 28rpx;
   }
 </style>

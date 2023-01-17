@@ -182,18 +182,18 @@
       font-size: 50rpx;
       line-height: 50rpx;
       font-weight: bold;
-      color: v-bind('props.textColor');
+      color: v-bind('textColor');
       vertical-align: text-bottom;
     }
 
     .value-unit {
-      color: v-bind('props.textColor');
+      color: v-bind('textColor');
       font-size: 24rpx;
       line-height: 30rpx;
     }
 
     .title-text {
-      color: v-bind('props.textColor');
+      color: v-bind('textColor');
       font-size: 24rpx;
       line-height: 30rpx;
       width: 150rpx;
@@ -205,10 +205,10 @@
       height: 50rpx;
       border-radius: 25rpx;
       border-style: solid;
-      border-color: v-bind('props.btnTextColor');
+      border-color: v-bind('btnTextColor');
       border-width: 1px;
-      color: v-bind('props.btnTextColor');
-      background-color: v-bind('props.btnBg');
+      color: v-bind('btnTextColor');
+      background-color: v-bind('btnBg');
       font-size: 24rpx;
       line-height: 50rpx;
     }
@@ -231,19 +231,19 @@
       font-size: 36rpx;
       line-height: 36rpx;
       font-weight: bold;
-      color: v-bind('props.textColor');
+      color: v-bind('textColor');
       vertical-align: text-bottom;
     }
 
     .value-unit {
-      color: v-bind('props.textColor');
+      color: v-bind('textColor');
       font-size: 22rpx;
       line-height: 22rpx;
     }
 
     .title-text,
     .surplus-text {
-      color: v-bind('props.textColor');
+      color: v-bind('textColor');
       font-size: 22rpx;
       line-height: 22rpx;
     }
@@ -253,7 +253,7 @@
       height: 100%;
 
       .btn-text {
-        color: v-bind('props.btnTextColor');
+        color: v-bind('btnTextColor');
         font-size: 24rpx;
         text-align: center;
         writing-mode: vertical-lr;
@@ -278,12 +278,12 @@
       font-size: 50rpx;
       line-height: 50rpx;
       font-weight: bold;
-      color: v-bind('props.textColor');
+      color: v-bind('textColor');
       vertical-align: text-bottom;
     }
 
     .value-unit {
-      color: v-bind('props.textColor');
+      color: v-bind('textColor');
       font-size: 22rpx;
       line-height: 22rpx;
     }
@@ -291,7 +291,7 @@
     .title-text,
     .sellby-text,
     .surplus-text {
-      color: v-bind('props.textColor');
+      color: v-bind('textColor');
       font-size: 22rpx;
       line-height: 22rpx;
     }
@@ -303,10 +303,10 @@
         height: 50rpx;
         border-radius: 25rpx;
         border-style: solid;
-        border-color: v-bind('props.btnTextColor');
+        border-color: v-bind('btnTextColor');
         border-width: 1px;
-        color: v-bind('props.btnTextColor');
-        background-color: v-bind('props.btnBg');
+        color: v-bind('btnTextColor');
+        background-color: v-bind('btnBg');
         font-size: 24rpx;
         line-height: 50rpx;
       }

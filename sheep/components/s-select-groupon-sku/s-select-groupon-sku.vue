@@ -128,6 +128,7 @@
   import { formatPrice } from '@/sheep/hooks/useGoods';
   import { isEmpty } from 'lodash';
 
+  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/groupon-btn-long.png');
   const emits = defineEmits(['change', 'addCart', 'buy', 'close', 'ladder']);
   const props = defineProps({
     show: {
@@ -403,7 +404,7 @@
     font-size: 24rpx;
     font-weight: 600;
     margin-left: -50rpx;
-    background-image: v-bind("sheep.$url.css('/static/img/shop/goods/groupon-btn-long.png')");
+    background-image: v-bind(headerBg);
     background-repeat: no-repeat;
     background-size: 100% 100%;
     color: #ffffff;

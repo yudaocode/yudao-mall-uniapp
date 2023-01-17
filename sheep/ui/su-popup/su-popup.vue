@@ -340,6 +340,7 @@
       // TODO 解决头条冒泡的问题
       this.clearPropagation = false;
       this.maskClass.backgroundColor = this.maskBackgroundColor;
+      const headerBg = sheep.$url.css(this.backgroundImage);
     },
     methods: {
       setH5Visible() {
@@ -556,7 +557,7 @@
       display: block;
       /* #endif */
       position: relative;
-      background: v-bind('sheep.$url.css(backgroundImage)') no-repeat;
+      background: v-bind(headerBg) no-repeat;
       background-size: 100% 100%;
 
       /* iphonex 等安全区设置，底部安全区适配 */

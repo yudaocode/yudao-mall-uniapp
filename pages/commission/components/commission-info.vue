@@ -35,6 +35,7 @@
 
   const userInfo = computed(() => sheep.$store('user').userInfo);
   const agentInfo = computed(() => sheep.$store('user').agentInfo);
+  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/commission/background.png');
 
   const state = reactive({
     showMoney: false,
@@ -48,7 +49,7 @@
     height: 192rpx;
     margin: -88rpx 20rpx 0 20rpx;
     padding-top: 88rpx;
-    background: v-bind("sheep.$url.css('/static/img/shop/commission/background.png')") no-repeat;
+    background: v-bind(headerBg) no-repeat;
     background-size: 100% 100%;
 
     .head-img-box {

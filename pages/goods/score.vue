@@ -90,9 +90,7 @@
             </button>
           </view>
           <view class="buy-box ss-flex ss-col-center ss-p-r-20" v-else>
-            <button class="ss-reset-button disabled-btn" disabled>
-              已兑完
-            </button>
+            <button class="ss-reset-button disabled-btn" disabled> 已兑完 </button>
           </view>
         </detail-tabbar>
       </block>
@@ -114,6 +112,10 @@
   import detailSkeleton from './components/detail/detail-skeleton.vue';
   import detailCommentCard from './components/detail/detail-comment-card.vue';
   import detailContentCard from './components/detail/detail-content-card.vue';
+
+  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/score-bg.png');
+  const seckillBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/seckill-tip-bg.png');
+  const grouponBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/seckill-tip-bg.png');
 
   onPageScroll(() => {});
 
@@ -209,7 +211,7 @@
     box-sizing: border-box;
     background-size: 100% 100%;
     border-radius: 10rpx;
-    background-image: v-bind("sheep.$url.css('/static/img/shop/goods/score-bg.png')");
+    background-image: v-bind(headerBg);
     background-repeat: no-repeat;
     .price-box {
       .score-img {
@@ -306,12 +308,12 @@
 
   //秒杀卡片
   .seckill-box {
-    background: v-bind("sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png')") no-repeat;
+    background: v-bind(seckillBg) no-repeat;
     background-size: 100% 100%;
   }
 
   .groupon-box {
-    background: v-bind("sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png')") no-repeat;
+    background: v-bind(grouponBg) no-repeat;
     background-size: 100% 100%;
   }
 

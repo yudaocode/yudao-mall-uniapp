@@ -6,7 +6,7 @@
     <detailSkeleton v-if="state.skeletonLoading" />
     <!-- 空置页 -->
     <s-empty
-      v-else-if="state.goodsInfo === null || state.goodsInfo.activity_type !== 'seckill' "
+      v-else-if="state.goodsInfo === null || state.goodsInfo.activity_type !== 'seckill'"
       text="活动不存在或已结束"
       icon="/static/soldout-empty.png"
       showAction
@@ -153,6 +153,14 @@
   import detailContentCard from './components/detail/detail-content-card.vue';
   import detailProgress from './components/detail/detail-progress.vue';
 
+  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/seckill-bg.png');
+  const btnBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/seckill-btn.png');
+  const disabledBtnBg = sheep.$url.css(
+    '/assets/addons/shopro/frontend_img/goods/activity-btn-disabled.png',
+  );
+  const seckillBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/seckill-tip-bg.png');
+  const grouponBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/groupon-tip-bg.png');
+
   onPageScroll(() => {});
   const state = reactive({
     goodsId: 0,
@@ -267,7 +275,7 @@
     // height: 320rpx;
     background-size: 100% 100%;
     border-radius: 10rpx;
-    background-image: v-bind("sheep.$url.css('/static/img/shop/goods/seckill-bg.png')");
+    background-image: v-bind(headerBg);
     background-repeat: no-repeat;
 
     .price-box {
@@ -415,7 +423,7 @@
       font-size: 24rpx;
       font-weight: 600;
       margin-left: -36rpx;
-      background-image: v-bind("sheep.$url.css('/static/img/shop/goods/seckill-btn.png')");
+      background-image: v-bind(btnBg);
       background-repeat: no-repeat;
       background-size: 100% 100%;
       color: #ffffff;
@@ -429,9 +437,7 @@
       font-size: 24rpx;
       font-weight: 600;
       margin-left: -36rpx;
-      background-image: v-bind(
-        "sheep.$url.css('/static/img/shop/goods/activity-btn-disabled.png')"
-      );
+      background-image: v-bind(disabledBtnBg);
       background-repeat: no-repeat;
       background-size: 100% 100%;
       color: #999999;
@@ -467,12 +473,12 @@
 
   //秒杀卡片
   .seckill-box {
-    background: v-bind("sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png')") no-repeat;
+    background: v-bind(seckillBg) no-repeat;
     background-size: 100% 100%;
   }
 
   .groupon-box {
-    background: v-bind("sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png')") no-repeat;
+    background: v-bind(grouponBg) no-repeat;
     background-size: 100% 100%;
   }
 

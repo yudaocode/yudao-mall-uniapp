@@ -98,6 +98,7 @@
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   const agentInfo = computed(() => sheep.$store('user').agentInfo);
   const userInfo = computed(() => sheep.$store('user').userInfo);
+  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/user/withdraw_bg.png');
 
   onPageScroll((e) => {
     if (e.scrollTop > 100) {
@@ -172,7 +173,7 @@
     width: 750rpx;
     z-index: 3;
     position: relative;
-    background: v-bind("sheep.$url.css('/static/img/shop/user/withdraw_bg.png')") no-repeat,
+    background: v-bind(headerBg) no-repeat,
       linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
     background-size: 750rpx 100%;
     // 团队信息总览
