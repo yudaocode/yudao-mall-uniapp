@@ -4,7 +4,7 @@
     type="bottom"
     round="10"
     :isMaskClick="false"
-    :backgroundImage="sheep.$url.static('/static/img/shop/commission/become-agent.png')"
+    :backgroundImage="sheep.$url.css('/static/img/shop/commission/become-agent.png')"
     @close="show = false"
     backgroundColor="var(--ui-BG-Main)"
   >
