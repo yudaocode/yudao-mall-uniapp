@@ -213,6 +213,20 @@
           @tap="onComment(state.orderInfo.order_sn)"
           >评价晒单</button
         >
+        <button
+          v-if="state.orderInfo.btns?.includes('invoice')"
+          class="ss-reset-button cancel-btn"
+          @tap.stop="onOrderInvoice(state.orderInfo.invoice?.id)"
+        >
+          查看发票
+        </button>
+        <button
+          v-if="state.orderInfo.btns?.includes('re_apply_refund')"
+          class="ss-reset-button cancel-btn"
+          @tap.stop="onRefund(state.orderInfo.id)"
+        >
+          重新退款
+        </button>
       </view>
     </su-fixed>
   </s-layout>
@@ -224,6 +238,7 @@
   import { computed, reactive } from 'vue';
 
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
+  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/order/order_bg.png');
   const state = reactive({
     orderInfo: {},
   });
@@ -298,6 +313,13 @@
     }
   }
 
+  // 查看发票
+  function onOrderInvoice(invoiceId) {
+    sheep.$router.go('/pages/order/invoice', {
+      invoiceId,
+    });
+  }
+
   // 评价
   function onComment(orderSN) {
     uni.$once('SELECT_INVOICE', (e) => {
@@ -337,7 +359,7 @@
   .state-box {
     color: rgba(#fff, 0.9);
     width: 100%;
-    background: v-bind("sheep.$url.css('/static/img/shop/order/order_bg.png')") no-repeat,
+    background: v-bind(headerBg) no-repeat,
       linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
     background-size: 750rpx 100%;
     box-sizing: border-box;

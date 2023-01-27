@@ -88,6 +88,7 @@
   import accountTypeSelect from './components/account-type-select.vue';
   import accountInfoModal from './components/account-info-modal.vue';
   import { onPageScroll } from '@dcloudio/uni-app';
+  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/user/withdraw_bg.png');
   onPageScroll(() => {});
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   function filterRules(rules) {
@@ -212,8 +213,7 @@
 
   .wallet-num-box {
     padding: 0 40rpx 80rpx;
-    background: var(--ui-BG-Main) v-bind("sheep.$url.css('/static/img/shop/user/withdraw_bg.png')")
-      center/750rpx 100% no-repeat;
+    background: var(--ui-BG-Main) v-bind(headerBg) center/750rpx 100% no-repeat;
     border-radius: 0 0 5% 5%;
 
     .num-title {

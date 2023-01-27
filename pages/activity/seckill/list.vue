@@ -73,6 +73,7 @@
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   const pageHeight =
     (safeArea.height + safeAreaInsets.bottom) * 2 + statusBarHeight - sys_navBar - 350;
+  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/seckill-header.png');
 
   const state = reactive({
     activityId: 0,
@@ -146,7 +147,7 @@
   .page-bg {
     width: 100%;
     height: 458rpx;
-    background: v-bind("sheep.$url.css('/static/img/shop/goods/seckill-header.png')") no-repeat;
+    background: v-bind(headerBg) no-repeat;
     background-size: 100% 100%;
   }
   .list-content {

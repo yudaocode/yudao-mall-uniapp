@@ -73,6 +73,7 @@
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   const pageHeight =
     (safeArea.height + safeAreaInsets.bottom) * 2 + statusBarHeight - sys_navBar - 350;
+  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/groupon-header.png');
 
   const state = reactive({
     activityId: 0,
@@ -147,7 +148,7 @@
     width: 100%;
     height: 458rpx;
     margin-top: -88rpx;
-    background: v-bind("sheep.$url.css('/static/img/shop/goods/groupon-header.png')") no-repeat;
+    background: v-bind(headerBg) no-repeat;
     background-size: 100% 100%;
   }
   .list-content {

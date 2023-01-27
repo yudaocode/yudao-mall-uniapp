@@ -189,6 +189,15 @@
   import grouponCardList from './components/groupon/groupon-card-list.vue';
   import { useDurationTime, formatPrice, formatGoodsSwiper } from '@/sheep/hooks/useGoods';
 
+
+  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/groupon-bg.png');
+  const btnBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/groupon-btn.png');
+  const disabledBtnBg = sheep.$url.css(
+    '/assets/addons/shopro/frontend_img/goods/activity-btn-disabled.png',
+  );
+  const seckillBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/seckill-tip-bg.png');
+  const grouponBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/groupon-tip-bg.png');
+
   onPageScroll(() => {});
   const state = reactive({
     skeletonLoading: true,  // 骨架屏
@@ -337,7 +346,7 @@
     // height: 320rpx;
     background-size: 100% 100%;
     border-radius: 10rpx;
-    background-image: v-bind("sheep.$url.css('/static/img/shop/goods/groupon-bg.png')");
+    background-image: v-bind(headerBg);
     background-repeat: no-repeat;
 
     .price-box {
@@ -461,7 +470,7 @@
       font-size: 24rpx;
       font-weight: 600;
       margin-left: -36rpx;
-      background-image: v-bind("sheep.$url.css('/static/img/shop/goods/groupon-btn.png')");
+      background-image: v-bind(btnBg);
       background-repeat: no-repeat;
       background-size: 100% 100%;
       color: #ffffff;
@@ -474,9 +483,7 @@
       font-size: 24rpx;
       font-weight: 600;
       margin-left: -36rpx;
-      background-image: v-bind(
-        "sheep.$url.css('/static/img/shop/goods/activity-btn-disabled.png')"
-      );
+      background-image: v-bind(disabledBtnBg);
       background-repeat: no-repeat;
       background-size: 100% 100%;
       color: #999999;
@@ -523,12 +530,14 @@
 
   //秒杀卡片
   .seckill-box {
-    background: v-bind("sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png')") no-repeat;
+    background: v-bind(seckillBg)
+      no-repeat;
     background-size: 100% 100%;
   }
 
   .groupon-box {
-    background: v-bind("sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png')") no-repeat;
+    background: v-bind(grouponBg)
+      no-repeat;
     background-size: 100% 100%;
   }
 

@@ -556,7 +556,7 @@
       display: block;
       /* #endif */
       position: relative;
-      background: v-bind('sheep.$url.css(backgroundImage)') no-repeat;
+      background: v-bind(backgroundImage) no-repeat;
       background-size: 100% 100%;
 
       /* iphonex 等安全区设置，底部安全区适配 */

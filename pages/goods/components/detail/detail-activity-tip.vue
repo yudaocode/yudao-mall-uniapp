@@ -32,6 +32,10 @@
 <script setup>
   import { ref, reactive } from 'vue';
   import sheep from '@/sheep';
+
+  const seckillBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/seckill-tip-bg.png');
+  const grouponBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/groupon-tip-bg.png');
+
   const props = defineProps({
     data: {
       type: Object,
@@ -81,12 +85,12 @@
 
   //秒杀卡片
   .seckill-box {
-    background: v-bind("sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png')") no-repeat;
+    background: v-bind(seckillBg) no-repeat;
     background-size: 100% 100%;
   }
 
   .groupon-box {
-    background: v-bind("sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png')") no-repeat;
+    background: v-bind(grouponBg) no-repeat;
     background-size: 100% 100%;
   }
 </style>

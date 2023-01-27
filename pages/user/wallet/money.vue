@@ -81,6 +81,8 @@
   import dayjs from 'dayjs';
   import _ from 'lodash';
 
+  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/user/wallet_card_bg.png');
+
   const pagination = {
     data: [],
     current_page: 1,
@@ -161,7 +163,7 @@
   function onChangeTime(e) {
     state.date[0] = e[0];
     state.date[1] = e[e.length - 1];
-
+    state.pagination = pagination;
     getLogList();
   }
 
@@ -202,7 +204,8 @@
         position: absolute;
         top: 0;
         left: 0;
-        background: v-bind("sheep.$url.css('/static/img/shop/user/wallet_card_bg.png')") no-repeat;
+        background: v-bind(headerBg)
+          no-repeat;
         pointer-events: none;
       }
 

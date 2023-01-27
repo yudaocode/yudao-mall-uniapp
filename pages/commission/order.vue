@@ -149,6 +149,7 @@
   import { onPageScroll } from '@dcloudio/uni-app';
 
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
+  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/user/withdraw_bg.png');
   onPageScroll((e) => {
     if (e.scrollTop > 100) {
       state.scrollTop = false;
@@ -256,7 +257,7 @@
     box-sizing: border-box;
     padding: 0 20rpx 20rpx 20rpx;
     width: 750rpx;
-    background: v-bind("sheep.$url.css('/static/img/shop/user/withdraw_bg.png')") no-repeat,
+    background: v-bind(headerBg) no-repeat,
       linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
     background-size: 750rpx 100%;
     // 团队信息总览
