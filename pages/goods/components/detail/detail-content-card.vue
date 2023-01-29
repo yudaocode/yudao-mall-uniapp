@@ -5,7 +5,7 @@
       <view class="title ss-m-l-20 ss-m-r-20">详情</view>
     </view>
     <view class="card-content">
-      <su-parse :content="content"></su-parse>
+      <mp-html :content="content"></mp-html>
     </view>
   </view>
 </template>

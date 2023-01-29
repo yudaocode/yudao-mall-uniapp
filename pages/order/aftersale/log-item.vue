@@ -6,7 +6,7 @@
     </view>
     <view>
       <view class="text">{{ item.log_type_text }}</view>
-      <su-parse class="richtext" :content="item.content"></su-parse>
+      <mp-html class="richtext" :content="item.content"></mp-html>
       <view class="" v-if="item.images?.length">
         <scroll-view class="scroll-box" scroll-x scroll-anchoring>
           <view class="ss-flex">

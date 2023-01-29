@@ -10,7 +10,7 @@
       },
     ]"
   >
-    <su-parse class="richtext" :content="state.content"></su-parse>
+    <mp-html class="richtext" :content="state.content"></mp-html>
   </view>
 </template>
 <script setup>

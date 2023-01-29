@@ -1,6 +1,6 @@
 <template>
   <s-layout class="set-wrap" :title="state.title" :bgStyle="{ color: '#FFF' }">
-    <view class="ss-p-30"><su-parse class="richtext" :content="state.content"></su-parse></view>
+    <view class="ss-p-30"><mp-html class="richtext" :content="state.content"></mp-html></view>
   </s-layout>
 </template>
 
