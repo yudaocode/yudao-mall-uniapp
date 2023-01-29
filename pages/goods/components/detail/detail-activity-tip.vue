@@ -33,8 +33,8 @@
   import { ref, reactive } from 'vue';
   import sheep from '@/sheep';
 
-  const seckillBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/seckill-tip-bg.png');
-  const grouponBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/groupon-tip-bg.png');
+  const seckillBg = sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png');
+  const grouponBg = sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png');
 
   const props = defineProps({
     data: {

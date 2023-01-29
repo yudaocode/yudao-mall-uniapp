@@ -190,13 +190,13 @@
   import { useDurationTime, formatPrice, formatGoodsSwiper } from '@/sheep/hooks/useGoods';
 
 
-  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/groupon-bg.png');
-  const btnBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/groupon-btn.png');
+  const headerBg = sheep.$url.css('/static/img/shop/goods/groupon-bg.png');
+  const btnBg = sheep.$url.css('/static/img/shop/goods/groupon-btn.png');
   const disabledBtnBg = sheep.$url.css(
-    '/assets/addons/shopro/frontend_img/goods/activity-btn-disabled.png',
+    '/static/img/shop/goods/activity-btn-disabled.png',
   );
-  const seckillBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/seckill-tip-bg.png');
-  const grouponBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/groupon-tip-bg.png');
+  const seckillBg = sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png');
+  const grouponBg = sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png');
 
   onPageScroll(() => {});
   const state = reactive({

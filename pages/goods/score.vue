@@ -113,9 +113,9 @@
   import detailCommentCard from './components/detail/detail-comment-card.vue';
   import detailContentCard from './components/detail/detail-content-card.vue';
 
-  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/score-bg.png');
-  const seckillBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/seckill-tip-bg.png');
-  const grouponBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/seckill-tip-bg.png');
+  const headerBg = sheep.$url.css('/static/img/shop/goods/score-bg.png');
+  const seckillBg = sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png');
+  const grouponBg = sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png');
 
   onPageScroll(() => {});
 

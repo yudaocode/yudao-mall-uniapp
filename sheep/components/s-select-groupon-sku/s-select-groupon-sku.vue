@@ -128,7 +128,7 @@
   import { formatPrice } from '@/sheep/hooks/useGoods';
   import { isEmpty } from 'lodash';
 
-  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/goods/groupon-btn-long.png');
+  const headerBg = sheep.$url.css('/static/img/shop/goods/groupon-btn-long.png');
   const emits = defineEmits(['change', 'addCart', 'buy', 'close', 'ladder']);
   const props = defineProps({
     show: {
