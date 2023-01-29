@@ -35,7 +35,7 @@
 
   const userInfo = computed(() => sheep.$store('user').userInfo);
   const agentInfo = computed(() => sheep.$store('user').agentInfo);
-  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/commission/background.png');
+  const headerBg = sheep.$url.css('/static/img/shop/commission/background.png');
 
   const state = reactive({
     showMoney: false,

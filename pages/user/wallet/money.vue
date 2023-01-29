@@ -81,7 +81,7 @@
   import dayjs from 'dayjs';
   import _ from 'lodash';
 
-  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/user/wallet_card_bg.png');
+  const headerBg = sheep.$url.css('/static/img/shop/user/wallet_card_bg.png');
 
   const pagination = {
     data: [],

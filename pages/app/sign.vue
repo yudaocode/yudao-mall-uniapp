@@ -158,7 +158,7 @@
   import { onLoad, onReady } from '@dcloudio/uni-app';
   import { computed, reactive } from 'vue';
 
-  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/app/sign.png');
+  const headerBg = sheep.$url.css('/static/img/shop/app/sign.png');
 
   const state = reactive({
     data: {

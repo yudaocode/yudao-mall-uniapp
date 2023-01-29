@@ -98,7 +98,7 @@
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   const agentInfo = computed(() => sheep.$store('user').agentInfo);
   const userInfo = computed(() => sheep.$store('user').userInfo);
-  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/user/withdraw_bg.png');
+  const headerBg = sheep.$url.css('/static/img/shop/user/withdraw_bg.png');
 
   onPageScroll((e) => {
     if (e.scrollTop > 100) {

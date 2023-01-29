@@ -126,7 +126,7 @@
   import { computed, reactive } from 'vue';
 
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
-  const headerBg = sheep.$url.css('/assets/addons/shopro/frontend_img/order/invoice_bg.png');
+  const headerBg = sheep.$url.css('/static/img/shop/order/invoice_bg.png');
   const state = reactive({
     info: [
       {
