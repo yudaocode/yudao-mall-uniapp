@@ -12,11 +12,8 @@
           </image>
         </view>
         <view class="header-right ss-flex-col ss-row-between ss-flex-1">
-          <view class="goods-title ss-line-2">{{ goodsInfo.title }}</view>
-          <view class="header-right-bottom ss-flex ss-col-center ss-row-between">
-            <view class="price-text"> {{ goodsPrice }}</view>
-			<!-- TODO @jj 拼团价放在标题左边 -->
- <!--           <view class="tig ss-flex ss-col-center">
+          <view class="goods-title ss-line-2">
+            <view class="tig ss-flex ss-col-center">
               <view class="tig-icon ss-flex ss-col-center ss-row-center">
                 <view class="groupon-tag">
                   <image :src="sheep.$url.static('/static/img/shop/goods/groupon-tag-white.png')">
@@ -24,9 +21,16 @@
                 </view>
               </view>
               <view class="tig-title">拼团价</view>
-            </view> -->
+            </view>
+            <view class="info-title">
+              {{ goodsInfo.title }}
+            </view>
+          </view>
+          <view class="header-right-bottom ss-flex ss-col-center ss-row-between">
+            <view class="price-text"> {{ goodsPrice }}</view>
+
             <view class="stock-text ss-m-l-20">
-              库存{{ state.selectedSkuPrice.stock || goodsInfo.stock }}000件
+              库存{{ state.selectedSkuPrice.stock || goodsInfo.stock }}件
             </view>
           </view>
         </view>
@@ -92,7 +96,9 @@
         <view class="buy-box ss-flex ss-col-center ss-flex ss-col-center ss-row-center">
           <view class="ss-flex">
             <button class="ss-reset-button origin-price-btn ss-flex-col">
-              <view class="btn-title">{{ state.grouponNum === 0 ? '阶梯团' : state.grouponNum + '人团' }}</view>
+              <view class="btn-title">{{
+                state.grouponNum === 0 ? '阶梯团' : state.grouponNum + '人团'
+              }}</view>
             </button>
             <button class="ss-reset-button btn-tox ss-flex-col" @tap="onBuy">
               <view class="btn-price">
@@ -154,7 +160,6 @@
     currentSkuArray: [],
     grouponNum: props.grouponNum,
   });
-
   // 默认单规格
   if (!props.goodsInfo.is_sku) {
     state.selectedSkuPrice = props.goodsInfo.sku_prices[0];
@@ -179,12 +184,14 @@
   // 规格价格
   const goodsPrice = computed(() => {
     if (isEmpty(state.selectedSkuPrice)) {
+      console.log(222);
       return formatPrice(props.goodsInfo.price);
     }
-	if(state.grouponNum === 0 && activityType === 'groupon_ladder') {
-		return formatPrice(props.goodsInfo.price)
-	}
-	
+    if (state.grouponNum === 0 && activityType === 'groupon_ladder') {
+      console.log(1111);
+      return formatPrice(props.goodsInfo.price);
+    }
+
     if (activityType === 'groupon') {
       return state.selectedSkuPrice.groupon_price;
     }
@@ -200,9 +207,11 @@
     if (isEmpty(state.selectedSkuPrice)) {
       return formatPrice(props.goodsInfo.price);
     }
-	
-	if(state.grouponNum === 0 && activityType === 'groupon_ladder') return;
-	
+
+    if (state.grouponNum === 0 && activityType === 'groupon_ladder') {
+      return formatPrice(props.goodsInfo.price);
+    }
+
     if (activityType === 'groupon') {
       return state.selectedSkuPrice.leader_price;
     }
@@ -214,7 +223,7 @@
 
   // 获取阶梯价
   function getSkuPriceByLadder() {
-	return state.selectedSkuPrice.ladders.find((item) => item.ladder == state.grouponNum);
+    return state.selectedSkuPrice.ladders.find((item) => item.ladder == state.grouponNum);
   }
 
   watch(
@@ -480,6 +489,43 @@
         font-size: 28rpx;
         font-weight: 500;
         line-height: 42rpx;
+        position: relative;
+        .tig {
+          border: 2rpx solid #ff6000;
+          border-radius: 4rpx;
+          width: 126rpx;
+          height: 38rpx;
+          position: absolute;
+          left: 0;
+          top: 0;
+
+          .tig-icon {
+            width: 40rpx;
+            height: 40rpx;
+            background: #ff6000;
+            margin-left: -2rpx;
+            border-radius: 4rpx 0 0 4rpx;
+
+            .groupon-tag {
+              width: 32rpx;
+              height: 32rpx;
+            }
+          }
+
+          .tig-title {
+            font-size: 24rpx;
+            font-weight: 500;
+            line-height: normal;
+            color: #ff6000;
+            width: 86rpx;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+        }
+        .info-title {
+          text-indent: 132rpx;
+        }
       }
 
       .price-text {
@@ -539,37 +585,6 @@
           background: #f8f8f8;
         }
       }
-    }
-  }
-
-  .tig {
-    border: 2rpx solid #ff6000;
-    border-radius: 4rpx;
-    width: 126rpx;
-    height: 38rpx;
-
-    .tig-icon {
-      width: 40rpx;
-      height: 40rpx;
-      background: #ff6000;
-      margin-left: -2rpx;
-      border-radius: 4rpx 0 0 4rpx;
-
-      .groupon-tag {
-        width: 32rpx;
-        height: 32rpx;
-      }
-    }
-
-    .tig-title {
-      font-size: 24rpx;
-      font-weight: 500;
-      line-height: normal;
-      color: #ff6000;
-      width: 86rpx;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
   }
 
