@@ -15,7 +15,8 @@
           <view class="goods-title ss-line-2">{{ goodsInfo.title }}</view>
           <view class="header-right-bottom ss-flex ss-col-center ss-row-between">
             <view class="price-text"> {{ goodsPrice }}</view>
-            <view class="tig ss-flex ss-col-center">
+			<!-- TODO @jj 拼团价放在标题左边 -->
+ <!--           <view class="tig ss-flex ss-col-center">
               <view class="tig-icon ss-flex ss-col-center ss-row-center">
                 <view class="groupon-tag">
                   <image :src="sheep.$url.static('/static/img/shop/goods/groupon-tag-white.png')">
@@ -23,9 +24,9 @@
                 </view>
               </view>
               <view class="tig-title">拼团价</view>
-            </view>
+            </view> -->
             <view class="stock-text ss-m-l-20">
-              库存{{ state.selectedSkuPrice.stock || goodsInfo.stock }}件
+              库存{{ state.selectedSkuPrice.stock || goodsInfo.stock }}000件
             </view>
           </view>
         </view>
@@ -180,6 +181,10 @@
     if (isEmpty(state.selectedSkuPrice)) {
       return formatPrice(props.goodsInfo.price);
     }
+	if(state.grouponNum === 0 && activityType === 'groupon_ladder') {
+		return formatPrice(props.goodsInfo.price)
+	}
+	
     if (activityType === 'groupon') {
       return state.selectedSkuPrice.groupon_price;
     }
@@ -195,6 +200,9 @@
     if (isEmpty(state.selectedSkuPrice)) {
       return formatPrice(props.goodsInfo.price);
     }
+	
+	if(state.grouponNum === 0 && activityType === 'groupon_ladder') return;
+	
     if (activityType === 'groupon') {
       return state.selectedSkuPrice.leader_price;
     }
@@ -206,7 +214,7 @@
 
   // 获取阶梯价
   function getSkuPriceByLadder() {
-    return state.selectedSkuPrice.ladders.find((item) => item.ladder == state.grouponNum);
+	return state.selectedSkuPrice.ladders.find((item) => item.ladder == state.grouponNum);
   }
 
   watch(

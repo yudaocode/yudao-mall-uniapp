@@ -218,6 +218,9 @@
     if (isEmpty(state.selectedSkuPrice)) {
       return formatPrice(state.goodsInfo.price);
     }
+	if(state.grouponNum === 0 && state.grouponType === 'groupon_ladder') {
+		return formatPrice(state.goodsInfo.price)
+	}
     if (state.grouponType === 'groupon') {
       return state.selectedSkuPrice.groupon_price;
     }
