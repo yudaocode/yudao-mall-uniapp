@@ -11,4 +11,4 @@ SHOPRO_DEV_PORT = 3000
 SHOPRO_API_PATH = /shop/api/
 
 # 客户端静态资源地址 空=默认使用服务端指定的CDN资源地址前缀 | local=本地  |  http(s)://xxx.xxx=自定义静态资源地址前缀
-SHOPRO_STATIC_URL = 
+SHOPRO_STATIC_URL = https://file.sheepjs.com
