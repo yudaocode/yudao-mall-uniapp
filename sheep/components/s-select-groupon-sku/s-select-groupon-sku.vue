@@ -49,7 +49,7 @@
                 class="ss-reset-button spec-btn"
                 :class="[
                   {
-                    'checked-btn': state.grouponNum == ladder,
+                    'checked-btn': grouponNum == ladder,
                   },
                 ]"
                 @tap="onSelectLadder(ladder)"
@@ -97,7 +97,7 @@
           <view class="ss-flex">
             <button class="ss-reset-button origin-price-btn ss-flex-col">
               <view class="btn-title">{{
-                state.grouponNum === 0 ? '阶梯团' : state.grouponNum + '人团'
+                grouponNum === 0 ? '阶梯团' : grouponNum + '人团'
               }}</view>
             </button>
             <button class="ss-reset-button btn-tox ss-flex-col" @tap="onBuy">
@@ -184,11 +184,9 @@
   // 规格价格
   const goodsPrice = computed(() => {
     if (isEmpty(state.selectedSkuPrice)) {
-      console.log(222);
       return formatPrice(props.goodsInfo.price);
     }
-    if (state.grouponNum === 0 && activityType === 'groupon_ladder') {
-      console.log(1111);
+    if (props.grouponNum === 0 && activityType === 'groupon_ladder') {
       return formatPrice(props.goodsInfo.price);
     }
 
@@ -208,7 +206,7 @@
       return formatPrice(props.goodsInfo.price);
     }
 
-    if (state.grouponNum === 0 && activityType === 'groupon_ladder') {
+    if (props.grouponNum === 0 && activityType === 'groupon_ladder') {
       return formatPrice(props.goodsInfo.price);
     }
 
@@ -223,7 +221,7 @@
 
   // 获取阶梯价
   function getSkuPriceByLadder() {
-    return state.selectedSkuPrice.ladders.find((item) => item.ladder == state.grouponNum);
+    return state.selectedSkuPrice.ladders.find((item) => item.ladder == props.grouponNum);
   }
 
   watch(
@@ -359,14 +357,13 @@
 
   // 选择阶梯拼团人数
   function onSelectLadder(ladder) {
-    state.grouponNum = ladder;
     emits('ladder', ladder);
   }
 
   // 选择规格
   function onSelectSku(pid, skuId) {
     // 清空已选择
-    if (activityType === 'groupon_ladder' && state.grouponNum == 0) {
+    if (activityType === 'groupon_ladder' && props.grouponNum == 0) {
       sheep.$helper.toast('请选择拼团人数');
       return;
     }
