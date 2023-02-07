@@ -19,6 +19,7 @@
               :title="item.amount_text"
               :value="item.amount"
               :surplus="item.stock"
+              :type="item.type"
               :sellBy="`${item.get_start_time.substring(0, 10)} 至 ${item.get_end_time.substring(
                 0,
                 10,
@@ -56,6 +57,7 @@
               :value="item.amount"
               :surplus="item.stock"
               :couponId="item.id"
+              :type="item.type"
               :sellBy="`${item.get_start_time.substring(0, 10)} 至 ${item.get_end_time.substring(
                 0,
                 10,
@@ -93,6 +95,7 @@
               :value="item.amount"
               :surplus="item.stock"
               :couponId="item.id"
+              :type="item.type"
               :sellBy="`${item.get_start_time.substring(0, 10)} 至 ${item.get_end_time.substring(
                 0,
                 10,

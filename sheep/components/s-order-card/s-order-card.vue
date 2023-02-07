@@ -71,6 +71,7 @@
     .menu-item {
       height: 160rpx;
       position: relative;
+      z-index: 10;
       .menu-title {
         font-size: 24rpx;
         line-height: 24rpx;

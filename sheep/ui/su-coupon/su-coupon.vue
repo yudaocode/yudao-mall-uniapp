@@ -11,10 +11,10 @@
         })
       "
     >
-      <view class=" ss-flex ss-flex-col ss-row-center ss-col-center">
+      <view class="ss-flex ss-flex-col ss-row-center ss-col-center">
         <view class="face-value-box ss-flex ss-col-bottom ss-m-t-50 ss-m-b-28">
-          <view class="value-text ss-m-r-4">{{ props.value }}</view>
-          <view class="value-unit">元</view>
+          <view class="value-text ss-m-r-4">{{ type === 'reduce' ? value : Number(value) }}</view>
+          <view class="value-unit">{{ type === 'reduce' ? '元' : '折' }}</view>
         </view>
         <view class="title-text">{{ props.title }}</view>
       </view>
@@ -38,8 +38,8 @@
     >
       <view class="card-left ss-flex ss-flex-col ss-row-between ss-col-top ss-m-l-40">
         <view class="face-value-box ss-flex ss-col-bottom ss-m-t-28">
-          <view class="value-unit">￥</view>
-          <view class="value-text ss-m-r-4">{{ props.value }}</view>
+          <view class="value-text ss-m-r-4">{{ type === 'reduce' ? value : Number(value) }}</view>
+          <view class="value-unit">{{ type === 'reduce' ? '元' : '折' }}</view>
         </view>
         <view class="ss-m-b-28">
           <view class="title-text ss-m-b-10">{{ props.title }}</view>
@@ -68,8 +68,8 @@
     >
       <view class="card-left ss-flex ss-flex-col ss-row-between ss-col-top ss-m-l-40">
         <view class="face-value-box ss-flex ss-col-bottom ss-m-t-28">
-          <view class="value-unit">￥</view>
-          <view class="value-text ss-m-r-4">{{ props.value }}</view>
+          <view class="value-text ss-m-r-4">{{ type === 'reduce' ? value : Number(value) }}</view>
+          <view class="value-unit">{{ type === 'reduce' ? '元' : '折' }}</view>
         </view>
         <view class="ss-m-b-20">
           <view class="title-text ss-m-b-10">{{ props.title }}</view>
@@ -161,6 +161,10 @@
       type: [Number, String],
       default: 1000,
     },
+    type: {
+      type: String,
+      default: '',
+    },
   });
 
   const cardStyle = computed(() => {
@@ -189,7 +193,7 @@
     .value-unit {
       color: v-bind('textColor');
       font-size: 24rpx;
-      line-height: 30rpx;
+      line-height: 38rpx;
     }
 
     .title-text {
@@ -238,7 +242,7 @@
     .value-unit {
       color: v-bind('textColor');
       font-size: 22rpx;
-      line-height: 22rpx;
+      line-height: 28rpx;
     }
 
     .title-text,
@@ -285,7 +289,7 @@
     .value-unit {
       color: v-bind('textColor');
       font-size: 22rpx;
-      line-height: 22rpx;
+      line-height: 32rpx;
     }
 
     .title-text,

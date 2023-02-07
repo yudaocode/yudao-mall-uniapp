@@ -189,7 +189,7 @@
     .cart-btn {
       position: absolute;
       bottom: 10rpx;
-      right: 10rpx;
+      right: 20rpx;
       z-index: 11;
       height: 50rpx;
       line-height: 50rpx;
