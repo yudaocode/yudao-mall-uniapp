@@ -53,9 +53,9 @@
             <view class="list-title">发票税号</view>
             <view class="list-desc">{{ state.data.tax_no }}</view>
           </view>
-          <view class="ss-flex">
-            <view class="list-title">开票金额</view>
-            <view class="list-desc">￥{{ state.data.amount }}</view>
+          <view class="ss-flex" v-if="state.data.status === 'finish'">
+            <view class="list-title">实开金额</view>
+            <view class="list-desc">￥{{ state.data.invoice_amount }}</view>
           </view>
           <view class="ss-flex" v-if="state.data.status === 'finish'">
             <view class="list-title">开票时间</view>
