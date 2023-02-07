@@ -23,7 +23,7 @@
     <su-sticky>
       <!-- 统计 -->
       <view class="filter-box ss-p-x-30 ss-flex ss-col-center ss-row-between">
-        <uni-datetime-picker v-model="state.data" type="daterange" @change="onChangeTime">
+        <uni-datetime-picker v-model="state.data" type="daterange" @change="onChangeTime" :end="state.today">
           <button class="ss-reset-button date-btn">
             <text>{{ dateFilterText }}</text>
             <text class="cicon-drop-down ss-seldate-icon"></text>
@@ -98,6 +98,7 @@
     currentTab: 0,
     pagination,
     loadStatus: '',
+    today: '',
   });
 
   const tabMaps = [
@@ -149,8 +150,8 @@
     }
   }
   onLoad(async (options) => {
-    const today = dayjs().format('YYYY-MM-DD');
-    state.date = [today, today];
+    state.today = dayjs().format('YYYY-MM-DD');
+    state.date = [state.today, state.today];
     getLogList();
   });
 

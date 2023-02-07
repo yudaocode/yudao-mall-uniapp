@@ -14,7 +14,7 @@
       <view class="score-box ss-flex-col ss-row-center ss-col-center">
         <view class="ss-m-b-30">
           <text class="all-title ss-m-r-8">当前积分</text>
-          <text class="cicon-help-o"></text>
+          <!-- <text class="cicon-help-o"></text> -->
         </view>
         <text class="all-num">{{ userInfo.score || 0 }}</text>
       </view>
@@ -23,7 +23,7 @@
     <su-sticky :customNavHeight="sys_navBar">
       <!-- 统计 -->
       <view class="filter-box ss-p-x-30 ss-flex ss-col-center ss-row-between">
-        <uni-datetime-picker v-model="state.data" type="daterange" @change="onChangeTime">
+        <uni-datetime-picker v-model="state.data" type="daterange" @change="onChangeTime" :end="state.today">
           <button class="ss-reset-button date-btn">
             <text>{{ dateFilterText }}</text>
             <text class="cicon-drop-down ss-seldate-icon"></text>
@@ -99,6 +99,7 @@
     pagination,
     loadStatus: '',
     date: [],
+    today:'',
   });
 
   const tabMaps = [
@@ -150,8 +151,8 @@
     }
   }
   onLoad(async (options) => {
-    const today = dayjs().format('YYYY-MM-DD');
-    state.date = [today, today];
+    state.today = dayjs().format('YYYY-MM-DD');
+    state.date = [state.today, state.today];
     getLogList();
   });
 
