@@ -193,7 +193,7 @@
             })
           "
         >
-          {{ state.orderInfo.status_code === 'groupon_invalid' ? '拼团详情' : '邀请拼团' }}
+          {{ state.orderInfo.status_code === 'groupon_ing' ? '邀请拼团' : '拼团详情' }}
         </button>
         <button
           class="ss-reset-button cancel-btn"

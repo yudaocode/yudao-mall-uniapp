@@ -137,7 +137,7 @@
               class="tool-btn ss-reset-button"
               @tap.stop="onOrderGroupon(order)"
             >
-              {{ order.status_code === 'groupon_invalid' ? '拼团详情' : '邀请拼团' }}
+              {{ order.status_code === 'groupon_ing' ? '邀请拼团' : '拼团详情' }}
             </button>
             <button
               v-if="order.btns.includes('invoice')"
@@ -240,6 +240,12 @@
   import sheep from '@/sheep';
   import _ from 'lodash';
 
+  const pagination = {
+    data: [],
+    current_page: 1,
+    total: 1,
+    last_page: 1,
+  };
   // 数据
   const state = reactive({
     currentTab: 0,
@@ -281,13 +287,7 @@
   function onTabsChange(e) {
     if (state.currentTab === e.index) return;
 
-    state.pagination = {
-      data: [],
-      current_page: 1,
-      total: 1,
-      last_page: 1,
-    };
-
+    state.pagination = pagination
     state.currentTab = e.index;
 
     getOrderList();
@@ -379,7 +379,7 @@
   }
 
   // 申请退款
-  async function onRefund(orderId, confirm = false) {
+  async function onRefund(orderId) {
     uni.showModal({
       title: '提示',
       content: '确定要申请退款吗?',
@@ -408,15 +408,11 @@
     });
     state.error = res.error;
     if (res.error === 0) {
-      if (page >= 2) {
         let orderList = _.concat(state.pagination.data, res.data.data);
         state.pagination = {
           ...res.data,
           data: orderList,
         };
-      } else {
-        state.pagination = res.data;
-      }
 
       if (state.pagination.current_page < state.pagination.last_page) {
         state.loadStatus = 'more';
@@ -447,6 +443,7 @@
 
   //下拉刷新
   onPullDownRefresh(() => {
+    state.pagination = pagination
     getOrderList();
     setTimeout(function () {
       uni.stopPullDownRefresh();
