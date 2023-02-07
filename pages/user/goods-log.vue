@@ -85,7 +85,7 @@
               class="ss-reset-button ui-BG-Main-Gradient pay-btn ss-font-28 ui-Shadow-Main"
               @tap="onCancel"
             >
-              取消收藏
+              删除足迹
             </button>
           </view>
         </view>
@@ -114,6 +114,12 @@
   import _ from 'lodash';
 
   const sys_navBar = sheep.$platform.navbar;
+  const pagination = {
+    data: [],
+    current_page: 1,
+    total: 1,
+    last_page: 1,
+  };
   const state = reactive({
     pagination: {
       data: [],
@@ -134,15 +140,11 @@
       page,
     });
     if (res.error === 0) {
-      if (page >= 2) {
         let orderList = _.concat(state.pagination.data, res.data.data);
         state.pagination = {
           ...res.data,
           data: orderList,
         };
-      } else {
-        state.pagination = res.data;
-      }
       if (state.pagination.current_page < state.pagination.last_page) {
         state.loadStatus = 'more';
       } else {
@@ -188,6 +190,7 @@
         state.editMode = false;
         state.selectedCollectList = [];
         state.selectAll = false;
+        state.pagination = pagination
         getData();
       }
     }

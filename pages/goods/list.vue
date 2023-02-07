@@ -124,6 +124,12 @@
   const sys_navBar = sheep.$platform.navbar;
   const emits = defineEmits(['close', 'change']);
 
+  const pagination = {
+    data: [],
+    current_page: 1,
+    total: 1,
+    last_page: 1,
+  };
   const state = reactive({
     pagination: {
       data: [],
@@ -198,12 +204,7 @@
   }
 
   function emptyList() {
-    state.pagination = {
-      data: [],
-      current_page: 1,
-      total: 1,
-      last_page: 1,
-    };
+    state.pagination = pagination
     state.leftGoodsList = [];
     state.rightGoodsList = [];
     count = 0;
@@ -256,15 +257,11 @@
       page,
     });
     if (res.error === 0) {
-      if (page >= 2) {
         let couponList = _.concat(state.pagination.data, res.data.data);
         state.pagination = {
           ...res.data,
           data: couponList,
         };
-      } else {
-        state.pagination = res.data;
-      }
       mountMasonry();
       if (state.pagination.current_page < state.pagination.last_page) {
         state.loadStatus = 'more';

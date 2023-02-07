@@ -144,6 +144,13 @@
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import { reactive } from 'vue';
   import _ from 'lodash';
+
+  const pagination = {
+    data: [],
+    current_page: 1,
+    total: 1,
+    last_page: 1,
+  };
   const state = reactive({
     list: {},
     couponId: 0,
@@ -182,12 +189,7 @@
   });
 
   function onTabsChange(e) {
-    state.pagination = {
-      data: [],
-      current_page: 1,
-      total: 1,
-      last_page: 1,
-    };
+    state.pagination = pagination;
     state.currentTab = e.index;
     state.categoryId = e.value;
     getGoodsList(state.categoryId);
@@ -201,15 +203,11 @@
       is_category_deep: false,
     });
     if (res.error === 0) {
-      if (page >= 2) {
-        let couponlist = _.concat(state.pagination.data, res.data.data);
-        state.pagination = {
-          ...res.data,
-          data: couponlist,
-        };
-      } else {
-        state.pagination = res.data;
-      }
+      let couponlist = _.concat(state.pagination.data, res.data.data);
+      state.pagination = {
+        ...res.data,
+        data: couponlist,
+      };
       if (state.pagination.current_page < state.pagination.last_page) {
         state.loadStatus = 'more';
       } else {
@@ -234,6 +232,7 @@
     data.items_value.forEach((i) => {
       state.tabMaps.push({ name: i.name, value: i.id });
     });
+    state.pagination = pagination
     getGoodsList(state.tabMaps[0].value);
   }
   // 加载更多

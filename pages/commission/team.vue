@@ -131,16 +131,11 @@
       page,
     });
     if (res.error === 0) {
-      if (page >= 2) {
         let orderList = _.concat(state.pagination.data, res.data.data);
         state.pagination = {
           ...res.data,
           data: orderList,
         };
-      } else {
-        state.pagination = res.data;
-      }
-
       if (state.pagination.current_page < state.pagination.last_page) {
         state.loadStatus = 'more';
       } else {

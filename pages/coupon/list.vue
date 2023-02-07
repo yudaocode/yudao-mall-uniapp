@@ -91,6 +91,12 @@
   import { computed, reactive } from 'vue';
   import _ from 'lodash';
 
+  const pagination = {
+    data: [],
+    current_page: 1,
+    total: 1,
+    last_page: 1,
+  };
   // 数据
   const state = reactive({
     currentTab: 0,
@@ -123,12 +129,7 @@
     },
   ];
   function onTabsChange(e) {
-    state.pagination = {
-      data: [],
-      current_page: 1,
-      total: 1,
-      last_page: 1,
-    };
+    state.pagination = pagination
     state.currentTab = e.index;
     state.type = e.value;
     if (state.currentTab == 0) {
@@ -141,15 +142,11 @@
     state.loadStatus = 'loading';
     const res = await sheep.$api.coupon.list({ list_rows, page });
     if (res.error === 0) {
-      if (page >= 2) {
-        let couponlist = _.concat(state.pagination.data, res.data.data);
-        state.pagination = {
-          ...res.data,
-          data: couponlist,
-        };
-      } else {
-        state.pagination = res.data;
-      }
+      let couponlist = _.concat(state.pagination.data, res.data.data);
+      state.pagination = {
+        ...res.data,
+        data: couponlist,
+      };
       if (state.pagination.current_page < state.pagination.last_page) {
         state.loadStatus = 'more';
       } else {
@@ -189,6 +186,7 @@
         title: msg,
       });
       setTimeout(() => {
+        state.pagination = pagination
         getData();
       }, 1000);
     }
