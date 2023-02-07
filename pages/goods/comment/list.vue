@@ -42,7 +42,6 @@
     },
     commentId: 0,
     code: 'all',
-    commentImages: [],
   });
   // 切换选项卡
   function onTabsChange(e) {
@@ -79,11 +78,6 @@
       } else {
         state.pagination = res.data;
       }
-      state.pagination.data.forEach((item) => {
-        item.images.forEach((image) => {
-          state.commentImages.push(sheep.$url.cdn(image));
-        });
-      });
       if (state.pagination.current_page < state.pagination.last_page) {
         state.loadStatus = 'more';
       } else {
