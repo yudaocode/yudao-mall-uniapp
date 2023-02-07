@@ -1,5 +1,8 @@
 <template>
-  <view class="ss-order-card-warp ss-flex ss-col-stretch ss-row-between bg-white">
+  <view
+    class="ss-order-card-warp ss-flex ss-col-stretch ss-row-between bg-white"
+    :style="[{ borderRadius: radius + 'rpx' }]"
+  >
     <view class="img-box ss-m-r-24">
       <image class="order-img" :src="sheep.$url.cdn(img)" mode="aspectFill"></image>
     </view>
@@ -89,6 +92,10 @@
     },
     score: {
       type: [String, Number],
+      default: '',
+    },
+    radius: {
+      type: [String],
       default: '',
     },
   });

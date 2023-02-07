@@ -16,12 +16,27 @@
         v-for="order in state.pagination.data"
         :key="order.id"
       >
+        <view class="order-card-header ss-flex ss-col-center ss-row-between ss-p-x-20">
+          <view class="order-no">订单号：{{ order.my.order.order_sn }}</view>
+          <view
+            class="ss-font-26"
+            :class="
+              order.status === 'ing'
+                ? 'warning-color'
+                : order.status === 'invalid'
+                ? 'danger-color'
+                : 'success-color'
+            "
+            >{{ order.status_text }}</view
+          >
+        </view>
         <view class="border-bottom">
           <s-goods-item
             :img="order.goods.image"
             :title="order.goods.title"
             :price="order.goods.price[0]"
             priceColor="#E1212B"
+            radius="20"
           >
             <template #groupon>
               <view class="ss-flex">
@@ -39,7 +54,8 @@
             订单详情
           </button>
           <button
-            class="detail-btn ss-reset-button"
+            class="tool-btn ss-reset-button"
+            :class="{ 'ui-BG-Main-Gradient': order.status === 'ing' }"
             @tap="sheep.$router.go('/pages/activity/groupon/detail', { id: order.id })"
           >
             {{ order.status === 'ing' ? '邀请拼团' : '拼团详情' }}
@@ -200,19 +216,6 @@
 </script>
 
 <style lang="scss" scoped>
-  .tool-btn {
-    width: 160rpx;
-    height: 60rpx;
-    background: #f6f6f6;
-    font-size: 26rpx;
-    border-radius: 30rpx;
-    margin-right: 10rpx;
-
-    &:last-of-type {
-      margin-right: 0;
-    }
-  }
-
   .swiper-box {
     flex: 1;
 
@@ -230,10 +233,6 @@
         font-size: 26rpx;
         font-weight: 500;
       }
-
-      .order-state {
-        color: var(--ui-BG-Main);
-      }
     }
 
     .order-card-footer {
@@ -248,6 +247,15 @@
         font-weight: 400;
         color: #999999;
         margin-right: 20rpx;
+      }
+      .tool-btn {
+        width: 210rpx;
+        height: 66rpx;
+        border-radius: 33rpx;
+        font-size: 26rpx;
+        font-weight: 400;
+        margin-right: 20rpx;
+        background: #f6f6f6;
       }
 
       .invite-btn {
@@ -277,5 +285,14 @@
     font-size: 24rpx;
     font-weight: 400;
     color: #999999;
+  }
+  .warning-color {
+    color: #faad14;
+  }
+  .danger-color {
+    color: #ff3000;
+  }
+  .success-color {
+    color: #52c41a;
   }
 </style>
