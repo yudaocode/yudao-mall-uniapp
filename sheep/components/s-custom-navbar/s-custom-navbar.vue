@@ -10,6 +10,18 @@
   >
     <template #item>
       <view class="nav-box">
+        <view class="nav-icon" v-if="showLeftButton">
+          <view class="icon-box ss-flex" :class="{ 'inner-icon-box': data.mode == 'inner' }">
+            <view class="icon-button icon-button-left ss-flex ss-row-center" @tap="onClickLeft">
+              <text class="sicon-back" v-if="hasHistory" />
+              <text class="sicon-home" v-else />
+            </view>
+            <view class="line"></view>
+            <view class="icon-button icon-button-right ss-flex ss-row-center" @tap="onClickRight">
+              <text class="sicon-more" />
+            </view>
+          </view>
+        </view>
         <view
           class="nav-item"
           v-for="(item, index) in navList"
@@ -39,13 +51,19 @@
   import sheep from '@/sheep';
   import Navbar from './components/navbar.vue';
   import NavbarItem from './components/navbar-item.vue';
+  import { showMenuTools } from '@/sheep/hooks/useModal';
 
   const props = defineProps({
     data: {
       type: Object,
       default: () => ({}),
     },
+    showLeftButton: {
+      type: Boolean,
+      default: false,
+    },
   });
+  const hasHistory = sheep.$router.hasHistory();
   const sticky = computed(() => {
     if (props.data.mode == 'inner') {
       if (props.data.alway) {
@@ -87,7 +105,11 @@
     props.data.mode === 'inner' ? Boolean(props.data.alwaysShow) : true,
   );
   const isOpacity = computed(() =>
-    props.data.mode === 'normal' ? false : props.data.mode === 'inner',
+    props.data.mode === 'normal'
+      ? false
+      : props.showLeftButton
+      ? false
+      : props.data.mode === 'inner',
   );
   const isPlaceholder = computed(() => props.data.mode === 'normal');
   const bgStyles = computed(() => {
@@ -100,6 +122,17 @@
       };
     }
   });
+
+  function onClickLeft() {
+    if (hasHistory) {
+      sheep.$router.back();
+    } else {
+      sheep.$router.go('/pages/index/index');
+    }
+  }
+  function onClickRight() {
+    showMenuTools();
+  }
 </script>
 
 <style lang="scss" scoped>
@@ -112,6 +145,54 @@
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
+    }
+    .nav-icon {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      left: 20rpx;
+      .inner-icon-box {
+        border: 1px solid rgba(#fff, 0.4);
+        background: none !important;
+      }
+      .icon-box {
+        background: #ffffff;
+        box-shadow: 0px 0px 4rpx rgba(51, 51, 51, 0.08),
+          0px 4rpx 6rpx 2rpx rgba(102, 102, 102, 0.12);
+        border-radius: 30rpx;
+        width: 134rpx;
+        height: 56rpx;
+        margin-left: 8rpx;
+        .line {
+          width: 2rpx;
+          height: 24rpx;
+          background: #e5e5e7;
+        }
+        .sicon-back {
+          font-size: 32rpx;
+          color: #000;
+        }
+        .sicon-home {
+          font-size: 32rpx;
+          color: #000;
+        }
+        .sicon-more {
+          font-size: 32rpx;
+          color: #000;
+        }
+        .icon-button {
+          width: 67rpx;
+          height: 56rpx;
+          &-left:hover {
+            background: rgba(0, 0, 0, 0.16);
+            border-radius: 30rpx 0px 0px 30rpx;
+          }
+          &-right:hover {
+            background: rgba(0, 0, 0, 0.16);
+            border-radius: 0px 30rpx 30rpx 0px;
+          }
+        }
+      }
     }
   }
 </style>

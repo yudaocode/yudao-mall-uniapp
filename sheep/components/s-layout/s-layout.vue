@@ -20,6 +20,7 @@
       <s-custom-navbar
         v-else-if="navbar === 'custom' && navbarMode === 'normal'"
         :data="navbarStyle"
+        :showLeftButton="showLeftButton"
       />
       <view class="page-body" :style="[bgBody]">
         <!-- 沉浸式头部 -->
@@ -30,7 +31,7 @@
         ></view>
 
         <!-- 装修组件导航栏-沉浸式 -->
-        <s-custom-navbar v-if="navbar === 'custom' && navbarMode === 'inner'" :data="navbarStyle" />
+        <s-custom-navbar v-if="navbar === 'custom' && navbarMode === 'inner'" :data="navbarStyle" :showLeftButton="showLeftButton" />
 
         <!-- 页面内容插槽 -->
         <slot />
@@ -131,6 +132,11 @@
     },
     //展示悬浮按钮
     showFloatButton: {
+      type: Boolean,
+      default: false,
+    },
+    //展示返回按钮
+    showLeftButton: {
       type: Boolean,
       default: false,
     },

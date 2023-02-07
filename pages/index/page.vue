@@ -5,6 +5,7 @@
     :bgStyle="page.style?.background"
     :navbarStyle="page.style?.navbar"
     onShareAppMessage
+    showLeftButton
   >
     <s-block v-for="(item, index) in page.list" :key="index" :styles="item.style">
       <s-block-item :type="item.type" :data="item.data" :styles="item.style" />
