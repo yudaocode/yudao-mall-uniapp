@@ -91,13 +91,13 @@
                 :src="sheep.$url.static('/static/img/shop/chat/loading.png')"
                 mode="aspectFill"
               ></image>
-              <image
+              <!-- <image
                 v-if="chatData.isSendSucces == 1"
                 class="warning"
                 :src="sheep.$url.static('/static/img/shop/chat/warning.png')"
                 mode="aspectFill"
                 @click="onAgainSendMessage(item)"
-              ></image>
+              ></image> -->
             </span>
 
             <!-- 内容 -->
@@ -705,7 +705,7 @@
           }
           .imgred,
           img {
-            width: 100%;
+            width: 100% !important;
           }
         }
       }
