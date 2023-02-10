@@ -35,7 +35,7 @@
             class="ss-reset-button face-value-btn"
             v-for="item in state.faceValueList"
             :key="item.money"
-            :class="[{ 'btn-active': state.recharge_money === item.money }]"
+            :class="[{ 'btn-active': state.recharge_money == parseFloat(item.money) }]"
             @tap="onCard(item.money)"
           >
             <text class="face-value-title">{{ item.money }}</text>
