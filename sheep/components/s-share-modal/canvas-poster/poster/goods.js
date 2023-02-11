@@ -47,7 +47,8 @@ const goods = (poster) => {
         val: poster.shareInfo.poster.title,
         x: width * 0.04,
         y: width * 1.18,
-        maxWidth: width * 0.92,
+        line: 2,
+        maxWidth: width * 0.91,
         lineHeight: 5,
         paintbrushProps: {
           fillStyle: '#333',
