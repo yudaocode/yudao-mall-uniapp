@@ -1,13 +1,12 @@
 <template>
   <view class="ui-video-wrap">
     <video
-      v-show="state.isplay"
       :id="`sVideo${uid}`"
       class="radius"
       :style="[{ height: height + 'px' }]"
       :src="src"
       controls
-      object-fit="fill"
+      object-fit="contain"
       :enable-progress-gesture="state.enableProgressGesture"
       :initial-time="initialTime"
       x5-video-player-type="h5"
@@ -18,22 +17,12 @@
       @play="play"
       @pause="pause"
       @ended="end"
+      :poster="poster"
     >
       <!-- #ifdef APP-PLUS -->
       <cover-view :style="{ transform: 'translateX(' + moveX + 'px)' }" />
       <!-- #endif -->
     </video>
-    <view
-      v-show="!state.isplay"
-      class="poster-wrap radius"
-      :style="{ height: height + 'px' }"
-      @click="beforePlay"
-    >
-      <image class="poster-image" mode="aspectFill" :src="poster" />
-      <view class="play-icon ss-flex ss-row-center ss-col-center">
-        <text class="cicon-play-arrow ss-font-40"></text>
-      </view>
-    </view>
   </view>
 </template>
 <script setup>
@@ -58,7 +47,6 @@
 
   // 数据
   const state = reactive({
-    isplay: false, // 播放状态
     // #ifdef APP-PLUS
     enableProgressGesture: true, // 手势滑动
     // #endif
@@ -121,16 +109,13 @@
   // 当暂停播放时触发 pause 事件
   const pause = () => {
     console.log('视频暂停');
-    state.isplay = false;
   };
   // 视频结束触发end 时间
   const end = () => {
     console.log('视频结束');
-    state.isplay = false;
   };
   // 开始播放
   const startPlay = () => {
-    state.isplay = true;
     nextTick(() => {
       const video = uni.createVideoContext(`sVideo${props.index}`, vm);
       video.play();
@@ -141,12 +126,10 @@
   const pausePlay = () => {
     const video = uni.createVideoContext(`sVideo${props.index}`, vm);
     video.pause();
-    state.isplay = false;
   };
 
   // 播放前拦截
   const beforePlay = () => {
-    state.isplay = true;
     uni.getNetworkType({
       success: (res) => {
         console.log(res.networkType, 'res.networkType');
