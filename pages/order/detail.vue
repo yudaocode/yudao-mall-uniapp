@@ -139,16 +139,18 @@
         <text class="detail">¥{{ state.orderInfo.promo_discount_fee }}</text>
       </view>
       <view class="notice-item all-rpice-item ss-flex ss-m-t-20">
-        <text class="title">已付款</text>
+        <text class="title">{{
+          ['unpaid', 'cancel', 'closed'].includes(state.orderInfo.status) ? '需付款' : '已付款'
+        }}</text>
         <text class="detail all-price" v-if="Number(state.orderInfo.pay_fee) > 0"
           >￥{{ state.orderInfo.pay_fee }}</text
         >
         <view
-          v-if="state.orderInfo.score_amount && Number(state.orderInfo.pay_fee) > 0"
+          v-if="state.orderInfo.score_amount && Number(state.orderInfo.pay_fee) > 0 && !['unpaid', 'cancel', 'closed'].includes(state.orderInfo.status)"
           class="detail all-price"
           >+</view
         >
-        <view class="price-text ss-flex ss-col-center" v-if="state.orderInfo.score_amount">
+        <view class="price-text ss-flex ss-col-center" v-if="state.orderInfo.score_amount && !['unpaid', 'cancel', 'closed'].includes(state.orderInfo.status)">
           <image
             :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
             class="score-img"
