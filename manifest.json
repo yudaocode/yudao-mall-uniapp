@@ -179,7 +179,13 @@
             "postcss" : true
         },
         "optimization" : {
-            "subPackages" : true //开启小程序分包优化。
+            "subPackages" : true
+        },
+        "plugins" : {
+            "live-player-plugin" : {
+                "version" : "1.3.5",
+                "provider" : "wx2b03c6e691cd7370"
+            }
         },
         "lazyCodeLoading" : "requiredComponents",
         "usingComponents" : {},

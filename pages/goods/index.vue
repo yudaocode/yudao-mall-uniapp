@@ -77,8 +77,8 @@
               :skus="state.goodsInfo.skus"
               @tap="state.showSelectSku = true"
             />
-            <detail-cell-service v-model="state.goodsInfo.service" />
-            <detail-cell-params v-model="state.goodsInfo.params" />
+            <detail-cell-service v-if="state.goodsInfo.service" v-model="state.goodsInfo.service" />
+            <detail-cell-params v-if="state.goodsInfo.params" v-model="state.goodsInfo.params" />
           </view>
 
           <!-- 规格与数量弹框 -->
