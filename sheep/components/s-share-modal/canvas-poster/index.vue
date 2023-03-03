@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-  import { computed, reactive, getCurrentInstance } from 'vue';
+  import { reactive, getCurrentInstance } from 'vue';
   import sheep from '@/sheep';
   import useCanvas from './useCanvas';
 
