@@ -1,11 +1,15 @@
 <template>
   <s-layout title="确认订单">
-    <view class="bg-white address-box ss-m-b-14 ss-r-b-20" @tap="onSelectAddress">
+    <view
+      class="bg-white address-box ss-m-b-14 ss-r-b-10"
+      @tap="onSelectAddress"
+      v-if="state.orderInfo.need_address === 1"
+    >
       <s-address-item :item="state.addressInfo" :hasBorderBottom="false">
         <view class="ss-rest-button"><text class="_icon-forward"></text></view>
       </s-address-item>
     </view>
-    <view class="bg-white order-card-box ss-m-b-14">
+    <view class="order-card-box ss-m-b-14">
       <s-goods-item
         v-for="item in state.orderInfo.goods_list"
         :key="item.goods_id"
@@ -14,15 +18,19 @@
         :skuText="item.current_sku_price?.goods_sku_text"
         :price="item.current_sku_price.price"
         :num="item.goods_num"
-      ></s-goods-item>
+        marginBottom="10"
+      >
+        <template #top>
+          <view class="order-item ss-flex ss-col-center ss-row-between ss-p-x-20 bg-white">
+            <view class="item-title">配送方式</view>
+            <view class="ss-flex ss-col-center">
+              <text class="item-value">{{ item.dispatch_type_text }}</text>
+            </view>
+          </view>
+        </template>
+      </s-goods-item>
 
-      <view class="order-item ss-flex ss-col-center ss-row-between ss-p-x-20">
-        <view class="item-title">配送方式</view>
-        <view class="ss-flex ss-col-center">
-          <text class="item-value">物流快递</text>
-        </view>
-      </view>
-      <view class="order-item ss-flex ss-col-center ss-row-between ss-p-x-20">
+      <view class="order-item ss-flex ss-col-center ss-row-between ss-p-x-20 bg-white ss-r-10">
         <view class="item-title">订单备注</view>
         <view class="ss-flex ss-col-center">
           <uni-easyinput
@@ -36,7 +44,7 @@
       </view>
     </view>
     <!-- 合计 -->
-    <view class="bg-white total-card-box ss-p-20 ss-m-b-14">
+    <view class="bg-white total-card-box ss-p-20 ss-m-b-14 ss-r-10">
       <view class="total-box-content border-bottom">
         <view class="order-item ss-flex ss-col-center ss-row-between">
           <view class="item-title">商品金额</view>
@@ -225,7 +233,7 @@
 
   // 提交订单/立即兑换
   function onConfirm() {
-    if (!state.orderPayload.address_id) {
+    if (!state.orderPayload.address_id && state.orderInfo.need_address === 1) {
       sheep.$helper.toast('请选择收货地址');
       return;
     }

@@ -1,7 +1,10 @@
 <template>
+  <view>
+    <slot name="top"></slot>
+  </view>
   <view
     class="ss-order-card-warp ss-flex ss-col-stretch ss-row-between bg-white"
-    :style="[{ borderRadius: radius + 'rpx' }]"
+    :style="[{ borderRadius: radius + 'rpx', marginBottom: marginBottom + 'rpx' }]"
   >
     <view class="img-box ss-m-r-24">
       <image class="order-img" :src="sheep.$url.cdn(img)" mode="aspectFill"></image>
@@ -39,8 +42,8 @@
       <view class="tool-box">
         <slot name="tool"></slot>
       </view>
-      <view class="bottom-box">
-        <slot name="bottom"></slot>
+      <view>
+        <slot name="rightBottom"></slot>
       </view>
     </view>
   </view>
@@ -95,6 +98,10 @@
       default: '',
     },
     radius: {
+      type: [String],
+      default: '',
+    },
+    marginBottom: {
       type: [String],
       default: '',
     },

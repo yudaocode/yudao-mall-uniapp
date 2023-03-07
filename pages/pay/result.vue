@@ -13,7 +13,9 @@
         v-if="['failed', 'closed'].includes(payResult)"
         :src="sheep.$url.static('/static/img/shop/order/order_paty_fail.gif')"
       ></image>
-      <view class="tip-text ss-m-b-30" v-if="payResult == 'success'">支付成功</view>
+      <view class="tip-text ss-m-b-30" v-if="payResult == 'success'">{{
+        state.orderInfo.pay_mode === 'offline' ? '下单成功' : '支付成功'
+      }}</view>
       <view class="tip-text ss-m-b-30" v-if="payResult == 'failed'">支付失败</view>
       <view class="tip-text ss-m-b-30" v-if="payResult == 'closed'">该订单已关闭</view>
       <view class="tip-text ss-m-b-30" v-if="payResult == 'waiting'">检测支付结果...</view>

@@ -12,7 +12,7 @@
         priceColor="#333"
         @tap="sheep.$router.go('/pages/goods/index', { id: item.id })"
       >
-        <template #bottom>
+        <template #rightBottom>
           <view class="ss-flex ss-row-between">
             <view class="commission-num">预计佣金：￥{{ item.commission }}</view>
             <button

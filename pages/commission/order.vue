@@ -111,7 +111,7 @@
           :price="item.order_item.goods_price"
           :num="item.order_item.goods_num"
         >
-          <template #bottom>
+          <template #rightBottom>
             <view class="ss-flex commission-box ss-row-between ss-m-t-10">
               <view class="ss-flex">
                 <text class="name">佣金：</text>

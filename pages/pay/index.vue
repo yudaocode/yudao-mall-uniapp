@@ -13,17 +13,33 @@
       </view>
       <view class="modal-content ss-flex-1">
         <view class="pay-title ss-p-l-30 ss-m-y-30">选择支付方式</view>
-        <view class="pay-type-item border-bottom" v-for="item in payMethods" :key="item.title">
+        <view
+          class="pay-type-item border-bottom"
+          v-for="item in state.payMethods"
+          :key="item.title"
+        >
           <view
             class="pay-item ss-flex ss-col-center ss-row-between ss-p-x-30"
+            :class="{ 'disabled-pay-item': item.disabled }"
             v-if="
               allowedPayment.includes(item.value) &&
               !(state.orderType === 'recharge' && item.value === 'money')
             "
-            @tap="state.payment = item.value"
+            @tap="onTapPay(item.disabled, item.value)"
           >
             <view class="ss-flex ss-col-center">
-              <image class="pay-icon" :src="sheep.$url.static(item.icon)" mode="aspectFit"></image>
+              <image
+                class="pay-icon"
+                v-if="item.disabled"
+                :src="sheep.$url.static('/assets/addons/shopro/frontend_img/pay/cod_disabled.png')"
+                mode="aspectFit"
+              ></image>
+              <image
+                class="pay-icon"
+                v-else
+                :src="sheep.$url.static(item.icon)"
+                mode="aspectFit"
+              ></image>
               <text class="pay-title">{{ item.title }}</text>
             </view>
             <view class="check-box ss-flex ss-col-center ss-p-l-10">
@@ -75,6 +91,7 @@
     payment: '',
     orderInfo: {},
     payStatus: 0, // 0=检测支付环境, -2=未查询到支付单信息， -1=支付已过期， 1=待支付，2=订单已支付
+    payMethods: [],
   });
   const allowedPayment = computed(() => sheep.$store('app').platform.payment);
   const payMethods = [
@@ -82,21 +99,31 @@
       icon: '/static/img/shop/wechat_pay.png',
       title: '微信支付',
       value: 'wechat',
+      disabled: false,
     },
     {
       icon: '/static/img/shop/ali_pay.png',
       title: '支付宝支付',
       value: 'alipay',
+      disabled: false,
     },
     {
       icon: '/static/img/shop/wallet_pay.png',
       title: '余额支付',
       value: 'money',
+      disabled: false,
     },
     {
       icon: '/static/img/shop/apple_pay.png',
       title: 'Apple Pay',
       value: 'apple',
+      disabled: false,
+    },
+    {
+      icon: '/assets/addons/shopro/frontend_img/pay/cod.png',
+      title: '线下支付',
+      value: 'offline',
+      disabled: false,
     },
   ];
 
@@ -151,19 +178,48 @@
     state.payStatus = 2;
   }
 
+  function onTapPay(disabled, value) {
+    if (disabled) {
+      state.payment = '';
+    } else {
+      state.payment = value;
+    }
+  }
+
   async function setRechargeOrder(id) {
     const { data, error } = await sheep.$api.trade.order(id);
     if (error === 0) {
       state.orderInfo = data;
+      payMethods.forEach((item, index, array) => {
+        if (item.value === 'offline') {
+          array.splice(index, 1);
+        }
+      });
+      state.payMethods = payMethods;
       checkPayStatus();
     } else {
       state.payStatus = -2;
     }
   }
+
   async function setGoodsOrder(id) {
     const { data, error } = await sheep.$api.order.detail(id);
     if (error === 0) {
       state.orderInfo = data;
+      if (state.orderInfo.ext.offline_status === 'none') {
+        payMethods.forEach((item, index, array) => {
+          if (item.value === 'offline') {
+            array.splice(index, 1);
+          }
+        });
+      } else if (state.orderInfo.ext.offline_status === 'disabled') {
+        payMethods.forEach((item) => {
+          if (item.value === 'offline') {
+            item.disabled = true;
+          }
+        });
+      }
+      state.payMethods = payMethods;
       checkPayStatus();
     } else {
       state.payStatus = -2;
@@ -258,6 +314,11 @@
 
       .pay-item {
         height: 86rpx;
+      }
+      .disabled-pay-item {
+        .pay-title {
+          color: #999999;
+        }
       }
 
       .userInfo-money {

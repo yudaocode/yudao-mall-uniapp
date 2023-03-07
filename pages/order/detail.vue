@@ -49,17 +49,17 @@
     </view>
 
     <!-- 收货地址 -->
-    <view class="order-address-box">
+    <view class="order-address-box" v-if="state.orderInfo.address">
       <view class="ss-flex ss-col-center">
         <text class="address-username">
-          {{ state.orderInfo.address?.consignee }}
+          {{ state.orderInfo.address.consignee }}
         </text>
-        <text class="address-phone">{{ state.orderInfo.address?.mobile }}</text>
+        <text class="address-phone">{{ state.orderInfo.address.mobile }}</text>
       </view>
       <view class="address-detail">{{ addressText }}</view>
     </view>
 
-    <view class="detail-goods">
+    <view class="detail-goods" :style="[{ marginTop: state.orderInfo.address ? '0' : '-40rpx' }]">
       <!-- 订单信息 -->
       <view class="order-list" v-for="item in state.orderInfo.items" :key="item.goods_id">
         <view class="order-card">
@@ -72,6 +72,14 @@
             :score="state.orderInfo.score_amount"
             :num="item.goods_num"
           >
+            <template #top>
+              <view class="order-item ss-flex ss-col-center ss-row-between ss-p-x-20 bg-white">
+                <view class="item-title">配送方式</view>
+                <view class="ss-flex ss-col-center">
+                  <text class="item-value">{{ item.dispatch_type_text }}</text>
+                </view>
+              </view>
+            </template>
             <template #priceSuffix>
               <button class="ss-reset-button tag-btn" v-if="item.status_text">
                 {{ item.status_text }}
@@ -95,7 +103,7 @@
           <text class="title">下单时间：</text>
           <text class="detail">{{ state.orderInfo.create_time }}</text>
         </view>
-        <view class="notice-item">
+        <view class="notice-item" v-if="state.orderInfo.paid_time">
           <text class="title">支付时间：</text>
           <text class="detail">{{ state.orderInfo.paid_time || '-' }}</text>
         </view>
@@ -140,17 +148,27 @@
       </view>
       <view class="notice-item all-rpice-item ss-flex ss-m-t-20">
         <text class="title">{{
-          ['unpaid', 'cancel', 'closed'].includes(state.orderInfo.status) ? '需付款' : '已付款'
+          ['unpaid', 'cancel', 'closed','pending'].includes(state.orderInfo.status) ? '需付款' : '已付款'
         }}</text>
         <text class="detail all-price" v-if="Number(state.orderInfo.pay_fee) > 0"
           >￥{{ state.orderInfo.pay_fee }}</text
         >
         <view
-          v-if="state.orderInfo.score_amount && Number(state.orderInfo.pay_fee) > 0 && !['unpaid', 'cancel', 'closed'].includes(state.orderInfo.status)"
+          v-if="
+            state.orderInfo.score_amount &&
+            Number(state.orderInfo.pay_fee) > 0 &&
+            !['unpaid', 'cancel', 'closed'].includes(state.orderInfo.status)
+          "
           class="detail all-price"
           >+</view
         >
-        <view class="price-text ss-flex ss-col-center" v-if="state.orderInfo.score_amount && !['unpaid', 'cancel', 'closed'].includes(state.orderInfo.status)">
+        <view
+          class="price-text ss-flex ss-col-center"
+          v-if="
+            state.orderInfo.score_amount &&
+            !['unpaid', 'cancel', 'closed'].includes(state.orderInfo.status)
+          "
+        >
           <image
             :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
             class="score-img"

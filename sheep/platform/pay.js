@@ -7,7 +7,7 @@ import { getRootUrl } from '@/sheep/helper';
 /**
  * 支付
  *
- * @param {String} payment = ['wechat','alipay','wallet']  	- 支付方式
+ * @param {String} payment = ['wechat','alipay','wallet','offline']  	- 支付方式
  * @param {String} orderType = ['goods','recharge','groupon']  	- 订单类型
  * @param {String} orderSN					- 订单号
  */
@@ -32,6 +32,9 @@ export default class SheepPay {
         money: () => {
           this.moneyPay();
         },
+        offline: () => {
+          this.offlinePay();
+        }
       },
       WechatMiniProgram: {
         wechat: () => {
@@ -43,6 +46,9 @@ export default class SheepPay {
         money: () => {
           this.moneyPay();
         },
+        offline: () => {
+          this.offlinePay();
+        }
       },
       App: {
         wechat: () => {
@@ -54,6 +60,9 @@ export default class SheepPay {
         money: () => {
           this.moneyPay();
         },
+        offline: () => {
+          this.offlinePay();
+        }
       },
       H5: {
         wechat: () => {
@@ -65,6 +74,9 @@ export default class SheepPay {
         money: () => {
           this.moneyPay();
         },
+        offline: () => {
+          this.offlinePay();
+        }
       },
     };
     return payAction[sheep.$platform.name][this.payment]();
@@ -122,9 +134,8 @@ export default class SheepPay {
   async wechatWapPay() {
     const { error, data } = await this.prepay();
     if (error === 0) {
-      const redirect_url = `${getRootUrl()}pages/pay/result?orderSN=${this.orderSN}&payment=${
-        this.payment
-      }`;
+      const redirect_url = `${getRootUrl()}pages/pay/result?orderSN=${this.orderSN}&payment=${this.payment
+        }`;
       location.href = `${data.pay_data.h5_url}&redirect_url=${encodeURIComponent(redirect_url)}`;
     }
   }
@@ -133,9 +144,8 @@ export default class SheepPay {
   async redirectPay() {
     let { error, data } = await this.prepay();
     if (error === 0) {
-      const redirect_url = `${getRootUrl()}pages/pay/result?orderSN=${this.orderSN}&payment=${
-        this.payment
-      }`;
+      const redirect_url = `${getRootUrl()}pages/pay/result?orderSN=${this.orderSN}&payment=${this.payment
+        }`;
       location.href = data.pay_data + encodeURIComponent(redirect_url);
     }
   }
@@ -166,6 +176,12 @@ export default class SheepPay {
   async moneyPay() {
     const { error } = await this.prepay();
     error === 0 && this.payResult('success');
+  }
+
+  // 货到付款
+  async offlinePay() {
+    const { code } = await this.prepay();
+    code === 1 && this.payResult('success');
   }
 
   // 支付宝复制链接支付
