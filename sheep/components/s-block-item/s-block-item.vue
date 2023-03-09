@@ -23,6 +23,7 @@
     <s-score-block v-if="type === 'scoreGoods'" :data="data" :styles="styles" />
     <s-goods-shelves v-if="type === 'goodsShelves'" :data="data" :styles="styles" />
     <s-coupon-block v-if="type === 'coupon'" :data="data" :styles="styles"></s-coupon-block>
+    <s-live-block v-if="type === 'mplive'" :data="data" :styles="styles"></s-live-block>
     <s-seckill-block v-if="type === 'seckill'" :data="data" :styles="styles"></s-seckill-block>
     <s-groupon-block v-if="type === 'groupon'" :data="data" :styles="styles"></s-groupon-block>
     <s-richtext-block v-if="type === 'richtext'" :data="data" :styles="styles"></s-richtext-block>

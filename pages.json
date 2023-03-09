@@ -210,6 +210,16 @@
           }
         },
         {
+          "path": "dispatch/content",
+          "style": {
+            "navigationBarTitleText": "发货内容"
+          },
+          "meta": {
+            "auth": true,
+            "title": "发货内容"
+          }
+        },
+        {
           "path": "aftersale/apply",
           "style": {
             "navigationBarTitleText": "申请售后"

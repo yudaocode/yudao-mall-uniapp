@@ -52,23 +52,37 @@ export default {
       method: 'GET',
     }),
   //积分商城
-  scoreShop: (params) =>
-    request({
-      url: 'app/scoreShop',
-      method: 'GET',
-      params,
-    }),
-  scoreShopIds: (params = {}) =>
-    request({
-      url: 'app/scoreShop/ids',
-      method: 'GET',
-      params,
-    }),
-  scoreShopDetail: (id) =>
-    request({
-      url: 'app/scoreShop/' + id,
-      method: 'GET',
-    }),
+  scoreShop: {
+    list: (params) =>
+      request({
+        url: 'app/scoreShop',
+        method: 'GET',
+        params,
+      }),
+    ids: (params = {}) =>
+      request({
+        url: 'app/scoreShop/ids',
+        method: 'GET',
+        params,
+      }),
+    detail: (id) =>
+      request({
+        url: 'app/scoreShop/' + id,
+        method: 'GET',
+      }),
+  },
+  //小程序直播
+  mplive: {
+    getRoomList: (ids) =>
+      request({
+        url: 'app/mplive/getRoomList',
+        method: 'GET',
+        params: {
+          ids: ids.join(','),
+        }
+      }),
+  },
+
   //上传
   upload: (file, group = 'ugc', callback) => {
     const token = uni.getStorageSync('token');

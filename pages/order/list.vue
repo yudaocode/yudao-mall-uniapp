@@ -287,7 +287,7 @@
   function onTabsChange(e) {
     if (state.currentTab === e.index) return;
 
-    state.pagination = pagination
+    state.pagination = pagination;
     state.currentTab = e.index;
 
     getOrderList();
@@ -354,11 +354,19 @@
 
   // 取消订单
   async function onCancel(orderId) {
-    const { error, data } = await sheep.$api.order.cancel(orderId);
-    if (error === 0) {
-      let index = state.pagination.data.findIndex((order) => order.id === orderId);
-      state.pagination.data[index] = data;
-    }
+    uni.showModal({
+      title: '提示',
+      content: '确定要取消订单吗?',
+      success: async function (res) {
+        if (res.confirm) {
+          const { error, data } = await sheep.$api.order.cancel(orderId);
+          if (error === 0) {
+            let index = state.pagination.data.findIndex((order) => order.id === orderId);
+            state.pagination.data[index] = data;
+          }
+        }
+      },
+    });
   }
 
   // 删除订单
@@ -408,11 +416,11 @@
     });
     state.error = res.error;
     if (res.error === 0) {
-        let orderList = _.concat(state.pagination.data, res.data.data);
-        state.pagination = {
-          ...res.data,
-          data: orderList,
-        };
+      let orderList = _.concat(state.pagination.data, res.data.data);
+      state.pagination = {
+        ...res.data,
+        data: orderList,
+      };
 
       if (state.pagination.current_page < state.pagination.last_page) {
         state.loadStatus = 'more';
@@ -443,7 +451,7 @@
 
   //下拉刷新
   onPullDownRefresh(() => {
-    state.pagination = pagination
+    state.pagination = pagination;
     getOrderList();
     setTimeout(function () {
       uni.stopPullDownRefresh();

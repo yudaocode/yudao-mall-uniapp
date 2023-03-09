@@ -113,7 +113,7 @@
   const { mode, buyNowStyle, goodsFields, goodsIds } = props.data ?? {};
   const { marginLeft, marginRight } = props.styles ?? {};
   async function getScoreListByIds(ids) {
-    let { data } = await sheep.$api.app.scoreShopIds({ ids });
+    let { data } = await sheep.$api.app.scoreShop.ids({ ids });
     return data;
   }
 

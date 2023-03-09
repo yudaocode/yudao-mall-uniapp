@@ -22,6 +22,15 @@ export default {
         showLoading: false,
       },
     }),
+  itemDetail: (params) =>
+    request({
+      url: 'order/order/itemDetail',
+      method: 'GET',
+      params,
+      custom: {
+        showLoading: false,
+      },
+    }),
   // 订单列表
   list: (params) =>
     request({

@@ -14,12 +14,12 @@
       <view class="modal-content ss-flex-1">
         <view class="pay-title ss-p-l-30 ss-m-y-30">选择支付方式</view>
         <view
-          class="pay-type-item border-bottom"
+          class="pay-type-item"
           v-for="item in state.payMethods"
           :key="item.title"
         >
           <view
-            class="pay-item ss-flex ss-col-center ss-row-between ss-p-x-30"
+            class="pay-item ss-flex ss-col-center ss-row-between ss-p-x-30 border-bottom"
             :class="{ 'disabled-pay-item': item.disabled }"
             v-if="
               allowedPayment.includes(item.value) &&
@@ -46,10 +46,17 @@
               <view class="userInfo-money ss-m-r-10" v-if="item.value == 'money'">
                 余额: {{ userInfo.money }}元
               </view>
+              <view
+                class="userInfo-money ss-m-r-10"
+                v-if="item.value == 'offline' && item.disabled"
+              >
+                部分商品不支持
+              </view>
               <radio
                 :value="item.value"
                 color="var(--ui-BG-Main)"
                 style="transform: scale(0.8)"
+                :disabled="item.disabled"
                 :checked="state.payment === item.value"
               />
             </view>
@@ -121,7 +128,7 @@
     },
     {
       icon: '/assets/addons/shopro/frontend_img/pay/cod.png',
-      title: '线下支付',
+      title: '货到付款',
       value: 'offline',
       disabled: false,
     },
@@ -136,6 +143,16 @@
       uni.showModal({
         title: '提示',
         content: '确定要支付吗?',
+        success: function (res) {
+          if (res.confirm) {
+            sheep.$platform.pay(state.payment, state.orderType, state.orderInfo.order_sn);
+          }
+        },
+      });
+    } else if (state.payment === 'offline') {
+      uni.showModal({
+        title: '提示',
+        content: '确定要下单吗?',
         success: function (res) {
           if (res.confirm) {
             sheep.$platform.pay(state.payment, state.orderType, state.orderInfo.order_sn);

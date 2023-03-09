@@ -43,7 +43,7 @@
   });
   async function getData(page = 1, list_rows = 5) {
     state.loadStatus = 'loading';
-    let res = await sheep.$api.app.scoreShop({
+    let res = await sheep.$api.app.scoreShop.list({
       list_rows,
       page,
     });

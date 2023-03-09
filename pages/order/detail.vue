@@ -76,8 +76,66 @@
               <view class="order-item ss-flex ss-col-center ss-row-between ss-p-x-20 bg-white">
                 <view class="item-title">配送方式</view>
                 <view class="ss-flex ss-col-center">
-                  <text class="item-value">{{ item.dispatch_type_text }}</text>
+                  <text class="item-value ss-m-r-20">{{ item.dispatch_type_text }}</text>
+                  <button
+                    class="ss-reset-button copy-btn"
+                    @tap="onDetail(item)"
+                    v-if="
+                      (item.dispatch_type === 'autosend' || item.dispatch_type === 'custom') &&
+                      item.dispatch_status !== 0
+                    "
+                    >详情</button
+                  >
                 </view>
+              </view>
+            </template>
+            <template #tool>
+              <view class="ss-flex">
+                <button
+                  class="ss-reset-button apply-btn"
+                  v-if="item.btns.includes('aftersale')"
+                  @tap.stop="
+                    sheep.$router.go('/pages/order/aftersale/apply', {
+                      item: JSON.stringify(item),
+                    })
+                  "
+                >
+                  申请售后
+                </button>
+                <button
+                  class="ss-reset-button apply-btn"
+                  v-if="item.btns.includes('re_aftersale')"
+                  @tap.stop="
+                    sheep.$router.go('/pages/order/aftersale/apply', {
+                      item: JSON.stringify(item),
+                    })
+                  "
+                >
+                  重新售后
+                </button>
+
+                <button
+                  class="ss-reset-button apply-btn"
+                  v-if="item.btns.includes('aftersale_info')"
+                  @tap.stop="
+                    sheep.$router.go('/pages/order/aftersale/detail', {
+                      id: item.ext.aftersale_id,
+                    })
+                  "
+                >
+                  售后详情
+                </button>
+                <button
+                  class="ss-reset-button apply-btn"
+                  v-if="item.btns.includes('buy_again')"
+                  @tap.stop="
+                    sheep.$router.go('/pages/goods/index', {
+                      id: item.goods_id,
+                    })
+                  "
+                >
+                  再次购买
+                </button>
               </view>
             </template>
             <template #priceSuffix>
@@ -148,7 +206,7 @@
       </view>
       <view class="notice-item all-rpice-item ss-flex ss-m-t-20">
         <text class="title">{{
-          ['unpaid', 'cancel', 'closed','pending'].includes(state.orderInfo.status) ? '需付款' : '已付款'
+          ['paid', 'completed'].includes(state.orderInfo.status) ? '已付款' : '需付款'
         }}</text>
         <text class="detail all-price" v-if="Number(state.orderInfo.pay_fee) > 0"
           >￥{{ state.orderInfo.pay_fee }}</text
@@ -157,7 +215,7 @@
           v-if="
             state.orderInfo.score_amount &&
             Number(state.orderInfo.pay_fee) > 0 &&
-            !['unpaid', 'cancel', 'closed'].includes(state.orderInfo.status)
+            ['paid', 'completed'].includes(state.orderInfo.status)
           "
           class="detail all-price"
           >+</view
@@ -165,8 +223,7 @@
         <view
           class="price-text ss-flex ss-col-center"
           v-if="
-            state.orderInfo.score_amount &&
-            !['unpaid', 'cancel', 'closed'].includes(state.orderInfo.status)
+            state.orderInfo.score_amount && ['paid', 'completed'].includes(state.orderInfo.status)
           "
         >
           <image
@@ -296,10 +353,18 @@
 
   // 取消订单
   async function onCancel(orderId) {
-    const { error, data } = await sheep.$api.order.cancel(orderId);
-    if (error === 0) {
-      getOrderDetail(data.order_sn);
-    }
+    uni.showModal({
+      title: '提示',
+      content: '确定要取消订单吗?',
+      success: async function (res) {
+        if (res.confirm) {
+          const { error, data } = await sheep.$api.order.cancel(orderId);
+          if (error === 0) {
+            getOrderDetail(data.order_sn);
+          }
+        }
+      },
+    });
   }
 
   // 申请退款
@@ -340,6 +405,14 @@
     });
   }
 
+  // 配送方式详情
+  function onDetail(item) {
+    sheep.$router.go('/pages/order/dispatch/content', {
+      id: item.order_id,
+      item_id: item.id,
+    });
+  }
+
   // 评价
   function onComment(orderSN) {
     uni.$once('SELECT_INVOICE', (e) => {
@@ -375,6 +448,15 @@
     width: 36rpx;
     height: 36rpx;
     margin: 0 4rpx;
+  }
+  .apply-btn {
+    width: 140rpx;
+    height: 50rpx;
+    border-radius: 25rpx;
+    font-size: 24rpx;
+    border: 2rpx solid #dcdcdc;
+    line-height: normal;
+    margin-left: 16rpx;
   }
   .state-box {
     color: rgba(#fff, 0.9);
@@ -419,7 +501,6 @@
     .order-list {
       margin-bottom: 20rpx;
       background-color: #fff;
-      padding: 0 20rpx;
 
       .order-card {
         padding: 20rpx 0;
@@ -496,18 +577,17 @@
         color: #333;
         flex: 1;
       }
-
-      .copy-btn {
-        width: 100rpx;
-        line-height: 50rpx;
-        border-radius: 25rpx;
-        padding: 0;
-        background: rgba(238, 238, 238, 1);
-        font-size: 22rpx;
-        font-weight: 400;
-        color: rgba(51, 51, 51, 1);
-      }
     }
+  }
+  .copy-btn {
+    width: 100rpx;
+    line-height: 50rpx;
+    border-radius: 25rpx;
+    padding: 0;
+    background: rgba(238, 238, 238, 1);
+    font-size: 22rpx;
+    font-weight: 400;
+    color: rgba(51, 51, 51, 1);
   }
 
   // 订单价格信息

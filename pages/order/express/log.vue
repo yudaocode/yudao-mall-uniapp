@@ -2,7 +2,7 @@
 <template>
   <s-layout title="物流追踪">
     <view class="log-wrap">
-      <view class="log-card ss-flex" v-if="goodsImages.length > 0">
+      <view class="log-card ss-flex ss-m-20 ss-r-10" v-if="goodsImages.length > 0">
         <uni-swiper-dot :info="goodsImages" :current="state.current" mode="round">
           <swiper class="swiper-box" @change="change">
             <swiper-item v-for="(item, index) in goodsImages" :key="index">
@@ -20,7 +20,7 @@
           <view>快递公司：{{ state.info.express_name }}</view>
         </view>
       </view>
-      <view class="log-content">
+      <view class="log-content ss-m-20 ss-r-10">
         <view
           class="log-content-box ss-flex"
           v-for="(item, index) in state.info.logs"

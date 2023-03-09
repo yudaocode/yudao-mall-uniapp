@@ -208,6 +208,8 @@
     state.leftGoodsList = [];
     state.rightGoodsList = [];
     count = 0;
+    leftHeight = 0;
+    rightHeight = 0;
   }
   //搜索
   function onSearch(e) {
@@ -237,6 +239,13 @@
 
   // 点击筛选项
   const onFilterItem = (val) => {
+    if (
+      state.currentSort === state.tabList[0].list[val].sort &&
+      state.currentOrder === state.tabList[0].list[val].order
+    ) {
+      state.showFilter = false;
+      return;
+    }
     state.curFilter = val;
     state.tabList[0].name = state.tabList[0].list[val].label;
     state.currentSort = state.tabList[0].list[val].sort;

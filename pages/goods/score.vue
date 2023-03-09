@@ -184,7 +184,7 @@
     }
     state.goodsId = options.id;
     // 加载商品信息
-    sheep.$api.app.scoreShopDetail(state.goodsId).then((res) => {
+    sheep.$api.app.scoreShop.detail(state.goodsId).then((res) => {
       state.skeletonLoading = false;
       if (res.error === 0) {
         state.goodsInfo = res.data;
