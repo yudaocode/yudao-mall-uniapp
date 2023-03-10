@@ -78,32 +78,49 @@
     return data;
   }
   function goRoom(id) {
-    // wx.navigateTo({
-    //   url: `plugin-private://wx2b03c6e691cd7370/pages/live-player-plugin?room_id=${id}&custom_params=${customParams}`,
-    // });
+    // #ifdef MP-WEIXIN
+    uni.navigateTo({
+      url: `plugin-private://wx2b03c6e691cd7370/pages/live-player-plugin?room_id=${id}`,
+    });
+    // #endif
+
+    // #ifndef MP-WEIXIN
+    uni.showModal({
+      title: '提示',
+      confirmText: '允许',
+      content: '将打开小程序访问',
+      success: async function (res) {
+        if (res.confirm) {
+          getMpLink();
+        }
+      },
+    });
+    // #endif
+  }
+
+  function goMpLink() {
     // #ifdef H5
     window.location = state.mpLink;
     // #endif
     // #ifdef APP-PLUS
     plus.runtime.openURL(state.mpLink);
     // #endif
-    // #ifdef MP-WEIXIN
-    wx.navigateTo({
-      url: `plugin-private://wx2b03c6e691cd7370/pages/live-player-plugin?room_id=${id}`,
-    });
-    // #endif
   }
 
   async function getMpLink() {
-    const { error, data } = await sheep.$api.app.mplive.getMpLink();
-    if (error === 0) {
-      state.mpLink = data;
+    // #ifndef MP-WEIXIN
+    if (state.mpLink === '') {
+      const { error, data } = await sheep.$api.app.mplive.getMpLink();
+      if (error === 0) {
+        state.mpLink = data;
+      }
     }
+    goMpLink();
+    // #endif
   }
 
   onMounted(async () => {
     state.liveList = await getLiveListByIds(mpliveIds);
-    getMpLink();
   });
 </script>
 <style lang="scss" scoped>
