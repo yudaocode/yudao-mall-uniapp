@@ -1,6 +1,6 @@
 <!-- 售后详情 -->
 <template>
-  <s-layout title="售后详情" :navbar="!isEmpty(state.info) && state.loading?'inner': 'normal'">
+  <s-layout title="售后详情" :navbar="!isEmpty(state.info) && state.loading ? 'inner' : 'normal'">
     <view class="content_box" v-if="!isEmpty(state.info) && state.loading">
       <!-- 步骤条 -->
       <view
@@ -133,6 +133,7 @@
   import { isEmpty } from 'lodash';
 
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
+  const headerBg = sheep.$url.css('/static/img/shop/order/order_bg.png');
   const state = reactive({
     active: 0,
     aftersaleId: 0,
@@ -207,8 +208,7 @@
   .steps-box {
     width: 100%;
     height: 190rpx;
-    background: v-bind(headerBg)
-        no-repeat,
+    background: v-bind(headerBg) no-repeat,
       linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
     background-size: 750rpx 100%;
     padding-left: 72rpx;
