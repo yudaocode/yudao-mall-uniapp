@@ -36,15 +36,12 @@
     data: [],
   });
   async function getDetail(id, item_id) {
-    const { error, data } = await sheep.$api.order.itemDetail({
-      id: id,
-      item_id: item_id,
-    });
+    const { error, data } = await sheep.$api.order.itemDetail(id,item_id);
     if (error === 0) {
       state.data = data;
     }
   }
-  onLoad(async (options) => {
+  onLoad((options) => {
     getDetail(options.id, options.item_id);
   });
 </script>

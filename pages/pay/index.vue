@@ -13,11 +13,7 @@
       </view>
       <view class="modal-content ss-flex-1">
         <view class="pay-title ss-p-l-30 ss-m-y-30">选择支付方式</view>
-        <view
-          class="pay-type-item"
-          v-for="item in state.payMethods"
-          :key="item.title"
-        >
+        <view class="pay-type-item" v-for="item in state.payMethods" :key="item.title">
           <view
             class="pay-item ss-flex ss-col-center ss-row-between ss-p-x-30 border-bottom"
             :class="{ 'disabled-pay-item': item.disabled }"
@@ -31,7 +27,7 @@
               <image
                 class="pay-icon"
                 v-if="item.disabled"
-                :src="sheep.$url.static('/assets/addons/shopro/frontend_img/pay/cod_disabled.png')"
+                :src="sheep.$url.static('/static/img/shop/pay/cod_disabled.png')"
                 mode="aspectFit"
               ></image>
               <image
@@ -127,7 +123,7 @@
       disabled: false,
     },
     {
-      icon: '/assets/addons/shopro/frontend_img/pay/cod.png',
+      icon: '/static/img/shop/pay/cod.png',
       title: '货到付款',
       value: 'offline',
       disabled: false,

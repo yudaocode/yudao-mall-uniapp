@@ -73,7 +73,7 @@
     },
     title: {
       type: String,
-      default: '这是商品标题这是商品标题这是商品标题这是商品标题这是商品标题',
+      default: '',
     },
     titleWidth: {
       type: Number,

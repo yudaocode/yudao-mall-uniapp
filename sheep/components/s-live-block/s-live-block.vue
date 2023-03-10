@@ -58,6 +58,7 @@
 
   const state = reactive({
     liveList: [],
+    mpLink: '',
   });
   const props = defineProps({
     data: {
@@ -73,21 +74,36 @@
   const { marginLeft, marginRight } = props.styles ?? {};
 
   async function getLiveListByIds(ids) {
-    let { data } = await sheep.$api.app.mplive.getRoomList(ids);
+    const { data } = await sheep.$api.app.mplive.getRoomList(ids);
     return data;
   }
   function goRoom(id) {
     // wx.navigateTo({
     //   url: `plugin-private://wx2b03c6e691cd7370/pages/live-player-plugin?room_id=${id}&custom_params=${customParams}`,
     // });
+    // #ifdef H5
+    window.location = state.mpLink;
+    // #endif
+    // #ifdef APP-PLUS
+    plus.runtime.openURL(state.mpLink);
+    // #endif
+    // #ifdef MP-WEIXIN
     wx.navigateTo({
       url: `plugin-private://wx2b03c6e691cd7370/pages/live-player-plugin?room_id=${id}`,
     });
+    // #endif
+  }
+
+  async function getMpLink() {
+    const { error, data } = await sheep.$api.app.mplive.getMpLink();
+    if (error === 0) {
+      state.mpLink = data;
+    }
   }
 
   onMounted(async () => {
     state.liveList = await getLiveListByIds(mpliveIds);
-    console.log(state.liveList, 'state.liveList');
+    getMpLink();
   });
 </script>
 <style lang="scss" scoped>

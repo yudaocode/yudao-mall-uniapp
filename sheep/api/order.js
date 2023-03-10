@@ -22,11 +22,10 @@ export default {
         showLoading: false,
       },
     }),
-  itemDetail: (params) =>
+  itemDetail: (id,itemId) =>
     request({
-      url: 'order/order/itemDetail',
+      url: 'order/order/itemDetail/'+ id + '/' + itemId,
       method: 'GET',
-      params,
       custom: {
         showLoading: false,
       },

@@ -81,6 +81,11 @@ export default {
           ids: ids.join(','),
         }
       }),
+    getMpLink: () =>
+      request({
+        url: 'app/mplive/getMpLink',
+        method: 'GET'
+      }),
   },
 
   //上传

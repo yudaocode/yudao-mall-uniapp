@@ -180,8 +180,8 @@ export default class SheepPay {
 
   // 货到付款
   async offlinePay() {
-    const { code } = await this.prepay();
-    code === 1 && this.payResult('success');
+    const { error } = await this.prepay();
+    error === 0 && this.payResult('success');
   }
 
   // 支付宝复制链接支付
