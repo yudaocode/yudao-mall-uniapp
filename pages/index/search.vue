@@ -46,8 +46,6 @@
       } else {
         sheep.$router.go('/pages/goods/list', { keyword: res.value });
       }
-    } else {
-      sheep.$router.go('/pages/goods/list', { keyword: res.value });
     }
   }
 
