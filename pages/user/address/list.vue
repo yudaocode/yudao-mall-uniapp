@@ -49,18 +49,12 @@
     loading: true,
   });
 
-  // 选择收货地址， 有h5端需返回两次的bug
+  // 选择收货地址
   const onSelect = (addressInfo) => {
-    // const pages = sheep.$router.getCur();
-    // const lastPage = pages[pages.length - 2];
-    // if (!_.isEmpty(lastPage) && lastPage.route === "pages/order/confirm") {
-    // sheep.$router.back();
-    // uni.navigateBack();
     uni.$emit('SELECT_ADDRESS', {
       addressInfo,
     });
     sheep.$router.back();
-    // }
   };
 
   // 导入微信地址
