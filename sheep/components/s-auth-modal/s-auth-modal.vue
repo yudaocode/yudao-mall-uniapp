@@ -75,29 +75,31 @@
         v-if="['accountLogin', 'smsLogin', 'smsRegister'].includes(authType)"
         class="agreement-box ss-flex ss-row-center"
       >
-        <label class="radio ss-flex" @tap="onChange">
-          <radio
-            :checked="state.protocol"
-            color="var(--ui-BG-Main)"
-            style="transform: scale(0.8)"
-          />
-          <view class="agreement-text ss-flex ss-col-center">
-            我已阅读并遵守
-            <view
-              class="tcp-text"
-              @tap.stop="onProtocol(appInfo.user_protocol.id, appInfo.user_protocol.title)"
-            >
-              《{{ appInfo.user_protocol.title }}》
+      <radio-group @change="onChange" class="ss-flex ss-col-center">
+          <label class="radio ss-flex">
+            <radio
+              :checked="state.protocol"
+              color="var(--ui-BG-Main)"
+              style="transform: scale(0.8)"
+            />
+            <view class="agreement-text ss-flex ss-col-center ss-m-l-8">
+              我已阅读并遵守
+              <view
+                class="tcp-text"
+                @tap.stop="onProtocol(appInfo.user_protocol.id, appInfo.user_protocol.title)"
+              >
+                《{{ appInfo.user_protocol.title }}》
+              </view>
+              <view class="agreement-text">与</view>
+              <view
+                class="tcp-text"
+                @tap.stop="onProtocol(appInfo.privacy_protocol.id, appInfo.privacy_protocol.title)"
+              >
+                《{{ appInfo.privacy_protocol.title }}》
+              </view>
             </view>
-            <view class="agreement-text">与</view>
-            <view
-              class="tcp-text"
-              @tap.stop="onProtocol(appInfo.privacy_protocol.id, appInfo.privacy_protocol.title)"
-            >
-              《{{ appInfo.privacy_protocol.title }}》
-            </view>
-          </view>
-        </label>
+          </label>
+        </radio-group>
       </view>
       <view class="safe-box"></view>
     </view>

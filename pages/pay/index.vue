@@ -13,51 +13,52 @@
       </view>
       <view class="modal-content ss-flex-1">
         <view class="pay-title ss-p-l-30 ss-m-y-30">选择支付方式</view>
-        <view class="pay-type-item" v-for="item in state.payMethods" :key="item.title">
-          <view
-            class="pay-item ss-flex ss-col-center ss-row-between ss-p-x-30 border-bottom"
-            :class="{ 'disabled-pay-item': item.disabled }"
-            v-if="
-              allowedPayment.includes(item.value) &&
-              !(state.orderType === 'recharge' && item.value === 'money')
-            "
-            @tap="onTapPay(item.disabled, item.value)"
-          >
-            <view class="ss-flex ss-col-center">
-              <image
-                class="pay-icon"
-                v-if="item.disabled"
-                :src="sheep.$url.static('/static/img/shop/pay/cod_disabled.png')"
-                mode="aspectFit"
-              ></image>
-              <image
-                class="pay-icon"
-                v-else
-                :src="sheep.$url.static(item.icon)"
-                mode="aspectFit"
-              ></image>
-              <text class="pay-title">{{ item.title }}</text>
-            </view>
-            <view class="check-box ss-flex ss-col-center ss-p-l-10">
-              <view class="userInfo-money ss-m-r-10" v-if="item.value == 'money'">
-                余额: {{ userInfo.money }}元
+        <radio-group @change="onTapPay">
+          <label class="pay-type-item" v-for="item in state.payMethods" :key="item.title">
+            <view
+              class="pay-item ss-flex ss-col-center ss-row-between ss-p-x-30 border-bottom"
+              :class="{ 'disabled-pay-item': item.disabled }"
+              v-if="
+                allowedPayment.includes(item.value) &&
+                !(state.orderType === 'recharge' && item.value === 'money')
+              "
+            >
+              <view class="ss-flex ss-col-center">
+                <image
+                  class="pay-icon"
+                  v-if="item.disabled"
+                  :src="sheep.$url.static('/static/img/shop/pay/cod_disabled.png')"
+                  mode="aspectFit"
+                ></image>
+                <image
+                  class="pay-icon"
+                  v-else
+                  :src="sheep.$url.static(item.icon)"
+                  mode="aspectFit"
+                ></image>
+                <text class="pay-title">{{ item.title }}</text>
               </view>
-              <view
-                class="userInfo-money ss-m-r-10"
-                v-if="item.value == 'offline' && item.disabled"
-              >
-                部分商品不支持
+              <view class="check-box ss-flex ss-col-center ss-p-l-10">
+                <view class="userInfo-money ss-m-r-10" v-if="item.value == 'money'">
+                  余额: {{ userInfo.money }}元
+                </view>
+                <view
+                  class="userInfo-money ss-m-r-10"
+                  v-if="item.value == 'offline' && item.disabled"
+                >
+                  部分商品不支持
+                </view>
+                <radio
+                  :value="item.value"
+                  color="var(--ui-BG-Main)"
+                  style="transform: scale(0.8)"
+                  :disabled="item.disabled"
+                  :checked="state.payment === item.value"
+                />
               </view>
-              <radio
-                :value="item.value"
-                color="var(--ui-BG-Main)"
-                style="transform: scale(0.8)"
-                :disabled="item.disabled"
-                :checked="state.payment === item.value"
-              />
             </view>
-          </view>
-        </view>
+          </label>
+        </radio-group>
       </view>
       <!-- 工具 -->
       <view class="modal-footer ss-flex ss-row-center ss-col-center ss-m-t-80 ss-m-b-40">
@@ -191,12 +192,8 @@
     state.payStatus = 2;
   }
 
-  function onTapPay(disabled, value) {
-    if (disabled) {
-      state.payment = '';
-    } else {
-      state.payment = value;
-    }
+  function onTapPay(e) {
+    state.payment = e.detail.value;
   }
 
   async function setRechargeOrder(id) {

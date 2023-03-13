@@ -10,9 +10,7 @@
               v-for="item in state.radioList"
               :key="item.type"
             >
-              <view>
-                <radio :value="item.type" color="var(--ui-BG-Main)" style="transform: scale(0.8)" />
-              </view>
+              <radio :value="item.type" color="var(--ui-BG-Main)" style="transform: scale(0.8)" />
               <view class="radio-subtitle">{{ item.type }}</view>
             </label>
           </radio-group>

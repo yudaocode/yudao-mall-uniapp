@@ -17,19 +17,21 @@
       <view class="refund-item">
         <view class="item-title ss-m-b-20">售后类型</view>
         <view class="ss-flex-col">
-          <view
-            class="ss-flex ss-col-center ss-p-y-10"
-            v-for="(item, index) in state.refundTypeList"
-            :key="index"
-            @tap="formData.type = item.value"
-          >
-            <radio
-              :checked="formData.type === item.value"
-              color="var(--ui-BG-Main)"
-              style="transform: scale(0.8)"
-            />
-            <view class="item-value">{{ item.text }}</view>
-          </view>
+          <radio-group @change="onRefundChange">
+            <label
+              class="ss-flex ss-col-center ss-p-y-10"
+              v-for="(item, index) in state.refundTypeList"
+              :key="index"
+            >
+              <radio
+                :checked="formData.type === item.value"
+                color="var(--ui-BG-Main)"
+                style="transform: scale(0.8)"
+                :value="item.value"
+              />
+              <view class="item-value ss-m-l-8">{{ item.text }}</view>
+            </label>
+          </radio-group>
         </view>
       </view>
       <!-- 申请原因 -->
@@ -99,26 +101,20 @@
           >申请原因</view
         >
         <view class="modal-content content_box">
-          <view
-            class="ss-flex ss-col-center"
-            v-for="item in state.refundReasonList"
-            :key="item.value"
-          >
-            <view class="ss-flex-1 ss-p-20" @tap="onTitle(item.value, item.title)">{{
-              item.title
-            }}</view>
-            <view class="radio">
-              <radio-group @change="onChange(item.value, item.title)">
-                <label class="radio">
-                  <radio
-                    :value="item.value"
-                    color="var(--ui-BG-Main)"
-                    :checked="item.value === state.currentValue"
-                  />
-                </label>
-              </radio-group>
-            </view>
-          </view>
+          <radio-group @change="onChange">
+            <label
+              class="radio ss-flex ss-col-center"
+              v-for="item in state.refundReasonList"
+              :key="item.value"
+            >
+              <view class="ss-flex-1 ss-p-20">{{ item.title }}</view>
+              <radio
+                :value="item.value"
+                color="var(--ui-BG-Main)"
+                :checked="item.value === state.currentValue"
+              />
+            </label>
+          </radio-group>
         </view>
         <view class="modal-foot foot_box ss-flex ss-row-center ss-col-center">
           <button class="ss-reset-button close-btn ui-BG-Main-Gradient" @tap="onReason"
@@ -209,10 +205,19 @@
     }
   }
 
+  //选择售后类型
+  function onRefundChange(e) {
+    formData.type = e.detail.value;
+  }
+
   //选择申请原因
-  function onChange(val, title) {
-    state.currentValue = val;
-    state.reasonText = title;
+  function onChange(e) {
+    state.currentValue = e.detail.value;
+    state.refundReasonList.forEach((item) => {
+      if (item.value === e.detail.value) {
+        state.reasonText = item.title;
+      }
+    });
   }
   //确定
   function onReason() {

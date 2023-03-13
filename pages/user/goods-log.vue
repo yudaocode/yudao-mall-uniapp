@@ -35,10 +35,10 @@
           :key="item.id"
         >
           <view class="ss-flex ss-col-center">
-            <view
-              v-show="state.editMode"
+            <radio-group
+            v-show="state.editMode"
               class="check-box ss-flex ss-col-center ss-p-l-10"
-              @tap="onSelect(item.goods_id)"
+              @change="onSelect(item.goods_id)"
             >
               <label class="radio">
                 <radio
@@ -47,7 +47,7 @@
                   style="transform: scale(0.8)"
                 />
               </label>
-            </view>
+            </radio-group>
             <s-goods-item
               :title="item.goods.title"
               :img="item.goods.image"
@@ -69,16 +69,16 @@
       <su-fixed bottom :val="0" placeholder v-show="state.editMode">
         <view class="cart-footer ss-flex ss-col-center ss-row-between ss-p-x-30 border-bottom">
           <view class="footer-left ss-flex ss-col-center">
-            <view class="check-box ss-flex ss-col-center ss-p-r-30" @tap="onSelectAll">
-              <label class="radio">
+            <radio-group @change="onSelectAll">
+              <label class="check-box ss-flex ss-col-center ss-p-r-30">
                 <radio
                   :checked="state.selectAll"
                   color="var(--ui-BG-Main)"
                   style="transform: scale(0.7)"
                 />
+                <view>全选</view>
               </label>
-              <view>全选</view>
-            </view>
+            </radio-group>
           </view>
           <view class="footer-right">
             <button

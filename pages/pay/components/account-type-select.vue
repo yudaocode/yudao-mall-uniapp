@@ -178,9 +178,4 @@
     width: 100%;
     height: 100%;
   }
-
-  :deep(.uni-radio-input) {
-    width: 36rpx;
-    height: 36rpx;
-  }
 </style>
