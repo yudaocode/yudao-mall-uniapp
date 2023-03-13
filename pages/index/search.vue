@@ -8,7 +8,7 @@
           placeholder="请输入关键字"
           cancelButton="none"
           :focus="true"
-          @confirm="onSearch"
+          @confirm="onSearch($event.value)"
         />
       </view>
       <view class="ss-flex ss-row-between ss-col-center">
@@ -18,7 +18,7 @@
       <view class="ss-flex ss-col-center ss-row-left ss-flex-wrap">
         <button
           class="history-btn ss-reset-button"
-          @tap="onSearchList(item)"
+          @tap="onSearch(item)"
           v-for="(item, index) in state.historyTag"
           :key="index"
         >
@@ -30,34 +30,34 @@
 </template>
 
 <script setup>
-  import { computed, reactive } from 'vue';
+  import { reactive } from 'vue';
   import sheep from '@/sheep';
   import { onLoad } from '@dcloudio/uni-app';
   const state = reactive({
     historyTag: [],
   });
 
-  function onSearch(res) {
-    if (res.value) {
-      if (!state.historyTag.includes(res.value)) {
-        let search = getArr(state.historyTag, res.value);
-        uni.setStorageSync('searchHistory', search);
-        sheep.$router.go('/pages/goods/list', { keyword: res.value });
-      } else {
-        sheep.$router.go('/pages/goods/list', { keyword: res.value });
-      }
+  // 搜索
+  function onSearch(keyword) {
+    if (!keyword) return;
+    saveSearchHistory(keyword);
+    sheep.$router.go('/pages/goods/list', { keyword });
+  }
+
+  // 保存搜索历史
+  function saveSearchHistory(keyword) {
+    // 如果关键词在搜索历史中，则把此关键词先移除
+    if (state.historyList.includes(keyword)) {
+      state.historyList.splice(state.historyList.indexOf(keyword), 1);
     }
-  }
+    // 置顶关键词
+    state.historyList.unshift(keyword);
 
-  function onSearchList(item) {
-    sheep.$router.go('/pages/goods/list', { keyword: item });
-  }
-
-  function getArr(list, item) {
-    let arr = list;
-    let length = 10; //队列长度
-    arr.length < length ? arr.unshift(item) : arr.pop();
-    return arr;
+    // 最多保留10条记录
+    if (state.historyList.length >= 10) {
+      state.historyList.length = 10;
+    }
+    uni.setStorageSync('searchHistory', state.historyList);
   }
 
   function onDelete() {
@@ -73,12 +73,7 @@
     });
   }
   onLoad(() => {
-    uni.getStorage({
-      key: 'searchHistory',
-      success: function (res) {
-        state.historyTag = res.data;
-      },
-    });
+    state.historyList = uni.getStorageSync('searchHistory') || [];
   });
 </script>
 
