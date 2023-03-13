@@ -18,7 +18,7 @@
       <view class="ss-flex ss-col-center ss-row-left ss-flex-wrap">
         <button
           class="history-btn ss-reset-button"
-          @tap="onSearch(item)"
+          @tap="onSearchList(item)"
           v-for="(item, index) in state.historyTag"
           :key="index"
         >
@@ -47,8 +47,12 @@
         sheep.$router.go('/pages/goods/list', { keyword: res.value });
       }
     } else {
-      sheep.$router.go('/pages/goods/list', { keyword: res });
+      sheep.$router.go('/pages/goods/list', { keyword: res.value });
     }
+  }
+
+  function onSearchList(item) {
+    sheep.$router.go('/pages/goods/list', { keyword: item });
   }
 
   function getArr(list, item) {
@@ -65,7 +69,7 @@
       success: function (res) {
         if (res.confirm) {
           state.historyTag = [];
-          uni.removeStorageSync('search');
+          uni.removeStorageSync('searchHistory');
         }
       },
     });
