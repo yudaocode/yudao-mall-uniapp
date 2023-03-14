@@ -158,12 +158,6 @@ function getCurrentPage() {
   return pages[pages.length - 1];
 }
 
-function getCur() {
-  let a = getCurrentPages();
-  let pages = clone(a);
-  return pages;
-}
-
 function handleAction(path) {
   const action = path.split(':');
   switch (action[1]) {
@@ -187,6 +181,5 @@ export default {
   redirect,
   getCurrentPage,
   getCurrentRoute,
-  getCur,
   error,
 };
