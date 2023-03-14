@@ -59,17 +59,17 @@
   });
   const typeList = [
     {
-      icon: '/static/img/shop/pay/wx_type.png',
+      icon: '/static/img/shop/pay/wechat.png',
       title: '微信零钱',
       value: 'wechat',
     },
     {
-      icon: '/static/img/shop/pay/ali_type.png',
+      icon: '/static/img/shop/pay/alipay.png',
       title: '支付宝账户',
       value: 'alipay',
     },
     {
-      icon: '/static/img/shop/pay/bank_type.png',
+      icon: '/static/img/shop/pay/bank.png',
       title: '银行卡转账',
       value: 'bank',
     },

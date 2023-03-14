@@ -100,25 +100,25 @@
   const allowedPayment = computed(() => sheep.$store('app').platform.payment);
   const payMethods = [
     {
-      icon: '/static/img/shop/wechat_pay.png',
+      icon: '/static/img/shop/pay/wechat.png',
       title: '微信支付',
       value: 'wechat',
       disabled: false,
     },
     {
-      icon: '/static/img/shop/ali_pay.png',
+      icon: '/static/img/shop/pay/alipay.png',
       title: '支付宝支付',
       value: 'alipay',
       disabled: false,
     },
     {
-      icon: '/static/img/shop/wallet_pay.png',
+      icon: '/static/img/shop/pay/wallet.png',
       title: '余额支付',
       value: 'money',
       disabled: false,
     },
     {
-      icon: '/static/img/shop/apple_pay.png',
+      icon: '/static/img/shop/pay/apple.png',
       title: 'Apple Pay',
       value: 'apple',
       disabled: false,
