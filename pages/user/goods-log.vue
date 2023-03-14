@@ -133,7 +133,7 @@
     selectAll: false,
   });
 
-  async function getData(page = 1, list_rows = 6) {
+  async function getData(page = 1, list_rows = 10) {
     state.loadStatus = 'loading';
     let res = await sheep.$api.user.view.list({
       list_rows,
