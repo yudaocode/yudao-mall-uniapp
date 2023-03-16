@@ -23,6 +23,7 @@ const app = defineStore({
     },
     platform: {
       payment: [], // 支持的支付方式
+      recharge_payment: [], // 支持的充值支付方式
       share: {
         methods: [], // 支持的分享方式
         forwardInfo: {}, // 默认转发信息

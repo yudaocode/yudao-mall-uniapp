@@ -19,7 +19,7 @@
         <button
           class="history-btn ss-reset-button"
           @tap="onSearch(item)"
-          v-for="(item, index) in state.historyTag"
+          v-for="(item, index) in state.historyList"
           :key="index"
         >
           {{ item }}
@@ -34,7 +34,7 @@
   import sheep from '@/sheep';
   import { onLoad } from '@dcloudio/uni-app';
   const state = reactive({
-    historyTag: [],
+    historyList: [],
   });
 
   // 搜索

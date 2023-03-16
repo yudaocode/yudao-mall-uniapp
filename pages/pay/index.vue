@@ -18,10 +18,7 @@
             <view
               class="pay-item ss-flex ss-col-center ss-row-between ss-p-x-30 border-bottom"
               :class="{ 'disabled-pay-item': item.disabled }"
-              v-if="
-                allowedPayment.includes(item.value) &&
-                !(state.orderType === 'recharge' && item.value === 'money')
-              "
+              v-if="allowedPayment.includes(item.value)"
             >
               <view class="ss-flex ss-col-center">
                 <image
@@ -88,8 +85,8 @@
   import { useDurationTime } from '@/sheep/hooks/useGoods';
 
   const userInfo = computed(() => sheep.$store('user').userInfo);
+
   // 检测支付环境
-  //
   const state = reactive({
     orderType: 'goods',
     payment: '',
@@ -97,7 +94,14 @@
     payStatus: 0, // 0=检测支付环境, -2=未查询到支付单信息， -1=支付已过期， 1=待支付，2=订单已支付
     payMethods: [],
   });
-  const allowedPayment = computed(() => sheep.$store('app').platform.payment);
+
+  const allowedPayment = computed(() => {
+    if(state.orderType === 'recharge') {
+      return sheep.$store('app').platform.recharge_payment
+    }
+    return sheep.$store('app').platform.payment
+    });
+
   const payMethods = [
     {
       icon: '/static/img/shop/pay/wechat.png',
@@ -200,11 +204,6 @@
     const { data, error } = await sheep.$api.trade.order(id);
     if (error === 0) {
       state.orderInfo = data;
-      payMethods.forEach((item, index, array) => {
-        if (item.value === 'offline') {
-          array.splice(index, 1);
-        }
-      });
       state.payMethods = payMethods;
       checkPayStatus();
     } else {
@@ -257,6 +256,7 @@
       // 充值订单
       setRechargeOrder(id);
     } else {
+      state.orderType = 'goods';
       // 商品订单
       setGoodsOrder(id);
     }
