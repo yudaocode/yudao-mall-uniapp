@@ -1,11 +1,11 @@
-<!-- 订单详情 -->
+<!--  -->
 <template>
   <su-video
     class="sss"
     :uid="guid()"
     :src="sheep.$url.cdn(data.videoUrl)"
     :poster="sheep.$url.cdn(data.src)"
-    :height="styles.height"
+    :height="styles.height * 2"
   ></su-video>
 </template>
 

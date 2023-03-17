@@ -32,11 +32,12 @@
             <su-video
               v-else
               :ref="(el) => (refs.videoRef[`video_${index}`] = el)"
-              :poster="item.poster"
-              :src="item.src"
+              :poster="sheep.$url.cdn(item.poster)"
+              :src="sheep.$url.cdn(item.src)"
               :index="index"
               :moveX="state.moveX"
               :initialTime="item.currentTime || 0"
+              :height="seizeHeight"
               @videoTimeupdate="videoTimeupdate"
             ></su-video>
           </view>
@@ -110,7 +111,7 @@
     },
     autoplay: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     interval: {
       type: Number,
@@ -186,7 +187,6 @@
     if (item.type === 'video') {
       state.videoPlaySataus = true;
     } else {
-      console.log(item,'item');
       sheep.$router.go(item.url);
       onPreview();
     }
@@ -194,11 +194,16 @@
 
   const onPreview = () => {
     if (!props.isPreview) return;
+    props.list.splice(
+      props.list.findIndex((item) => item.type === 'video'),
+      1,
+    );
+    let previewImage = props.list;
     uni.previewImage({
       urls:
-        props.list.length < 1
+        previewImage.length < 1
           ? [props.src]
-          : props.list.reduce((pre, cur) => {
+          : previewImage.reduce((pre, cur) => {
               pre.push(cur.src);
               return pre;
             }, []),

@@ -3,7 +3,7 @@
     <video
       :id="`sVideo${uid}`"
       class="radius"
-      :style="[{ height: height + 'px' }]"
+      :style="[{ height: height + 'rpx' }]"
       :src="src"
       controls
       object-fit="contain"
@@ -80,7 +80,7 @@
     // 指定视频初始播放位置，单位为秒（s）
     initialTime: {
       type: Number,
-      default: 0,
+      default: 1,
     },
     src: {
       type: String,
