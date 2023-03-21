@@ -151,6 +151,7 @@
       cart.delete(cartItem.id);
       return;
     }
+    cartItem.goods_num = e;
     cart.update({
       goods_id: cartItem.goods_id,
       goods_num: e,
