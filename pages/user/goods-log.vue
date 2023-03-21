@@ -35,24 +35,23 @@
           :key="item.id"
         >
           <view class="ss-flex ss-col-center">
-            <radio-group
-            v-show="state.editMode"
+            <label
               class="check-box ss-flex ss-col-center ss-p-l-10"
-              @change="onSelect(item.goods_id)"
+              v-if="state.editMode"
+              @tap="onSelect(item.goods_id)"
             >
-              <label class="radio">
-                <radio
-                  :checked="state.selectedCollectList.includes(item.goods_id)"
-                  color="var(--ui-BG-Main)"
-                  style="transform: scale(0.8)"
-                />
-              </label>
-            </radio-group>
+              <radio
+                :checked="state.selectedCollectList.includes(item.goods_id)"
+                color="var(--ui-BG-Main)"
+                style="transform: scale(0.8)"
+                @tap.stop="onSelect(item.goods_id)"
+              />
+            </label>
             <s-goods-item
               :title="item.goods.title"
               :img="item.goods.image"
-              price="666"
-              skuText="123"
+              :price="item.goods.price[0]"
+              :skuText="item.goods.subtitle"
               priceColor="#FF3000"
               :titleWidth="400"
               @tap="
@@ -69,16 +68,15 @@
       <su-fixed bottom :val="0" placeholder v-show="state.editMode">
         <view class="cart-footer ss-flex ss-col-center ss-row-between ss-p-x-30 border-bottom">
           <view class="footer-left ss-flex ss-col-center">
-            <radio-group @change="onSelectAll">
-              <label class="check-box ss-flex ss-col-center ss-p-r-30">
-                <radio
-                  :checked="state.selectAll"
-                  color="var(--ui-BG-Main)"
-                  style="transform: scale(0.7)"
-                />
-                <view>全选</view>
-              </label>
-            </radio-group>
+            <label class="check-box ss-flex ss-col-center ss-p-r-30" @tap="onSelectAll">
+              <radio
+                :checked="state.selectAll"
+                color="var(--ui-BG-Main)"
+                style="transform: scale(0.7)"
+                @tap.stop="onSelectAll"
+              />
+              <view>全选</view>
+            </label>
           </view>
           <view class="footer-right">
             <button
@@ -140,11 +138,11 @@
       page,
     });
     if (res.error === 0) {
-        let orderList = _.concat(state.pagination.data, res.data.data);
-        state.pagination = {
-          ...res.data,
-          data: orderList,
-        };
+      let orderList = _.concat(state.pagination.data, res.data.data);
+      state.pagination = {
+        ...res.data,
+        data: orderList,
+      };
       if (state.pagination.current_page < state.pagination.last_page) {
         state.loadStatus = 'more';
       } else {
@@ -190,7 +188,7 @@
         state.editMode = false;
         state.selectedCollectList = [];
         state.selectAll = false;
-        state.pagination = pagination
+        state.pagination = pagination;
         getData();
       }
     }

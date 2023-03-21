@@ -100,9 +100,9 @@
         }
 
         .unit-text {
-          font-size: 16rpx;
-          color: #000000;
-          line-height: 16rpx;
+          font-size: 24rpx;
+          color: #343434;
+          line-height: 24rpx;
         }
       }
     }

@@ -58,29 +58,28 @@
             </uni-forms-item>
           </view>
         </uni-forms>
-        <radio-group @change="onChange" v-if="state.protocol?.status == 1">
-          <label class="ss-flex ss-m-t-20">
-            <radio
-              :checked="state.isAgree"
-              color="var(--ui-BG-Main)"
-              style="transform: scale(0.6)"
-            />
-            <view class="agreement-text ss-flex">
-              <view class="ss-m-r-4">勾选代表同意</view>
-              <view
-                class="tcp-text"
-                @tap.stop="
-                  sheep.$router.go('/pages/public/richtext', {
-                    id: state.protocol.id,
-                    title: state.protocol.title,
-                  })
-                "
-              >
-                《{{ state.protocol.title }}》
-              </view>
+        <label class="ss-flex ss-m-t-20" v-if="state.protocol?.status == 1" @tap="onChange">
+          <radio
+            :checked="state.isAgree"
+            color="var(--ui-BG-Main)"
+            style="transform: scale(0.6)"
+            @tap.stop="onChange"
+          />
+          <view class="agreement-text ss-flex">
+            <view class="ss-m-r-4">勾选代表同意</view>
+            <view
+              class="tcp-text"
+              @tap.stop="
+                sheep.$router.go('/pages/public/richtext', {
+                  id: state.protocol.id,
+                  title: state.protocol.title,
+                })
+              "
+            >
+              《{{ state.protocol.title }}》
             </view>
-          </label>
-        </radio-group>
+          </view>
+        </label>
         <su-fixed bottom placeholder>
           <view class="submit-box ss-flex ss-row-center ss-p-30">
             <button class="submit-btn ss-reset-button ui-BG-Main ui-Shadow-Main" @tap="submit">
