@@ -347,9 +347,6 @@
     .item-value {
       font-size: 28rpx;
       font-weight: 500;
-    }
-
-    .item-value {
       font-family: OPPOSANS;
     }
     .text-disabled {
