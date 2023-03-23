@@ -140,6 +140,7 @@
       height: 40rpx;
       background: rgba(#000000, 0.5);
       border-radius: 20rpx;
+      z-index: 1;
       .icon {
         width: 40rpx;
         height: 40rpx;
@@ -189,9 +190,9 @@
       top: 10rpx;
       width: 136rpx;
       height: 40rpx;
-      background: #000000;
-      opacity: 0.5;
+      background: rgba(#000000, 0.5);
       border-radius: 20rpx;
+      z-index: 1;
       .icon {
         width: 40rpx;
         height: 40rpx;
