@@ -3,7 +3,6 @@
   <s-layout title="收银台">
     <view class="bg-white ss-modal-box ss-flex-col">
       <view class="modal-header ss-flex-col ss-col-center ss-row-center">
-        <text class="modal-title ss-m-b-30">收银台</text>
         <view class="money-box ss-m-b-20">
           <text class="money-text">{{ state.orderInfo.pay_fee }}</text>
         </view>
@@ -277,10 +276,6 @@
       position: relative;
       padding: 60rpx 20rpx 40rpx;
 
-      .modal-title {
-        font-size: 32rpx;
-        font-weight: 500;
-      }
 
       .money-text {
         color: $red;

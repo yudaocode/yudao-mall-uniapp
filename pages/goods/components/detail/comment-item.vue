@@ -32,6 +32,10 @@
         </view>
       </scroll-view>
     </view>
+    <view class="ss-m-t-20 reply-box" v-if="item.reply_time">
+      <view class="reply-title">商家回复</view>
+      <view class="reply-content">{{ item.reply_content }}</view>
+    </view>
   </view>
 </template>
 
@@ -69,6 +73,26 @@
     width: 636rpx;
     font-size: 26rpx;
     font-weight: 400;
+    color: #333333;
+  }
+  .reply-box {
+    position: relative;
+  }
+  .reply-title {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-weight: 600;
+    font-size: 26rpx;
+    line-height: 40rpx;
+    color: #666666;
+  }
+
+  .reply-content {
+    text-indent: 108rpx;
+    font-weight: 400;
+    font-size: 26rpx;
+    line-height: 40rpx;
     color: #333333;
   }
 </style>

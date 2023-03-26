@@ -11,7 +11,7 @@
         <view class="md-goods-title ss-line-1" :style="[{ color: titleColor }]">
           {{ data.name }}
         </view>
-        <view class="md-goods-subtitle ss-m-t-20 ss-line-1" :style="[{ color: subTitleColor }]">
+        <view class="md-goods-subtitle ss-m-t-14 ss-line-1" :style="[{ color: subTitleColor }]">
           主播：{{ data.anchor_name }}
         </view>
       </view>
@@ -27,7 +27,7 @@
         <view class="sl-goods-title ss-line-1" :style="[{ color: titleColor }]">
           {{ data.name }}
         </view>
-        <view class="sl-goods-subtitle ss-m-t-20 ss-line-1" :style="[{ color: subTitleColor }]">
+        <view class="sl-goods-subtitle ss-m-t-14 ss-line-1" :style="[{ color: subTitleColor }]">
           主播：{{ data.anchor_name }}
         </view>
       </view>
@@ -140,6 +140,7 @@
       height: 40rpx;
       background: rgba(#000000, 0.5);
       border-radius: 20rpx;
+      z-index: 1;
       .icon {
         width: 40rpx;
         height: 40rpx;
@@ -153,8 +154,11 @@
     }
     .md-goods-content {
       position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
+      left: 0;
+      bottom: 0;
+      padding: 20rpx;
+      width: 100%;
+      background: linear-gradient(360deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.02) 100%);
     }
 
     .md-img-box {
@@ -186,9 +190,9 @@
       top: 10rpx;
       width: 136rpx;
       height: 40rpx;
-      background: #000000;
-      opacity: 0.5;
+      background: rgba(#000000, 0.5);
       border-radius: 20rpx;
+      z-index: 1;
       .icon {
         width: 40rpx;
         height: 40rpx;
@@ -202,8 +206,11 @@
     }
     .sl-goods-content {
       position: absolute;
-      left: 20rpx;
-      bottom: 20rpx;
+      left: 0;
+      bottom: 0;
+      padding: 20rpx;
+      width: 100%;
+      background: linear-gradient(360deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.02) 100%);
     }
 
     .sl-img-box {

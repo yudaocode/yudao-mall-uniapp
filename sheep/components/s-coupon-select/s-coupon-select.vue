@@ -19,15 +19,14 @@
         <view v-for="(item, index) in state.couponInfo.can_use" :key="index">
           <s-coupon-list :data="item" type="user" :disabled="false">
             <template #default>
-              <radio-group @change="radioChange(item.id)" class="ss-flex ss-col-center">
-                <label class="radio">
-                  <radio
-                    color="var(--ui-BG-Main)"
-                    style="transform: scale(0.8)"
-                    :checked="state.couponId == item.id"
-                  />
-                </label>
-              </radio-group>
+              <label class="ss-flex ss-col-center" @tap="radioChange(item.id)">
+                <radio
+                  color="var(--ui-BG-Main)"
+                  style="transform: scale(0.8)"
+                  :checked="state.couponId == item.id"
+                  @tap.stop="radioChange(item.id)"
+                />
+              </label>
             </template>
           </s-coupon-list>
         </view>

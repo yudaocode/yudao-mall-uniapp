@@ -154,6 +154,7 @@
         font-size: 64rpx;
         font-weight: 500;
         line-height: normal;
+        font-family: OPPOSANS;
       }
       .value-reduce {
         line-height: normal;
@@ -166,6 +167,7 @@
       .value-enough {
         font-size: 24rpx;
         font-weight: 400;
+        font-family: OPPOSANS;
       }
     }
   }

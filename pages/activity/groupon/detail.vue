@@ -294,7 +294,8 @@
     const { error, data } = await sheep.$api.activity.grouponDetail(id);
     if (error === 0) {
       state.data = data;
-      state.number = Number(state.data.num - state.data.current_num);
+      let number = Number(state.data.num - state.data.current_num);
+      state.number = number > 0 ? number : 0;
     } else {
       state.data = null;
     }

@@ -102,7 +102,7 @@
               >￥{{ order.order_amount }}</view
             >
             <view v-if="order.score_amount && Number(order.order_amount) > 0">+</view>
-            <view class="price-text ss-flex ss-col-center" v-if="order.score_amount">
+            <view class="discounts-money pay-color ss-flex ss-col-center" v-if="order.score_amount">
               <image
                 :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
                 class="score-img"

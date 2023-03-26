@@ -27,18 +27,14 @@
       <view class="cart-content ss-flex-1 ss-p-x-30 ss-m-b-40">
         <view class="goods-box ss-r-10 ss-m-b-14" v-for="item in state.list" :key="item.id">
           <view class="ss-flex ss-col-center">
-            <radio-group
-              @change="onSelectSingle(item.id)"
-              class="check-box ss-flex ss-col-center ss-p-l-10"
-            >
-              <label class="radio ss-flex">
-                <radio
-                  :checked="state.selectedIds.includes(item.id)"
-                  color="var(--ui-BG-Main)"
-                  style="transform: scale(0.8)"
-                />
-              </label>
-            </radio-group>
+            <label class="check-box ss-flex ss-col-center ss-p-l-10" @tap="onSelectSingle(item.id)">
+              <radio
+                :checked="state.selectedIds.includes(item.id)"
+                color="var(--ui-BG-Main)"
+                style="transform: scale(0.8)"
+                @tap.stop="onSelectSingle(item.id)"
+              />
+            </label>
             <s-goods-item
               :title="item.goods.title"
               :img="item.sku_price.image || item.goods.image"
@@ -64,16 +60,15 @@
       <su-fixed bottom :val="48" placeholder v-if="state.list.length > 0" :isInset="false">
         <view class="cart-footer ss-flex ss-col-center ss-row-between ss-p-x-30 border-bottom">
           <view class="footer-left ss-flex ss-col-center">
-            <radio-group @change="onSelectAll" class="check-box ss-flex ss-col-center ss-p-r-30">
-              <label class="radio ss-flex">
-                <radio
-                  :checked="state.isAllSelected"
-                  color="var(--ui-BG-Main)"
-                  style="transform: scale(0.8)"
-                />
-                <view class="ss-m-l-8"> 全选 </view>
-              </label>
-            </radio-group>
+            <label class="check-box ss-flex ss-col-center ss-p-r-30" @tap="onSelectAll">
+              <radio
+                :checked="state.isAllSelected"
+                color="var(--ui-BG-Main)"
+                style="transform: scale(0.8)"
+                @tap.stop="onSelectAll"
+              />
+              <view class="ss-m-l-8"> 全选 </view>
+            </label>
             <text>合计：</text>
             <view class="text-price price-text">
               {{ state.totalPriceSelected }}
@@ -156,6 +151,7 @@
       cart.delete(cartItem.id);
       return;
     }
+    cartItem.goods_num = e;
     cart.update({
       goods_id: cartItem.goods_id,
       goods_num: e,

@@ -5,28 +5,25 @@
         <text class="modal-title ss-m-b-20">选择提现方式</text>
       </view>
       <view class="modal-content ss-flex-1 ss-p-b-100">
-        <view
-          class="container-list ss-p-l-34 ss-p-r-24 ss-flex ss-col-center ss-row-center"
-          v-for="(item, index) in typeList"
-          :key="index"
-        >
-          <view class="container-icon ss-flex ss-m-r-20">
-            <image :src="sheep.$url.static(item.icon)" />
-          </view>
-          <view class="ss-flex-1">{{ item.title }}</view>
-          <view class="radio">
-            <radio-group @change="onChange">
-              <label class="radio">
-                <radio
-                  :value="item.value"
-                  color="var(--ui-BG-Main)"
-                  :checked="item.value === state.currentValue"
-                  :disabled="!methods.includes(item.value)"
-                />
-              </label>
-            </radio-group>
-          </view>
-        </view>
+        <radio-group @change="onChange">
+          <label
+            class="container-list ss-p-l-34 ss-p-r-24 ss-flex ss-col-center ss-row-center"
+            v-for="(item, index) in typeList"
+            :key="index"
+          >
+            <view class="container-icon ss-flex ss-m-r-20">
+              <image :src="sheep.$url.static(item.icon)" />
+            </view>
+            <view class="ss-flex-1">{{ item.title }}</view>
+
+            <radio
+              :value="item.value"
+              color="var(--ui-BG-Main)"
+              :checked="item.value === state.currentValue"
+              :disabled="!methods.includes(item.value)"
+            />
+          </label>
+        </radio-group>
       </view>
       <view class="modal-footer ss-flex ss-row-center ss-col-center">
         <button class="ss-reset-button save-btn" @tap="onConfirm">确定</button>

@@ -199,10 +199,10 @@
       </view>
       <view
         class="notice-item ss-flex ss-row-between"
-        v-if="state.orderInfo.promo_discount_fee > 0"
+        v-if="state.orderInfo.total_discount_fee > 0"
       >
         <text class="title">优惠金额</text>
-        <text class="detail">¥{{ state.orderInfo.promo_discount_fee }}</text>
+        <text class="detail">¥{{ state.orderInfo.total_discount_fee }}</text>
       </view>
       <view class="notice-item all-rpice-item ss-flex ss-m-t-20">
         <text class="title">{{
