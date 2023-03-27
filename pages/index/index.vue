@@ -1,5 +1,5 @@
 <template>
-  <view>
+  <view v-if="template">
     <s-layout
       title="首页"
       navbar="custom"
@@ -26,7 +26,7 @@
   // 隐藏原生tabBar
   uni.hideTabBar();
 
-  const template = computed(() => sheep.$store('app').template.home);
+  const template = computed(() => sheep.$store('app').template?.home);
 
   onLoad((options) => {
     // #ifdef MP
