@@ -3,7 +3,7 @@ import uni from '@dcloudio/vite-plugin-uni';
 import path from 'path';
 // import viteCompression from 'vite-plugin-compression';
 import uniReadPagesV3Plugin from './sheep/router/utils/uni-read-pages-v3';
-import mpliveMainfestPlugin from './sheep/libs/mpLive-manifest-plugin';
+import mpliveMainfestPlugin from './sheep/libs/mplive-manifest-plugin';
 
 
 // https://vitejs.dev/config/
