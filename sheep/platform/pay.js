@@ -135,7 +135,7 @@ export default class SheepPay {
     const { error, data } = await this.prepay();
     if (error === 0) {
       const redirect_url = `${getRootUrl()}pages/pay/result?orderSN=${this.orderSN}&payment=${this.payment
-        }`;
+        }&orderType=${this.orderType}`;
       location.href = `${data.pay_data.h5_url}&redirect_url=${encodeURIComponent(redirect_url)}`;
     }
   }
@@ -145,7 +145,7 @@ export default class SheepPay {
     let { error, data } = await this.prepay();
     if (error === 0) {
       const redirect_url = `${getRootUrl()}pages/pay/result?orderSN=${this.orderSN}&payment=${this.payment
-        }`;
+        }&orderType=${this.orderType}`;
       location.href = data.pay_data + encodeURIComponent(redirect_url);
     }
   }

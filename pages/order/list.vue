@@ -394,7 +394,7 @@
       success: async function (res) {
         if (res.confirm) {
           // #ifdef MP
-          sheep.$platform.useProvider('wechat').subscribeMessage('order_apply_refund');
+          sheep.$platform.useProvider('wechat').subscribeMessage('order_refund');
           // #endif
           const { error, data } = await sheep.$api.order.applyRefund(orderId);
           if (error === 0) {
