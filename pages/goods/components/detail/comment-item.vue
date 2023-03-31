@@ -18,16 +18,8 @@
       <scroll-view class="scroll-box" scroll-x scroll-anchoring>
         <view class="ss-flex">
           <view v-for="(item, index) in item.images" :key="item" class="ss-m-r-10">
-            <su-image
-              class="content-img"
-              isPreview
-              :previewList="state.commentImages"
-              :current="index"
-              :src="item"
-              :height="120"
-              :width="120"
-              mode="aspectFill"
-            ></su-image>
+            <su-image class="content-img" isPreview :previewList="state.commentImages" :current="index" :src="item"
+              :height="120" :width="120" mode="aspectFill"></su-image>
           </view>
         </view>
       </scroll-view>
@@ -40,59 +32,61 @@
 </template>
 
 <script setup>
-  import sheep from '@/sheep';
-  import { reactive } from 'vue';
-  const props = defineProps({
-    item: {
-      type: Object,
-      default() {},
-    },
-  });
-  const state = reactive({
-    commentImages: [],
-  });
-  props.item.images?.forEach((i) => {
-    state.commentImages.push(sheep.$url.cdn(i));
-  });
+import sheep from '@/sheep';
+import { reactive } from 'vue';
+const props = defineProps({
+  item: {
+    type: Object,
+    default() { },
+  },
+});
+const state = reactive({
+  commentImages: [],
+});
+props.item.images?.forEach((i) => {
+  state.commentImages.push(sheep.$url.cdn(i));
+});
 </script>
 
 <style lang="scss" scoped>
-  .avatar {
-    width: 52rpx;
-    height: 52rpx;
-    border-radius: 50%;
-  }
+.avatar {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
+}
 
-  .nickname {
-    font-size: 26rpx;
-    font-weight: 500;
-    color: #999999;
-  }
+.nickname {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #999999;
+}
 
-  .content {
-    width: 636rpx;
-    font-size: 26rpx;
-    font-weight: 400;
-    color: #333333;
-  }
-  .reply-box {
-    position: relative;
-  }
-  .reply-title {
-    position: absolute;
-    left: 0;
-    top: 0;
-    font-weight: 600;
-    font-size: 26rpx;
-    line-height: 40rpx;
-    color: #666666;
-  }
+.content {
+  width: 636rpx;
+  font-size: 26rpx;
+  font-weight: 400;
+  color: #333333;
+}
 
-  .reply-content {
-    text-indent: 108rpx;
-    font-weight: 400;
-    font-size: 26rpx;
-    line-height: 40rpx;
-    color: #333333;
-  }
+.reply-box {
+  position: relative;
+}
+
+.reply-title {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 600;
+  font-size: 26rpx;
+  line-height: 40rpx;
+  color: #333333;
+}
+
+.reply-content {
+  text-indent: 108rpx;
+  font-weight: 400;
+  font-size: 26rpx;
+  line-height: 40rpx;
+  color: #333333;
+}
 </style>
