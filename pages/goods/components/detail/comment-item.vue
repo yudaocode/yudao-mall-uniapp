@@ -25,7 +25,7 @@
       </scroll-view>
     </view>
     <view class="ss-m-t-20 reply-box" v-if="item.reply_time">
-      <view class="reply-title">商家回复</view>
+      <view class="reply-title">商家回复：</view>
       <view class="reply-content">{{ item.reply_content }}</view>
     </view>
   </view>
@@ -70,20 +70,23 @@ props.item.images?.forEach((i) => {
 
 .reply-box {
   position: relative;
+  background: #f8f8f8;
+  border-radius: 8rpx;
+  padding: 16rpx;
 }
 
 .reply-title {
   position: absolute;
-  left: 0;
-  top: 0;
-  font-weight: 600;
+  left: 16rpx;
+  top: 16rpx;
+  font-weight: 400;
   font-size: 26rpx;
   line-height: 40rpx;
   color: #333333;
 }
 
 .reply-content {
-  text-indent: 108rpx;
+  text-indent: 128rpx;
   font-weight: 400;
   font-size: 26rpx;
   line-height: 40rpx;

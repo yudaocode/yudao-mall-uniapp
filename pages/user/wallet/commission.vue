@@ -94,7 +94,7 @@
             class="ss-flex-1 ss-p-l-10"
             v-model="state.amount"
             type="number"
-            placeholder="请输入提现金额"
+            placeholder="请输入金额"
           />
         </view>
         <button
