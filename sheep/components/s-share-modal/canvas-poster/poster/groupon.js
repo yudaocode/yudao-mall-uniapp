@@ -1,11 +1,12 @@
 import sheep from '@/sheep';
+import { formatImageUrlProtocol } from './index';
 
 const groupon = (poster) => {
   const width = poster.width;
   const userInfo = sheep.$store('user').userInfo;
 
   return {
-    background: sheep.$url.cdn(sheep.$store('app').platform.share.posterInfo.groupon_bg),
+    background: formatImageUrlProtocol(sheep.$url.cdn(sheep.$store('app').platform.share.posterInfo.groupon_bg)),
     list: [
       {
         name: 'nickname',
@@ -24,7 +25,7 @@ const groupon = (poster) => {
       {
         name: 'avatar',
         type: 'image',
-        val: sheep.$url.cdn(userInfo.avatar),
+        val: formatImageUrlProtocol(sheep.$url.cdn(userInfo.avatar)),
         x: width * 0.04,
         y: width * 0.04,
         width: width * 0.14,
@@ -34,7 +35,7 @@ const groupon = (poster) => {
       {
         name: 'goodsImage',
         type: 'image',
-        val: poster.shareInfo.poster.image,
+        val: formatImageUrlProtocol(poster.shareInfo.poster.image),
         x: width * 0.03,
         y: width * 0.21,
         width: width * 0.94,

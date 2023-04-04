@@ -1,11 +1,12 @@
 import sheep from '@/sheep';
+import { formatImageUrlProtocol } from './index';
 
 const user = (poster) => {
   const width = poster.width;
   const userInfo = sheep.$store('user').userInfo;
 
   return {
-    background: sheep.$url.cdn(sheep.$store('app').platform.share.posterInfo.user_bg),
+    background: formatImageUrlProtocol(sheep.$url.cdn(sheep.$store('app').platform.share.posterInfo.user_bg)),
     list: [
       {
         name: 'nickname',
@@ -25,7 +26,7 @@ const user = (poster) => {
       {
         name: 'avatar',
         type: 'image',
-        val: sheep.$url.cdn(userInfo.avatar),
+        val: formatImageUrlProtocol(sheep.$url.cdn(userInfo.avatar)),
         x: width * 0.4,
         y: width * 0.16,
         width: width * 0.2,
