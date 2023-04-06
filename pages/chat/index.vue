@@ -495,7 +495,9 @@
     });
     chat.showTools = false;
     // scrollBottom();
-    chat.msg = '';
+    setTimeout(()=>{
+      chat.msg = '';
+    },100)
   }
 
   // 点击猜你想问
