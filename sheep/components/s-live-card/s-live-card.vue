@@ -6,7 +6,7 @@
         <image class="icon" :src="state.liveStatus[data.status].img"></image>
         <view class="title ss-m-l-16">{{ state.liveStatus[data.status].title }}</view>
       </view>
-      <image class="md-img-box" :src="sheep.$url.cdn(data.feeds_img)" mode="aspectFill"></image>
+      <img class="md-img-box" :src="sheep.$url.cdn(data.feeds_img)" referrerpolicy="no-referrer">
       <view class="md-goods-content">
         <view class="md-goods-title ss-line-1" :style="[{ color: titleColor }]">
           {{ data.name }}
@@ -22,7 +22,7 @@
         <image class="icon" :src="state.liveStatus[data.status].img"></image>
         <view class="title ss-m-l-16">{{ state.liveStatus[data.status].title }}</view>
       </view>
-      <image class="sl-img-box" :src="sheep.$url.cdn(data.feeds_img)" mode="aspectFill"></image>
+      <img class="sl-img-box" :src="sheep.$url.cdn(data.feeds_img)" referrerpolicy="no-referrer">
       <view class="sl-goods-content">
         <view class="sl-goods-title ss-line-1" :style="[{ color: titleColor }]">
           {{ data.name }}
@@ -164,6 +164,7 @@
     .md-img-box {
       width: 100%;
       height: 100%;
+      object-fit: cover;
     }
 
     .md-goods-title {
@@ -216,6 +217,7 @@
     .sl-img-box {
       width: 100%;
       height: 100%;
+      object-fit: cover;
     }
 
     .sl-goods-title {
