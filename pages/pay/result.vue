@@ -41,11 +41,7 @@
         >
           重新支付
         </button>
-        <button
-          class="check-btn ss-reset-button"
-          v-if="payResult === 'success'"
-          @tap="sheep.$router.redirect('/pages/order/list')"
-        >
+        <button class="check-btn ss-reset-button" v-if="payResult === 'success'" @tap="onOrder">
           查看订单
         </button>
         <button
@@ -74,9 +70,9 @@
 </template>
 
 <script setup>
-  import { onLoad } from '@dcloudio/uni-app';
+  import { onLoad, onHide, onShow } from '@dcloudio/uni-app';
   import { reactive, computed } from 'vue';
-  import sheep from '@/sheep';
+  import { isEmpty } from 'lodash';
 
   const state = reactive({
     orderId: 0,
@@ -127,11 +123,19 @@
     if (state.counter < 3 && state.result === 'unpaid') {
       setTimeout(() => {
         getOrderInfo(orderId);
-      }, 1000);
+      }, 1500);
     }
     // 超过三次检测才判断为支付失败
     if (state.counter >= 3) {
       state.result = 'failed';
+    }
+  }
+
+  function onOrder() {
+    if ((state.orderType === 'recharge')) {
+      sheep.$router.redirect('/pages/pay/recharge-log');
+    } else {
+      sheep.$router.redirect('/pages/order/list');
     }
   }
 
@@ -152,20 +156,32 @@
     if (options.orderSN) {
       id = options.orderSN;
     }
-    if (options.orderType === 'recharge') {
-      state.orderType = 'recharge';
-    }
     if (options.id) {
       id = options.id;
     }
     state.orderId = id;
+
+    if (options.orderType === 'recharge') {
+      state.orderType = 'recharge';
+    }
+
     // 支付结果传值过来是失败，则直接显示失败界面
     if (options.payState === 'fail') {
       state.result = 'failed';
     } else {
       // 轮询三次检测订单支付结果
-      getOrderInfo(id);
+      getOrderInfo(state.orderId);
     }
+  });
+
+  onShow(() => {
+    if(isEmpty(state.orderInfo)) return;
+    getOrderInfo(state.orderId);
+  })
+
+  onHide(() => {
+    state.result = 'unpaid';
+    state.counter = 0;
   });
 </script>
 
@@ -174,10 +190,12 @@
     0% {
       transform: rotate(0deg);
     }
+
     100% {
       transform: rotate(360deg);
     }
   }
+
   .score-img {
     width: 36rpx;
     height: 36rpx;
@@ -186,6 +204,7 @@
 
   .pay-result-box {
     padding: 60rpx 0;
+
     .pay-waiting {
       margin-top: 20rpx;
       width: 60rpx;
@@ -197,6 +216,7 @@
       // -webkit-animation: rotation 1s linear infinite;
       animation: rotation 1s linear infinite;
     }
+
     .pay-img {
       width: 130rpx;
       height: 130rpx;
@@ -214,8 +234,10 @@
       color: #333333;
       font-family: OPPOSANS;
     }
+
     .btn-box {
       width: 100%;
+
       .back-btn {
         width: 190rpx;
         height: 70rpx;
@@ -225,6 +247,7 @@
         font-weight: 400;
         color: #595959;
       }
+
       .check-btn {
         width: 190rpx;
         height: 70rpx;
@@ -236,17 +259,20 @@
         margin-left: 32rpx;
       }
     }
+
     .subscribe-box {
       .subscribe-img {
         width: 44rpx;
         height: 44rpx;
       }
+
       .subscribe-title {
         font-weight: 500;
         font-size: 32rpx;
         line-height: 36rpx;
         color: #434343;
       }
+
       .subscribe-start {
         color: var(--ui-BG-Main);
         font-weight: 700;
