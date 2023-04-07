@@ -26,6 +26,7 @@
       cancelButton="none"
       clearButton="none"
       @confirm="onSearch"
+      v-model="state.searchVal"
     />
     <view class="keyword-link ss-flex">
       <view v-for="(item, index) in data.keywords" :key="index">
@@ -129,6 +130,9 @@
   function onSearch(e) {
     if (e.value) {
       sheep.$router.go('/pages/goods/list', { keyword: e.value });
+      setTimeout(() => {
+        state.searchVal = '';
+      }, 100);
     }
   }
 </script>
@@ -137,14 +141,17 @@
   .border-content {
     border: 2rpx solid #eee;
   }
+
   .search-content {
     flex: 1;
     // height: 80rpx;
     position: relative;
+
     .search-icon {
       font-size: 38rpx;
       margin-right: 20rpx;
     }
+
     .keyword-link {
       position: absolute;
       right: 16rpx;
