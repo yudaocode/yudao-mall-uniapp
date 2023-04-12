@@ -73,6 +73,7 @@
   import { onLoad, onHide, onShow } from '@dcloudio/uni-app';
   import { reactive, computed } from 'vue';
   import { isEmpty } from 'lodash';
+  import sheep from '@/sheep';
 
   const state = reactive({
     orderId: 0,
