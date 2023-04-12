@@ -120,7 +120,7 @@
                   :src="sheep.$url.cdn(item.content.url)"
                   :height="200"
                   :width="200"
-                  mode="scaleToFill"
+                  mode="aspectFill"
                 ></su-image>
               </view>
             </template>
@@ -707,7 +707,7 @@
           }
           .imgred,
           img {
-            width: 100% !important;
+            width: 100%;
           }
         }
       }
