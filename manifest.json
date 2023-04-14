@@ -1,9 +1,9 @@
 {
   "name": "星品购",
   "appid": "__UNI__082C0BA",
-  "description": "应用描述",
-  "versionName": "1.0.7",
-  "versionCode": 107,
+  "description": "Shopro是由SheepJS团队开发，使用Uniapp+Vue3技术驱动的在线商城系统，内含诸多功能与丰富的活动，期待您的使用和反馈。",
+  "versionName": "1.8.3",
+  "versionCode": 183,
   "transformPx": false,
   "app-plus": {
     "usingComponents": true,

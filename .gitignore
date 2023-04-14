@@ -1,10 +1,11 @@
-/unpackage/*
-/node_modules/*
-/.idea/*
+unpackage/*
+node_modules/*
+.idea/*
 deploy.sh
-/.hbuilderx/
-/.vscode/
+.hbuilderx/
+.vscode/
 **/.DS_Store
 .env
 yarn.lock
 package-lock.json
+*.keystore
