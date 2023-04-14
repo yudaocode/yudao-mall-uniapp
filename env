@@ -1,5 +1,5 @@
 # 版本号
-SHOPRO_VERSION = v1.8.1
+SHOPRO_VERSION = v1.8.3
 
 # 正式环境接口域名
 SHOPRO_BASE_URL = https://api.shopro.sheepjs.com
