@@ -11,6 +11,11 @@
         class="goods-item"
         v-for="item in props.data.children[activeMenu].children"
         :key="item.id"
+		@tap="
+		  sheep.$router.go('/pages/goods/list', {
+		    categoryId: item.id,
+		  })
+		"
       >
         <image class="goods-img" :src="sheep.$url.cdn(item.image)" mode="aspectFill"></image>
         <view class="ss-p-10">
