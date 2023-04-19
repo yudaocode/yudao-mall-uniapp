@@ -109,6 +109,7 @@
     background: '',
     imgHeight: 400,
   });
+  const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
 
   //勾选协议
   function onChange() {
@@ -139,7 +140,7 @@
     }
   }
   function onImgLoad(e) {
-    state.imgHeight = (e.detail.height / e.detail.width) * 750 - 88;
+    state.imgHeight = (e.detail.height / e.detail.width) * 750 - 88 - statusBarHeight;
   }
 
   async function submit() {
