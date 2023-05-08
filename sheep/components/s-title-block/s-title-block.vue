@@ -13,7 +13,7 @@
         {{ data.subtitle.text }}
       </view>
     </view>
-    <view v-if="data.more.show" class="more-box ss-flex ss-col-center">
+    <view v-if="data.more.show" class="more-box ss-flex ss-col-center" @tap="sheep.$router.go(data.more.url)">
       <view class="more-text">查看更多</view>
       <text class="_icon-forward"></text>
     </view>
