@@ -21,13 +21,14 @@
                 <view
                   v-if="goodsPrice.price > 0 && goodsPrice.score > 0"
                   class="score-text ss-m-l-4"
-                  >+</view
-                >
+                  >+
+                </view>
                 <image
                   v-if="goodsPrice.score > 0"
                   :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
                   class="score-img"
-                ></image>
+                >
+                </image>
                 <view v-if="goodsPrice.score > 0" class="score-text">
                   {{ goodsPrice.score }}
                 </view>
@@ -75,6 +76,7 @@
               :max="state.selectedSkuPrice.stock"
               :step="1"
               v-model="state.selectedSkuPrice.goods_num"
+              @change="onNumberChange($event)"
             ></su-number-box>
           </view>
         </scroll-view>
@@ -123,7 +125,12 @@
     selectedSkuPrice: {},
     currentSkuArray: [],
   });
-
+  //输入框改变数量
+  function onNumberChange(e) {
+    if (e === 0) return;
+    if (state.selectedSkuPrice.goods_num === e) return;
+    state.selectedSkuPrice.goods_num = e;
+  }
   // 默认单规格
   if (!props.goodsInfo.is_sku) {
     state.selectedSkuPrice = props.goodsInfo.sku_prices[0];
@@ -162,7 +169,10 @@
       price = state.selectedSkuPrice.price;
       score = state.selectedSkuPrice.score || 0;
     }
-    return { price, score };
+    return {
+      price,
+      score,
+    };
   });
 
   function onAddCart() {
@@ -352,6 +362,7 @@
       background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
       color: #fff;
     }
+
     .score-btn {
       width: 100%;
       margin: 0 20rpx;
@@ -393,22 +404,26 @@
         font-weight: 500;
         line-height: 42rpx;
       }
+
       .score-img {
         width: 36rpx;
         height: 36rpx;
         margin: 0 4rpx;
       }
+
       .score-text {
         font-size: 30rpx;
         font-weight: 500;
         color: $red;
         font-family: OPPOSANS;
       }
+
       .price-text {
         font-size: 30rpx;
         font-weight: 500;
         color: $red;
         font-family: OPPOSANS;
+
         &::before {
           content: '￥';
           font-size: 30rpx;
@@ -449,6 +464,7 @@
           margin-right: 10rpx;
           margin-bottom: 10rpx;
         }
+
         .disabled-btn {
           font-weight: 400;
           color: #c6c6c6;

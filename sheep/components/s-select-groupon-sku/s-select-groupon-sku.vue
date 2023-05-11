@@ -87,6 +87,7 @@
               :max="state.selectedSkuPrice.stock"
               :step="1"
               v-model="state.selectedSkuPrice.goods_num"
+              @change="onNumberChange($event)"
               activity="groupon"
             ></su-number-box>
           </view>
@@ -96,9 +97,7 @@
         <view class="buy-box ss-flex ss-col-center ss-flex ss-col-center ss-row-center">
           <view class="ss-flex">
             <button class="ss-reset-button origin-price-btn ss-flex-col">
-              <view class="btn-title">{{
-                grouponNum === 0 ? '阶梯团' : grouponNum + '人团'
-              }}</view>
+              <view class="btn-title">{{ grouponNum === 0 ? '阶梯团' : grouponNum + '人团' }}</view>
             </button>
             <button class="ss-reset-button btn-tox ss-flex-col" @tap="onBuy">
               <view class="btn-price">
@@ -160,6 +159,13 @@
     currentSkuArray: [],
     grouponNum: props.grouponNum,
   });
+  //输入框改变数量
+  function onNumberChange(e) {
+    if(e === 0) return;
+    if (state.selectedSkuPrice.goods_num === e) return;
+    state.selectedSkuPrice.goods_num = e;
+  }
+
   // 默认单规格
   if (!props.goodsInfo.is_sku) {
     state.selectedSkuPrice = props.goodsInfo.sku_prices[0];

@@ -60,6 +60,7 @@
               :max="state.selectedSkuPrice.stock"
               :step="1"
               v-model="state.selectedSkuPrice.goods_num"
+              @change="onNumberChange($event)"
               activity="seckill"
             ></su-number-box>
           </view>
@@ -151,6 +152,12 @@
       sheep.$helper.toast('请选择规格');
     }
   };
+  //输入框改变数量
+  function onNumberChange(e) {
+	if (e === 0) return;
+    if (state.selectedSkuPrice.goods_num === e) return;
+    state.selectedSkuPrice.goods_num = e;
+  }
   // 改变禁用状态
   const changeDisabled = (isChecked = false, pid = 0, skuId = 0) => {
     let newPrice = []; // 所有可以选择的 skuPrice
