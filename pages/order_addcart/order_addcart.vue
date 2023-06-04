@@ -63,7 +63,7 @@
 						<view class='goodsNav acea-row row-between-wrapper'>
 							<view v-if="cartList.invalid.length > 1 || cartList.valid.length > 0" @click='goodsOpen'>
 								<text class='iconfont'
-									:class='goodsHidden==true?"icon-xiangxia":"icon-xiangshang"'></text>失效商品
+									:class='goodsHidden===true?"icon-xiangxia":"icon-xiangshang"'></text>失效商品
 							</view>
 							<view v-else>
 								失效商品
@@ -95,10 +95,10 @@
 					</view> -->
 					<view class='loadingicon acea-row row-center-wrapper' v-if="cartList.invalid.length&&loadend">
 						<text class='loading iconfont icon-jiazai'
-							:hidden='loadingInvalid==false'></text>{{loadTitleInvalid}}
+							:hidden='loadingInvalid===false'></text>{{loadTitleInvalid}}
 					</view>
 				</view>
-				<view class='noCart' v-if="cartList.valid.length == 0 && cartList.invalid.length == 0 && canShow">
+				<view class='noCart' v-if="cartList.valid.length === 0 && cartList.invalid.length === 0 && canShow">
 					<view class='pictrue'>
 						<image src='../../static/images/noCart.png'></image>
 					</view>
@@ -136,7 +136,6 @@
 		<!-- #ifdef MP -->
 		<!-- <authorize :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
 		<!-- #endif -->
-
 	</view>
 </template>
 
@@ -219,13 +218,13 @@
 		computed: mapGetters(['isLogin']),
 		onLoad: function(options) {
 			let that = this;
-			if (that.isLogin == false) {
+			if (that.isLogin === false) {
 				toLogin();
 			}
 		},
 		onShow: function() {
 			this.canShow = false
-			if (this.isLogin == true) {
+			if (this.isLogin === true) {
 				this.hotPage = 1;
 				this.hostProduct = [],
 					this.hotScroll = false,
@@ -243,15 +242,15 @@
 				this.hotPage = 1;
 				this.hotLimit = 10;
 				this.cartList = {
-						valid: [],
-						invalid: []
-					},
-					this.isAllSelect = false; //全选
+          valid: [],
+          invalid: []
+        };
+        this.isAllSelect = false; //全选
 				this.selectValue = []; //选中的数据
 				this.selectCountPrice = 0.00;
 				this.cartCount = 0;
 				this.isShowAuth = false;
-			};
+			}
 		},
 		methods: {
 			// 授权关闭
@@ -306,7 +305,7 @@
 			},
 			/**
 			 * 获取产品详情
-			 * 
+			 *
 			 */
 			getGoodsDetails: function(item) {
 				uni.showLoading({
@@ -330,7 +329,7 @@
 			},
 			/**
 			 * 属性变动赋值
-			 * 
+			 *
 			 */
 			ChangeAttr: function(res) {
 				let productSelect = this.productValue[res];
@@ -354,7 +353,7 @@
 			},
 			/**
 			 * 默认选中属性
-			 * 
+			 *
 			 */
 			DefaultSelect: function() {
 				let productAttr = this.attr.productAttr;
@@ -421,7 +420,7 @@
 			},
 			/**
 			 * 购物车数量加和数量减
-			 * 
+			 *
 			 */
 			ChangeCartNum: function(changeValue) {
 				//changeValue:是否 加|减
@@ -450,7 +449,7 @@
 			},
 			/**
 			 * 购物车手动填写
-			 * 
+			 *
 			 */
 			iptCartNum: function(e) {
 				this.$set(this.attr.productSelect, 'cart_num', e);
@@ -631,7 +630,7 @@
 			},
 			/**
 			 * 购物车手动填写
-			 * 
+			 *
 			 */
 			iptCartNum: function(index) {
 				let item = this.cartList.valid[index];
@@ -743,7 +742,7 @@
 							selectValue = [];
 						if (validList.length > 0) {
 							for (let index in validList) {
-								if (validList[index].cartNum == 1) {
+								if (validList[index].cartNum === 1) {
 									validList[index].numSub = true;
 								} else {
 									validList[index].numSub = false;
@@ -769,7 +768,7 @@
 						data.page += 1;
 						that.selectValue = selectValue;
 						let newArr = validList.filter(item => item.attrStatus);
-						that.isAllSelect = newArr.length == selectValue.length && newArr.length;
+						that.isAllSelect = newArr.length === selectValue.length && newArr.length;
 						that.switchSelect();
 					}
 
@@ -898,7 +897,7 @@
 	.shoppingCart {
 		/* #ifdef H5 */
 		// padding-bottom: 0;
-		// padding-bottom: constant(safe-area-inset-bottom);  
+		// padding-bottom: constant(safe-area-inset-bottom);
 		// padding-bottom: env(safe-area-inset-bottom);
 		/* #endif */
 	}
