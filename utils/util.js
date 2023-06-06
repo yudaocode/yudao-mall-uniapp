@@ -108,7 +108,7 @@ export default {
 	 * @param int index 需要移除的数组的键值
 	 * @param string | int 值
 	 * @return array
-	 * 
+	 *
 	 */
 	ArrayRemove: function(array, index, value) {
 		const valueArray = [];
@@ -127,7 +127,7 @@ export default {
 	 * 生成海报获取文字
 	 * @param string text 为传入的文本
 	 * @param int num 为单行显示的字节长度
-	 * @return array 
+	 * @return array
 	 */
 	textByteLength: function(text, num) {
 
@@ -164,8 +164,8 @@ export default {
 	 * @param string price 价格
 	 * @param string ot_price 原始价格
 	 * @param function successFn 回调函数
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	PosterCanvas: function(arr2, store_name, price, ot_price, successFn) {
 		let that = this;
@@ -173,7 +173,7 @@ export default {
 		ctx.clearRect(0, 0, 0, 0);
 		/**
 		 * 只能获取合法域名下的图片信息,本地调试无法获取
-		 * 
+		 *
 		 */
 		ctx.fillStyle = '#fff';
 		ctx.fillRect(0, 0, 750, 1150);
@@ -331,7 +331,7 @@ export default {
 		context.clearRect(0, 0, 0, 0);
 		/**
 		 * 只能获取合法域名下的图片信息,本地调试无法获取
-		 * 
+		 *
 		 */
 		context.fillStyle = '#fff';
 		context.fillRect(0, 0, 594, 850);
@@ -425,8 +425,8 @@ export default {
 	/*
 	 * 单图上传
 	 * @param object opt
-	 * @param callable successCallback 成功执行方法 data 
-	 * @param callable errorCallback 失败执行方法 
+	 * @param callable successCallback 成功执行方法 data
+	 * @param callable errorCallback 失败执行方法
 	 */
 	uploadImageOne: function(opt, successCallback, errorCallback) {
 		let that = this;
@@ -445,11 +445,11 @@ export default {
 			model = opt.model;
 
 		uni.chooseImage({
-			count: count, //最多可以选择的图片总数  
-			sizeType: sizeType, // 可以指定是原图还是压缩图，默认二者都有  
-			sourceType: sourceType, // 可以指定来源是相册还是相机，默认二者都有  
+			count: count, //最多可以选择的图片总数
+			sizeType: sizeType, // 可以指定是原图还是压缩图，默认二者都有
+			sourceType: sourceType, // 可以指定来源是相册还是相机，默认二者都有
 			success: function(res) {
-				//启动上传等待中...  
+				//启动上传等待中...
 				uni.showLoading({
 					title: '图片上传中',
 				});
@@ -509,7 +509,7 @@ export default {
 	 * @param string k 整体分割符 默认为：&
 	 * @param string p 单个分隔符 默认为：=
 	 * @return object
-	 * 
+	 *
 	 */
 	// #ifdef MP
 	getUrlParams: function(param, k, p) {
@@ -781,13 +781,21 @@ export default {
 		else return url.replace('http://', 'https://');
 	},
 
-
-
 	/**
 	 * 姓名除了姓显示其他
 	 */
 	formatName: function(str) {
 		return str.substr(0, 1) + new Array(str.length).join('*');
-	}
+	},
 
+}
+
+/**
+ * 将分转成元
+ *
+ * @param price 分，例如说 100 分
+ * @returns {string} 元，例如说 1.00 元
+ */
+export function fen2yuan(price) {
+  return (price / 100.0).toFixed(2)
 }

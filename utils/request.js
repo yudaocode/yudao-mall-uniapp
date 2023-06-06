@@ -31,17 +31,28 @@ function baseRequest(url, method, data, {
 			});
 		}
 	}
+
+  // TODO 补个 header 多租户
+  if (url.indexOf('app-api') >= 0) {
+    header = {
+      ...header
+    }
+    header['tenant-id'] = 1
+    header['Authorization'] = 'Bearer test247'
+  }
+
 	if (store.state.app.token) header[TOKENNAME] = store.state.app.token;
 	return new Promise((reslove, reject) => {
 		uni.request({
-			url: Url + '/api/front/' + url,
+			url: url.indexOf('app-api') < 0 ? Url + '/api/front/' + url
+        : 'http://127.0.0.1:48080/' + url, // TODO 芋艿：搞个 url 的配置
 			method: method || 'GET',
 			header: header,
 			data: data || {},
 			success: (res) => {
 				if (noVerify)
 					reslove(res.data, res);
-				else if (res.data.code == 200)
+				else if (res.data.code === 200 || res.data.code === 0)
 					reslove(res.data, res);
 				else if ([410000, 410001, 410002, 401].indexOf(res.data.code) !== -1) {
 					toLogin();

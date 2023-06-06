@@ -20,27 +20,26 @@
 			<scroll-view :scroll-top="scrollTop" scroll-y='true' scroll-with-animation="true"
 				:style='"height:"+height+"px;"' @scroll="scroll">
 				<view id="past0">
-					<productConSwiper :imgUrls="sliderImage" :videoline="productInfo.videoLink">
+					<productConSwiper :imgUrls="spu.sliderPicUrls" :videoline="spu.videoUrl">
 					</productConSwiper>
 					<view class="pad30">
+            <!-- 价格、库存、销量 -->
 						<view class='wrapper mb30 borRadius14'>
 							<view class='share acea-row row-between row-bottom'>
 								<view class='money font-color'>
 									￥
-									<text class='num'>{{productInfo.price}}</text>
-									<text class='vip-money'
-										v-if="productInfo.vipPrice && productInfo.vipPrice > 0">￥{{productInfo.vipPrice}}</text>
-									<image v-if="productInfo.vipPrice && productInfo.vipPrice > 0"
-										src="../../static/images/vip.png"></image>
+									<text class='num'>{{ fen2yuan(spu.price) }}</text>
+									<text class='vip-money' v-if="spu.vipPrice && spu.vipPrice > 0">￥{{ fen2yuan(spu.vipPrice) }}</text>
+									<image v-if="spu.vipPrice && spu.vipPrice > 0" src="../../static/images/vip.png" />
 								</view>
 								<view class='iconfont icon-fenxiang' @click="listenerActionSheet"></view>
 							</view>
-							<view class='introduce'>{{productInfo.storeName}}</view>
+							<view class='introduce'>{{ spu.name }}</view>
 							<view class='label acea-row row-between-wrapper'>
-								<view>原价:￥{{productInfo.otPrice || 0}}</view>
-								<view>库存:{{productInfo.stock || 0}}{{productInfo.unitName || ''}}</view>
+								<view>原价:￥{{ fen2yuan(spu.marketPrice) }}</view>
+								<view>库存:{{ spu.stock }} {{ spu.unitName}}</view>
 								<view>
-									销量:{{Math.floor(productInfo.sales) + Math.floor(productInfo.ficti) || 0}}{{productInfo.unitName || ''}}
+									销量:{{ spu.salesCount}} {{ spu.unitName }}
 								</view>
 							</view>
 							<!-- <view class='coupon acea-row row-between-wrapper' v-if="productInfo.give_integral > 0">
@@ -49,12 +48,14 @@
 									<view class='activity'>赠送 {{productInfo.give_integral}} 积分</view>
 								</view>
 							</view> -->
-							<view v-if="coupon.list.length>0 && type=='normal'"
+              <!-- TODO 芋艿：卡在这个位置 -->
+							<view v-if="coupon.list.length > 0 && type==='normal'"
 								class='coupon acea-row row-between-wrapper' @click='couponTap'>
 								<view class='hide line1 acea-row'>
 									优惠券：
 									<view class='activity'>
-										满{{coupon.list[0].minPrice}}减{{coupon.list[0].money}}</view>
+										满{{ coupon.list[0].minPrice }}减{{ coupon.list[0].money }}
+                  </view>
 								</view>
 								<view class='iconfont icon-jiantou'></view>
 							</view>
@@ -146,9 +147,8 @@
 						<image src="../../static/images/xyou.png"></image>
 					</view>
 					<view class='conter'>
-						<jyf-parser :html="description" ref="article" :tag-style="tagStyle"></jyf-parser>
+						<jyf-parser :html="spu.description" ref="article" :tag-style="tagStyle"></jyf-parser>
 					</view>
-					<!-- <rich-text :nodes="description" class="conter"></rich-text> -->
 				</view>
 				<view style='height:120rpx;'></view>
 			</scroll-view>
@@ -203,9 +203,17 @@
 		<shareRedPackets :sharePacket="sharePacket" @listenerActionSheet="listenerActionSheet"
 			@closeChange="closeChange"></shareRedPackets>
 		<!-- 组件 -->
-		<productWindow :attr="attr" :isShow='1' :iSplus='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
-			@ChangeCartNum="ChangeCartNum" @attrVal="attrVal" @iptCartNum="iptCartNum" id='product-window'>
-		</productWindow>
+		<productWindow
+      :attr="attr"
+      :isShow='1'
+      :iSplus='1'
+      @myevent="onMyEvent"
+      @ChangeAttr="ChangeAttr"
+			@ChangeCartNum="ChangeCartNum"
+      @attrVal="attrVal"
+      @iptCartNum="iptCartNum"
+      id='product-window'
+    />
 		<home></home>
 		<couponListWindow :coupon='coupon' @ChangCouponsClone="ChangCouponsClone" @ChangCoupons="ChangCoupons"
 			@ChangCouponsUseState="ChangCouponsUseState" @tabCouponType="tabCouponType"></couponListWindow>
@@ -257,14 +265,10 @@
 
 <script>
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js'
-	// import yzf_chat from '@/plugin/chat/yzf_chat.js'
-	import store from '@/store';
 	import {
-		getProductDetail,
 		collectAdd,
 		collectDel,
 		postCartAdd,
-		getReplyList,
 		getReplyConfig,
 		getProductGood,
 		getReplyProduct
@@ -292,11 +296,10 @@
 	import userEvaluation from '@/components/userEvaluation';
 	import shareRedPackets from '@/components/shareRedPackets';
 	import home from '@/components/home';
-	import {
-		silenceBindingSpread
-	} from "@/utils";
 	import parser from "@/components/jyf-parser/jyf-parser";
-	// #ifdef MP
+  import * as ProductSpuApi from '@/api/product/spu.js';
+  import * as Util from '@/utils/util.js';
+  // #ifdef MP
 	import {
 		base64src
 	} from '@/utils/base64src.js'
@@ -320,7 +323,6 @@
 			// #endif
 		},
 		data() {
-			let that = this;
 			return {
 				//属性是否打开
 				coupon: {
@@ -335,8 +337,9 @@
 				id: 0, //商品id
 				replyCount: 0, //总评论数量
 				reply: [], //评论列表
-				productInfo: {}, //商品详情
-				productValue: [], //系统属性
+				productInfo: {}, // 商品详情 TODO 芋艿：准备移除
+        spu: {}, // 商品 SPU 详情
+				skuMap: [], // 商品 SKU Map
 				couponList: [], //优惠券
 				cart_num: 1, //购买数量
 				isAuto: false, //没有授权的不会自动授权
@@ -362,12 +365,12 @@
 				isDown: true,
 				posters: false,
 				weixinStatus: false,
-				attr: {
-					cartAttr: false,
+				attr: { // productWindow 组件，使用该属性
+					cartAttr: false, // TODO 芋艿，还没搞懂
+          // ↓↓↓ 属性数组，结构为：id = 属性编号；name = 属性编号的名字；values[].id = 属性值的编号，values[].name = 属性值的名字；index = 选中的属性值的名字
 					productAttr: [],
-					productSelect: {}
+          productSelect: {} // 选中的 SKU
 				},
-				description: '',
 				navActive: 0,
 				H5ShareBox: false, //公众号分享图片
 				activityH5: [],
@@ -387,7 +390,6 @@
 					table: 'width:100%',
 					video: 'width:100%'
 				},
-				sliderImage: [],
 				qrcodeSize: 600,
 				canvasStatus: false, //是否显示海报
 				imagePath: '', //海报路径
@@ -405,25 +407,18 @@
 			isLogin: {
 				handler: function(newV, oldV) {
 					let that = this;
-					if (newV == true) {
+					if (newV === true) {
 						that.getCouponList();
 						that.getCartCount();
-						//that.downloadFilePromotionCode();
 					}
 				},
 				deep: true
-			},
-			productInfo: {
-				handler: function() {
-					this.$nextTick(() => {});
-				},
-				immediate: true
 			}
 		},
 		onLoad(options) {
 			let that = this
 			var pages = getCurrentPages();
-			that.returnShow = pages.length === 1 ? false : true;
+			that.returnShow = pages.length !== 1;
 			if (pages.length <= 1) {
 				that.retunTop = false
 			}
@@ -463,7 +458,7 @@
 					setTimeout(()=>{
 						spread(mapeMpQrCodeValue.spread).then(res => {}).catch(res => {})
 					},2000)
-					
+
 				} else {
 					this.id = options.id;
 				}
@@ -560,7 +555,7 @@
 			},
 			/**
 			 * 购物车手动填写
-			 * 
+			 *
 			 */
 			iptCartNum: function(e) {
 				this.$set(this.attr.productSelect, 'cart_num', e ? e : 1);
@@ -597,8 +592,8 @@
 					}
 				}
 			},
-			/*
-			 *去商品详情页 
+			/**
+			 * 去商品详情页
 			 */
 			goDetail(item) {
 				if (!item.activityH5) {
@@ -633,7 +628,6 @@
 					uni.redirectTo({
 						url: `/pages/activity/goods_seckill_details/index?id=${item.activityH5.id}`
 					})
-					return
 				}
 			},
 			// 微信登录回调
@@ -646,12 +640,12 @@
 			},
 			/**
 			 * 购物车数量加和数量减
-			 * 
+			 *
 			 */
 			ChangeCartNum: function(changeValue) {
 				//changeValue:是否 加|减
 				//获取当前变动属性
-				let productSelect = this.productValue[this.attrValue];
+				let productSelect = this.skuMap[this.attrValue];
 				//如果没有属性,赋值给商品默认库存
 				if (productSelect === undefined && !this.attr.productAttr.length)
 					productSelect = this.attr.productSelect;
@@ -679,10 +673,10 @@
 			},
 			/**
 			 * 属性变动赋值
-			 * 
+			 *
 			 */
 			ChangeAttr: function(res) {
-				let productSelect = this.productValue[res];
+				let productSelect = this.skuMap[res];
 				if (productSelect) {
 					this.$set(this.attr.productSelect, "image", productSelect.image);
 					this.$set(this.attr.productSelect, "price", productSelect.price);
@@ -723,7 +717,7 @@
 			},
 			/**
 			 * 优品推荐
-			 * 
+			 *
 			 */
 			getGoods() {
 				getProductGood().then(res => {
@@ -749,26 +743,25 @@
 					})
 				});
 			},
+
 			/**
 			 * 获取产品详情
-			 * 
 			 */
 			getGoodsDetails: function() {
 				let that = this;
-				getProductDetail(that.id, that.type).then(res => {
-					let productInfo = res.data.productInfo;
-					// 字符串数组转数组；
-					let arrayImg = productInfo.sliderImage;
-					let sliderImage = JSON.parse(arrayImg);
-					that.$set(that, 'sliderImage', sliderImage);
+        ProductSpuApi.getSpuDetail(that.id).then(res => {
+					let productInfo = res.data;
+          let spu = res.data;
 					that.$set(that, 'productInfo', productInfo);
-					that.$set(that, 'description', productInfo.content);
-					that.$set(that, 'userCollect', res.data.userCollect);
+          that.$set(that, 'spu', spu);
+					that.$set(that, 'userCollect', res.data.userCollect); // TODO 芋艿：需要改造下，异步加载收藏状态
+          if (true) {
+            return;
+          }
 					that.$set(that.attr, 'productAttr', res.data.productAttr);
-					that.$set(that, 'productValue', res.data.productValue);
+					that.$set(that, 'skuMap', res.data.skuMap);
 					that.$set(that.sharePacket, 'priceName', res.data.priceName);
-					that.$set(that.sharePacket, 'isState', Math.floor(res.data.priceName) != 0 ?
-						false : true);
+					that.$set(that.sharePacket, 'isState', Math.floor(res.data.priceName) === 0);
 					that.$set(that, 'activityH5', res.data.activityAllH5 ? res.data.activityAllH5 : []);
 					uni.setNavigationBarTitle({
 						title: productInfo.storeName.substring(0, 7) + "..."
@@ -794,7 +787,7 @@
 						// #ifdef MP
 						that.getQrcode();
 						// #endif
-					};
+					}
 					setTimeout(function() {
 						that.infoScroll();
 					}, 500);
@@ -806,6 +799,9 @@
 					// #endif
 					that.DefaultSelect();
 				}).catch(err => {
+          if (true) {
+            return;
+          }
 					//状态异常返回上级页面
 					return that.$util.Tips({
 						title: err.toString()
@@ -859,7 +855,7 @@
 			},
 			/**
 			 * 打开地图
-			 * 
+			 *
 			 */
 			showMaoLocation: function() {
 				if (!this.systemStore.latitude || !this.systemStore.longitude) return this.$util.Tips({
@@ -876,13 +872,13 @@
 			},
 			/**
 			 * 默认选中属性
-			 * 
+			 *
 			 */
 			DefaultSelect: function() {
 				let productAttr = this.attr.productAttr;
 				let value = [];
-				for (let key in this.productValue) {
-					if (this.productValue[key].stock > 0) {
+				for (let key in this.skuMap) {
+					if (this.skuMap[key].stock > 0) {
 						value = this.attr.productAttr.length ? key.split(",") : [];
 						break;
 					}
@@ -891,7 +887,7 @@
 					this.$set(productAttr[i], "index", value[i]);
 				}
 				//sort();排序函数:数字-英文-汉字；
-				let productSelect = this.productValue[value.join(",")];
+				let productSelect = this.skuMap[value.join(",")];
 				if (productSelect && productAttr.length) {
 					this.$set(
 						this.attr.productSelect,
@@ -939,7 +935,7 @@
 			},
 			/**
 			 * 获取优惠券
-			 * 
+			 *
 			 */
 			getCouponList(type) {
 				let that = this,
@@ -969,9 +965,9 @@
 				that.$set(that.coupon, 'list', that.coupon.list);
 				that.$set(that.coupon, 'coupon', false);
 			},
-			/** 
-			 * 
-			 * 
+			/**
+			 *
+			 *
 			 * 收藏商品
 			 */
 			setCollect: function() {
@@ -1015,7 +1011,7 @@
 			},
 			/**
 			 * 打开属性加入购物车
-			 * 
+			 *
 			 */
 			joinCart: function(e) {
 				//是否登录
@@ -1030,7 +1026,7 @@
 			 */
 			goCat: function(num) {
 				let that = this,
-					productSelect = that.productValue[this.attrValue];
+					productSelect = that.skuMap[this.attrValue];
 				//打开属性
 				if (that.attrValue) {
 					//默认选中了属性，但是没有打开过属性弹窗还是自动打开让用户查看默认选中的属性
@@ -1125,7 +1121,7 @@
 			},
 			/**
 			 * 分享打开
-			 * 
+			 *
 			 */
 			listenerActionSheet: function() {
 				if (this.isLogin === false) {
@@ -1370,6 +1366,9 @@
 					})
 				}
 			},
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		}
 	}
 </script>
