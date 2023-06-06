@@ -12,7 +12,7 @@
 				</view>
 			</view>
 		</view>
-		<view id="home" class="home acea-row row-center-wrapper iconfont icon-xiangzuo" :class="opacity>0.5?'on':''"
+		<view id="home" class="home acea-row row-center-wrapper iconfont icon-xiangzuo" :class="opacity > 0.5?'on':''"
 			:style="{ top: homeTop + 'rpx' }" v-if="returnShow" @tap="returns">
 		</view>
 		<!-- 	<view class='iconfont icon-xiangzuo' :style="'top:'+navH/2+'rpx'" @tap='returns'></view> -->
@@ -48,7 +48,7 @@
 									<view class='activity'>赠送 {{productInfo.give_integral}} 积分</view>
 								</view>
 							</view> -->
-              <!-- TODO 芋艿：卡在这个位置 -->
+              <!-- 优惠劵 TODO 芋艿：待接入 -->
 							<view v-if="coupon.list.length > 0 && type==='normal'"
 								class='coupon acea-row row-between-wrapper' @click='couponTap'>
 								<view class='hide line1 acea-row'>
@@ -59,7 +59,8 @@
 								</view>
 								<view class='iconfont icon-jiantou'></view>
 							</view>
-							<view class="coupon acea-row row-between-wrapper" v-if="activityH5.length">
+              <!-- 营销活动 TODO 芋艿：待接入 -->
+              <view class="coupon acea-row row-between-wrapper" v-if="activityH5.length">
 								<view class="line1 acea-row">
 									<text class="activityName">活&nbsp;&nbsp;&nbsp;动：</text>
 									<view v-for='(item,index) in activityH5' :key='index' @click="goActivity(item)"
@@ -85,12 +86,14 @@
 								</view>
 							</view>
 						</view>
+            <!-- SKU 选择 -->
 						<view class='attribute acea-row row-between-wrapper mb30 borRadius14' @click="openAttr">
 							<view class="line1">{{ attrValue.length > 0 ? "已选择" : "请选择" }}：
 								<text class='atterTxt'>{{attrValue}}</text>
 							</view>
 							<view class='iconfont icon-jiantou'></view>
 						</view>
+            <!-- 评论 TODO 芋艿：待完成 -->
 						<view class='userEvaluation' id="past1">
 							<view class='title acea-row row-between-wrapper'
 								:style="replyCount==0?'border-bottom-left-radius:14rpx;border-bottom-right-radius:14rpx;':''">
@@ -105,7 +108,7 @@
 								<userEvaluation :reply="reply"></userEvaluation>
 							</block>
 						</view>
-						<!-- 优品推荐 -->
+						<!-- 优品推荐 TODO 芋艿：待完成 -->
 						<view class="superior borRadius14" if='good_list.length' id="past2">
 							<view class="title acea-row row-center-wrapper">
 								<image src="../../static/images/xzuo.png"></image>
@@ -154,6 +157,7 @@
 			</scroll-view>
 		</view>
 		<view class='footer acea-row row-between-wrapper'>
+      <!-- 客服 TODO 芋艿：待完成 -->
 			<!-- #ifdef MP -->
 			<button open-type="contact" hover-class='none' class='item'>
 				<view class='iconfont icon-kefu'></view>
@@ -166,43 +170,56 @@
 				<view>客服</view>
 			</view>
 			<!-- #endif -->
-			<block v-if="type === 'normal'">
-				<view @click="setCollect" class='item'>
+      <!-- 场景：普通订单 -->
+      <block v-if="type === 'normal'">
+        <!-- 收藏 TODO 芋艿：收藏逻辑 -->
+        <view @click="setCollect" class='item'>
 					<view class='iconfont icon-shoucang1' v-if="userCollect"></view>
 					<view class='iconfont icon-shoucang' v-else></view>
 					<view>收藏</view>
 				</view>
-				<navigator open-type='switchTab' class="animated item" :class="animated==true?'bounceIn':''"
-					url='/pages/order_addcart/order_addcart' hover-class="none">
+				<navigator open-type='switchTab' class="animated item" :class="animated ? 'bounceIn':''"
+                   url='/pages/order_addcart/order_addcart' hover-class="none">
 					<view class='iconfont icon-gouwuche1'>
-						<text v-if="Math.floor(CartCount)>0" class='num bg-color'>{{CartCount}}</text>
+						<text v-if="CartCount > 0" class='num bg-color'>{{CartCount}}</text>
 					</view>
 					<view>购物车</view>
 				</navigator>
+        <!-- 无库存，不允许购买 -->
 				<view class="bnt acea-row" v-if="attr.productSelect.stock <= 0">
-					<form @submit="joinCart" report-submit="true"><button class="joinCart bnts"
-							form-type="submit">加入购物车</button></form>
-					<form report-submit="true"><button class="buy bnts bg-color-hui" form-type="submit">已售罄</button>
+					<form @submit="joinCart" report-submit="true">
+            <button class="joinCart bnts" form-type="submit">加入购物车</button>
+          </form>
+					<form report-submit="true">
+            <button class="buy bnts bg-color-hui" form-type="submit">已售罄</button>
 					</form>
 				</view>
-				<view class="bnt acea-row" v-else>
-					<form @submit="joinCart" report-submit="true"><button class="joinCart bnts"
-							form-type="submit">加入购物车</button></form>
-					<form @submit="goBuy" report-submit="true"><button class="buy bnts" form-type="submit">立即购买</button>
+        <!-- 有库存，允许购买 -->
+        <view class="bnt acea-row" v-else>
+					<form @submit="joinCart" report-submit="true">
+            <button class="joinCart bnts" form-type="submit">加入购物车</button>
+          </form>
+					<form @submit="goBuy" report-submit="true">
+            <button class="buy bnts" form-type="submit">立即购买</button>
 					</form>
 				</view>
 			</block>
-			<view class="bnt bntVideo acea-row" v-if="attr.productSelect.stock <= 0 && type === 'video'">
-				<form report-submit="true"><button class="buy bnts bg-color-hui" form-type="submit">已售罄</button></form>
-			</view>
-			<view class="bnt bntVideo acea-row" v-if="attr.productSelect.stock > 0 && type === 'video'">
-				<form @submit="goBuy" report-submit="true"><button class="buy bnts" form-type="submit">立即购买</button>
-				</form>
-			</view>
+      <!-- 场景：视频订单 -->
+      <block v-else-if="type === 'video'">
+        <!-- 无库存，不允许购买 -->
+        <view class="bnt bntVideo acea-row" v-if="attr.productSelect.stock <= 0 && type === 'video'">
+          <form report-submit="true"><button class="buy bnts bg-color-hui" form-type="submit">已售罄</button></form>
+        </view>
+        <!-- 有库存，允许购买 -->
+        <view class="bnt bntVideo acea-row" v-if="attr.productSelect.stock > 0 && type === 'video'">
+          <form @submit="goBuy" report-submit="true"><button class="buy bnts" form-type="submit">立即购买</button>
+          </form>
+        </view>
+      </block>
 		</view>
 		<shareRedPackets :sharePacket="sharePacket" @listenerActionSheet="listenerActionSheet"
 			@closeChange="closeChange"></shareRedPackets>
-		<!-- 组件 -->
+		<!-- SKU 弹窗 -->
 		<productWindow
       :attr="attr"
       :isShow='1'
@@ -210,14 +227,13 @@
       @myevent="onMyEvent"
       @ChangeAttr="ChangeAttr"
 			@ChangeCartNum="ChangeCartNum"
-      @attrVal="attrVal"
       @iptCartNum="iptCartNum"
-      id='product-window'
     />
 		<home></home>
+    <!-- 优惠劵弹窗 TODO 芋艿：待实现 -->
 		<couponListWindow :coupon='coupon' @ChangCouponsClone="ChangCouponsClone" @ChangCoupons="ChangCoupons"
 			@ChangCouponsUseState="ChangCouponsUseState" @tabCouponType="tabCouponType"></couponListWindow>
-		<!-- 分享按钮 -->
+		<!-- 分享按钮 TODO 芋艿：待实现 -->
 		<view class="generate-posters acea-row row-middle" :class="posters ? 'on' : ''">
 			<!-- #ifndef MP -->
 			<button class="item" hover-class='none' v-if="weixinStatus === true" @click="H5ShareBox = true">
@@ -236,12 +252,13 @@
 				<view class="">生成海报</view>
 			</button>
 		</view>
+    <!-- TODO 芋艿：不知道啥东西 -->
 		<view class="mask" v-if="posters" @click="closePosters"></view>
 		<view class="mask" v-if="canvasStatus"></view>
 		<!-- #ifdef MP -->
 		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
 		<!-- #endif -->
-		<!-- 海报展示 -->
+		<!-- 海报展示 TODO 芋艿：待实现 -->
 		<view class='poster-pop' v-if="canvasStatus">
 			<image src='../../static/images/poster-close.png' class='close' @click="posterImageClose"></image>
 			<image :src='imagePath'></image>
@@ -308,7 +325,6 @@
 	import {
 		getQrcode
 	} from '@/api/api.js';
-  import {convertProductPropertyList, convertProductSkuMap} from "../../utils/product";
 	// #endif
 	let app = getApp();
 	export default {
@@ -326,81 +342,80 @@
 		},
 		data() {
 			return {
-				//属性是否打开
+				// 属性是否打开 TODO 待实现
 				coupon: {
 					coupon: false,
 					type: 1,
 					list: [],
 					count: []
 				},
-				animated: false, //购物车动画
-				id: 0, //商品id
-				replyCount: 0, //总评论数量
-				reply: [], //评论列表
-				productInfo: {}, // 商品详情 TODO 芋艿：准备移除
+				id: 0, // 商品 id
+        productInfo: {}, // 商品详情 TODO 芋艿：准备移除
         spu: {}, // 商品 SPU 详情
-				skuMap: [], // 商品 SKU Map
-				couponList: [], //优惠券
-				cart_num: 1, //购买数量
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				isOpen: false, //是否打开属性组件
-				actionSheetHidden: true,
-				storeImage: '', //海报产品图
-				PromotionCode: '', //二维码图片
-				posterbackgd: '/static/images/posterbackgd.png',
-				sharePacket: {
-					isState: true, //默认不显示
-				}, //分销商详细
-				// uid: 0, //用户uid
-				circular: false,
-				autoplay: false,
-				interval: 3000,
-				duration: 500,
-				clientHeight: "",
-				systemStore: {}, //门店信息
-				good_list: [],
-				replyChance: 0,
-				CartCount: 0,
-				isDown: true,
-				posters: false,
-				weixinStatus: false,
+        skuMap: [], // 商品 SKU Map
         attrValue: '', // 已选属性名的拼接，例如说 红色,大 这样的格式
         attr: { // productWindow 组件，使用该属性
-					cartAttr: false, // 是否打开属性的选择弹出
+          cartAttr: false, // 是否打开属性的选择弹出
           // ↓↓↓ 属性数组，结构为：id = 属性编号；name = 属性编号的名字；values[].id = 属性值的编号，values[].name = 属性值的名字；index = 选中的属性值的名字
-					properties: [],
+          properties: [],
           productSelect: {} // 选中的 SKU
+        },
+        CartCount: 0, // 购物车数量
+        animated: false, // 购物车动画
+				replyCount: 0, // 总评论数量 TODO 芋艿：回复，待实现
+				reply: [], // 评论列表
+        replyChance: 0, // TODO 芋艿：评论相关，待接入
+        userCollect: false,
+        couponList: [], // 优惠券 TODO 芋艿：待实现
+				cart_num: 1, // 购买数量 TODO 芋艿：待实现
+				isAuto: false, // 没有授权的不会自动授权 TODO 芋艿：待实现
+				isShowAuth: false, // 是否隐藏授权 TODO 芋艿：待实现
+				isOpen: false, // 是否打开属性组件 TODO 芋艿：是不是可以移除，貌似和 attr.cartAttr 重复
+				actionSheetHidden: true, // TODO 芋艿：没搞懂
+				storeImage: '', // 海报产品图  // TODO 芋艿：没搞懂
+				PromotionCode: '', // 二维码图片  // TODO 芋艿：没搞懂
+				posterbackgd: '/static/images/posterbackgd.png',  // TODO 芋艿：没搞懂
+				sharePacket: { // 分销商详细
+					isState: true, // 默认不显示  // TODO 芋艿：没搞懂
 				},
-				navActive: 0,
-				H5ShareBox: false, //公众号分享图片
-				activityH5: [],
-				retunTop: true, //顶部返回
-				navH: "",
-				navList: [],
-				opacity: 0,
-				scrollY: 0,
-				topArr: [],
-				toView: '',
-				height: 0,
-				heightArr: [],
-				lock: false,
-				scrollTop: 0,
-				tagStyle: {
+				circular: false, // TODO 芋艿：没搞懂
+				autoplay: false,  // TODO 芋艿：没搞懂
+				interval: 3000,   // TODO 芋艿：没搞懂
+				duration: 500,  // TODO 芋艿：没搞懂
+				clientHeight: "",  // TODO 芋艿：没搞懂
+				systemStore: {}, // 门店信息 TODO 芋艿：后面搞
+				good_list: [], // TODO 芋艿：优品推荐
+				isDown: true, // TODO 芋艿：分销
+				posters: false, // TODO 芋艿：海报
+				weixinStatus: false, // TODO 芋艿：微信分享
+				H5ShareBox: false, // 公众号分享图片 TODO 芋艿：微信分享
+				activityH5: [], // TODO 芋艿：活动？
+				retunTop: true, // 顶部返回 TODO 芋艿：貌似没啥用
+				navH: "", // 头部 nav 高度
+				navList: [], // 头部 nav 列表
+        navActive: 0, // 选中的 nav 下标
+        opacity: 0, // TODO 芋艿：没搞懂；滚动相关
+				scrollY: 0, // TODO 芋艿：没搞懂；滚动相关
+				topArr: [], // TODO 芋艿：没搞懂；滚动相关
+				toView: '', // TODO 芋艿：貌似没啥用
+				height: 0, // TODO 芋艿：没搞懂；滚动相关
+				heightArr: [], // TODO 芋艿：没搞懂；滚动相关
+				lock: false,  // TODO 芋艿：没搞懂；滚动相关
+				scrollTop: 0,  // TODO 芋艿：没搞懂；滚动相关
+				tagStyle: { // 商品描述的样式
 					img: 'width:100%;display:block;',
 					table: 'width:100%',
 					video: 'width:100%'
 				},
-				qrcodeSize: 600,
-				canvasStatus: false, //是否显示海报
-				imagePath: '', //海报路径
-				imgTop: '',
-				errT: '',
-				homeTop: 20,
-				navbarRight: 0,
-				userCollect: false,
-				returnShow: true, //判断顶部返回是否出现
-				type: "" //视频号普通商品类型
+				qrcodeSize: 600, // TODO 芋艿：海报相关
+				canvasStatus: false, // 是否显示海报 TODO 芋艿：海报相关
+				imagePath: '', // 海报路径 TODO 芋艿：海报相关
+				imgTop: '', // TODO 芋艿：海报相关
+				errT: '',  // TODO 芋艿：海报相关
+				homeTop: 20, // TODO 芋艿：头部相关
+				navbarRight: 0,  // TODO 芋艿：头部相关
+				returnShow: true, // 判断顶部返回是否出现  // TODO 芋艿：头部相关
+				type: "" // 视频号普通商品类型 TODO 待实现
 			};
 		},
 		computed: mapGetters(['isLogin', 'uid', 'chatUrl']),
@@ -1020,7 +1035,8 @@
 			},
 			/**
 			 * 获取购物车数量
-			 * @param boolean 是否展示购物车动画和重置属性
+       *
+			 * @param isAnima 是否展示购物车动画和重置属性
 			 */
 			getCartCount: function(isAnima) {
 				let that = this;
@@ -1028,7 +1044,7 @@
 				if (isLogin) {
 					getCartCounts(true, 'total').then(res => {
 						that.CartCount = res.data.count;
-						//加入购物车后重置属性
+						// 加入购物车后重置属性
 						if (isAnima) {
 							that.animated = true;
 							setTimeout(function() {
