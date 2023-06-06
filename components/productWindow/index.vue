@@ -1,32 +1,33 @@
 <template>
 	<view>
 		<view class="product-window"
-			:class="(attr.cartAttr === true ? 'on' : '') + ' ' + (iSbnt?'join':'') + ' ' + (iScart?'joinCart':'')">
+			:class="(attr.cartAttr === true ? 'on' : '') + ' ' + (iSbnt ? 'join':'') + ' ' + (iScart ? 'joinCart':'')">
 			<view class="textpic acea-row row-between-wrapper">
 				<view class="pictrue">
-					<image :src="attr.productSelect.image"></image>
+					<image :src="attr.productSelect.picUrl"></image>
 				</view>
 				<view class="text">
 					<view class="line1">
-						{{ attr.productSelect.storeName }}
+						{{ attr.productSelect.spuName }}
 					</view>
 					<view class="money font-color">
 						￥<text class="num">{{ attr.productSelect.price }}</text>
 						<text class="stock" v-if='isShow'>库存: {{ attr.productSelect.stock }}</text>
-						<text class='stock' v-if="limitNum">限量: {{attr.productSelect.quota}}</text>
+						<text class='stock' v-if="limitNum">限量: {{ attr.productSelect.quota }}</text>
 					</view>
 				</view>
 				<view class="iconfont icon-guanbi" @click="closeAttr"></view>
 			</view>
 			<view class="rollTop">
+        <!-- 属性 key + value 列表 -->
 				<view class="productWinList">
-					<view class="item" v-for="(item, indexw) in attr.productAttr" :key="indexw">
-						<view class="title">{{ item.attrName }}</view>
+					<view class="item" v-for="(property, indexw) in attr.properties" :key="indexw">
+						<view class="title">{{ property.name }}</view>
 						<view class="listn acea-row row-middle">
-							<view class="itemn" :class="item.index === itemn ? 'on' : ''"
-								v-for="(itemn, indexn) in item.attrValues" @click="tapAttr(indexw, indexn)"
+							<view class="itemn" :class="property.index === value.name ? 'on' : ''"
+								v-for="(value, indexn) in property.values" @click="clickProperty(indexw, indexn)"
 								:key="indexn">
-								{{ itemn }}
+								{{ value.name }}
 							</view>
 						</view>
 					</view>
@@ -70,17 +71,16 @@
 
 <script>
 	export default {
-
 		props: {
 			attr: {
 				type: Object,
 				default: () => {}
 			},
-			limitNum: {
+			limitNum: { // TODO 芋艿：是否限流
 				type: Number,
 				value: 0
 			},
-			isShow: {
+			isShow: { // 是否展示库存
 				type: Number,
 				value: 0
 			},
@@ -107,7 +107,6 @@
 			},
 			/**
 			 * 购物车手动输入数量
-			 * 
 			 */
 			bindCode: function(e) {
 				this.$emit('iptCartNum', this.attr.productSelect.cart_num);
@@ -121,32 +120,33 @@
 			CartNumAdd: function() {
 				this.$emit('ChangeCartNum', true);
 			},
-			tapAttr: function(indexw, indexn) {
-				let that = this;
-				that.$emit("attrVal", {
-					indexw: indexw,
-					indexn: indexn
-				});
-				this.$set(this.attr.productAttr[indexw], 'index', this.attr.productAttr[indexw].attrValues[indexn]);
-				let value = that
-					.getCheckedValue()
-					// .sort()
-					.join(",");
-				that.$emit("ChangeAttr", value);
-
+      /**
+       * 选中某个规格属性
+       *
+       * @param indexw properties 的下标
+       * @param indexn properties 的下标
+       */
+			clickProperty: function(indexw, indexn) {
+        this.$set(this.attr.properties[indexw], 'index', this.attr.properties[indexw].values[indexn].name);
+				let newSkuKey = this.getCheckedValueNames().join(",");
+        this.$emit("ChangeAttr", newSkuKey);
 			},
-			//获取被选中属性；
-			getCheckedValue: function() {
-				let productAttr = this.attr.productAttr;
-				let value = [];
-				for (let i = 0; i < productAttr.length; i++) {
-					for (let j = 0; j < productAttr[i].attrValues.length; j++) {
-						if (productAttr[i].index === productAttr[i].attrValues[j]) {
-							value.push(productAttr[i].attrValues[j]);
+      /**
+       * 获取被选中属性值的数组
+       *
+       * @returns {*[]} 例如说，['红色', '大']
+       */
+			getCheckedValueNames: function() {
+				let properties = this.attr.properties;
+				let valueNames = [];
+				for (let i = 0; i < properties.length; i++) {
+					for (let j = 0; j < properties[i].values.length; j++) {
+						if (properties[i].index === properties[i].values[j].name) {
+							valueNames.push(properties[i].values[j].name);
 						}
 					}
 				}
-				return value;
+				return valueNames;
 			}
 		}
 	}
