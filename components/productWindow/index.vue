@@ -42,13 +42,9 @@
 						<view class='item num'>
 							<input type="number" v-model="attr.productSelect.cart_num"
 								data-name="productSelect.cart_num"
-								@input="bindCode(attr.productSelect.cart_num)"></input>
+								@input="bindCode(attr.productSelect.cart_num)" />
 						</view>
-						<view v-if="iSplus" class="item plus" :class="
-				      attr.productSelect.cart_num >= attr.productSelect.stock
-				        ? 'on'
-				        : ''
-				    " @click="CartNumAdd">
+						<view v-if="iSplus" class="item plus" :class="attr.productSelect.cart_num >= attr.productSelect.stock ? 'on'  : ''" @click="CartNumAdd">
 							+
 						</view>
 						<view v-else class='item plus'
@@ -57,7 +53,7 @@
 					</view>
 				</view>
 			</view>
-			<view class="joinBnt bg-color" v-if="iSbnt && attr.productSelect.stock>0 &&attr.productSelect.quota>0"
+			<view class="joinBnt bg-color" v-if="iSbnt && attr.productSelect.stock > 0 && attr.productSelect.quota > 0"
 				@click="goCat">我要参团</view>
 			<view class="joinBnt on"
 				v-else-if="(iSbnt && attr.productSelect.quota<=0)||(iSbnt &&attr.productSelect.stock<=0)">已售罄</view>

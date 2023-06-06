@@ -85,8 +85,8 @@
 								</view>
 							</view>
 						</view>
-						<view class='attribute acea-row row-between-wrapper mb30 borRadius14' @click="selecAttr">
-							<view class="line1">{{attrTxt}}：
+						<view class='attribute acea-row row-between-wrapper mb30 borRadius14' @click="openAttr">
+							<view class="line1">{{ attrValue.length > 0 ? "已选择" : "请选择" }}：
 								<text class='atterTxt'>{{attrValue}}</text>
 							</view>
 							<view class='iconfont icon-jiantou'></view>
@@ -333,8 +333,6 @@
 					list: [],
 					count: []
 				},
-				attrTxt: '请选择', //属性页面提示
-				attrValue: '', //已选属性
 				animated: false, //购物车动画
 				id: 0, //商品id
 				replyCount: 0, //总评论数量
@@ -367,8 +365,9 @@
 				isDown: true,
 				posters: false,
 				weixinStatus: false,
-				attr: { // productWindow 组件，使用该属性
-					cartAttr: false, // TODO 芋艿，还没搞懂
+        attrValue: '', // 已选属性名的拼接，例如说 红色,大 这样的格式
+        attr: { // productWindow 组件，使用该属性
+					cartAttr: false, // 是否打开属性的选择弹出
           // ↓↓↓ 属性数组，结构为：id = 属性编号；name = 属性编号的名字；values[].id = 属性值的编号，values[].name = 属性值的名字；index = 选中的属性值的名字
 					properties: [],
           productSelect: {} // 选中的 SKU
@@ -671,23 +670,16 @@
        * @param newSkuKey 新的 skuKey
 			 */
 			ChangeAttr: function(newSkuKey) {
-				let productSelect = this.skuMap[newSkuKey];
-				if (productSelect) {
-          this.$set(this.attr.productSelect, "id", productSelect.id);
-          this.$set(this.attr.productSelect, "picUrl", productSelect.picUrl);
-					this.$set(this.attr.productSelect, "price", productSelect.price);
-					this.$set(this.attr.productSelect, "stock", productSelect.stock);
-					this.$set(this.attr.productSelect, "cart_num", 1);
-					this.$set(this, "attrValue", newSkuKey);
-					this.$set(this, "attrTxt", "已选择");
-				} else {
-					this.$set(this.attr.productSelect, "image", this.spu.image);
-					this.$set(this.attr.productSelect, "price", this.spu.price);
-					this.$set(this.attr.productSelect, "stock", 0);
-					this.$set(this.attr.productSelect, "cart_num", 1);
-					this.$set(this, "attrValue", "");
-					this.$set(this, "attrTxt", "请选择");
-				}
+				let sku = this.skuMap[newSkuKey];
+        if (!sku) {
+          return;
+        }
+        this.$set(this.attr.productSelect, "id", sku.id);
+        this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
+        this.$set(this.attr.productSelect, "price", sku.price);
+        this.$set(this.attr.productSelect, "stock", sku.stock);
+        this.$set(this.attr.productSelect, "cart_num", 1);
+        this.$set(this, "attrValue", newSkuKey);
 			},
 			/**
 			 * 领取完毕移除当前页面领取过的优惠券展示
@@ -778,12 +770,8 @@
 					// #ifndef H5
 					that.downloadFilestoreImage();
 					// #endif
-					that.DefaultSelect();
+					that.selectDefaultSku();
 				}).catch(err => {
-          console.error(err)
-          if (true) {
-            return;
-          }
 					//状态异常返回上级页面
 					return that.$util.Tips({
 						title: err.toString()
@@ -855,59 +843,39 @@
 
 			/**
 			 * 查找默认选中的 sku，设置到 attr.productSelect 中
+       *
+       * 先找有库存的 SKU，否则找第一个 SKU
 			 */
-			DefaultSelect: function() {
+			selectDefaultSku: function() {
 				let properties = this.attr.properties;
         // 获得选中的属性值的名字，例如说 "黑色,大"，则 skuKey = ["黑色", "大"]
-        let skuKey = [];
+        let skuKey = undefined;
         for (let key in this.skuMap) {
 					if (this.skuMap[key].stock > 0) {
-						skuKey = this.attr.properties.length ? key.split(",") : [];
+						skuKey = key.split(",");
 						break;
 					}
 				}
+        if (!skuKey) { // 如果找不到，则选中第一个
+          skuKey = Object.keys(this.skuMap)[0].split(",");
+        }
         // 使用 index 属性表示当前选中的，值为属性值的名字
         for (let i = 0; i < properties.length; i++) {
 					this.$set(properties[i], "index", skuKey[i]);
 				}
 
-				// sort();排序函数:数字-英文-汉字；
-				let productSelect = this.skuMap[skuKey.join(",")];
-        // 情况一：选中 SKU，并且有规格
-				if (productSelect && properties.length) {
-					this.$set(this.attr.productSelect, "spuName", this.spu.name);
-          this.$set(this.attr.productSelect, "id", productSelect.id);
-          this.$set(this.attr.productSelect, "picUrl", productSelect.picUrl);
-					this.$set(this.attr.productSelect, "price", productSelect.price);
-					this.$set(this.attr.productSelect, "stock", productSelect.stock);
-					this.$set(this.attr.productSelect, "cart_num", 1);
-					this.$set(this, "attrValue", skuKey.join(","));
-					this.$set(this, "attrTxt", "已选择");
-        // 情况二：未选中 SKU，并且有规格
-				} else if (!productSelect && properties.length) {
-          this.$set(this.attr.productSelect, "spuName", this.spu.name);
-          this.$set(this.attr.productSelect, "id", productSelect.id);
-          this.$set(this.attr.productSelect, "picUrl", productSelect.picUrl);
-          this.$set(this.attr.productSelect, "price", productSelect.price);
-          this.$set(this.attr.productSelect, "stock", 0);
-					this.$set(this.attr.productSelect, "cart_num", 1);
-					this.$set(this, "attrValue", "");
-					this.$set(this, "attrTxt", "请选择");
-        // TODO 芋艿：啥情况会出现呢？
-				} else if (!productSelect && !properties.length) {
-					this.$set(this.attr.productSelect, "storeName", this.productInfo.storeName);
-					this.$set(this.attr.productSelect, "image", this.productInfo.image);
-					this.$set(this.attr.productSelect, "price", this.productInfo.price);
-					this.$set(this.attr.productSelect, "stock", this.productInfo.stock);
-					this.$set(
-						this.attr.productSelect,
-						"unique",
-						this.productInfo.id || ""
-					);
-					this.$set(this.attr.productSelect, "cart_num", 1);
-					this.$set(this, "attrValue", "");
-					this.$set(this, "attrTxt", "请选择");
-				}
+				let sku = this.skuMap[skuKey.join(",")];
+        if (!sku) {
+          return
+        }
+        this.$set(this.attr.productSelect, "spuName", this.spu.name);
+        this.$set(this.attr.productSelect, "id", sku.id);
+        this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
+        this.$set(this.attr.productSelect, "price", sku.price);
+        this.$set(this.attr.productSelect, "stock", sku.stock);
+        this.$set(this.attr.productSelect, "cart_num", 1);
+        this.$set(this, "attrValue", skuKey.join(","));
+        this.$set(this, "attrTxt", "已选择");
 			},
 			/**
 			 * 获取优惠券
@@ -962,9 +930,9 @@
 				}
 			},
 			/**
-			 * 打开属性插件
+			 * 打开 SKU 属性的选择
 			 */
-			selecAttr: function() {
+			openAttr: function() {
 				this.$set(this.attr, 'cartAttr', true);
 				this.$set(this, 'isOpen', true);
 			},
