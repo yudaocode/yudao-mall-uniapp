@@ -15,7 +15,6 @@
 		<view id="home" class="home acea-row row-center-wrapper iconfont icon-xiangzuo" :class="opacity > 0.5?'on':''"
 			:style="{ top: homeTop + 'rpx' }" v-if="returnShow" @tap="returns">
 		</view>
-		<!-- 	<view class='iconfont icon-xiangzuo' :style="'top:'+navH/2+'rpx'" @tap='returns'></view> -->
 		<view>
 			<scroll-view :scroll-top="scrollTop" scroll-y='true' scroll-with-animation="true"
 				:style='"height:"+height+"px;"' @scroll="scroll">
@@ -384,7 +383,6 @@
 				weixinStatus: false, // TODO 芋艿：微信分享
 				H5ShareBox: false, // 公众号分享图片 TODO 芋艿：微信分享
 				activityH5: [], // TODO 芋艿：活动？
-				retunTop: true, // 顶部返回 TODO 芋艿：貌似没啥用
 				navH: "", // 头部 nav 高度
 				navList: [], // 头部 nav 列表
         navActive: 0, // 选中的 nav 下标
@@ -406,7 +404,7 @@
 				imagePath: '', // 海报路径 TODO 芋艿：海报相关
 				imgTop: '', // TODO 芋艿：海报相关
 				errT: '',  // TODO 芋艿：海报相关
-				homeTop: 20, // TODO 芋艿：头部相关
+				homeTop: 20, // 头部的 top 位置
 				navbarRight: 0,  // TODO 芋艿：头部相关
 				returnShow: true, // 判断顶部返回是否出现  // TODO 芋艿：头部相关
 				type: "" // 视频号普通商品类型 TODO 待实现
@@ -426,28 +424,28 @@
 			}
 		},
 		onLoad(options) {
-			let that = this
-			var pages = getCurrentPages();
-			that.returnShow = pages.length !== 1;
-			if (pages.length <= 1) {
-				that.retunTop = false
-			}
-			that.navH = app.globalData.navHeight;
-			// #ifdef MP || APP-PLUS
-			// 小程序链接进入获取绑定关系id
-      // TODO 芋艿：分销？？？
-			setTimeout(()=>{
-				if(options.spread){
-					app.globalData.spread = options.spread;
-					spread(options.spread).then(res => {})
-				}
-			},2000)
-			// #endif
+      // 设置返回、nav 高度、总高度等字段
+			const pages = getCurrentPages();
+      this.returnShow = pages.length !== 1;
+      this.navH = app.globalData.navHeight;
 			uni.getSystemInfo({
-				success: function(res) {
-					that.height = res.windowHeight;
-				},
+				success: ( res ) => {
+					this.height = res.windowHeight;
+				}
 			});
+
+      // #ifdef MP || APP-PLUS
+      // 小程序链接进入获取绑定关系id
+      // TODO 芋艿：分销？？？
+      setTimeout(()=>{
+        if(options.spread){
+          app.globalData.spread = options.spread;
+          spread(options.spread).then(res => {})
+        }
+      },2000)
+      // #endif
+
+      // 校验参数是否正确
 			if (!options.scene && !options.id) {
 				this.$util.Tips({
 					title: '缺少参数无法查看商品'
@@ -456,46 +454,52 @@
 				});
 				return;
 			}
-			if (options.hasOwnProperty('id') || options.scene) {
+      let that = this
+      // 解析 id 商品编号
+      if (options.hasOwnProperty('id') || options.scene) {
 				if (options.scene) { // 仅仅小程序扫码进入
-					let qrCodeValue = that.$util.getUrlParams(decodeURIComponent(options.scene));
-					let mapeMpQrCodeValue = that.$util.formatMpQrCodeData(qrCodeValue);
+          // TODO 芋艿：code 是啥
+          let qrCodeValue = this.$util.getUrlParams(decodeURIComponent(options.scene));
+					let mapeMpQrCodeValue = this.$util.formatMpQrCodeData(qrCodeValue);
 					app.globalData.spread = mapeMpQrCodeValue.spread;
 					this.id = mapeMpQrCodeValue.id;
-					setTimeout(()=>{
+					// TODO 芋艿：code 是啥
+          setTimeout(()=>{
 						spread(mapeMpQrCodeValue.spread).then(res => {}).catch(res => {})
 					},2000)
 				} else {
 					this.id = options.id;
 				}
-				options.type == undefined || options.type == null ? that.type = 'normal' : that.type = options.type;
-				that.$store.commit("PRODUCT_TYPE", that.type);
+        // 设置 type 商品类型
+        if (options.type === undefined || options.type == null) {
+          this.type = 'normal'
+        } else {
+          this.type = options.type
+        }
+				this.$store.commit("PRODUCT_TYPE", that.type);
 			}
+
+      // 请求后端，加载商品等相关信息
 			this.getGoodsDetails();
+      if (true) {
+        return;
+      }
 			this.getCouponList();
 			this.getProductReplyList();
 			this.getProductReplyCount();
 			this.getGoods();
 		},
 		onReady() {
-			this.$nextTick(function() {
+			this.$nextTick(() => {
+        // 设置微信的头部 top 位置
 				// #ifdef MP
 				const menuButton = uni.getMenuButtonBoundingClientRect();
 				const query = uni.createSelectorQuery().in(this);
-				query
-					.select('#home')
-					.boundingClientRect(data => {
+				query.select('#home')
+          .boundingClientRect(data => {
 						this.homeTop = menuButton.top * 2 + menuButton.height - data.height;
 					})
-					.exec();
-				// #endif
-				// #ifdef H5
-				// const clipboard = new ClipboardJS('.copy-data');
-				// clipboard.on('success', () => {
-				// 	this.$util.Tips({
-				// 		title: '复制成功'
-				// 	});
-				// });
+          .exec();
 				// #endif
 			});
 		},
@@ -627,7 +631,6 @@
 				}
 				// 秒杀
 				if (item.activityH5 && item.activityH5.type == 1) {
-					debugger
 					uni.redirectTo({
 						url: `/pages/activity/goods_seckill_details/index?id=${item.activityH5.id}`
 					})
@@ -770,14 +773,13 @@
 						that.infoScroll();
 					}, 500);
 					// #ifdef MP
-					that.imgTop = res.data.productInfo.image
+					that.imgTop = spu.picUrl
 					// #endif
 					// #ifndef H5
 					that.downloadFilestoreImage();
 					// #endif
 					that.selectDefaultSku();
 				}).catch(err => {
-					//状态异常返回上级页面
 					return that.$util.Tips({
 						title: err.toString()
 					}, {
@@ -1055,7 +1057,6 @@
 					}
 					// #endif
 					this.posters = true;
-
 				}
 			},
 			closePosters: function() {
