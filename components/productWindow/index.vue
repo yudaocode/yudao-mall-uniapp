@@ -16,17 +16,17 @@
 						<text class='stock' v-if="limitNum">限量: {{ attr.productSelect.quota }}</text>
 					</view>
 				</view>
-				<view class="iconfont icon-guanbi" @click="closeAttr"></view>
+				<view class="iconfont icon-guanbi" @click="close"></view>
 			</view>
 			<view class="rollTop">
         <!-- 属性 key + value 列表 -->
 				<view class="productWinList">
-					<view class="item" v-for="(property, indexw) in attr.properties" :key="indexw">
+					<view class="item" v-for="(property, propertyIndex) in attr.properties" :key="propertyIndex">
 						<view class="title">{{ property.name }}</view>
 						<view class="listn acea-row row-middle">
 							<view class="itemn" :class="property.index === value.name ? 'on' : ''"
-								v-for="(value, indexn) in property.values" @click="clickProperty(indexw, indexn)"
-								:key="indexn">
+                    v-for="(value, valueIndex) in property.values" :key="valueIndex"
+                    @click="clickProperty(propertyIndex, valueIndex)">
 								{{ value.name }}
 							</view>
 						</view>
@@ -64,7 +64,7 @@
 			<view class="joinBnt on"
             v-else-if="(iScart && !attr.productSelect.stock)">已售罄</view>
 		</view>
-		<view class="mask" @touchmove.prevent :hidden="attr.cartAttr === false" @click="closeAttr"></view>
+		<view class="mask" @touchmove.prevent :hidden="attr.cartAttr === false" @click="close"></view>
 	</view>
 </template>
 
@@ -111,9 +111,9 @@
         // TODO 芋艿：【优化】方法名的处理；是否可去掉这个事件，统一处理
 				this.$emit('iptCartNum', this.attr.productSelect.cart_num);
 			},
-			closeAttr: function() {
-        this.attr.cartAttr = false
-			},
+			close: function() {
+        this.$emit('close');
+      },
 			CartNumDes: function() {
         // TODO 芋艿：【优化】方法名的处理；是否可去掉这个事件，统一处理
 				this.$emit('ChangeCartNum', false);
@@ -125,14 +125,14 @@
       /**
        * 选中某个规格属性
        *
-       * @param indexw properties 的下标
-       * @param indexn properties 的下标
+       * @param propertyIndex properties 的下标
+       * @param valueIndex values 的下标
        */
-			clickProperty: function(indexw, indexn) {
-        this.$set(this.attr.properties[indexw], 'index', this.attr.properties[indexw].values[indexn].name);
+			clickProperty: function(propertyIndex, valueIndex) {
+        this.$set(this.attr.properties[propertyIndex], 'index', this.attr.properties[propertyIndex].values[valueIndex].name);
 				let newSkuKey = this.getCheckedValueNames().join(",");
         // TODO 芋艿：【优化】修改下 ChangeAttr 名字，改成 selectSku 更合适
-        this.$emit("ChangeAttr", newSkuKey);
+        this.$emit("ChangeAttr", newSkuKey, propertyIndex, valueIndex);
 			},
       /**
        * 获取被选中属性值的数组
