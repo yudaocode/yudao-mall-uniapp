@@ -1,17 +1,19 @@
 <template>
 	<view class="product-con">
-		<view class='navbar' :style="{height:navH+'rpx',opacity:opacity}">
+    <!-- 顶部的 nav tab -->
+		<view class='navbar' :style="{ height: navH+'rpx', opacity: opacity }">
 			<view class='navbarH' :style='"height:"+navH+"rpx;"'>
 				<view class='navbarCon acea-row row-center-wrapper' :style="{ paddingRight: navbarRight + 'px' }">
 					<view class="header acea-row row-center-wrapper">
-						<view class="item" :class="navActive === index ? 'on' : ''" v-for="(item,index) in navList"
-							:key='index' @tap="tap(index)">
+						<view class="item" :class="navActive === index ? 'on' : ''"
+                  v-for="(item,index) in navList" :key='index' @tap="tap(index)">
 							{{ item }}
 						</view>
 					</view>
 				</view>
 			</view>
 		</view>
+    <!-- 返回键 -->
 		<view id="home" class="home acea-row row-center-wrapper iconfont icon-xiangzuo" :class="opacity > 0.5?'on':''"
 			:style="{ top: homeTop + 'rpx' }" v-if="returnShow" @tap="returns">
 		</view>
@@ -376,7 +378,6 @@
 				autoplay: false,  // TODO 芋艿：没搞懂
 				interval: 3000,   // TODO 芋艿：没搞懂
 				duration: 500,  // TODO 芋艿：没搞懂
-				clientHeight: "",  // TODO 芋艿：没搞懂
 				systemStore: {}, // 门店信息 TODO 芋艿：后面搞
 				good_list: [], // TODO 芋艿：优品推荐
 				isDown: true, // TODO 芋艿：分销
@@ -384,17 +385,6 @@
 				weixinStatus: false, // TODO 芋艿：微信分享
 				H5ShareBox: false, // 公众号分享图片 TODO 芋艿：微信分享
 				activityH5: [], // TODO 芋艿：活动？
-				navH: "", // 头部 nav 高度
-				navList: [], // 头部 nav 列表
-        navActive: 0, // 选中的 nav 下标
-        opacity: 0, // TODO 芋艿：没搞懂；滚动相关
-				scrollY: 0, // TODO 芋艿：没搞懂；滚动相关
-				topArr: [], // TODO 芋艿：没搞懂；滚动相关
-				toView: '', // TODO 芋艿：貌似没啥用
-				height: 0, // TODO 芋艿：没搞懂；滚动相关
-				heightArr: [], // TODO 芋艿：没搞懂；滚动相关
-				lock: false,  // TODO 芋艿：没搞懂；滚动相关
-				scrollTop: 0,  // TODO 芋艿：没搞懂；滚动相关
 				tagStyle: { // 商品描述的样式
 					img: 'width:100%;display:block;',
 					table: 'width:100%',
@@ -405,11 +395,24 @@
 				imagePath: '', // 海报路径 TODO 芋艿：海报相关
 				imgTop: '', // TODO 芋艿：海报相关
 				errT: '',  // TODO 芋艿：海报相关
-				homeTop: 20, // 头部的 top 位置
-				navbarRight: 0,  // TODO 芋艿：头部相关
-				returnShow: true, // 判断顶部返回是否出现  // TODO 芋艿：头部相关
-				type: "" // 视频号普通商品类型 TODO 待实现
-			};
+				type: "", // 视频号普通商品类型 TODO 待实现
+
+        // ========== 顶部 nav + scroll 相关的变量 ==========
+        returnShow: true, // 判断顶部 [返回] 是否出现
+        homeTop: 20, // 头部的 top 位置
+        clientHeight: "",  // 客户端 height 高度
+        height: 0, // 窗口 height 高度
+        scrollY: 0, // 滚动的 Y 轴
+        scrollTop: 0,  // 滚动条的 top 位置
+        lock: false,  // 是否锁定 scroll 下
+        topArr: [], // 每个 nav 的 top 位置
+        heightArr: [], // 每个 nav 的 height 高度
+        navH: "", // 头部 nav 高度
+        navbarRight: 0,  // 头部 nav 距离 right 距离
+        opacity: 0, // 头部 nav 的透明度
+        navList: [], // 头部 nav 列表
+        navActive: 0, // 选中的 navList 下标
+      };
 		},
 		computed: mapGetters(['isLogin', 'uid', 'chatUrl']),
 		watch: {
@@ -482,9 +485,6 @@
 
       // 请求后端，加载商品等相关信息
 			this.getGoodsDetails();
-      if (true) {
-        return;
-      }
 			this.getCouponList();
 			this.getProductReplyList();
 			this.getProductReplyCount();
@@ -504,6 +504,7 @@
 				// #endif
 			});
 		},
+    // TODO 芋艿：微信专属逻辑？
 		/**
 		 * 用户点击右上角分享
 		 */
@@ -519,26 +520,6 @@
 		},
 		// #endif
 		methods: {
-			getChat(uid) {
-				window.yzf && window.yzf.init({
-					sign: '37ef9b97872756ce2a1596ec4fe9b66b0b4cbeec7b36239a65924fa6cbd5c29ac6b013c274511b2eee929e72312baeeeb97aae86',
-					token: '', //非必填
-					userAvator: '', //非必填，用户头像
-					userNick: '', //非必填，用户昵称
-					uid: uid, //用户唯一标识，如果没有则不填写，默认为空,（字符串格式）
-					title: '', //非必填，如果未填写，默认获取配置标题
-					isRMB: '', //商品是否显示人民币￥,默认显示，false不显示
-					data: {
-						c1: '',
-						c2: '',
-						c3: '',
-						c4: '',
-						c5: ''
-					},
-					selector: 'chat-btn',
-					callback: function(type, data) {}
-				})
-			},
 			kefuClick() {
 				location.href = this.chatUrl;
 			},
@@ -568,37 +549,6 @@
 			 */
 			iptCartNum: function(number) {
 				this.$set(this.attr.productSelect, 'cart_num', number ? number : 1);
-			},
-			// 后退
-			returns: function() {
-				uni.navigateBack()
-			},
-			tap: function(index) {
-				var id = "past" + index;
-				var that = this;
-				this.$set(this, 'toView', id);
-				this.$set(this, 'navActive', index);
-				this.$set(this, 'lock', true);
-				this.$set(this, 'scrollTop', index > 0 ? that.topArr[index] - (app.globalData.navHeight / 2) : that
-					.topArr[index]);
-			},
-			scroll: function(e) {
-				var that = this,
-					scrollY = e.detail.scrollTop;
-				var opacity = scrollY / 200;
-				opacity = opacity > 1 ? 1 : opacity;
-				that.$set(that, 'opacity', opacity);
-				that.$set(that, 'scrollY', scrollY);
-				if (that.lock) {
-					that.$set(that, 'lock', false)
-					return;
-				}
-				for (var i = 0; i < that.topArr.length; i++) {
-					if (scrollY < that.topArr[i] - (app.globalData.navHeight / 2) + that.heightArr[i]) {
-						that.$set(that, 'navActive', i)
-						break
-					}
-				}
 			},
 			/**
 			 * 去商品详情页
@@ -711,16 +661,6 @@
 				this.getCouponList();
 			},
 
-			setClientHeight: function() {
-				let that = this;
-				if (!that.good_list.length) return;
-				let view = uni.createSelectorQuery().in(this).select("#list0");
-				view.fields({
-					size: true,
-				}, data => {
-					that.$set(that, 'clientHeight', data.height + 20)
-				}).exec();
-			},
 			/**
 			 * 优品推荐
 			 */
@@ -736,6 +676,8 @@
 						});
 					}
 					this.$set(this, 'good_list', goodArray);
+
+          // 设置 nav bar
 					let navList = ['商品', '评价', '详情'];
 					if (goodArray.length) {
 						navList.splice(2, 0, '推荐')
@@ -753,46 +695,53 @@
 			 * 获取产品详情
 			 */
 			getGoodsDetails: function() {
-				let that = this;
-        ProductSpuApi.getSpuDetail(that.id).then(res => {
+        ProductSpuApi.getSpuDetail(this.id).then(res => {
 					let productInfo = res.data;
           let spu = res.data;
           let skus = res.data.skus;
-					that.$set(that, 'productInfo', productInfo);
-          that.$set(that, 'spu', spu);
-					that.$set(that, 'userCollect', res.data.userCollect); // TODO 芋艿：需要改造下，异步加载收藏状态
-					that.$set(that.attr, 'properties', ProductUtil.convertProductPropertyList(skus));
-					that.$set(that, 'skuMap', ProductUtil.convertProductSkuMap(skus));
-					that.$set(that.sharePacket, 'priceName', res.data.priceName); // TODO 芋艿：share packet 不知道干啥
-					that.$set(that.sharePacket, 'isState', Math.floor(res.data.priceName) === 0);
-					that.$set(that, 'activityH5', res.data.activityAllH5 ? res.data.activityAllH5 : []);
-					// 设置标题
+          this.$set(this, 'productInfo', productInfo);
+          this.$set(this, 'spu', spu);
+          this.$set(this, 'userCollect', res.data.userCollect); // TODO 芋艿：需要改造下，异步加载收藏状态
+          this.$set(this.attr, 'properties', ProductUtil.convertProductPropertyList(skus));
+          this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
+          this.$set(this.sharePacket, 'priceName', res.data.priceName); // TODO 芋艿：share packet 不知道干啥
+          this.$set(this.sharePacket, 'isState', Math.floor(res.data.priceName) === 0);
+          this.$set(this, 'activityH5', res.data.activityAllH5 ? res.data.activityAllH5 : []);
+
+          // 设置标题
           uni.setNavigationBarTitle({
 						title: productInfo.name.substring(0, 7) + "..."
 					})
-					if (that.isLogin) {
-						that.getCartCount();
+
+          // TODO 芋艿：需要在看看
+					if (this.isLogin) {
+            this.getCartCount();
 						//#ifdef H5
-						that.make(that.uid);
-						that.ShareInfo();
+            this.make(this.uid);
+            this.ShareInfo();
 						this.getImageBase64(this.productInfo.image);
 						// #endif
 						// #ifdef MP
-						that.getQrcode();
+            this.getQrcode();
 						// #endif
 					}
-					setTimeout(function() {
-						that.infoScroll();
+
+          // 处理滚动条
+					setTimeout(() => {
+						this.infoScroll();
 					}, 500);
-					// #ifdef MP
-					that.imgTop = spu.picUrl
+
+          // #ifdef MP
+          this.imgTop = spu.picUrl
 					// #endif
 					// #ifndef H5
-					that.downloadFilestoreImage();
+          this.downloadFilestoreImage();
 					// #endif
-					that.selectDefaultSku();
+
+          // 选中默认 sku
+          this.selectDefaultSku();
 				}).catch(err => {
-					return that.$util.Tips({
+					return this.$util.Tips({
 						title: err.toString()
 					}, {
 						tab: 3,
@@ -811,28 +760,6 @@
 					that.$set(that, 'replyChance', res.data.replyChance * 100);
 					that.$set(that, 'replyCount', res.data.sumCount);
 				});
-			},
-			infoScroll: function() {
-				var that = this,
-					topArr = [],
-					heightArr = [];
-				for (var i = 0; i < that.navList.length; i++) { //productList
-					//获取元素所在位置
-					var query = uni.createSelectorQuery().in(this);
-					var idView = "#past" + i;
-					// if (!that.data.good_list.length && i == 2) {
-					//   var idView = "#past" + 3;
-					// }
-					query.select(idView).boundingClientRect();
-					query.exec(function(res) {
-						var top = res[0].top;
-						var height = res[0].height;
-						topArr.push(top);
-						heightArr.push(height);
-						that.$set(that, 'topArr', topArr);
-						that.$set(that, 'heightArr', heightArr);
-					});
-				}
 			},
 			/**
 			 * 拨打电话
@@ -1301,6 +1228,84 @@
 					})
 				}
 			},
+
+      // ========== 顶部 nav 相关的方法 ==========
+      /**
+       * 后退
+       */
+      returns: function() {
+        uni.navigateBack()
+      },
+      /**
+       * 点击指定 nav bar
+       *
+       * @param index 新的 navList 位置
+       */
+      tap: function(index) {
+        this.$set(this, 'navActive', index);
+        this.$set(this, 'lock', true);
+        this.$set(this, 'scrollTop', index > 0 ? this.topArr[index] - (app.globalData.navHeight / 2)
+          : this.topArr[index]);
+      },
+      /**
+       * 计算并设置客户端 height 高度
+       */
+      setClientHeight: function() {
+        if (!this.good_list.length) {
+          return;
+        }
+        let view = uni.createSelectorQuery().in(this).select("#list0");
+        view.fields({
+          size: true,
+        }, data => {
+          this.$set(this, 'clientHeight', data.height + 20)
+        }).exec();
+      },
+      /**
+       * 滚动
+       *
+       * @param e 滚动事件
+       */
+      scroll: function(e) {
+        const	scrollY = e.detail.scrollTop;
+        let opacity = scrollY / 200;
+        opacity = opacity > 1 ? 1 : opacity;
+        this.$set(this, 'opacity', opacity);
+        this.$set(this, 'scrollY', scrollY);
+        if (this.lock) {
+          this.$set(this, 'lock', false)
+          return;
+        }
+        // 设置选中的 nav
+        for (let i = 0; i < this.topArr.length; i++) {
+          if (scrollY < this.topArr[i] - (app.globalData.navHeight / 2) + this.heightArr[i]) {
+            this.$set(this, 'navActive', i)
+            break
+          }
+        }
+      },
+      /**
+       * 处理器滚动条
+       */
+      infoScroll: function() {
+        const topArr = [];
+        const heightArr = [];
+        for (let i = 0; i < this.navList.length; i++) {
+          // 获取元素所在位置
+          const query = uni.createSelectorQuery().in(this);
+          const idView = "#past" + i;
+          query.select(idView).boundingClientRect();
+          query.exec((res) => {
+            const top = res[0].top;
+            const height = res[0].height;
+            topArr.push(top);
+            heightArr.push(height);
+            this.$set(this, 'topArr', topArr);
+            this.$set(this, 'heightArr', heightArr);
+          });
+        }
+      },
+
       fen2yuan(price) {
         return Util.fen2yuan(price)
       }
