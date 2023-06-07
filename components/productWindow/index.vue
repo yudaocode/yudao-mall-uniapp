@@ -53,13 +53,16 @@
 					</view>
 				</view>
 			</view>
+      <!-- TODO 芋艿：拼团 -->
 			<view class="joinBnt bg-color" v-if="iSbnt && attr.productSelect.stock > 0 && attr.productSelect.quota > 0"
-				@click="goCat">我要参团</view>
+            @click="goCat">我要参团</view>
 			<view class="joinBnt on"
-				v-else-if="(iSbnt && attr.productSelect.quota<=0)||(iSbnt &&attr.productSelect.stock<=0)">已售罄</view>
-			<view class="joinBnt bg-color" v-if="iScart && attr.productSelect.stock" @click="goCat">确定</view>
-			<!-- <view class="joinBnt bg-color" v-if="iSbnt && attr.productSelect.stock && attr.productSelect.quota" @click="goCat">确定</view> -->
-			<view class="joinBnt on" v-else-if="(iScart && !attr.productSelect.stock)">已售罄</view>
+            v-else-if="(iSbnt && attr.productSelect.quota<=0)||(iSbnt &&attr.productSelect.stock<=0)">已售罄</view>
+			<!-- TODO 芋艿：购物车 -->
+      <view class="joinBnt bg-color" v-if="iScart && attr.productSelect.stock"
+            @click="goCat">确定</view>
+			<view class="joinBnt on"
+            v-else-if="(iScart && !attr.productSelect.stock)">已售罄</view>
 		</view>
 		<view class="mask" @touchmove.prevent :hidden="attr.cartAttr === false" @click="closeAttr"></view>
 	</view>
@@ -80,15 +83,15 @@
 				type: Number,
 				value: 0
 			},
-			iSbnt: {
+			iSbnt: { // 是否拼团商品
 				type: Number,
 				value: 0
 			},
-			iSplus: {
+			iSplus: { // 是否允许 + - 操作
 				type: Number,
 				value: 0
 			},
-			iScart: {
+			iScart: { // 是否来自购物车界面
 				type: Number,
 				value: 0
 			}
@@ -105,15 +108,18 @@
 			 * 购物车手动输入数量
 			 */
 			bindCode: function(e) {
+        // TODO 芋艿：【优化】方法名的处理；是否可去掉这个事件，统一处理
 				this.$emit('iptCartNum', this.attr.productSelect.cart_num);
 			},
 			closeAttr: function() {
-				this.$emit('myevent');
+        this.attr.cartAttr = false
 			},
 			CartNumDes: function() {
+        // TODO 芋艿：【优化】方法名的处理；是否可去掉这个事件，统一处理
 				this.$emit('ChangeCartNum', false);
 			},
 			CartNumAdd: function() {
+        // TODO 芋艿：【优化】方法名的处理；是否可去掉这个事件，统一处理
 				this.$emit('ChangeCartNum', true);
 			},
       /**
@@ -125,6 +131,7 @@
 			clickProperty: function(indexw, indexn) {
         this.$set(this.attr.properties[indexw], 'index', this.attr.properties[indexw].values[indexn].name);
 				let newSkuKey = this.getCheckedValueNames().join(",");
+        // TODO 芋艿：【优化】修改下 ChangeAttr 名字，改成 selectSku 更合适
         this.$emit("ChangeAttr", newSkuKey);
 			},
       /**

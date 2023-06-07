@@ -2,7 +2,7 @@ import request from "@/utils/request.js";
 import Cache from "@/utils/cache.js"
 /**
  * 获取用户信息
- * 
+ *
 */
 export function getUserInfo(){
   return request.get('user');
@@ -10,7 +10,7 @@ export function getUserInfo(){
 
 /**
  * 设置用户分享
- * 
+ *
 */
 export function userShare(){
   return request.post('user/share');
@@ -80,7 +80,7 @@ export function postSignUser(sign) {
 
 /**
  * 获取签到配置
- * 
+ *
 */
 export function getSignConfig(){
   return request.get('user/sign/config')
@@ -104,7 +104,7 @@ export function setSignIntegral(){
 /**
  * 签到列表(年月)
  * @param object data
- * 
+ *
 */
 export function getSignMonthList(data){
   return request.get('user/sign/month',data)
@@ -112,7 +112,7 @@ export function getSignMonthList(data){
 
 /**
  * 活动状态
- * 
+ *
 */
 export function userActivity(){
   return request.get('user/activity');
@@ -133,7 +133,7 @@ export function getRecordApi(q) {
 }
 
 /*
- * 提现总金额 
+ * 提现总金额
  * */
 export function getCountApi() {
   return request.get("extract/totalMoney");
@@ -148,7 +148,7 @@ export function getIntegralList(q) {
 
 /**
  * 获取分销海报图片
- * 
+ *
 */
 export function spreadBanner(data){
 	return request.get('user/spread/banner',data);
@@ -164,7 +164,7 @@ export function spreadPeople(data){
 }
 
 /**
- * 
+ *
  * 推广佣金/提现总和
  * @param int type
 */
@@ -181,7 +181,7 @@ export function getSpreadInfo() {
 
 
 /**
- * 
+ *
  * 推广订单
  * @param object data
 */
@@ -213,7 +213,7 @@ export function extractCash(data){
 
 /**
  * 提现银行/提现最低金额
- * 
+ *
 */
 export function extractBank(){
   return request.get('extract/bank');
@@ -221,7 +221,7 @@ export function extractBank(){
 
 /**
  * 会员等级列表
- * 
+ *
 */
 export function userLevelGrade(){
   return request.get('user/level/grade');
@@ -237,14 +237,14 @@ export function userLevelTask(id){
 
 /**
  * 检查用户是否可以成为会员
- * 
+ *
 */
 export function userLevelDetection(){
   return request.get('user/level/detection');
 }
 
 /**
- * 
+ *
  * 地址列表
  * @param object data
 */
@@ -271,7 +271,7 @@ export function editAddress(data){
 /**
  * 删除地址
  * @param int id
- * 
+ *
 */
 export function delAddress(id){
   return request.post('address/del',{id:id})
@@ -279,7 +279,7 @@ export function delAddress(id){
 
 /**
  * 获取单个地址
- * @param int id 
+ * @param int id
 */
 export function getAddressDetail(id){
   return request.get('address/detail/'+id);
@@ -301,7 +301,7 @@ export function getLogout() {
 }
 /**
  * 小程序充值
- * 
+ *
 */
 export function rechargeRoutine(data){
   return request.post('recharge/routine',data)
@@ -329,7 +329,7 @@ export function transferIn(data) {
 
 /**
  * 获取默认地址
- * 
+ *
 */
 export function getAddressDefault(){
   return request.get('address/default');
@@ -374,7 +374,7 @@ export function spread(puid)
 
 /**
  * 当前用户在佣金排行第几名
- * 
+ *
  */
 export function brokerageRankNumber(data)
 {
@@ -383,7 +383,7 @@ export function brokerageRankNumber(data)
 
 /**
  * 会员等级经验值；
- * 
+ *
  */
 export function getlevelInfo()
 {
@@ -392,7 +392,7 @@ export function getlevelInfo()
 
 /**
  * 经验值明细；
- * 
+ *
  */
 export function getlevelExpList(data)
 {
@@ -401,7 +401,7 @@ export function getlevelExpList(data)
 
 /**
  * 经验值明细；
- * 
+ *
  */
 export function getuserDalance()
 {
@@ -411,7 +411,7 @@ export function getuserDalance()
 
 /**
  * 账单记录；
- * 
+ *
  */
 export function getBillList(data)
 {
@@ -437,24 +437,4 @@ export function extractUser() {
  * */
 export function spreadPeoCount() {
   return request.get("spread/people/count");
-}
-
-/*
-统计
-*
-*/
-export function computeUser(){
-	uni.request({
-	    url: document.location.protocol + '//shop.crmeb.net/index.php/admin/server.upgrade_api/updatewebinfo',
-		method:'POST',
-		data: {
-	        host:window.location.host,
-			https:document.location.protocol,
-			version:'CRMEB-JAVA-KY-V1.3.4',
-			version_code:'gitee',
-			ip:Cache.has('Ip') ? Cache.get('Ip') : ''
-	    },
-		dataType:'json',
-	    success: (res) => {}
-	});
 }

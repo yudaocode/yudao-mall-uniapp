@@ -19,5 +19,5 @@ export function base64src(base64data, cb) {
       return (new Error('ERROR_BASE64SRC_WRITE'));
     },
   });
-};
+}
 //module.exports = base64src;
