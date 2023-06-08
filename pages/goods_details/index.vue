@@ -520,6 +520,261 @@
 		},
 		// #endif
 		methods: {
+      // ========== 商品详情相关 ==========
+      /**
+       * 获取产品详情
+       */
+      getGoodsDetails: function() {
+        ProductSpuApi.getSpuDetail(this.id).then(res => {
+          let productInfo = res.data;
+          let spu = res.data;
+          let skus = res.data.skus;
+          this.$set(this, 'productInfo', productInfo);
+          this.$set(this, 'spu', spu);
+          this.$set(this, 'userCollect', res.data.userCollect); // TODO 芋艿：需要改造下，异步加载收藏状态
+          this.$set(this.attr, 'properties', ProductUtil.convertProductPropertyList(skus));
+          this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
+          this.$set(this.sharePacket, 'priceName', res.data.priceName); // TODO 芋艿：share packet 不知道干啥
+          this.$set(this.sharePacket, 'isState', Math.floor(res.data.priceName) === 0);
+          this.$set(this, 'activityH5', res.data.activityAllH5 ? res.data.activityAllH5 : []);
+
+          // 设置标题
+          uni.setNavigationBarTitle({
+            title: productInfo.name.substring(0, 7) + "..."
+          })
+
+          // TODO 芋艿：需要在看看
+          if (this.isLogin) {
+            this.getCartCount();
+            //#ifdef H5
+            this.make(this.uid);
+            this.ShareInfo();
+            this.getImageBase64(this.productInfo.image);
+            // #endif
+            // #ifdef MP
+            this.getQrcode();
+            // #endif
+          }
+
+          // 处理滚动条
+          setTimeout(() => {
+            this.infoScroll();
+          }, 500);
+
+          // #ifdef MP
+          this.imgTop = spu.picUrl
+          // #endif
+          // #ifndef H5
+          this.downloadFilestoreImage();
+          // #endif
+
+          // 选中默认 sku
+          this.selectDefaultSku();
+        }).catch(err => {
+          return this.$util.Tips({
+            title: err.toString()
+          }, {
+            tab: 3,
+            url: 1
+          });
+        })
+      },
+      /**
+       * 查找默认选中的 sku，设置到 attr.productSelect 中
+       *
+       * 先找有库存的 SKU，否则找第一个 SKU
+       */
+      selectDefaultSku: function() {
+        let properties = this.attr.properties;
+        // 获得选中的属性值的名字，例如说 "黑色,大"，则 skuKey = ["黑色", "大"]
+        let skuKey = undefined;
+        for (let key in this.skuMap) {
+          if (this.skuMap[key].stock > 0) {
+            skuKey = key.split(",");
+            break;
+          }
+        }
+        if (!skuKey) { // 如果找不到，则选中第一个
+          skuKey = Object.keys(this.skuMap)[0].split(",");
+        }
+        // 使用 index 属性表示当前选中的，值为属性值的名字
+        for (let i = 0; i < properties.length; i++) {
+          this.$set(properties[i], "index", skuKey[i]);
+        }
+
+        let sku = this.skuMap[skuKey.join(",")];
+        if (!sku) {
+          return
+        }
+        this.$set(this.attr.productSelect, "spuName", this.spu.name);
+        this.$set(this.attr.productSelect, "id", sku.id);
+        this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
+        this.$set(this.attr.productSelect, "price", sku.price);
+        this.$set(this.attr.productSelect, "stock", sku.stock);
+        this.$set(this.attr.productSelect, "cart_num", 1);
+        this.$set(this, "attrValue", skuKey.join(","));
+      },
+      /**
+       * 打开 SKU 属性的选择
+       */
+      openAttr: function() {
+        this.$set(this.attr, 'cartAttr', true);
+      },
+      /**
+       * 关闭 productWindow 弹窗
+       */
+      closeAttr: function () {
+        this.$set(this.attr, "cartAttr", false);
+      },
+      /**
+       * 属性变动赋值
+       *
+       * @param newSkuKey 新的 skuKey
+       * @param propertyIndex properties 的下标
+       * @param valueIndex values 的下标
+       */
+      ChangeAttr: function(newSkuKey, propertyIndex, valueIndex) {
+        // SKU
+        let sku = this.skuMap[newSkuKey];
+        if (!sku) {
+          return;
+        }
+        this.$set(this.attr.productSelect, "id", sku.id);
+        this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
+        this.$set(this.attr.productSelect, "price", sku.price);
+        this.$set(this.attr.productSelect, "stock", sku.stock);
+        this.$set(this.attr.productSelect, "cart_num", 1);
+        // SKU 关联属性
+        this.$set(this.attr.properties[propertyIndex], 'index', this.attr.properties[propertyIndex].values[valueIndex].name);
+        this.$set(this, "attrValue", newSkuKey);
+      },
+      /**
+       * 购物车数量加和数量减
+       *
+       * @param changeValue true 增加；false 减少
+       */
+      ChangeCartNum: function(changeValue) {
+        // 获取当前 sku
+        let sku = this.attr.productSelect;
+        if (!sku) {
+          return;
+        }
+
+        // 设置数量
+        let stock = sku.stock || 0;
+        if (changeValue) {
+          sku.cart_num++;
+          if (sku.cart_num > stock) {
+            this.$set(this.attr.productSelect, "cart_num", stock);
+            this.$set(this, "cart_num", stock);
+          }
+        } else {
+          sku.cart_num--;
+          if (sku.cart_num < 1) {
+            this.$set(this.attr.productSelect, "cart_num", 1);
+            this.$set(this, "cart_num", 1);
+          }
+        }
+      },
+      /**
+       * 购物车手动填写
+       *
+       * @param number 数量
+       */
+      iptCartNum: function(number) {
+        this.$set(this.attr.productSelect, 'cart_num', number ? number : 1);
+      },
+      /**
+       * 打开属性加入购物车
+       */
+      joinCart: function() {
+        // 未登录，需要跳转
+        if (!this.isLogin) {
+          toLogin();
+          return;
+        }
+
+        // 【重要】如果 attr 组件未打开，此时需要先打开。等到选择完后，再添加购物车
+        if (!this.attr.cartAttr) {
+          this.openAttr();
+          return
+        }
+
+        // 库存不足
+        let sku = this.attr.productSelect;
+        if (sku.stock === 0) {
+          return that.$util.Tips({
+            title: "产品库存不足，请选择其它"
+          });
+        }
+
+        // 添加购物车
+        TradeCartApi.addCart({
+          count: sku.cart_num,
+          skuId: sku.id,
+          addStatus: true // TODO 芋艿：去掉 addStatus 字段
+        }).then(res => {
+          // 关闭 attr 组件
+          this.attr.cartAttr = false;
+          // 提示成功
+          this.$util.Tips({
+            title: "添加购物车成功",
+            success: () => {
+              this.getCartCount(true);
+            }
+          });
+        }).catch(res => {
+          this.$util.Tips({
+            title: res
+          });
+        });
+      },
+      /**
+       * 立即购买
+       */
+      goBuy: function() {
+        // 未登录，需要跳转
+        if (!this.isLogin) {
+          toLogin();
+          return;
+        }
+
+        // 【重要】如果 attr 组件未打开，此时需要先打开。等到选择完后，再立即购买
+        if (!this.attr.cartAttr) {
+          this.openAttr();
+          return;
+        }
+
+        // 发起下单
+        let sku = this.attr.productSelect;
+        uni.navigateTo({
+          url: '/pages/users/order_confirm/index?skuId=' + sku.id + '&count=' + sku.cart_num
+        });
+      },
+      /**
+       * 获取购物车数量
+       *
+       * @param isAnima 是否展示购物车动画和重置属性
+       */
+      getCartCount: function(isAnima) {
+        const isLogin = this.isLogin;
+        if (!isLogin) {
+          return
+        }
+        TradeCartApi.getCartCount().then(res => {
+          this.cartCount = res.data;
+          // 加入购物车后重置属性
+          if (isAnima) {
+            this.cartAnimated = true;
+            setTimeout(() => {
+              this.cartAnimated = false;
+            }, 500);
+          }
+        });
+      },
+
+      // === TODO 芋艿：未处理 ====
+
 			kefuClick() {
 				location.href = this.chatUrl;
 			},
@@ -541,14 +796,6 @@
 						url: `/pages/activity/goods_combination_details/index?id=${item.id}`
 					});
 				}
-			},
-			/**
-			 * 购物车手动填写
-       *
-       * @param number 数量
-			 */
-			iptCartNum: function(number) {
-				this.$set(this.attr.productSelect, 'cart_num', number ? number : 1);
 			},
 			/**
 			 * 去商品详情页
@@ -596,62 +843,6 @@
 				this.$set(this.coupon, 'coupon', false)
 			},
 			/**
-			 * 购物车数量加和数量减
-       *
-       * @param changeValue true 增加；false 减少
-			 */
-			ChangeCartNum: function(changeValue) {
-				// 获取当前 sku
-				let sku = this.attr.productSelect;
-        if (!sku) {
-          return;
-        }
-
-        // 设置数量
-				let stock = sku.stock || 0;
-				if (changeValue) {
-					sku.cart_num++;
-					if (sku.cart_num > stock) {
-						this.$set(this.attr.productSelect, "cart_num", stock);
-						this.$set(this, "cart_num", stock);
-					}
-				} else {
-          sku.cart_num--;
-					if (sku.cart_num < 1) {
-						this.$set(this.attr.productSelect, "cart_num", 1);
-						this.$set(this, "cart_num", 1);
-					}
-				}
-			},
-			/**
-			 * 属性变动赋值
-       *
-       * @param newSkuKey 新的 skuKey
-       * @param propertyIndex properties 的下标
-       * @param valueIndex values 的下标
-			 */
-			ChangeAttr: function(newSkuKey, propertyIndex, valueIndex) {
-        // SKU
-				let sku = this.skuMap[newSkuKey];
-        if (!sku) {
-          return;
-        }
-        this.$set(this.attr.productSelect, "id", sku.id);
-        this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
-        this.$set(this.attr.productSelect, "price", sku.price);
-        this.$set(this.attr.productSelect, "stock", sku.stock);
-        this.$set(this.attr.productSelect, "cart_num", 1);
-        // SKU 关联属性
-        this.$set(this.attr.properties[propertyIndex], 'index', this.attr.properties[propertyIndex].values[valueIndex].name);
-        this.$set(this, "attrValue", newSkuKey);
-			},
-      /**
-       * 关闭 productWindow 弹窗
-       */
-      closeAttr: function () {
-        this.$set(this.attr, "cartAttr", false);
-      },
-			/**
 			 * 领取完毕移除当前页面领取过的优惠券展示
 			 */
 			ChangCoupons: function(e) {
@@ -690,65 +881,6 @@
 					})
 				});
 			},
-
-			/**
-			 * 获取产品详情
-			 */
-			getGoodsDetails: function() {
-        ProductSpuApi.getSpuDetail(this.id).then(res => {
-					let productInfo = res.data;
-          let spu = res.data;
-          let skus = res.data.skus;
-          this.$set(this, 'productInfo', productInfo);
-          this.$set(this, 'spu', spu);
-          this.$set(this, 'userCollect', res.data.userCollect); // TODO 芋艿：需要改造下，异步加载收藏状态
-          this.$set(this.attr, 'properties', ProductUtil.convertProductPropertyList(skus));
-          this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
-          this.$set(this.sharePacket, 'priceName', res.data.priceName); // TODO 芋艿：share packet 不知道干啥
-          this.$set(this.sharePacket, 'isState', Math.floor(res.data.priceName) === 0);
-          this.$set(this, 'activityH5', res.data.activityAllH5 ? res.data.activityAllH5 : []);
-
-          // 设置标题
-          uni.setNavigationBarTitle({
-						title: productInfo.name.substring(0, 7) + "..."
-					})
-
-          // TODO 芋艿：需要在看看
-					if (this.isLogin) {
-            this.getCartCount();
-						//#ifdef H5
-            this.make(this.uid);
-            this.ShareInfo();
-						this.getImageBase64(this.productInfo.image);
-						// #endif
-						// #ifdef MP
-            this.getQrcode();
-						// #endif
-					}
-
-          // 处理滚动条
-					setTimeout(() => {
-						this.infoScroll();
-					}, 500);
-
-          // #ifdef MP
-          this.imgTop = spu.picUrl
-					// #endif
-					// #ifndef H5
-          this.downloadFilestoreImage();
-					// #endif
-
-          // 选中默认 sku
-          this.selectDefaultSku();
-				}).catch(err => {
-					return this.$util.Tips({
-						title: err.toString()
-					}, {
-						tab: 3,
-						url: 1
-					});
-				})
-			},
 			getProductReplyList: function() {
 				getReplyProduct(this.id).then(res => {
 					this.reply = res.data.productReply ? [res.data.productReply] : [];
@@ -771,7 +903,6 @@
 			},
 			/**
 			 * 打开地图
-			 *
 			 */
 			showMaoLocation: function() {
 				if (!this.systemStore.latitude || !this.systemStore.longitude) return this.$util.Tips({
@@ -787,42 +918,7 @@
 				});
 			},
 
-			/**
-			 * 查找默认选中的 sku，设置到 attr.productSelect 中
-       *
-       * 先找有库存的 SKU，否则找第一个 SKU
-			 */
-			selectDefaultSku: function() {
-				let properties = this.attr.properties;
-        // 获得选中的属性值的名字，例如说 "黑色,大"，则 skuKey = ["黑色", "大"]
-        let skuKey = undefined;
-        for (let key in this.skuMap) {
-					if (this.skuMap[key].stock > 0) {
-						skuKey = key.split(",");
-						break;
-					}
-				}
-        if (!skuKey) { // 如果找不到，则选中第一个
-          skuKey = Object.keys(this.skuMap)[0].split(",");
-        }
-        // 使用 index 属性表示当前选中的，值为属性值的名字
-        for (let i = 0; i < properties.length; i++) {
-					this.$set(properties[i], "index", skuKey[i]);
-				}
 
-				let sku = this.skuMap[skuKey.join(",")];
-        if (!sku) {
-          return
-        }
-        this.$set(this.attr.productSelect, "spuName", this.spu.name);
-        this.$set(this.attr.productSelect, "id", sku.id);
-        this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
-        this.$set(this.attr.productSelect, "price", sku.price);
-        this.$set(this.attr.productSelect, "stock", sku.stock);
-        this.$set(this.attr.productSelect, "cart_num", 1);
-        this.$set(this, "attrValue", skuKey.join(","));
-        this.$set(this, "attrTxt", "已选择");
-			},
 			/**
 			 * 获取优惠券
 			 */
@@ -874,12 +970,6 @@
 				}
 			},
 			/**
-			 * 打开 SKU 属性的选择
-			 */
-			openAttr: function() {
-				this.$set(this.attr, 'cartAttr', true);
-			},
-			/**
 			 * 打开优惠券插件
 			 */
 			couponTap: function() {
@@ -890,94 +980,6 @@
 					that.getCouponList(1);
 					that.$set(that.coupon, 'coupon', true);
 				}
-			},
-			/**
-			 * 打开属性加入购物车
-			 */
-			joinCart: function() {
-        // 未登录，需要跳转
-				if (!this.isLogin) {
-					toLogin();
-          return;
-				}
-
-        // 【重要】如果 attr 组件未打开，此时需要先打开。等到选择完后，再添加购物车
-        if (!this.attr.cartAttr) {
-          this.openAttr();
-          return
-        }
-
-        // 库存不足
-        let sku = this.attr.productSelect;
-        if (sku.stock === 0) {
-          return that.$util.Tips({
-            title: "产品库存不足，请选择其它"
-          });
-        }
-
-        // 添加购物车
-        TradeCartApi.addCart({
-          count: sku.cart_num,
-          skuId: sku.id,
-          addStatus: true // TODO 芋艿：去掉 addStatus 字段
-        }).then(res => {
-          // 关闭 attr 组件
-          this.attr.cartAttr = false;
-          // 提示成功
-          this.$util.Tips({
-            title: "添加购物车成功",
-            success: () => {
-              this.getCartCount(true);
-            }
-          });
-        }).catch(res => {
-          this.$util.Tips({
-            title: res
-          });
-        });
-      },
-			/**
-			 * 获取购物车数量
-       *
-			 * @param isAnima 是否展示购物车动画和重置属性
-			 */
-			getCartCount: function(isAnima) {
-				const isLogin = this.isLogin;
-				if (!isLogin) {
-          return
-        }
-        TradeCartApi.getCartCount().then(res => {
-          this.cartCount = res.data;
-          // 加入购物车后重置属性
-          if (isAnima) {
-            this.cartAnimated = true;
-            setTimeout(() => {
-              this.cartAnimated = false;
-            }, 500);
-          }
-        });
-			},
-			/**
-			 * 立即购买
-			 */
-			goBuy: function() {
-        // 未登录，需要跳转
-				if (!this.isLogin) {
-					toLogin();
-          return;
-				}
-
-        // 【重要】如果 attr 组件未打开，此时需要先打开。等到选择完后，再立即购买
-        if (!this.attr.cartAttr) {
-          this.openAttr();
-          return;
-        }
-
-        // 发起下单
-        let sku = this.attr.productSelect;
-        uni.navigateTo({
-          url: '/pages/users/order_confirm/index?skuId=' + sku.id + '&count=' + sku.cart_num
-        });
 			},
 			// 授权关闭
 			authColse: function(e) {
