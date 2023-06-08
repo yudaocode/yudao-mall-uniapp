@@ -1,5 +1,5 @@
 <template>
-	<view class='sharing-packets' :class='sharePacket.isState==true?"on":""'>
+	<view class='sharing-packets' :class='sharePacket.isState ? "on":""'>
 	   <view class='iconfont icon-guanbi' @click="closeShare"></view>
 	   <view class='line'></view>
 	   <view class='sharing-con' @click='goShare'>
@@ -10,34 +10,35 @@
 	        <view class='tip'>下单即返佣金</view>
 	        <view class='shareBut'>立即分享</view>
 	      </view>
-	   </view>  
+	   </view>
 	</view>
 </template>
 
 <script>
 	export default {
-		
 		props: {
-			    sharePacket: {
-					type: Object,
-					default: function(){
-						return {isState: true,priceName:''}
-					}
-			    }
+      sharePacket: {
+        type: Object,
+        default: function() {
+          return {
+            isState: true,
+            priceName:'' // 金额
+          }
+        }
+      }
 		},
 		data() {
 			return {
-
 			};
 		},
-		
+
 		methods: {
 			closeShare:function(){
-				  this.$emit('closeChange');
-			    },
-				goShare:function(){
-				      this.$emit('listenerActionSheet');
-				    }
+        this.$emit('closeChange');
+      },
+      goShare:function(){
+        this.$emit('listenerActionSheet');
+      }
 		}
 	}
 </script>

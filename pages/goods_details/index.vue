@@ -218,8 +218,12 @@
         </view>
       </block>
 		</view>
-		<shareRedPackets :sharePacket="sharePacket" @listenerActionSheet="listenerActionSheet"
-			@closeChange="closeChange"></shareRedPackets>
+    <!-- 左侧的分销提示 -->
+		<shareRedPackets
+      :sharePacket="sharePacket"
+      @listenerActionSheet="listenerActionSheet"
+      @closeChange="closeChange"
+    />
 		<!-- SKU 弹窗 -->
 		<productWindow
       :attr="attr"
@@ -234,7 +238,7 @@
     <!-- 优惠劵弹窗 TODO 芋艿：待实现 -->
 		<couponListWindow :coupon='coupon' @ChangCouponsClone="ChangCouponsClone" @ChangCoupons="ChangCoupons"
 			@ChangCouponsUseState="ChangCouponsUseState" @tabCouponType="tabCouponType"></couponListWindow>
-		<!-- 分享按钮 TODO 芋艿：待实现 -->
+		<!-- 分享按钮 -->
 		<view class="generate-posters acea-row row-middle" :class="posters ? 'on' : ''">
 			<!-- #ifndef MP -->
 			<button class="item" hover-class='none' v-if="weixinStatus === true" @click="H5ShareBox = true">
@@ -243,7 +247,7 @@
 			</button>
 			<!-- #endif -->
 			<!-- #ifdef MP -->
-			<button class="item" open-type="share" hover-class='none' @click="goFriend">
+			<button class="item" open-type="share" hover-class='none' @click="closePosters">
 				<view class="iconfont icon-weixin3"></view>
 				<view class="">发送给朋友</view>
 			</button>
@@ -253,13 +257,13 @@
 				<view class="">生成海报</view>
 			</button>
 		</view>
-    <!-- TODO 芋艿：不知道啥东西 -->
+    <!-- 海报展示 -->
 		<view class="mask" v-if="posters" @click="closePosters"></view>
 		<view class="mask" v-if="canvasStatus"></view>
 		<!-- #ifdef MP -->
 		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
 		<!-- #endif -->
-		<!-- 海报展示 TODO 芋艿：待实现 -->
+		<!-- 海报展示【操作】 -->
 		<view class='poster-pop' v-if="canvasStatus">
 			<image src='../../static/images/poster-close.png' class='close' @click="posterImageClose"></image>
 			<image :src='imagePath'></image>
@@ -294,15 +298,9 @@
 	import {
 		getCoupons
 	} from '@/api/api.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	import {
-		imageBase64
-	} from "@/api/public";
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
+	import { imageBase64 } from "@/api/public";
 	import productConSwiper from '@/components/productConSwiper';
 	import couponListWindow from '@/components/couponListWindow';
 	import productWindow from '@/components/productWindow';
@@ -315,15 +313,11 @@
   import * as Util from '@/utils/util.js';
   import * as ProductUtil from '@/utils/product.js';
   // #ifdef MP
-	import {
-		base64src
-	} from '@/utils/base64src.js'
+	import { base64src } from '@/utils/base64src.js'
 	import authorize from '@/components/Authorize';
-	import {
-		getQrcode
-	} from '@/api/api.js';
+	import { getQrcode } from '@/api/api.js';
 	// #endif
-	let app = getApp();
+	const app = getApp();
 	export default {
 		components: {
 			productConSwiper,
@@ -339,14 +333,8 @@
 		},
 		data() {
 			return {
-				// 属性是否打开 TODO 待实现
-				coupon: {
-					coupon: false,
-					type: 1,
-					list: [],
-					count: []
-				},
 				id: 0, // 商品 id
+        type: "", // 商品展示类型；normal - 普通；video - 视频
         productInfo: {}, // 商品详情 TODO 芋艿：准备移除
         spu: {}, // 商品 SPU 详情
         skuMap: [], // 商品 SKU Map
@@ -359,7 +347,13 @@
         },
         cartCount: 0, // 购物车的数量
         cartAnimated: false, // 购物车的动画开关
-				replyCount: 0, // 总评论数量 TODO 芋艿：回复，待实现
+        tagStyle: { // 商品描述的样式
+          img: 'width:100%;display:block;',
+          table: 'width:100%',
+          video: 'width:100%'
+        },
+
+        replyCount: 0, // 总评论数量 TODO 芋艿：回复，待实现
 				reply: [], // 评论列表
         replyChance: 0, // TODO 芋艿：评论相关，待接入
         userCollect: false,
@@ -367,35 +361,37 @@
 				cart_num: 1, // 购买数量 TODO 芋艿：待实现
 				isAuto: false, // 没有授权的不会自动授权 TODO 芋艿：待实现
 				isShowAuth: false, // 是否隐藏授权 TODO 芋艿：待实现
-				actionSheetHidden: true, // TODO 芋艿：没搞懂
-				storeImage: '', // 海报产品图  // TODO 芋艿：没搞懂
-				PromotionCode: '', // 二维码图片  // TODO 芋艿：没搞懂
-				posterbackgd: '/static/images/posterbackgd.png',  // TODO 芋艿：没搞懂
-				sharePacket: { // 分销商详细
-					isState: true, // 默认不显示  // TODO 芋艿：没搞懂
-				},
 				circular: false, // TODO 芋艿：没搞懂
 				autoplay: false,  // TODO 芋艿：没搞懂
 				interval: 3000,   // TODO 芋艿：没搞懂
 				duration: 500,  // TODO 芋艿：没搞懂
 				systemStore: {}, // 门店信息 TODO 芋艿：后面搞
 				good_list: [], // TODO 芋艿：优品推荐
-				isDown: true, // TODO 芋艿：分销
-				posters: false, // TODO 芋艿：海报
-				weixinStatus: false, // TODO 芋艿：微信分享
-				H5ShareBox: false, // 公众号分享图片 TODO 芋艿：微信分享
 				activityH5: [], // TODO 芋艿：活动？
-				tagStyle: { // 商品描述的样式
-					img: 'width:100%;display:block;',
-					table: 'width:100%',
-					video: 'width:100%'
-				},
-				qrcodeSize: 600, // TODO 芋艿：海报相关
-				canvasStatus: false, // 是否显示海报 TODO 芋艿：海报相关
-				imagePath: '', // 海报路径 TODO 芋艿：海报相关
-				imgTop: '', // TODO 芋艿：海报相关
-				errT: '',  // TODO 芋艿：海报相关
-				type: "", // 视频号普通商品类型 TODO 待实现
+        // 属性是否打开 TODO 待实现
+        coupon: {
+          coupon: false,
+          type: 1,
+          list: [],
+          count: []
+        },
+
+        // ========== 分销相关的变量 ==========
+        qrcodeSize: 600, // 二维码的大小
+        promotionCode: '', // 二维码图片
+        imgTop: '', // 商品图片的 base64 码
+        errT: '',  // 获得小程序码失败的提示文本
+        posters: false, // 分享弹窗的开关
+        weixinStatus: false, // TODO 芋艿：微信分享
+        canvasStatus: false, // 是否显示海报
+        imagePath: '', // 海报路径
+        H5ShareBox: false, // 公众号分享图片 TODO 芋艿：微信分享
+        posterbackgd: '/static/images/posterbackgd.png',  // 海报的背景，用于海报的生成
+        storeImage: '', // 下载商品图片后的文件地址
+        sharePacket: { // 分销商详细
+          isState: true, // 默认不显示  // TODO 芋艿：没搞懂
+        },
+        actionSheetHidden: true, // 微信小程序的右上角分享的弹出
 
         // ========== 顶部 nav + scroll 相关的变量 ==========
         returnShow: true, // 判断顶部 [返回] 是否出现
@@ -417,6 +413,7 @@
 		computed: mapGetters(['isLogin', 'uid', 'chatUrl']),
 		watch: {
 			isLogin: {
+        // TODO 芋艿：测试下，如果登录后，这里的效果
 				handler: function(newV, oldV) {
 					let that = this;
 					if (newV === true) {
@@ -504,18 +501,16 @@
 				// #endif
 			});
 		},
-    // TODO 芋艿：微信专属逻辑？
 		/**
-		 * 用户点击右上角分享
+		 * 微信小程序的用户点击右上角分享，会回调该方法
 		 */
 		// #ifdef MP
 		onShareAppMessage: function() {
-			let that = this;
-			that.$set(that, 'actionSheetHidden', !that.actionSheetHidden);
+      this.$set(this, 'actionSheetHidden', !this.actionSheetHidden);
 			return {
-				title: that.productInfo.storeName || '',
-				imageUrl: that.productInfo.image || '',
-				path: '/pages/goods_details/index?id=' + that.id + '&spread=' + that.uid,
+				title: this.spu.name || '',
+				imageUrl: this.spu.picUrl || '',
+				path: '/pages/goods_details/index?id=' + this.id + '&spread=' + this.uid,
 			}
 		},
 		// #endif
@@ -534,22 +529,24 @@
           this.$set(this, 'userCollect', res.data.userCollect); // TODO 芋艿：需要改造下，异步加载收藏状态
           this.$set(this.attr, 'properties', ProductUtil.convertProductPropertyList(skus));
           this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
-          this.$set(this.sharePacket, 'priceName', res.data.priceName); // TODO 芋艿：share packet 不知道干啥
+          // 设置分销相关变量 // TODO 芋艿：待接入
+          this.$set(this.sharePacket, 'priceName', res.data.priceName);
           this.$set(this.sharePacket, 'isState', Math.floor(res.data.priceName) === 0);
+          // 设置营销活动
           this.$set(this, 'activityH5', res.data.activityAllH5 ? res.data.activityAllH5 : []);
 
           // 设置标题
           uni.setNavigationBarTitle({
-            title: productInfo.name.substring(0, 7) + "..."
+            title: spu.name.substring(0, 7) + "..."
           })
 
-          // TODO 芋艿：需要在看看
+          // 登录情况下，获得购物车、分享等信息
           if (this.isLogin) {
             this.getCartCount();
-            //#ifdef H5
-            this.make(this.uid);
+            // #ifdef H5
+            this.make();
             this.ShareInfo();
-            this.getImageBase64(this.productInfo.image);
+            this.getImageBase64();
             // #endif
             // #ifdef MP
             this.getQrcode();
@@ -561,6 +558,7 @@
             this.infoScroll();
           }, 500);
 
+          // 设置或下载分销需要的图片
           // #ifdef MP
           this.imgTop = spu.picUrl
           // #endif
@@ -778,9 +776,6 @@
 			kefuClick() {
 				location.href = this.chatUrl;
 			},
-			closeChange: function() {
-				this.$set(this.sharePacket, 'isState', true);
-			},
 			goActivity: function(e) {
 				let item = e;
 				if (item.type === "1") {
@@ -917,8 +912,6 @@
 					success: function() {},
 				});
 			},
-
-
 			/**
 			 * 获取优惠券
 			 */
@@ -985,251 +978,247 @@
 			authColse: function(e) {
 				this.isShowAuth = e
 			},
-			/**
-			 * 分享打开
-			 */
-			listenerActionSheet: function() {
-				if (this.isLogin === false) {
-					toLogin();
-				} else {
-					// #ifdef H5
-					if (this.$wechat.isWeixin() === true) {
-						this.weixinStatus = true;
-					}
-					// #endif
-					this.posters = true;
-				}
-			},
-			closePosters: function() {
-				this.posters = false;
-			},
-			//隐藏海报
-			posterImageClose: function() {
-				this.canvasStatus = false
-			},
-			//替换安全域名
-			setDomain: function(url) {
-				url = url ? url.toString() : '';
-				//本地调试打开,生产请注销
-				if (url.indexOf("https://") > -1) return url;
-				else return url.replace('http://', 'https://');
-			},
-			//获取海报产品图（解决跨域问题，只适用于小程序）
-			downloadFilestoreImage: function() {
-				let that = this;
-				uni.downloadFile({
-					url: that.setDomain(that.productInfo.image),
-					success: function(res) {
-						that.storeImage = res.tempFilePath;
-					},
-					fail: function() {
-						return that.$util.Tips({
-							title: ''
-						});
-						that.storeImage = '';
-					},
-				});
-			},
-			// 小程序关闭分享弹窗；
-			goFriend: function() {
-				this.posters = false;
-			},
-			// 小程序二维码
-			getQrcode() {
-				let that = this;
-				let data = {
-					pid: that.uid,
-					id: that.id,
-					path: 'pages/goods_details/index'
-				}
-				getQrcode(data).then(res => {
-					base64src(res.data.code, res => {
-						that.PromotionCode = res;
-					});
 
-				}).catch(err => {
-					that.errT = err;
-				});
-			},
-			// 生成二维码；
-			make(uid) {
-				let href = location.href.split('?')[0] + "?id="+ this.id + "&spread="  + this.uid;
-				uQRCode.make({
-					canvasId: 'qrcode',
-					text: href,
-					size: this.qrcodeSize,
-					margin: 10,
-					success: res => {
-						this.PromotionCode = res;
-					},
-					complete: () => {},
-					fail: res => {
-						this.$util.Tips({
-							title: '海报二维码生成失败！'
-						});
-					}
-				})
-			},
-			getImageBase64: function(images) {
-				let that = this;
-				imageBase64({
-					url: images
-				}).then(res => {
-					that.imgTop = res.data.code;
-				})
-			},
-			/**
-			 * 获取产品分销二维码
-			 * @param function successFn 下载完成回调
-			 *
-			 */
-			downloadFilePromotionCode: function(successFn) {
-				let that = this;
-				getProductCode(that.id)
-					.then(res => {
-						uni.downloadFile({
-							url: that.setDomain(res.data.code),
-							success: function(res) {
-								that.$set(that, 'isDown', false);
-								if (typeof successFn == 'function') successFn && successFn(res
-									.tempFilePath);
-								else that.$set(that, 'PromotionCode', res.tempFilePath);
-							},
-							fail: function() {
-								that.$set(that, 'isDown', false);
-								that.$set(that, 'PromotionCode', '');
-							}
-						});
-					})
-					.catch(err => {
-						that.$set(that, 'isDown', false);
-						that.$set(that, 'PromotionCode', '');
-					});
-			},
-			/**
-			 * 生成海报
-			 */
-			goPoster: function() {
-				let that = this;
-				uni.showLoading({
-					title: '海报生成中',
-					mask: true
-				});
-				that.posters = false;
-				let arrImagesUrl = '';
-				let arrImagesUrlTop = '';
-				if (!that.PromotionCode) {
-					uni.hideLoading();
-					that.$util.Tips({
-						title: that.errT
-					});
-					return
-				}
-				setTimeout(() => {
-					if (!that.imgTop) {
-						uni.hideLoading();
-						that.$util.Tips({
-							title: '无法生成商品海报！'
-						});
-						return
-					}
-				}, 1000);
-				uni.downloadFile({
-					url: that.imgTop, //仅为示例，并非真实的资源
-					success: (res) => {
-						arrImagesUrlTop = res.tempFilePath;
-						let arrImages = [that.posterbackgd, arrImagesUrlTop, that.PromotionCode];
-						let storeName = that.productInfo.storeName;
-						let price = that.productInfo.price;
-						setTimeout(() => {
-							that.$util.PosterCanvas(arrImages, storeName, price, that.productInfo
-								.otPrice,
-								function(tempFilePath) {
-									that.imagePath = tempFilePath;
-									that.canvasStatus = true;
-									uni.hideLoading();
-								});
-						}, 500);
-					}
-				});
-			},
-			/*
-			 * 保存到手机相册
-			 */
-			// #ifdef MP
-			savePosterPath: function() {
-				let that = this;
-				uni.getSetting({
-					success(res) {
-						if (!res.authSetting['scope.writePhotosAlbum']) {
-							uni.authorize({
-								scope: 'scope.writePhotosAlbum',
-								success() {
-									uni.saveImageToPhotosAlbum({
-										filePath: that.imagePath,
-										success: function(res) {
-											that.posterImageClose();
-											that.$util.Tips({
-												title: '保存成功',
-												icon: 'success'
-											});
-										},
-										fail: function(res) {
-											that.$util.Tips({
-												title: '保存失败'
-											});
-										}
-									})
-								}
-							})
-						} else {
-							uni.saveImageToPhotosAlbum({
-								filePath: that.imagePath,
-								success: function(res) {
-									that.posterImageClose();
-									that.$util.Tips({
-										title: '保存成功',
-										icon: 'success'
-									});
-								},
-								fail: function(res) {
-									that.$util.Tips({
-										title: '保存失败'
-									});
-								},
-							})
-						}
-					}
-				})
-			},
-			// #endif
-			ShareInfo() {
-				let data = this.productInfo;
-				let href = location.href;
-				if (this.$wechat.isWeixin()) {
-					href =
-						href.indexOf("?") === -1 ?
-						href + "?spread=" + this.uid :
-						href + "&spread=" + this.uid;
+      // ========== 分销相关的方法 ==========
+      /**
+       * 生成二维码，设置到 promotionCode 变量
+       */
+      make() {
+        let href = location.href.split('?')[0] + "?id="+ this.id + "&spread="  + this.uid;
+        uQRCode.make({
+          canvasId: 'qrcode',
+          text: href,
+          size: this.qrcodeSize,
+          margin: 10,
+          success: res => {
+            this.promotionCode = res;
+          },
+          complete: () => {},
+          fail: res => {
+            this.$util.Tips({
+              title: '海报二维码生成失败！'
+            });
+          }
+        })
+      },
+      /**
+       * 设置微信公众号的分享标题、内容等信息
+       */
+      ShareInfo() {
+        // 只处理微信环境
+        if (!this.$wechat.isWeixin()) {
+          return
+        }
+        let spu = this.spu;
+        let href = location.href;
+        href = href.indexOf("?") === -1 ? href + "?spread=" + this.uid : href + "&spread=" + this.uid;
+        let configAppMessage = {
+          desc: spu.description,
+          title: spu.name,
+          link: href,
+          imgUrl: spu.picUrl
+        };
+        this.$wechat.wechatEvevt([
+          "updateAppMessageShareData",
+          "updateTimelineShareData",
+          "onMenuShareAppMessage",
+          "onMenuShareTimeline"
+        ], configAppMessage).then(res => {
+          console.log(res);
+        }).catch(err => {
+          console.log(err);
+        })
+      },
+      /**
+       * 获得商品的封面 base64
+       */
+      getImageBase64: function() {
+        imageBase64({
+          url: this.spu.picUrl
+        }).then(res => {
+          this.imgTop = res.data.code;
+        })
+      },
+      /**
+       * 获得小程序的二维码
+       */
+      getQrcode() {
+        let data = {
+          pid: this.uid,
+          id: this.id,
+          path: 'pages/goods_details/index'
+        }
+        getQrcode(data).then(res => {
+          base64src(res.data.code, res => {
+            this.promotionCode = res;
+          });
+        }).catch(err => {
+          this.errT = err;
+        });
+      },
+      /**
+       * 生成海报，并进行展示
+       */
+      goPoster: function() {
+        // 提示正在生成中
+        uni.showLoading({
+          title: '海报生成中',
+          mask: true
+        });
+        this.posters = false;
+        // 如果没有二维码图片，则说明加载失败，进行错误提示
+        if (!this.promotionCode) {
+          uni.hideLoading();
+          this.$util.Tips({
+            title: this.errT
+          });
+          return
+        }
+        // 校验海报是否已经生成；如果失败，则进行错误提示
+        setTimeout(() => {
+          if (!this.imgTop) {
+            uni.hideLoading();
+            this.$util.Tips({
+              title: '无法生成商品海报！'
+            });
+          }
+        }, 1000);
 
-					let configAppMessage = {
-						desc: data.storeInfo,
-						title: data.storeName,
-						link: href,
-						imgUrl: data.image
-					};
-					this.$wechat.wechatEvevt([
-						"updateAppMessageShareData",
-						"updateTimelineShareData",
-						"onMenuShareAppMessage",
-						"onMenuShareTimeline"
-					], configAppMessage).then(res => {
-						console.log(res);
-					}).catch(err => {
-						console.log(err);
-					})
-				}
-			},
+        // 展示海报
+        const that = this;
+        let arrImagesUrlTop = '';
+        uni.downloadFile({
+          url: that.imgTop, // 仅为示例，并非真实的资源
+          success: (res) => {
+            debugger
+            arrImagesUrlTop = res.tempFilePath;
+            const arrImages = [that.posterbackgd, arrImagesUrlTop, that.promotionCode];
+            const name = that.spu.name;
+            const price = that.fen2yuan(this.spu.price);
+            const marketPrice = that.fen2yuan(this.spu.marketPrice);
+            setTimeout(() => {
+              that.$util.PosterCanvas(arrImages, name, price, marketPrice,
+                function(tempFilePath) {
+                  that.imagePath = tempFilePath;
+                  that.canvasStatus = true;
+                  uni.hideLoading();
+                });
+            }, 500);
+          }
+        });
+      },
+      /**
+       * 隐藏海报
+       */
+      posterImageClose: function() {
+        this.canvasStatus = false
+      },
+      /**
+       * 关闭分享弹窗
+       */
+      closePosters: function() {
+        this.posters = false;
+      },
+      /**
+       * 获取海报产品图（解决跨域问题，只适用于小程序）
+       */
+      downloadFilestoreImage: function() {
+        let that = this;
+        uni.downloadFile({
+          url: that.setDomain(that.spu.picUrl),
+          success: function(res) {
+            that.storeImage = res.tempFilePath;
+          },
+          fail: function() {
+            that.storeImage = '';
+            return that.$util.Tips({
+              title: ''
+            });
+          },
+        });
+      },
+      /**
+       * 替换安全域名
+       */
+      setDomain: function(url) {
+        url = url ? url.toString() : '';
+        // 本地调试打开,生产请注销
+        if (url.indexOf("https://") > -1) {
+          return url;
+        }
+        return url.replace('http://', 'https://');
+      },
+      /**
+       * 分享打开
+       */
+      listenerActionSheet: function() {
+        if (!this.isLogin) {
+          toLogin();
+          return
+        }
+        // #ifdef H5
+        if (this.$wechat.isWeixin() === true) {
+          this.weixinStatus = true;
+        }
+        // #endif
+        this.posters = true;
+      },
+      /**
+       * 微信小程序的保存图片到本机
+       */
+      // #ifdef MP
+      savePosterPath: function() {
+        let that = this;
+        uni.getSetting({
+          success(res) {
+            if (!res.authSetting['scope.writePhotosAlbum']) {
+              uni.authorize({
+                scope: 'scope.writePhotosAlbum',
+                success() {
+                  uni.saveImageToPhotosAlbum({
+                    filePath: that.imagePath,
+                    success: function(res) {
+                      that.posterImageClose();
+                      that.$util.Tips({
+                        title: '保存成功',
+                        icon: 'success'
+                      });
+                    },
+                    fail: function(res) {
+                      that.$util.Tips({
+                        title: '保存失败'
+                      });
+                    }
+                  })
+                }
+              })
+            } else {
+              uni.saveImageToPhotosAlbum({
+                filePath: that.imagePath,
+                success: function(res) {
+                  that.posterImageClose();
+                  that.$util.Tips({
+                    title: '保存成功',
+                    icon: 'success'
+                  });
+                },
+                fail: function(res) {
+                  that.$util.Tips({
+                    title: '保存失败'
+                  });
+                },
+              })
+            }
+          }
+        })
+      },
+      // #endif
+      /**
+       * 关闭分销的弹窗
+       */
+      closeChange: function() {
+        this.$set(this.sharePacket, 'isState', true);
+      },
 
       // ========== 顶部 nav 相关的方法 ==========
       /**
