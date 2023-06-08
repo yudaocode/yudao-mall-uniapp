@@ -260,9 +260,6 @@
     <!-- 海报展示 -->
 		<view class="mask" v-if="posters" @click="closePosters"></view>
 		<view class="mask" v-if="canvasStatus"></view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<!-- 海报展示【操作】 -->
 		<view class='poster-pop' v-if="canvasStatus">
 			<image src='../../static/images/poster-close.png' class='close' @click="posterImageClose"></image>
@@ -314,7 +311,6 @@
   import * as ProductUtil from '@/utils/product.js';
   // #ifdef MP
 	import { base64src } from '@/utils/base64src.js'
-	import authorize from '@/components/Authorize';
 	import { getQrcode } from '@/api/api.js';
 	// #endif
 	const app = getApp();
@@ -326,14 +322,12 @@
 			userEvaluation,
 			shareRedPackets,
 			home,
-			"jyf-parser": parser,
-			// #ifdef MP
-			authorize
-			// #endif
+			"jyf-parser": parser
 		},
 		data() {
 			return {
-				id: 0, // 商品 id
+        // ========== 商品详情相关的变量 ==========
+        id: 0, // 商品 id
         type: "", // 商品展示类型；normal - 普通；video - 视频
         productInfo: {}, // 商品详情 TODO 芋艿：准备移除
         spu: {}, // 商品 SPU 详情
@@ -353,21 +347,16 @@
           video: 'width:100%'
         },
 
+        // ========== 评价相关的变量 TODO ==========
         replyCount: 0, // 总评论数量 TODO 芋艿：回复，待实现
 				reply: [], // 评论列表
         replyChance: 0, // TODO 芋艿：评论相关，待接入
+
+        // ========== 收藏相关的变量 ① TODO ==========
         userCollect: false,
+
+        // ========== 优惠劵相关的变量 ② TODO ==========
         couponList: [], // 优惠券 TODO 芋艿：待实现
-				cart_num: 1, // 购买数量 TODO 芋艿：待实现
-				isAuto: false, // 没有授权的不会自动授权 TODO 芋艿：待实现
-				isShowAuth: false, // 是否隐藏授权 TODO 芋艿：待实现
-				circular: false, // TODO 芋艿：没搞懂
-				autoplay: false,  // TODO 芋艿：没搞懂
-				interval: 3000,   // TODO 芋艿：没搞懂
-				duration: 500,  // TODO 芋艿：没搞懂
-				systemStore: {}, // 门店信息 TODO 芋艿：后面搞
-				good_list: [], // TODO 芋艿：优品推荐
-				activityH5: [], // TODO 芋艿：活动？
         // 属性是否打开 TODO 待实现
         coupon: {
           coupon: false,
@@ -376,20 +365,30 @@
           count: []
         },
 
+        // ========== 营销活动相关的变量 ③ TODO ==========
+        activityH5: [], // TODO 芋艿：活动？
+
+        // ========== 商品推荐相关的变量 ④ TODO ==========
+        circular: false, // TODO 芋艿：没搞懂
+        autoplay: false,  // TODO 芋艿：没搞懂
+        duration: 500,  // TODO 芋艿：没搞懂
+        interval: 3000,   // TODO 芋艿：没搞懂
+        good_list: [], // TODO 芋艿：优品推荐
+
         // ========== 分销相关的变量 ==========
         qrcodeSize: 600, // 二维码的大小
         promotionCode: '', // 二维码图片
         imgTop: '', // 商品图片的 base64 码
         errT: '',  // 获得小程序码失败的提示文本
         posters: false, // 分享弹窗的开关
-        weixinStatus: false, // TODO 芋艿：微信分享
+        weixinStatus: false, // 微信分享是否打开
         canvasStatus: false, // 是否显示海报
         imagePath: '', // 海报路径
-        H5ShareBox: false, // 公众号分享图片 TODO 芋艿：微信分享
+        H5ShareBox: false, // 公众号分享的弹出
         posterbackgd: '/static/images/posterbackgd.png',  // 海报的背景，用于海报的生成
         storeImage: '', // 下载商品图片后的文件地址
-        sharePacket: { // 分销商详细
-          isState: true, // 默认不显示  // TODO 芋艿：没搞懂
+        sharePacket: { // 分销弹出信息
+          isState: true, // 默认不显示
         },
         actionSheetHidden: true, // 微信小程序的右上角分享的弹出
 
@@ -664,13 +663,11 @@
           sku.cart_num++;
           if (sku.cart_num > stock) {
             this.$set(this.attr.productSelect, "cart_num", stock);
-            this.$set(this, "cart_num", stock);
           }
         } else {
           sku.cart_num--;
           if (sku.cart_num < 1) {
             this.$set(this.attr.productSelect, "cart_num", 1);
-            this.$set(this, "cart_num", 1);
           }
         }
       },
@@ -829,11 +826,6 @@
 					})
 				}
 			},
-			// 微信登录回调
-			onLoadFun: function(e) {
-				this.getCouponList();
-				this.getCartCount();
-			},
 			ChangCouponsClone: function() {
 				this.$set(this.coupon, 'coupon', false)
 			},
@@ -886,30 +878,6 @@
 				getReplyConfig(that.id).then(res => {
 					that.$set(that, 'replyChance', res.data.replyChance * 100);
 					that.$set(that, 'replyCount', res.data.sumCount);
-				});
-			},
-			/**
-			 * 拨打电话
-			 */
-			makePhone: function() {
-				uni.makePhoneCall({
-					phoneNumber: this.systemStore.phone
-				})
-			},
-			/**
-			 * 打开地图
-			 */
-			showMaoLocation: function() {
-				if (!this.systemStore.latitude || !this.systemStore.longitude) return this.$util.Tips({
-					title: '缺少经纬度信息无法查看地图！'
-				});
-				uni.openLocation({
-					latitude: parseFloat(this.systemStore.latitude),
-					longitude: parseFloat(this.systemStore.longitude),
-					scale: 8,
-					name: this.systemStore.name,
-					address: this.systemStore.address + this.systemStore.detailed_address,
-					success: function() {},
 				});
 			},
 			/**
@@ -973,10 +941,6 @@
 					that.getCouponList(1);
 					that.$set(that.coupon, 'coupon', true);
 				}
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
 			},
 
       // ========== 分销相关的方法 ==========
