@@ -43,12 +43,6 @@
 									销量:{{ spu.salesCount}} {{ spu.unitName }}
 								</view>
 							</view>
-							<!-- <view class='coupon acea-row row-between-wrapper' v-if="productInfo.give_integral > 0">
-								<view class='hide line1 acea-row'>
-									赠积分：
-									<view class='activity'>赠送 {{productInfo.give_integral}} 积分</view>
-								</view>
-							</view> -->
               <!-- 优惠劵 TODO 芋艿：待接入 -->
 							<view v-if="coupon.list.length > 0 && type==='normal'"
 								class='coupon acea-row row-between-wrapper' @click='couponTap'>
@@ -94,14 +88,13 @@
 							</view>
 							<view class='iconfont icon-jiantou'></view>
 						</view>
-            <!-- 评论 TODO 芋艿：待完成 -->
+            <!-- 评论 -->
 						<view class='userEvaluation' id="past1">
 							<view class='title acea-row row-between-wrapper'
 								:style="replyCount==0?'border-bottom-left-radius:14rpx;border-bottom-right-radius:14rpx;':''">
 								<view>用户评价<i>({{replyCount}})</i></view>
-								<navigator class='praise' hover-class='none'
-									:url='"/pages/users/goods_comment_list/index?productId="+id'>
-									<i>好评</i>&nbsp;<text class='font-color'>{{replyChance || 0}}%</text>
+								<navigator class='praise' hover-class='none' :url='"/pages/users/goods_comment_list/index?productId="+id'>
+									<i>好评</i>&nbsp;<text class='font-color'> {{ replyChance || 0 }}%</text>
 									<text class='iconfont icon-jiantou'></text>
 								</navigator>
 							</view>
@@ -173,7 +166,7 @@
 			<!-- #endif -->
       <!-- 场景：普通订单 -->
       <block v-if="type === 'normal'">
-        <!-- 收藏 TODO 芋艿：收藏逻辑 -->
+        <!-- 收藏 -->
         <view @click="setCollect" class='item'>
 					<view class='iconfont icon-shoucang1' v-if="userCollect"></view>
 					<view class='iconfont icon-shoucang' v-else></view>
@@ -285,11 +278,7 @@
 <script>
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js'
 	import {
-		collectAdd,
-		collectDel,
-		getReplyConfig,
-		getProductGood,
-		getReplyProduct
+		getProductGood
 	} from '@/api/store.js';
 	import { spread } from "@/api/user";
 	import {
@@ -307,13 +296,14 @@
 	import parser from "@/components/jyf-parser/jyf-parser";
   import * as ProductSpuApi from '@/api/product/spu.js';
   import * as ProductFavoriteApi from '@/api/product/favorite.js';
+  import * as ProductCommentApi from '@/api/product/comment.js';
   import * as TradeCartApi from '@/api/trade/cart.js';
   import * as Util from '@/utils/util.js';
   import * as ProductUtil from '@/utils/product.js';
   // #ifdef MP
 	import { base64src } from '@/utils/base64src.js'
 	import { getQrcode } from '@/api/api.js';
-  import {createFavorite, deleteFavorite} from "../../api/product/favorite";
+  import {getCommentList} from "../../api/product/comment";
 	// #endif
 	const app = getApp();
 	export default {
@@ -331,7 +321,6 @@
         // ========== 商品详情相关的变量 ==========
         id: 0, // 商品 id
         type: "", // 商品展示类型；normal - 普通；video - 视频
-        productInfo: {}, // 商品详情 TODO 芋艿：准备移除
         spu: {}, // 商品 SPU 详情
         skuMap: [], // 商品 SKU Map
         attrValue: '', // 已选属性名的拼接，例如说 红色,大 这样的格式
@@ -349,10 +338,10 @@
           video: 'width:100%'
         },
 
-        // ========== 评价相关的变量 TODO ==========
-        replyCount: 0, // 总评论数量 TODO 芋艿：回复，待实现
-				reply: [], // 评论列表
-        replyChance: 0, // TODO 芋艿：评论相关，待接入
+        // ========== 评价相关的变量 ==========
+        replyCount: 0, // 总评论数量
+        replyChance: 0, // 好评率
+        reply: [], // 评论列表
 
         // ========== 收藏相关的变量 ==========
         userCollect: false,
@@ -526,7 +515,6 @@
           let productInfo = res.data;
           let spu = res.data;
           let skus = res.data.skus;
-          this.$set(this, 'productInfo', productInfo);
           this.$set(this, 'spu', spu);
           this.$set(this.attr, 'properties', ProductUtil.convertProductPropertyList(skus));
           this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
@@ -771,18 +759,22 @@
         });
       },
 
-      // ========== 评价相关的方法 TODO ==========
-
+      // ========== 评价相关的方法 ==========
+      /**
+       * 获得商品评价列表
+       */
       getProductReplyList: function() {
-        getReplyProduct(this.id).then(res => {
-          this.reply = res.data.productReply ? [res.data.productReply] : [];
+        ProductCommentApi.getCommentList(this.id).then(res => {
+          this.reply = res.data;
         })
       },
+      /**
+       * 获得商品评价统计
+       */
       getProductReplyCount: function() {
-        let that = this;
-        getReplyConfig(that.id).then(res => {
-          that.$set(that, 'replyChance', res.data.replyChance * 100);
-          that.$set(that, 'replyCount', res.data.sumCount);
+        ProductCommentApi.getCommentStatistics(this.id).then(res => {
+          this.$set(this, 'replyChance', res.data.goodPercent);
+          this.$set(this, 'replyCount', res.data.allCount);
         });
       },
 
