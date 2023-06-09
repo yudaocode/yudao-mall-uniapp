@@ -306,12 +306,14 @@
 	import home from '@/components/home';
 	import parser from "@/components/jyf-parser/jyf-parser";
   import * as ProductSpuApi from '@/api/product/spu.js';
+  import * as ProductFavoriteApi from '@/api/product/favorite.js';
   import * as TradeCartApi from '@/api/trade/cart.js';
   import * as Util from '@/utils/util.js';
   import * as ProductUtil from '@/utils/product.js';
   // #ifdef MP
 	import { base64src } from '@/utils/base64src.js'
 	import { getQrcode } from '@/api/api.js';
+  import {createFavorite, deleteFavorite} from "../../api/product/favorite";
 	// #endif
 	const app = getApp();
 	export default {
@@ -352,7 +354,7 @@
 				reply: [], // 评论列表
         replyChance: 0, // TODO 芋艿：评论相关，待接入
 
-        // ========== 收藏相关的变量 ① TODO ==========
+        // ========== 收藏相关的变量 ==========
         userCollect: false,
 
         // ========== 优惠劵相关的变量 ② TODO ==========
@@ -418,7 +420,8 @@
 					if (newV === true) {
 						that.getCouponList();
 						that.getCartCount();
-					}
+            that.isFavoriteExists();
+          }
 				},
 				deep: true
 			}
@@ -525,7 +528,6 @@
           let skus = res.data.skus;
           this.$set(this, 'productInfo', productInfo);
           this.$set(this, 'spu', spu);
-          this.$set(this, 'userCollect', res.data.userCollect); // TODO 芋艿：需要改造下，异步加载收藏状态
           this.$set(this.attr, 'properties', ProductUtil.convertProductPropertyList(skus));
           this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
           // 设置分销相关变量 // TODO 芋艿：待接入
@@ -542,6 +544,7 @@
           // 登录情况下，获得购物车、分享等信息
           if (this.isLogin) {
             this.getCartCount();
+            this.isFavoriteExists();
             // #ifdef H5
             this.make();
             this.ShareInfo();
@@ -768,6 +771,52 @@
         });
       },
 
+      // ========== 评价相关的方法 TODO ==========
+
+      getProductReplyList: function() {
+        getReplyProduct(this.id).then(res => {
+          this.reply = res.data.productReply ? [res.data.productReply] : [];
+        })
+      },
+      getProductReplyCount: function() {
+        let that = this;
+        getReplyConfig(that.id).then(res => {
+          that.$set(that, 'replyChance', res.data.replyChance * 100);
+          that.$set(that, 'replyCount', res.data.sumCount);
+        });
+      },
+
+      // ========== 收藏相关方法 ==========
+      /**
+       * 获得是否收藏
+       */
+      isFavoriteExists: function() {
+        ProductFavoriteApi.isFavoriteExists(this.id).then(res => {
+          this.userCollect = res.data;
+        });
+      },
+      /**
+       * 收藏 / 取消商品
+       */
+      setCollect: function() {
+        if (!this.isLogin) {
+          toLogin();
+          return;
+        }
+
+        // 情况一：取消收藏
+        if (this.userCollect) {
+          ProductFavoriteApi.deleteFavorite(this.id).then(res => {
+            this.$set(this, 'userCollect', false);
+          })
+        // 情况二：添加收藏
+        } else {
+          ProductFavoriteApi.createFavorite(this.id).then(res => {
+            this.$set(this, 'userCollect', true);
+          })
+        }
+      },
+
       // === TODO 芋艿：未处理 ====
 
 			kefuClick() {
@@ -868,18 +917,6 @@
 					})
 				});
 			},
-			getProductReplyList: function() {
-				getReplyProduct(this.id).then(res => {
-					this.reply = res.data.productReply ? [res.data.productReply] : [];
-				})
-			},
-			getProductReplyCount: function() {
-				let that = this;
-				getReplyConfig(that.id).then(res => {
-					that.$set(that, 'replyChance', res.data.replyChance * 100);
-					that.$set(that, 'replyCount', res.data.sumCount);
-				});
-			},
 			/**
 			 * 获取优惠券
 			 */
@@ -910,25 +947,6 @@
 				that.coupon.list[index].isUse = true;
 				that.$set(that.coupon, 'list', that.coupon.list);
 				that.$set(that.coupon, 'coupon', false);
-			},
-			/**
-			 * 收藏商品
-			 */
-			setCollect: function() {
-				let that = this;
-				if (this.isLogin === false) {
-					toLogin();
-				} else {
-					if (this.userCollect) {
-						collectDel(this.productInfo.id).then(res => {
-							that.$set(that, 'userCollect', !that.userCollect);
-						})
-					} else {
-						collectAdd(this.productInfo.id).then(res => {
-							that.$set(that, 'userCollect', !that.userCollect);
-						})
-					}
-				}
 			},
 			/**
 			 * 打开优惠券插件
