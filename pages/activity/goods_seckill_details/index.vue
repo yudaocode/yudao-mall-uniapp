@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<!-- 头部 -->
+    <!-- 顶部的 nav tab -->
 		<view class='navbar' :style="{height:navH+'rpx',opacity:opacity}">
 			<view class='navbarH' :style='"height:"+navH+"rpx;"'>
 				<view class='navbarCon acea-row row-center-wrapper'>
@@ -12,15 +12,21 @@
 				</view>
 			</view>
 		</view>
-		<view id="home" class="home-nav acea-row row-center-wrapper iconfont icon-xiangzuo" :class="opacity>0.5?'on':''" :style="{ top: homeTop + 'rpx' }" v-if="returnShow" @tap="returns">
+    <!-- 返回键 -->
+    <view id="home" class="home-nav acea-row row-center-wrapper iconfont icon-xiangzuo" :class="opacity>0.5?'on':''" :style="{ top: homeTop + 'rpx' }" v-if="returnShow" @tap="returns">
 		</view>
 		<view class='product-con'>
 			<scroll-view :scroll-top="scrollTop" scroll-y='true' scroll-with-animation="true" :style="'height:'+height+'px;'"
 			 @scroll="scroll">
 				<view id="past0">
-					<productConSwiper :imgUrls='imgUrls'></productConSwiper>
-					<view class='nav acea-row row-between-wrapper mb30'>
-						<view class='money'>￥<text class='num'>{{storeInfo.price}}</text><text class='y-money'>￥{{storeInfo.otPrice}}</text></view>
+					<productConSwiper :imgUrls='spu.sliderPicUrls' />
+          <!-- 价格、库存、销量 -->
+          <view class='nav acea-row row-between-wrapper mb30'>
+						<view class='money'>￥
+              <text class='num'>{{ fen2yuan(spu.price) }}</text>
+              <text class='y-money'>￥{{ fen2yuan(spu.marketPrice) }}</text>
+            </view>
+            <!-- TODO 活动状态 -->
 						<view class='acea-row row-middle'>
 							<view class='time' v-if="status == 2">
 								<view>距秒杀结束仅剩</view>
@@ -32,19 +38,21 @@
 					<view class="pad30 mb30">
 						<view class='wrapper borRadius14 mb30'>
 							<view class='introduce acea-row row-between'>
-								<view class='infor'> {{storeInfo.storeName}}</view>
+								<view class='infor'> {{ spu.name}}</view>
 								<view class='iconfont icon-fenxiang' @click="listenerActionSheet"></view>
 							</view>
 							<view class='label acea-row row-middle'>
-								<view class='stock'>累计销售：{{parseFloat(storeInfo.sales) + parseFloat(storeInfo.ficti) || 0}}{{storeInfo.unitName}}</view>
-								<view>限量: {{ storeInfo.quota ? storeInfo.quota : 0 }} {{storeInfo.unitName}}</view>
+								<view class='stock'>累计销售：{{ spu.salesCount}} {{ spu.unitName }}</view>
+								<view>限量: {{ activity.quota ? activity.quota : 0 }} {{ spu.unitName }}</view>
 							</view>
 						</view>
-						<view class='attribute acea-row row-between-wrapper mb30 borRadius14' @tap='selecAttr' v-if='attribute.productAttr.length'>
+            <!-- SKU 选择 TODO  -->
+            <view class='attribute acea-row row-between-wrapper mb30 borRadius14' @tap='selecAttr' v-if='attribute.productAttr.length'>
 							<view class="line1">{{attr}}：<text class='atterTxt'>{{attrValue}}</text></view>
 							<view class='iconfont icon-jiantou'></view>
 						</view>
-						<view class='userEvaluation' id="past1">
+            <!-- 评论 TODO -->
+            <view class='userEvaluation' id="past1">
 							<view class='title acea-row row-between-wrapper' :style="replyCount==0?'border-bottom-left-radius:14rpx;border-bottom-right-radius:14rpx;':''">
 								<view>用户评价({{replyCount}})</view>
 								<navigator class='praise' hover-class='none' :url="'/pages/users/goods_comment_list/index?productId='+ storeInfo.productId">
@@ -63,13 +71,14 @@
 						<image src="../../../static/images/xyou.png"></image>
 					</view>
 					<view class='conter'>
-						<jyf-parser :html="storeInfo.content" ref="article" :tag-style="tagStyle"></jyf-parser>
+						<jyf-parser :html="spu.description" ref="article" :tag-style="tagStyle"></jyf-parser>
 					</view>
 				</view>
 				<view style='height:120rpx;'></view>
 			</scroll-view>
 			<view class='footer acea-row row-between-wrapper'>
-				<!-- #ifdef MP -->
+        <!-- 客服 TODO 芋艿：待完成 -->
+        <!-- #ifdef MP -->
 				<button open-type="contact" hover-class='none' class='item'>
 					<view class='iconfont icon-kefu'></view>
 					<view>客服</view>
@@ -81,12 +90,14 @@
 					<view>客服</view>
 				</navigator>
 				<!-- #endif -->
-				<view @tap='setCollect' class='item'>
+        <!-- 收藏 TODO -->
+        <view @tap='setCollect' class='item'>
 					<view class='iconfont icon-shoucang1' v-if="userCollect"></view>
 					<view class='iconfont icon-shoucang' v-else></view>
 					<view>收藏</view>
 				</view>
-				<view class="bnt acea-row" v-if="dataShow == 0">
+        <!-- 购买操作 TODO -->
+        <view class="bnt acea-row" v-if="dataShow === 0">
 					<view class="joinCart bnts" @tap="openAlone">单独购买</view>
 					<view class="buy bnts bg-color-hui">立即购买</view>
 				</view>
@@ -112,13 +123,11 @@
 				</view>
 			</view>
 		</view>
-		<product-window :attr='attribute' :limitNum='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr" @ChangeCartNum="ChangeCartNum"
+    <!-- SKU 弹窗 TODO -->
+    <product-window :attr='attribute' :limitNum='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr" @ChangeCartNum="ChangeCartNum"
 		 @attrVal="attrVal" @iptCartNum="iptCartNum"></product-window>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth"></authorize> -->
-		<!-- #endif -->
 		<home></home>
-		<!-- 分享按钮 -->
+		<!-- 分享按钮  TODO-->
 		<view class="generate-posters acea-row row-middle" :class="posters ? 'on' : ''">
 			<!-- #ifndef MP -->
 			<button class="item" hover-class='none' v-if="weixinStatus === true" @click="H5ShareBox = true">
@@ -139,8 +148,7 @@
 		</view>
 		<view class="mask"  v-if="posters" @click="closePosters"></view>
 		<view class="mask"  v-if="canvasStatus"  @click="listenerActionClose"></view>
-
-		<!-- 海报展示 -->
+		<!-- 海报展示 TODO -->
 		<view class='poster-pop' v-if="canvasStatus">
 			<image src='/static/images/poster-close.png' class='close' @click="posterImageClose"></image>
 			<image :src='posterImage'></image>
@@ -163,7 +171,7 @@
 </template>
 
 <script>
-	const app = getApp();
+  const app = getApp();
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js'
 	import {
 		mapGetters
@@ -182,7 +190,6 @@
 	import productWindow from '@/components/productWindow/index.vue'
 	import userEvaluation from '@/components/userEvaluation/index.vue'
 	// #ifdef MP
-	import authorize from '@/components/Authorize';
 	import { base64src } from '@/utils/base64src.js'
 	import {
 		getQrcode
@@ -200,9 +207,21 @@
 	} from '@/libs/login.js';
 	import { silenceBindingSpread } from "@/utils";
 	import { spread } from "@/api/user";
+  import * as ProductSpuApi from '@/api/product/spu.js';
+  import * as SeckillActivityApi from '@/api/promotion/seckill.js';
+  import * as Util from '@/utils/util.js';
+  import * as ProductUtil from '@/utils/product.js';
 	export default {
 		data() {
 			return {
+        // 秒杀活动相关变量
+        activity: {},
+
+        // 商品相关变量
+        spu: {}, // 商品 SPU 详情
+
+        // TODO  芋艿:未整理
+
 				bgColor: {
 					'bgColor': '#333333',
 					'Color': '#fff',
@@ -234,11 +253,7 @@
 				attr: '请选择',
 				attrValue: '',
 				status: 1,
-				isAuto: false,
-				isShowAuth: false,
 				iShidden: false,
-				limitNum: 1, //限制本属性产品的个数；
-				personNum: 0, //限制用户购买的个数；
 				iSplus: false,
 				replyCount: 0, //总评论数量
 				reply: [], //评论列表
@@ -290,14 +305,11 @@
 		components: {
 			shareRedPackets,
 			productConSwiper,
-			'productWindow': productWindow,
+      productWindow,
 			userEvaluation,
 			"jyf-parser": parser,
 			home,
-			countDown,
-			// #ifdef MP
-			authorize
-			// #endif
+			countDown
 		},
 		computed: mapGetters(['isLogin','uid','chatUrl']),
 		watch:{
@@ -314,7 +326,6 @@
 			let that = this;
 			that.$store.commit("PRODUCT_TYPE", 'normal');
 			let statusBarHeight = '';
-			var pages = getCurrentPages();
 			//设置商品列表高度
 			uni.getSystemInfo({
 				success: function(res) {
@@ -333,10 +344,10 @@
 			let menuButtonInfo = uni.getMenuButtonBoundingClientRect()
 			this.meunHeight = menuButtonInfo.height
 			this.backH = (that.navH / 2) + (this.meunHeight / 2)
-			
+
 			// #ifdef MP || APP-NVUE
 			// 小程序链接进入获取绑定关系id
-			// if(options.spread) app.globalData.spread = options.spread; 
+			// if(options.spread) app.globalData.spread = options.spread;
 			setTimeout(()=>{
 				if(options.spread){
 					app.globalData.spread = options.spread;
@@ -368,7 +379,8 @@
 					this.id = options.id;
 				}
 			}
-			
+
+      // TODO 芋艿：为什么要登录才允许获取？
 			if (this.isLogin) {
 				this.getSeckillDetail();
 			} else {
@@ -391,7 +403,145 @@
 			silenceBindingSpread();
 		},
 		methods: {
-			kefuClick(){
+      // ========== 秒杀活动相关 ==========
+      getSeckillDetail: function() {
+        let that = this;
+        SeckillActivityApi.getSeckillActivity(this.id).then(res => {
+          this.dataShow = 1;
+          this.activity = res.data;
+          // 计算总的 quota 数量
+          this.activity.quota = this.activity.products.reduce((accumulator, product) => {
+            return accumulator + product.quota;
+          }, 0);
+
+          // 获得商品详情
+          this.getGoodsDetails();
+        });
+        if (true) {
+          return;
+        }
+        getSeckillDetail(that.id).then(res => {
+          this.dataShow = 1;
+          this.storeInfo = res.data.storeSeckill;
+          this.userCollect = res.data.userCollect;
+          this.status = this.storeInfo.seckillStatus;
+          this.datatime = Number(this.storeInfo.timeSwap);
+          this.imgUrls = JSON.parse(res.data.storeSeckill.sliderImage) || [];
+          this.attribute.productAttr = res.data.productAttr;
+          this.productValue = res.data.productValue;
+          this.attribute.productSelect.num = res.data.storeSeckill.num;
+
+          this.getProductReplyList();
+          this.getProductReplyCount();
+          let productAttr = res.data.productAttr.map(item => {
+            return {
+              attrName : item.attrName,
+              attrValues: item.attrValues.split(','),
+              id:item.id,
+              isDel:item.isDel,
+              productId:item.productId,
+              type:item.type
+            }
+          });
+          this.$set(this.attribute,'productAttr',productAttr);
+          // #ifdef H5
+          that.storeImage = that.storeInfo.image;
+          that.make();
+          that.setShare();
+          // #endif
+          // #ifdef MP
+          that.getQrcode();
+          that.imgTop = res.data.storeSeckill.image
+          // #endif
+          // #ifndef H5
+          that.downloadFilestoreImage();
+          //that.downloadFilePromotionCode();
+          // #endif
+          that.DefaultSelect();
+          setTimeout(function() {
+            that.infoScroll();
+          }, 1000);
+          app.globalData.openPages = '/pages/activity/goods_seckill_details/index?id=' + that.id + '&spread=' + that.uid ;
+        }).catch(err => {
+          console.log(err, '各种异常')
+          that.$util.Tips({
+            title:err
+          },{
+            tab:3
+          })
+        });
+      },
+
+      // ========== 商品详情相关 ==========
+      /**
+       * 获取产品详情
+       */
+      getGoodsDetails: function() {
+        ProductSpuApi.getSpuDetail(this.activity.spuId).then(res => {
+          let spu = res.data;
+          let skus = res.data.skus;
+          this.$set(this, 'spu', spu);
+          // this.$set(this.attr, 'properties', ProductUtil.convertProductPropertyList(skus));
+          // this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
+          //
+          // // 设置分销相关变量 // TODO 芋艿：待接入
+          // this.$set(this.sharePacket, 'priceName', res.data.priceName);
+          // this.$set(this.sharePacket, 'isState', Math.floor(res.data.priceName) === 0);
+          //
+          // // 设置营销活动
+          // PromotionActivityApi.getActivityListBySpuId(this.id).then(res => {
+          //   let activityList = res.data;
+          //   activityList = ProductUtil.sortActivityList(activityList);
+          //   this.$set(this, 'activityH5', activityList);
+          // });
+          //
+          // // 设置标题
+          // uni.setNavigationBarTitle({
+          //   title: spu.name.substring(0, 7) + "..."
+          // })
+          //
+          // // 登录情况下，获得购物车、分享等信息
+          // if (this.isLogin) {
+          //   this.getCartCount();
+          //   this.isFavoriteExists();
+          //   // #ifdef H5
+          //   this.make();
+          //   this.ShareInfo();
+          //   this.getImageBase64();
+          //   // #endif
+          //   // #ifdef MP
+          //   this.getQrcode();
+          //   // #endif
+          // }
+          //
+          // // 处理滚动条
+          // setTimeout(() => {
+          //   this.infoScroll();
+          // }, 500);
+          //
+          // // 设置或下载分销需要的图片
+          // // #ifdef MP
+          // this.imgTop = spu.picUrl
+          // // #endif
+          // // #ifndef H5
+          // this.downloadFilestoreImage();
+          // // #endif
+          //
+          // // 选中默认 sku
+          // this.selectDefaultSku();
+        }).catch(err => {
+          return this.$util.Tips({
+            title: err.toString()
+          }, {
+            tab: 3,
+            url: 1
+          });
+        })
+      },
+
+      // TODO 芋艿：暂未整理
+
+      kefuClick(){
 				location.href = this.chatUrl;
 			},
 			closePosters:function(){
@@ -415,7 +565,7 @@
 			},
 			/**
 			 * 购物车手动填写
-			 * 
+			 *
 			*/
 			iptCartNum: function (e) {
 				this.$set(this.attribute.productSelect, 'cart_num', e?e:1);
@@ -423,73 +573,12 @@
 				if (e > 1) {
 					return this.$util.Tips({
 						title: `该商品每次限购1${this.storeInfo.unitName}`
-					}); 
+					});
 				}
 			},
 			// 后退
 			returns: function() {
 				uni.navigateBack()
-			},
-			onLoadFun: function(data) {
-				if(this.isAuto){
-					this.isAuto = false;
-					this.isShowAuth = false;
-					this.getSeckillDetail();
-				}
-			},
-			getSeckillDetail: function() {
-				let that = this;
-				getSeckillDetail(that.id).then(res => {
-					this.dataShow = 1;
-					this.storeInfo = res.data.storeSeckill;
-					this.userCollect = res.data.userCollect;
-					this.status = this.storeInfo.seckillStatus;
-					this.datatime = Number(this.storeInfo.timeSwap);
-					this.imgUrls = JSON.parse(res.data.storeSeckill.sliderImage) || [];
-					this.attribute.productAttr = res.data.productAttr;
-					this.productValue = res.data.productValue;
-					this.personNum = res.data.storeSeckill.quota;
-					this.attribute.productSelect.num = res.data.storeSeckill.num;
-					
-					this.getProductReplyList();
-					this.getProductReplyCount();
-					let productAttr = res.data.productAttr.map(item => {
-					return {
-						attrName : item.attrName,
-						attrValues: item.attrValues.split(','),
-						id:item.id,
-						isDel:item.isDel,
-						productId:item.productId,
-						type:item.type
-					 }
-					});
-					this.$set(this.attribute,'productAttr',productAttr);
-					// #ifdef H5
-					that.storeImage = that.storeInfo.image;
-					that.make();
-					that.setShare();
-					// #endif
-					// #ifdef MP
-					that.getQrcode();
-					that.imgTop = res.data.storeSeckill.image
-					// #endif
-					// #ifndef H5
-					that.downloadFilestoreImage();
-					//that.downloadFilePromotionCode();
-					// #endif
-					that.DefaultSelect();
-					setTimeout(function() {
-						that.infoScroll();
-					}, 1000);
-					app.globalData.openPages = '/pages/activity/goods_seckill_details/index?id=' + that.id + '&spread=' + that.uid ;
-				
-				}).catch(err => {
-					that.$util.Tips({
-						title:err
-					},{
-						tab:3
-					})
-				});
 			},
 			setShare: function() {
 				this.$wechat.isWeixin() &&
@@ -510,7 +599,7 @@
 			},
 			/**
 			 * 默认选中属性
-			 * 
+			 *
 			 */
 			DefaultSelect: function() {
 				let self = this
@@ -587,7 +676,7 @@
 			},
 			/**
 			 * 购物车数量加和数量减
-			 * 
+			 *
 			 */
 			ChangeCartNum: function(changeValue) {
 				//changeValue:是否 加|减
@@ -605,18 +694,16 @@
 				let stock = productSelect.stock || 0;
 				let quota = productSelect.quota || 0;
 				let num = this.attribute.productSelect;
-				let nums = this.storeInfo.num || 0;
 				//设置默认数据
 				if (productSelect.cart_num == undefined) productSelect.cart_num = 1;
 				if (changeValue) {
 					if (num.cart_num === 1) {
 						return this.$util.Tips({
-							title: `该商品每次限购1${this.storeInfo.unitName}`
+							title: `该商品每次限购 1 ${this.storeInfo.unitName}`
 						});
 					}
 					num.cart_num++;
 					let arrMin = [];
-					arrMin.push(nums);
 					arrMin.push(quota);
 					arrMin.push(stock);
 					let minN = Math.min.apply(null, arrMin);
@@ -626,7 +713,7 @@
 					}
 					this.$set(this, "cart_num", num.cart_num);
 					this.$set(this.attribute.productSelect, "cart_num", num.cart_num);
-			
+
 				} else {
 					num.cart_num--;
 					if (num.cart_num < 1) {
@@ -642,7 +729,7 @@
 			},
 			/**
 			 * 属性变动赋值
-			 * 
+			 *
 			 */
 			ChangeAttr: function(res) {
 				this.$set(this,'cart_num',1);
@@ -751,7 +838,6 @@
 			goCat: function() {
 				var that = this;
 				var productSelect = this.productValue[this.attrValue];
-				var productSelect = this.productValue[this.attrValue];
 				if (that.cart_num > 1) {
 					return this.$util.Tips({
 						title: `该商品每人限购1${this.storeInfo.unitName}`
@@ -768,7 +854,7 @@
 				if (this.attribute.productAttr.length && productSelect === undefined && this.isOpen == true) return app.$util.Tips({
 					title: '请选择属性'
 				});
-				
+
 				this.$Order.getPreOrder("buyNow",[{
 						"attrValueId": parseFloat(this.attribute.productSelect.unique),
 						"seckillId": parseFloat(this.id),
@@ -778,7 +864,7 @@
 			},
 			/**
 			 * 分享打开
-			 * 
+			 *
 			 */
 			listenerActionSheet: function() {
 				if (this.isLogin === false) {
@@ -828,7 +914,7 @@
 			/**
 			 * 获取产品分销二维码
 			 * @param function successFn 下载完成回调
-			 * 
+			 *
 			 */
 			downloadFilePromotionCode: function(successFn) {
 				let that = this;
@@ -879,8 +965,8 @@
 					that.$util.Tips({
 						title: that.errT
 					});
-					return 
-				} 
+					return
+				}
 				setTimeout(() => {
 					if (!that.imgTop) {
 						uni.hideLoading();
@@ -902,10 +988,10 @@
 								that.posterImage = tempFilePath;
 								that.canvasStatus = true;
 								uni.hideLoading();
-							});	
+							});
 						}, 500);
 					}
-				});		
+				});
 			},
 			// 小程序二维码
 			getQrcode(){
@@ -943,7 +1029,7 @@
 					}
 				})
 			},
-			
+
 			/*
 			 * 保存到手机相册
 			 */
@@ -1002,7 +1088,7 @@
 						href.indexOf("?") === -1 ?
 						href + "?spread=" + this.uid :
 						href + "&spread=" + this.uid;
-					
+
 					let configAppMessage = {
 						desc: data.storeInfo,
 						title: data.storeName,
@@ -1012,17 +1098,21 @@
 					this.$wechat.wechatEvevt(["updateAppMessageShareData", "updateTimelineShareData"], configAppMessage)
 				}
 			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		},
-	    //#ifdef MP
-	    onShareAppMessage() {
-	    	let that = this;
-	    	return {
-	    		title: that.storeInfo.title,
-	    		path: app.globalData.openPages,
-	    		imageUrl: that.storeInfo.image
-	    	};
-	    },
-	    //#endif
+    //#ifdef MP
+    onShareAppMessage() {
+      let that = this;
+      return {
+        title: that.storeInfo.title,
+        path: app.globalData.openPages,
+        imageUrl: that.storeInfo.image
+      };
+    },
+    //#endif
 	}
 </script>
 
@@ -1044,7 +1134,7 @@
 		top: 0;
 		width: 100%;
 		height: 100%;
-	
+
 		image {
 			width: 100%;
 			height: 100%;
@@ -1303,7 +1393,7 @@
 		z-index: -5;
 		opacity: 0;
 	}
-	
+
 	.poster-pop {
 		width: 450rpx;
 		height: 714rpx;
@@ -1314,13 +1404,13 @@
 		top: 50%;
 		margin-top: -357rpx;
 	}
-	
+
 	.poster-pop image {
 		width: 100%;
 		height: 100%;
 		display: block;
 	}
-	
+
 	.poster-pop .close {
 		width: 46rpx;
 		height: 75rpx;
@@ -1329,7 +1419,7 @@
 		top: -73rpx;
 		display: block;
 	}
-	
+
 	.poster-pop .save-poster {
 		background-color: #df2d0a;
 		font-size: ：22rpx;
@@ -1339,14 +1429,14 @@
 		line-height: 76rpx;
 		width: 100%;
 	}
-	
+
 	.poster-pop .keep {
 		color: #fff;
 		text-align: center;
 		font-size: 25rpx;
 		margin-top: 10rpx;
 	}
-	
+
 	.mask {
 		position: fixed;
 		top: 0;
@@ -1361,7 +1451,7 @@
 		top: 20rpx !important;
 		/* #endif */
 	}
-	
+
 	.home-nav {
 		color: #fff;
 		position: fixed;
@@ -1377,13 +1467,13 @@
 			color: #333;
 		}
 	}
-	
+
 	.home-nav .line {
 		width: 1rpx;
 		height: 24rpx;
 		background: rgba(255, 255, 255, 0.25);
 	}
-	
+
 	.home-nav .icon-xiangzuo {
 		width: auto;
 		font-size: 28rpx;

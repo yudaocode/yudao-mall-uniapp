@@ -21,8 +21,7 @@
 			<scroll-view :scroll-top="scrollTop" scroll-y='true' scroll-with-animation="true"
 				:style='"height:"+height+"px;"' @scroll="scroll">
 				<view id="past0">
-					<productConSwiper :imgUrls="spu.sliderPicUrls" :videoline="spu.videoUrl">
-					</productConSwiper>
+					<productConSwiper :imgUrls="spu.sliderPicUrls" :videoline="spu.videoUrl" />
 					<view class="pad30">
             <!-- 价格、库存、销量 -->
 						<view class='wrapper mb30 borRadius14'>
@@ -277,9 +276,6 @@
 
 <script>
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js'
-	import {
-		getProductGood
-	} from '@/api/store.js';
 	import { spread } from "@/api/user";
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
@@ -868,7 +864,7 @@
       goActivity: function(activity) {
         if (activity.type === 1) {
           uni.navigateTo({
-            url: `/pages/activity/goods_seckill_details/index?id=${this.id}`
+            url: `/pages/activity/goods_seckill_details/index?id=${activity.id}`
           });
         } else if (activity.type === 2) {
           uni.navigateTo({
@@ -936,7 +932,7 @@
         // 秒杀
         if (activity.type === 1) {
           uni.redirectTo({
-            url: `/pages/activity/goods_seckill_details/index?id=${spu.id}`
+            url: `/pages/activity/goods_seckill_details/index?id=${activity.id}`
           })
           return
         }
