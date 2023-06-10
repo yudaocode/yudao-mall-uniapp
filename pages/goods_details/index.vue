@@ -99,7 +99,7 @@
 								<userEvaluation :reply="reply"></userEvaluation>
 							</block>
 						</view>
-						<!-- 优品推荐 TODO 芋艿：待完成 -->
+						<!-- 优品推荐 -->
 						<view class="superior borRadius14" if='good_list.length' id="past2">
 							<view class="title acea-row row-center-wrapper">
 								<image src="../../static/images/xzuo.png"></image>
@@ -110,21 +110,20 @@
 								<swiper indicator-dots="true" :autoplay="autoplay" :circular="circular"
 									:interval="interval" :duration="duration" indicator-color="#999"
 									indicator-active-color="#e93323" :style="'height:'+clientHeight+'px'">
-									<swiper-item v-for="(item,indexw) in good_list" :key="indexw">
+									<swiper-item v-for="(item, indexw) in good_list" :key="indexw">
 										<view class="list acea-row row-middle" :id="'list'+indexw">
-											<view class="item" v-for="(val,indexn) in item.list" :key="indexn"
-												@click="goDetail(val)">
+											<view class="item" v-for="(val, indexn) in item.list" :key="indexn" @click="goDetail(val)">
 												<view class="pictrue">
-													<image :src="val.image"></image>
+													<image :src="val.picUrl"></image>
 													<span class="pictrue_log pictrue_log_class"
-														v-if="val.activityH5 && val.activityH5.type === '1'">秒杀</span>
+                                v-if="val.activityList && val.activityList[0] && val.activityList[0].type === 1">秒杀</span>
 													<span class="pictrue_log pictrue_log_class"
-														v-if="val.activityH5 && val.activityH5.type === '2'">砍价</span>
+                                v-if="val.activityList && val.activityList[0] && val.activityList[0].type === 2">砍价</span>
 													<span class="pictrue_log pictrue_log_class"
-														v-if="val.activityH5 && val.activityH5.type === '3'">拼团</span>
+                                v-if="val.activityList && val.activityList[0] && val.activityList[0].type === 3">拼团</span>
 												</view>
-												<view class="name line1">{{val.storeName}}</view>
-												<view class="money font-color">¥{{val.price}}</view>
+												<view class="name line1">{{val.name}}</view>
+												<view class="money font-color">¥{{ fen2yuan(val.price) }}</view>
 											</view>
 										</view>
 									</swiper-item>
@@ -303,6 +302,8 @@
   // #ifdef MP
 	import { base64src } from '@/utils/base64src.js'
 	import { getQrcode } from '@/api/api.js';
+  import {getActivityListBySpuIds} from "../../api/promotion/activity";
+  import {setActivityList} from "../../utils/product";
 	// #endif
 	const app = getApp();
 	export default {
@@ -355,12 +356,12 @@
         // ========== 营销活动相关的变量 ==========
         activityH5: [], // 活动列表
 
-        // ========== 商品推荐相关的变量 ④ TODO ==========
-        circular: false, // TODO 芋艿：没搞懂
-        autoplay: false,  // TODO 芋艿：没搞懂
-        duration: 500,  // TODO 芋艿：没搞懂
-        interval: 3000,   // TODO 芋艿：没搞懂
-        good_list: [], // TODO 芋艿：优品推荐
+        // ========== 商品推荐相关的变量 ==========
+        good_list: [],   // 推荐的商品数组
+        circular: false, // swiper 的 circular 变量
+        autoplay: false, // swiper 的 autoplay 变量
+        duration: 500,   // swiper 的 duration 变量
+        interval: 3000,  // swiper 的 interval 变量
 
         // ========== 分销相关的变量 ==========
         qrcodeSize: 600, // 二维码的大小
@@ -759,6 +760,12 @@
           }
         });
       },
+      /**
+       * 跳转到客服
+       */
+      kefuClick() {
+        location.href = this.chatUrl;
+      },
 
       // ========== 评价相关的方法 ==========
       /**
@@ -848,105 +855,104 @@
       /**
        * 领取完毕后，刷新下优惠劵列表
        */
-      ChangCoupons: function(coupon) {
-        // let couponList = this.$util.ArrayRemove(this.couponList, 'id', coupon.id);
-        // this.$set(this, 'coupon.couponList', couponList);
+      ChangCoupons: function() {
         this.getCouponList(this.coupon.type);
       },
 
       // ========== 营销相关方法 ==========
       /**
-       * 前往活动页面
+       * 前往商品的活动详情页
        *
        * @param activity 活动
        */
       goActivity: function(activity) {
         if (activity.type === 1) {
           uni.navigateTo({
-            url: `/pages/activity/goods_seckill_details/index?id=${activity.id}`
+            url: `/pages/activity/goods_seckill_details/index?id=${this.id}`
           });
         } else if (activity.type === 2) {
           uni.navigateTo({
-            url: `/pages/activity/goods_bargain_details/index?id=${activity.id}&startBargainUid=${this.uid}`
+            url: `/pages/activity/goods_bargain_details/index?id=${this.id}&startBargainUid=${this.uid}`
           });
         } else {
           uni.navigateTo({
-            url: `/pages/activity/goods_combination_details/index?id=${activity.id}`
+            url: `/pages/activity/goods_combination_details/index?id=${this.id}`
           });
         }
       },
 
-      // === TODO 芋艿：未处理 ====
+      // ========== 商品推荐相关方法 ==========
+      /**
+       * 优品推荐
+       */
+      getGoods() {
+        ProductSpuApi.getSpuList('good').then(res => {
+          const good_list = res.data || [];
+          if (good_list.length <= 0) {
+            return;
+          }
+          const count = Math.ceil(good_list.length / 6);
+          const goodArray = [];
+          for (let i = 0; i < count; i++) {
+            let list = good_list.slice(i * 6, i * 6 + 6);
+            if (list.length) goodArray.push({
+              list: list
+            });
+          }
+          this.$set(this, 'good_list', goodArray);
 
-			kefuClick() {
-				location.href = this.chatUrl;
-			},
+          // 设置 nav bar
+          let navList = ['商品', '评价', '详情'];
+          if (goodArray.length) {
+            navList.splice(2, 0, '推荐')
+          }
+          this.$set(this, 'navList', navList);
+          this.$nextTick(() => {
+            if (good_list.length) {
+              this.setClientHeight();
+            }
+          })
+
+          // 设置营销活动
+          const spuIds = good_list.map(item => item.id);
+          PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+            ProductUtil.setActivityList(good_list, res.data);
+          });
+        })
+      },
 			/**
 			 * 去商品详情页
+       *
+       * @param spu 点击的商品
 			 */
-			goDetail(item) {
-				if (!item.activityH5) {
+			goDetail(spu) {
+        const activity = spu.activityList && spu.activityList[0] ? spu.activityList[0] : undefined;
+				if (!activity) {
 					uni.redirectTo({
-						url: '/pages/goods_details/index?id=' + item.id
+						url: '/pages/goods_details/index?id=' + spu.id
 					})
-					return
+					return;
 				}
-				if (item.activityH5.length == 0) {
-					uni.redirectTo({
-						url: '/pages/goods_details/index?id=' + item.id
-					})
-					return
-				}
+        // 秒杀
+        if (activity.type === 1) {
+          uni.redirectTo({
+            url: `/pages/activity/goods_seckill_details/index?id=${spu.id}`
+          })
+          return
+        }
 				// 砍价
-				if (item.activityH5 && item.activityH5.type == 2) {
+				if (activity.type === 2) {
 					uni.redirectTo({
-						url: `/pages/activity/goods_bargain_details/index?id=${item.activityH5.id}&bargain=${this.uid}`
+						url: `/pages/activity/goods_bargain_details/index?id=${spu.id}&bargain=${this.uid}`
 					})
 					return
 				}
 				// 拼团
-				if (item.activityH5 && item.activityH5.type == 3) {
+				if (activity.type === 3) {
 					uni.redirectTo({
-						url: `/pages/activity/goods_combination_details/index?id=${item.activityH5.id}`
-					})
-					return
-				}
-				// 秒杀
-				if (item.activityH5 && item.activityH5.type == 1) {
-					uni.redirectTo({
-						url: `/pages/activity/goods_seckill_details/index?id=${item.activityH5.id}`
+						url: `/pages/activity/goods_combination_details/index?id=${spu.id}`
 					})
 				}
-			},
-
-			/**
-			 * 优品推荐
-			 */
-			getGoods() {
-				getProductGood().then(res => {
-					let good_list = res.data.list || [];
-					let count = Math.ceil(good_list.length / 6);
-					let goodArray = new Array();
-					for (let i = 0; i < count; i++) {
-						let list = good_list.slice(i * 6, i * 6 + 6);
-						if (list.length) goodArray.push({
-							list: list
-						});
-					}
-					this.$set(this, 'good_list', goodArray);
-
-          // 设置 nav bar
-					let navList = ['商品', '评价', '详情'];
-					if (goodArray.length) {
-						navList.splice(2, 0, '推荐')
-					}
-					this.$set(this, 'navList', navList);
-					this.$nextTick(() => {
-						if (good_list.length) {
-							this.setClientHeight();
-						}
-					})
-				});
 			},
 
       // ========== 分销相关的方法 ==========

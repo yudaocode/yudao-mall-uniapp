@@ -90,3 +90,20 @@ export function sortActivityList(activityList, spu) {
   }
   return result;
 }
+
+/**
+ * 将营销活动，设置到 SPU 中
+ *
+ * @param spuList SPU 数组
+ * @param activityListMap 营销活动 Map，key 为 SPU ID，value 为营销活动数组
+ */
+export function setActivityList(spuList, activityListMap) {
+  if (!spuList || spuList.length === 0) {
+    return;
+  }
+  for (const spu of spuList) {
+    spu.activityList = activityListMap[spu.id + ''] || [];
+    spu.activityList = sortActivityList(spu.activityList, spu);
+  }
+  console.log(spuList);
+}
