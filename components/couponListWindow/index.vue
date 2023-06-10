@@ -6,18 +6,20 @@
 				<view :class="['acea-row', 'row-middle', type === 2 ? 'on' : '']" @click="setType(2)">商品券</view>
 				<view :class="['acea-row', 'row-middle', type === 3 ? 'on' : '']" @click="setType(3)">品类券</view>
 			</view>
-			<!-- <view class="occupy" v-if="!orderShow"></view> -->
-			<!-- <view class='title'>优惠券<text class='iconfont icon-guanbi' @click='close'></text></view> -->
 			<view class='coupon-list' :style="{'margin-top':!orderShow?'0':'50rpx'}">
 				<block v-if="coupon.list.length">
-					<!-- <view class='item acea-row row-center-wrapper' v-for="(item,index) in coupon.list" :key='index'> -->
 					<view class='item acea-row row-center-wrapper' v-for="(item,index) in coupon.list"
-						@click="getCouponUser(index,item.id)" :key='index'>
-						<view class='money acea-row row-column row-center-wrapper' :class='item.isUse?"moneyGray":""'>
-							<view>￥<text class='num'>{{item.money?Number(item.money):''}}</text></view>
-							<view class="pic-num">满{{item.minPrice}}元可用</view>
+						@click="getCouponUser(index, item.id)" :key='index'>
+            <!-- 金额 -->
+						<view class='money acea-row row-column row-center-wrapper' :class='item.takeStatus?"moneyGray":""'>
+							<view>￥
+                <text v-if="item.discountType === 1" class='num'>{{ fen2yuan(item.discountPrice) }}</text>
+                <text v-else class='num'>{{ (item.discountPercent / 10.0).toFixed(1) }} 折</text>
+              </view>
+							<view class="pic-num">满 {{ fen2yuan(item.usePrice) }} 元可用</view>
 						</view>
 						<view class='text'>
+              <!-- 类型 -->
 							<view class='condition line2'>
 								<span class='line-title' :class='item.isUse?"gray":""' v-if='item.useType===1'>通用</span>
 								<span class='line-title' :class='item.isUse?"gray":""'
@@ -25,12 +27,13 @@
 								<span class='line-title' :class='item.isUse?"gray":""' v-else>商品</span>
 								<span>{{item.name}}</span>
 							</view>
+              <!-- 领取类型 -->
 							<view class='data acea-row row-between-wrapper'>
-								<view v-if="item.day>0">领取后{{item.day}}天内可用</view>
+								<view v-if="item.validityType > 1">领取后 {{ item.fixedEndTerm }} 天内可用</view>
 								<view v-else>
-									{{ item.useStartTimeStr&& item.useEndTimeStr ? item.useStartTimeStr + " - " + item.useEndTimeStr : ""}}
+									{{ formatDate(item.validStartTime) + " - " + formatDate(item.validEndTime) }}
 								</view>
-								<view class='bnt gray' v-if="item.isUse">{{item.use_title || '已领取'}}</view>
+								<view class='bnt gray' v-if="item.takeStatus">{{item.use_title || '已领取'}}</view>
 								<view class='bnt bg-color' v-else>{{coupon.statusTile || '立即领取'}}</view>
 							</view>
 						</view>
@@ -41,21 +44,19 @@
 					<image src='../../static/images/noCoupon.png'></image>
 				</view>
 			</view>
-			
 		</view>
-		<view class='mask' catchtouchmove="true" :hidden='coupon.coupon==false' @click='close'></view>
+		<view class='mask' catchtouchmove="true" :hidden='!coupon.coupon' @click='close'></view>
 	</view>
 </template>
 
 <script>
-	import {
-		setCouponReceive
-	} from '@/api/api.js';
-	export default {
+  import * as Util from '@/utils/util.js';
+  import dayjs from "@/plugin/dayjs/dayjs.min.js";
+  import * as CouponApi from '@/api/promotion/coupon.js';
+  export default {
 		props: {
-			//打开状态 0=领取优惠券,1=使用优惠券
 			openType: {
-				type: Number,
+				type: Number, // 打开状态 0=领取优惠券, 1=使用优惠券
 				default: 0,
 			},
 			coupon: {
@@ -64,9 +65,8 @@
 					return {};
 				}
 			},
-			//下单页面使用优惠券组件不展示tab切换页
 			orderShow: {
-				type: String,
+				type: String, // 下单页面使用优惠券组件不展示 tab 切换页
 				default: function() {
 					return '';
 				}
@@ -74,41 +74,45 @@
 		},
 		data() {
 			return {
-               type: 1
+        type: 1 // 使用类型
 			};
 		},
-
 		methods: {
 			close: function() {
 				this.type = 1
 				this.$emit('ChangCouponsClone');
 			},
 			getCouponUser: function(index, id) {
-				let that = this;
-				let list = that.coupon.list;
-				if (list[index].isUse == true && this.openType == 0) return true;
+        // 领取优惠劵时，如果已经领取，则直接跳过
+				let list = this.coupon.list;
+				if (list[index].takeStatus && this.openType === 0) {
+          return true;
+        }
 				switch (this.openType) {
-					case 0:
-						//领取优惠券
-						let ids = [];
-						ids.push(id);
-						setCouponReceive(id).then(res => {
-							that.$emit('ChangCouponsUseState', index);
-							that.$util.Tips({
+					case 0: // 领取优惠券
+            CouponApi.takeCoupon(id).then(res => {
+              this.$util.Tips({
 								title: "领取成功"
 							});
-							that.$emit('ChangCoupons', list[index]);
+              this.$emit('ChangCoupons', list[index]);
 						})
 						break;
-					case 1:
-						that.$emit('ChangCoupons', index);
+					case 1: // 使用优惠劵
+            this.$emit('ChangCoupons', index);
 						break;
 				}
 			},
 			setType: function(type) {
 				this.type = type;
 				this.$emit('tabCouponType', type);
-			}
+			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD");
+      }
 		}
 	}
 </script>

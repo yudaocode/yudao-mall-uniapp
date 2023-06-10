@@ -14,7 +14,11 @@
 							</view>
 							<view class="time">{{ formatDate(item.createTime) }}</view>
 						</view>
-						<view class="sku">规格：{{ item.sku?item.sku:'无' }}</view>
+						<view class="sku">规格：
+              <text v-for="(property, propertyIndex) in item.skuProperties" :key="propertyIndex" style="padding-right: 2px">
+                {{ property.valueName }}
+              </text>
+            </view>
 					</view>
 					<view class="evaluate-infor">{{ item.content }}</view>
 					<view class="imgList acea-row" v-if="item.picUrls && item.picUrls.length > 0">

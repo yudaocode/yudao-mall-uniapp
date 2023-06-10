@@ -43,13 +43,15 @@
 									销量:{{ spu.salesCount}} {{ spu.unitName }}
 								</view>
 							</view>
-              <!-- 优惠劵 TODO 芋艿：待接入 -->
+              <!-- 优惠劵 -->
 							<view v-if="coupon.list.length > 0 && type==='normal'"
 								class='coupon acea-row row-between-wrapper' @click='couponTap'>
 								<view class='hide line1 acea-row'>
 									优惠券：
 									<view class='activity'>
-										满{{ coupon.list[0].minPrice }}减{{ coupon.list[0].money }}
+										满{{ fen2yuan(coupon.list[0].usePrice) }}
+                    <text v-if="coupon.list[0].discountType === 1"> 减 {{ fen2yuan(coupon.list[0].discountPrice) }} 元</text>
+                    <text v-else>打 {{ (coupon.list[0].discountPercent / 10.0).toFixed(1) }} 折</text>
                   </view>
 								</view>
 								<view class='iconfont icon-jiantou'></view>
@@ -228,9 +230,13 @@
       @close="closeAttr"
     />
 		<home></home>
-    <!-- 优惠劵弹窗 TODO 芋艿：待实现 -->
-		<couponListWindow :coupon='coupon' @ChangCouponsClone="ChangCouponsClone" @ChangCoupons="ChangCoupons"
-			@ChangCouponsUseState="ChangCouponsUseState" @tabCouponType="tabCouponType"></couponListWindow>
+    <!-- 优惠劵弹窗 -->
+		<couponListWindow
+      :coupon='coupon'
+      @ChangCouponsClone="ChangCouponsClone"
+      @ChangCoupons="ChangCoupons"
+      @tabCouponType="tabCouponType"
+    />
 		<!-- 分享按钮 -->
 		<view class="generate-posters acea-row row-middle" :class="posters ? 'on' : ''">
 			<!-- #ifndef MP -->
@@ -281,9 +287,6 @@
 		getProductGood
 	} from '@/api/store.js';
 	import { spread } from "@/api/user";
-	import {
-		getCoupons
-	} from '@/api/api.js';
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
 	import { imageBase64 } from "@/api/public";
@@ -297,13 +300,13 @@
   import * as ProductSpuApi from '@/api/product/spu.js';
   import * as ProductFavoriteApi from '@/api/product/favorite.js';
   import * as ProductCommentApi from '@/api/product/comment.js';
+  import * as CouponTemplateApi from '@/api/promotion/couponTemplate.js';
   import * as TradeCartApi from '@/api/trade/cart.js';
   import * as Util from '@/utils/util.js';
   import * as ProductUtil from '@/utils/product.js';
   // #ifdef MP
 	import { base64src } from '@/utils/base64src.js'
 	import { getQrcode } from '@/api/api.js';
-  import {getCommentList} from "../../api/product/comment";
 	// #endif
 	const app = getApp();
 	export default {
@@ -346,14 +349,11 @@
         // ========== 收藏相关的变量 ==========
         userCollect: false,
 
-        // ========== 优惠劵相关的变量 ② TODO ==========
-        couponList: [], // 优惠券 TODO 芋艿：待实现
-        // 属性是否打开 TODO 待实现
+        // ========== 优惠劵相关的变量 ==========
         coupon: {
-          coupon: false,
-          type: 1,
-          list: [],
-          count: []
+          coupon: false, // 弹窗是否打开
+          type: 1, // 筛选的优惠劵类型
+          list: [], // 优惠劵列表
         },
 
         // ========== 营销活动相关的变量 ③ TODO ==========
@@ -809,6 +809,50 @@
         }
       },
 
+      // ========== 优惠劵相关方法 ==========
+      /**
+       * 获取优惠券
+       */
+      getCouponList(useType) {
+        CouponTemplateApi.getCouponTemplateList(this.id, useType).then(res => {
+          this.$set(this.coupon, 'list', res.data);
+        })
+      },
+      /**
+       * 打开优惠券弹窗
+       */
+      couponTap: function() {
+        if (!this.isLogin) {
+          toLogin();
+          return
+        }
+        this.getCouponList(1);
+        this.$set(this.coupon, 'coupon', true);
+      },
+      /**
+       * 关闭优惠劵弹窗
+       */
+      ChangCouponsClone: function() {
+        this.$set(this.coupon, 'coupon', false)
+      },
+      /**
+       * 切换优惠劵弹窗的使用类型
+       *
+       * @param useType 使用类型
+       */
+      tabCouponType(useType) {
+        this.$set(this.coupon, 'type', useType);
+        this.getCouponList(useType);
+      },
+      /**
+       * 领取完毕后，刷新下优惠劵列表
+       */
+      ChangCoupons: function(coupon) {
+        // let couponList = this.$util.ArrayRemove(this.couponList, 'id', coupon.id);
+        // this.$set(this, 'coupon.couponList', couponList);
+        this.getCouponList(this.coupon.type);
+      },
+
       // === TODO 芋艿：未处理 ====
 
 			kefuClick() {
@@ -867,18 +911,6 @@
 					})
 				}
 			},
-			ChangCouponsClone: function() {
-				this.$set(this.coupon, 'coupon', false)
-			},
-			/**
-			 * 领取完毕移除当前页面领取过的优惠券展示
-			 */
-			ChangCoupons: function(e) {
-				let coupon = e;
-				let couponList = this.$util.ArrayRemove(this.couponList, 'id', coupon.id);
-				this.$set(this, 'couponList', couponList);
-				this.getCouponList();
-			},
 
 			/**
 			 * 优品推荐
@@ -908,49 +940,6 @@
 						}
 					})
 				});
-			},
-			/**
-			 * 获取优惠券
-			 */
-			getCouponList(type) {
-				let that = this,
-					obj = {
-						page: 1,
-						limit: 20,
-						productId: that.id,
-						type: type
-					};
-				if (type != undefined || type != null) {
-					obj.type = type;
-				} else {
-					obj.type = "";
-				}
-				getCoupons(obj).then(res => {
-					that.$set(that.coupon, 'list', res.data);
-				});
-			},
-			tabCouponType(type) {
-				this.$set(this.coupon, 'type', type);
-				this.getCouponList(type);
-			},
-
-			ChangCouponsUseState(index) {
-				let that = this;
-				that.coupon.list[index].isUse = true;
-				that.$set(that.coupon, 'list', that.coupon.list);
-				that.$set(that.coupon, 'coupon', false);
-			},
-			/**
-			 * 打开优惠券插件
-			 */
-			couponTap: function() {
-				let that = this;
-				if (that.isLogin === false) {
-					toLogin();
-				} else {
-					that.getCouponList(1);
-					that.$set(that.coupon, 'coupon', true);
-				}
 			},
 
       // ========== 分销相关的方法 ==========
