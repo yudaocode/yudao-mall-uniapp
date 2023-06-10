@@ -56,27 +56,22 @@
 								</view>
 								<view class='iconfont icon-jiantou'></view>
 							</view>
-              <!-- 营销活动 TODO 芋艿：待接入 -->
+              <!-- 营销活动 -->
               <view class="coupon acea-row row-between-wrapper" v-if="activityH5.length">
 								<view class="line1 acea-row">
 									<text class="activityName">活&nbsp;&nbsp;&nbsp;动：</text>
-									<view v-for='(item,index) in activityH5' :key='index' @click="goActivity(item)"
+									<view v-for='(item, index) in activityH5' :key='index' @click="goActivity(item)"
 										class="activityBox">
-										<view v-if="item.type === '1'"
-											:class="index==0?'activity_pin':'' || index==1?'activity_miao':'' || index==2?'activity_kan':''">
+										<view v-if="item.type === 1" class="activity_miao">
 											<text class="iconfonts iconfont icon-pintuan"></text>
 											<text class="activity_title"> 参与秒杀</text>
 										</view>
-										<view
-											:class="index==0?'activity_pin':'' || index==1?'activity_miao':'' || index==2?'activity_kan':''"
-											v-if="item.type === '2'">
+										<view v-if="item.type === 2" class="activity_kan">
 											<text class="iconfonts iconfont icon-shenhezhong"></text>
 											<text class="activity_title"> 参与砍价</text>
 										</view>
-										<view
-											:class="index==0?'activity_pin':'' || index==1?'activity_miao':'' || index==2?'activity_kan':''"
-											v-if="item.type === '3'">
-											<text class="iconfonts iconfont icon-kanjia"></text>
+                    <view v-if="item.type === 3" class="activity_pin">
+                    <text class="iconfonts iconfont icon-kanjia"></text>
 											<text class="activity_title"> 参与拼团</text>
 										</view>
 									</view>
@@ -301,6 +296,7 @@
   import * as ProductFavoriteApi from '@/api/product/favorite.js';
   import * as ProductCommentApi from '@/api/product/comment.js';
   import * as CouponTemplateApi from '@/api/promotion/couponTemplate.js';
+  import * as PromotionActivityApi from '@/api/promotion/activity.js';
   import * as TradeCartApi from '@/api/trade/cart.js';
   import * as Util from '@/utils/util.js';
   import * as ProductUtil from '@/utils/product.js';
@@ -356,8 +352,8 @@
           list: [], // 优惠劵列表
         },
 
-        // ========== 营销活动相关的变量 ③ TODO ==========
-        activityH5: [], // TODO 芋艿：活动？
+        // ========== 营销活动相关的变量 ==========
+        activityH5: [], // 活动列表
 
         // ========== 商品推荐相关的变量 ④ TODO ==========
         circular: false, // TODO 芋艿：没搞懂
@@ -512,17 +508,22 @@
        */
       getGoodsDetails: function() {
         ProductSpuApi.getSpuDetail(this.id).then(res => {
-          let productInfo = res.data;
           let spu = res.data;
           let skus = res.data.skus;
           this.$set(this, 'spu', spu);
           this.$set(this.attr, 'properties', ProductUtil.convertProductPropertyList(skus));
           this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
+
           // 设置分销相关变量 // TODO 芋艿：待接入
           this.$set(this.sharePacket, 'priceName', res.data.priceName);
           this.$set(this.sharePacket, 'isState', Math.floor(res.data.priceName) === 0);
+
           // 设置营销活动
-          this.$set(this, 'activityH5', res.data.activityAllH5 ? res.data.activityAllH5 : []);
+          PromotionActivityApi.getActivityListBySpuId(this.id).then(res => {
+            let activityList = res.data;
+            activityList = ProductUtil.sortActivityList(activityList);
+            this.$set(this, 'activityH5', activityList);
+          });
 
           // 设置标题
           uni.setNavigationBarTitle({
@@ -853,26 +854,32 @@
         this.getCouponList(this.coupon.type);
       },
 
+      // ========== 营销相关方法 ==========
+      /**
+       * 前往活动页面
+       *
+       * @param activity 活动
+       */
+      goActivity: function(activity) {
+        if (activity.type === 1) {
+          uni.navigateTo({
+            url: `/pages/activity/goods_seckill_details/index?id=${activity.id}`
+          });
+        } else if (activity.type === 2) {
+          uni.navigateTo({
+            url: `/pages/activity/goods_bargain_details/index?id=${activity.id}&startBargainUid=${this.uid}`
+          });
+        } else {
+          uni.navigateTo({
+            url: `/pages/activity/goods_combination_details/index?id=${activity.id}`
+          });
+        }
+      },
+
       // === TODO 芋艿：未处理 ====
 
 			kefuClick() {
 				location.href = this.chatUrl;
-			},
-			goActivity: function(e) {
-				let item = e;
-				if (item.type === "1") {
-					uni.navigateTo({
-						url: `/pages/activity/goods_seckill_details/index?id=${item.id}`
-					});
-				} else if (item.type === "2") {
-					uni.navigateTo({
-						url: `/pages/activity/goods_bargain_details/index?id=${item.id}&startBargainUid=${this.uid}`
-					});
-				} else {
-					uni.navigateTo({
-						url: `/pages/activity/goods_combination_details/index?id=${item.id}`
-					});
-				}
 			},
 			/**
 			 * 去商品详情页

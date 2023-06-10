@@ -68,3 +68,25 @@ export function convertProductSkuMap(skus) {
   }
   return result
 }
+
+/**
+ * 根据 SPU 的活动展示顺序，排序活动列表
+ *
+ * @param activityList 原始的活动列表
+ * @param spu
+ * @return 新的活动列表
+ */
+export function sortActivityList(activityList, spu) {
+  if (!spu || !spu.activityOrders) {
+    return activityList;
+  }
+  const result = [];
+  for (const activityOrder of spu.activityOrders) {
+    for (const activity of activityList) {
+      if (activity.type === activityOrder) {
+        result.push(activity)
+      }
+    }
+  }
+  return result;
+}
