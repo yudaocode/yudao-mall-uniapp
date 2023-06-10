@@ -467,6 +467,7 @@
       // 请求后端，加载商品等相关信息
 			this.getGoodsDetails();
 			this.getCouponList();
+      // 获得商品评价列表
 			this.getProductReplyList();
 			this.getProductReplyCount();
 			this.getGoods();
@@ -571,7 +572,7 @@
        * 先找有库存的 SKU，否则找第一个 SKU
        */
       selectDefaultSku: function() {
-        let properties = this.attr.properties;
+        const properties = this.attr.properties;
         // 获得选中的属性值的名字，例如说 "黑色,大"，则 skuKey = ["黑色", "大"]
         let skuKey = undefined;
         for (let key in this.skuMap) {

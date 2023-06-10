@@ -46,9 +46,11 @@
 								<view>限量: {{ activity.quota ? activity.quota : 0 }} {{ spu.unitName }}</view>
 							</view>
 						</view>
-            <!-- SKU 选择 TODO  -->
-            <view class='attribute acea-row row-between-wrapper mb30 borRadius14' @tap='selecAttr' v-if='attribute.productAttr.length'>
-							<view class="line1">{{attr}}：<text class='atterTxt'>{{attrValue}}</text></view>
+            <!-- SKU 选择  -->
+            <view class='attribute acea-row row-between-wrapper mb30 borRadius14' @tap='selecAttr'>
+							<view class="line1">{{ attrValue.length > 0 ? "已选择" : "请选择" }}：
+                <text class='atterTxt'>{{attrValue}}</text>
+              </view>
 							<view class='iconfont icon-jiantou'></view>
 						</view>
             <!-- 评论 TODO -->
@@ -96,7 +98,7 @@
 					<view class='iconfont icon-shoucang' v-else></view>
 					<view>收藏</view>
 				</view>
-        <!-- 购买操作 TODO -->
+        <!-- 购买操作 -->
         <view class="bnt acea-row" v-if="status === 0">
           <view class="joinCart bnts" @tap="openAlone">单独购买</view>
           <view class="buy bnts bg-color-hui">已关闭</view>
@@ -123,9 +125,16 @@
         </view>
 			</view>
 		</view>
-    <!-- SKU 弹窗 TODO -->
-    <product-window :attr='attribute' :limitNum='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr" @ChangeCartNum="ChangeCartNum"
-		 @attrVal="attrVal" @iptCartNum="iptCartNum"></product-window>
+    <!-- SKU 弹窗 -->
+    <product-window
+      :attr='attribute'
+      :limitNum='1'
+      @myevent="onMyEvent"
+      @ChangeAttr="ChangeAttr"
+      @ChangeCartNum="ChangeCartNum"
+      @attrVal="attrVal"
+      @iptCartNum="iptCartNum"
+    />
 		<home></home>
 		<!-- 分享按钮  TODO-->
 		<view class="generate-posters acea-row row-middle" :class="posters ? 'on' : ''">
@@ -220,6 +229,13 @@
 
         // 商品相关变量
         spu: {}, // 商品 SPU 详情
+        skuMap: [], // 商品 SKU Map
+        attribute: { // productWindow 组件，使用该属性
+          cartAttr: false,
+          // ↓↓↓ 属性数组，结构为：id = 属性编号；name = 属性编号的名字；values[].id = 属性值的编号，values[].name = 属性值的名字；index = 选中的属性值的名字
+          properties: [],
+          productSelect: {} // 选中的 SKU
+        },
 
         // TODO  芋艿:未整理
 
@@ -242,11 +258,6 @@
 					'return': '1',
 					'title': '抢购详情页',
 					'color': false
-				},
-				attribute: {
-					cartAttr: false,
-					productAttr: [],
-					productSelect: {}
 				},
 				productValue: [],
 				isOpen: false,
@@ -285,15 +296,10 @@
 				posterbackgd: '/static/images/posterbackgd.png',
 				actionSheetHidden: false,
 				cart_num:'',
-				attrTxt: '',
 				qrcodeSize: 600,
 				imagePath:'',//海报路径
 				imgTop:'',
 				H5ShareBox: false, //公众号分享图片
-				sharePacket: {
-					isState: true, //默认不显示
-				},
-				buyNum: 1,
 				errT: '',
 				returnShow: true,
 				homeTop: 20,
@@ -356,7 +362,6 @@
 			that.$set(that,'theme',that.$Cache.get('theme')); //用户从分享卡片进入的场景下获取主题色配置
 			// #endif
 			if (!options.scene && !options.id){
-				this.showSkeleton = false;
 				this.$util.Tips({
 					title: '缺少参数无法查看商品'
 				}, {
@@ -427,56 +432,27 @@
 
           // 获得商品详情
           this.getGoodsDetails();
-        });
-        if (true) {
-          return;
-        }
-        getSeckillDetail(that.id).then(res => {
-          this.storeInfo = res.data.storeSeckill;
-          this.userCollect = res.data.userCollect;
-          this.attribute.productAttr = res.data.productAttr;
-          this.productValue = res.data.productValue;
-          this.attribute.productSelect.num = res.data.storeSeckill.num;
-
+          // TODO 收藏
+          // this.isFavoriteExists();
+          // 获得商品评价列表
           this.getProductReplyList();
           this.getProductReplyCount();
-          let productAttr = res.data.productAttr.map(item => {
-            return {
-              attrName : item.attrName,
-              attrValues: item.attrValues.split(','),
-              id:item.id,
-              isDel:item.isDel,
-              productId:item.productId,
-              type:item.type
-            }
-          });
-          this.$set(this.attribute,'productAttr',productAttr);
-          // #ifdef H5
-          that.storeImage = that.storeInfo.image;
-          that.make();
-          that.setShare();
-          // #endif
-          // #ifdef MP
-          that.getQrcode();
-          that.imgTop = res.data.storeSeckill.image
-          // #endif
-          // #ifndef H5
-          that.downloadFilestoreImage();
-          //that.downloadFilePromotionCode();
-          // #endif
-          that.DefaultSelect();
-          setTimeout(function() {
-            that.infoScroll();
-          }, 1000);
-          app.globalData.openPages = '/pages/activity/goods_seckill_details/index?id=' + that.id + '&spread=' + that.uid ;
+
+          app.globalData.openPages = '/pages/activity/goods_seckill_details/index?id=' + this.id + '&spread=' + this.uid ;
         }).catch(err => {
-          console.log(err, '各种异常')
           that.$util.Tips({
             title:err
           },{
             tab:3
           })
         });
+        if (true) {
+          return;
+        }
+        getSeckillDetail(that.id).then(res => {
+          this.storeInfo = res.data.storeSeckill;
+          this.attribute.productSelect.num = res.data.storeSeckill.num;
+        })
       },
 
       // ========== 商品详情相关 ==========
@@ -488,49 +464,37 @@
           let spu = res.data;
           let skus = res.data.skus;
           this.$set(this, 'spu', spu);
-          // this.$set(this.attr, 'properties', ProductUtil.convertProductPropertyList(skus));
-          // this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
-          //
-          // // 设置分销相关变量 // TODO 芋艿：待接入
-          // this.$set(this.sharePacket, 'priceName', res.data.priceName);
-          // this.$set(this.sharePacket, 'isState', Math.floor(res.data.priceName) === 0);
+          this.$set(this.attribute, 'properties', ProductUtil.convertProductPropertyList(skus));
+          this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
+          // TODO 芋艿：需要设置个 minPrice
 
 
-          // // 设置标题
-          // uni.setNavigationBarTitle({
-          //   title: spu.name.substring(0, 7) + "..."
-          // })
-          //
-          // // 登录情况下，获得购物车、分享等信息
-          // if (this.isLogin) {
-          //   this.getCartCount();
-          //   this.isFavoriteExists();
-          //   // #ifdef H5
-          //   this.make();
-          //   this.ShareInfo();
-          //   this.getImageBase64();
-          //   // #endif
-          //   // #ifdef MP
-          //   this.getQrcode();
-          //   // #endif
-          // }
-          //
-          // // 处理滚动条
-          // setTimeout(() => {
-          //   this.infoScroll();
-          // }, 500);
-          //
-          // // 设置或下载分销需要的图片
-          // // #ifdef MP
-          // this.imgTop = spu.picUrl
-          // // #endif
-          // // #ifndef H5
-          // this.downloadFilestoreImage();
-          // // #endif
-          //
-          // // 选中默认 sku
-          // this.selectDefaultSku();
+          // 处理滚动条
+          setTimeout(() => {
+            this.infoScroll();
+          }, 1000);
+
+          // 设置或下载分销需要的图片
+          // #ifdef H5
+          this.storeImage = spu.picUrl;
+          this.make();
+          this.setShare();
+          // #endif
+          // #ifdef MP
+          this.getQrcode();
+          this.imgTop = spu.picUrl;
+          // #endif
+          // #ifndef H5
+          this.downloadFilestoreImage();
+          // #endif
+
+          // 选中默认 sku
+          this.selectDefaultSku();
         }).catch(err => {
+          // TODO 芋艿：临时去掉
+          if (true) {
+            return
+          }
           return this.$util.Tips({
             title: err.toString()
           }, {
@@ -600,73 +564,37 @@
 			},
 			/**
 			 * 默认选中属性
-			 *
 			 */
-			DefaultSelect: function() {
-				let self = this
-				let productAttr = self.attribute.productAttr;
-				let value = [];
-				for (var key in self.productValue) {
-					if (self.productValue[key].stock > 0) {
-						value = self.attribute.productAttr.length ? key.split(",") : [];
-						break;
-					}
-				}
-				for (let i = 0; i < productAttr.length; i++) {
-					this.$set(productAttr[i], "index", value[i]);
-				}
-				//sort();排序函数:数字-英文-汉字；
-				let productSelect = this.productValue[value.join(",")];
-				if (productSelect && productAttr.length) {
-					self.$set(
-						self.attribute.productSelect,
-						"storeName",
-						self.storeInfo.storeName
-					);
-					self.$set(self.attribute.productSelect, "image", productSelect.image);
-					self.$set(self.attribute.productSelect, "price", productSelect.price);
-					self.$set(self.attribute.productSelect, "stock", productSelect.stock);
-					self.$set(self.attribute.productSelect, "unique", productSelect.id);
-                    self.$set(self.attribute.productSelect, "quota", productSelect.quota);
-					self.$set(self.attribute.productSelect, "quotaShow", productSelect.quotaShow);
-					self.$set(self.attribute.productSelect, "cart_num", 1);
-					self.$set(self, "attrValue", value.join(","));
-					this.$set(self, "attrTxt", "已选择")
-						self.attrValue = value.join(",")
-				} else if (!productSelect && productAttr.length) {
-					self.$set(
-						self.attribute.productSelect,
-						"storeName",
-						self.storeInfo.storeName
-					);
-					self.$set(self.attribute.productSelect, "image", self.storeInfo.image);
-					self.$set(self.attribute.productSelect, "price", self.storeInfo.price);
-					self.$set(self.attribute.productSelect, "quota", 0);
-					self.$set(self.attribute.productSelect, "quota", 0);
-					self.$set(self.attribute.productSelect, "stock", 0);
-					self.$set(self.attribute.productSelect, "unique", "");
-					self.$set(self.attribute.productSelect, "cart_num", 0);
-					self.$set(self, "attrValue", "");
-					self.$set(self, "attrTxt", "请选择");
-				} else if (!productSelect && !productAttr.length) {
-					self.$set(
-						self.attribute.productSelect,
-						"storeName",
-						self.storeInfo.storeName
-					);
-					self.$set(self.attribute.productSelect, "image", self.storeInfo.image);
-					self.$set(self.attribute.productSelect, "price", self.storeInfo.price);
-					self.$set(self.attribute.productSelect, "quota", self.storeInfo.quota);
-					self.$set(self.attribute.productSelect, "quotaShow", self.storeInfo.quotaShow);
-					self.$set(self.attribute.productSelect, "stock", self.storeInfo.stock);
-					self.$set(
-						self.attribute.productSelect,
-						"unique", ""
-					);
-					self.$set(self.attribute.productSelect, "cart_num", 1);
-					self.$set(self, "attrValue", "");
-					self.$set(self, "attrTxt", "请选择");
-				}
+      selectDefaultSku: function() {
+        const properties = this.attribute.properties;
+        // 获得选中的属性值的名字，例如说 "黑色,大"，则 skuKey = ["黑色", "大"]
+        let skuKey = undefined;
+        for (let key in this.skuMap) {
+          if (this.skuMap[key].stock > 0) {
+            skuKey = key.split(",");
+            break;
+          }
+        }
+        if (!skuKey) { // 如果找不到，则选中第一个
+          skuKey = Object.keys(this.skuMap)[0].split(",");
+        }
+        // 使用 index 属性表示当前选中的，值为属性值的名字
+        for (let i = 0; i < properties.length; i++) {
+          this.$set(properties[i], "index", skuKey[i]);
+        }
+
+        let sku = this.skuMap[skuKey.join(",")];
+        if (!sku) {
+          return
+        }
+        this.$set(this.attribute.productSelect, "spuName", this.spu.name);
+        this.$set(this.attribute.productSelect, "id", sku.id);
+        this.$set(this.attribute.productSelect, "picUrl", sku.picUrl);
+        this.$set(this.attribute.productSelect, "price", sku.price);
+        this.$set(this.attribute.productSelect, "stock", sku.stock);
+        this.$set(this.attribute.productSelect, "cart_num", 1);
+        this.$set(this.attribute.productSelect, "quota", sku.quota);
+        this.$set(this, "attrValue", skuKey.join(","));
 			},
 			selecAttr: function() {
 				this.attribute.cartAttr = true

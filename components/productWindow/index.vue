@@ -11,7 +11,7 @@
 						{{ attr.productSelect.spuName }}
 					</view>
 					<view class="money font-color">
-						￥<text class="num">{{ attr.productSelect.price }}</text>
+						￥<text class="num">{{ fen2yuan(attr.productSelect.price) }}</text>
 						<text class="stock" v-if='isShow'>库存: {{ attr.productSelect.stock }}</text>
 						<text class='stock' v-if="limitNum">限量: {{ attr.productSelect.quota }}</text>
 					</view>
@@ -69,13 +69,14 @@
 </template>
 
 <script>
+  import * as Util from '@/utils/util.js';
 	export default {
 		props: {
 			attr: {
 				type: Object,
 				default: () => {}
 			},
-			limitNum: { // TODO 芋艿：是否限流
+			limitNum: { // 是否展示限售
 				type: Number,
 				value: 0
 			},
@@ -150,7 +151,11 @@
 					}
 				}
 				return valueNames;
-			}
+			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		}
 	}
 </script>
