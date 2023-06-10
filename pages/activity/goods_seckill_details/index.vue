@@ -26,12 +26,12 @@
               <text class='num'>{{ fen2yuan(spu.price) }}</text>
               <text class='y-money'>￥{{ fen2yuan(spu.marketPrice) }}</text>
             </view>
-            <!-- TODO 活动状态 -->
+            <!-- 活动状态 -->
 						<view class='acea-row row-middle'>
-							<view class='time' v-if="status == 2">
+							<view class='time' v-if="status === 2">
 								<view>距秒杀结束仅剩</view>
-								<countDown :bgColor="bgColor" :is-day="false" :tip-text="' '" :day-text="' '" :hour-text="' : '" :minute-text="' : '" :second-text="' '"
-								 :datatime="datatime"></countDown>
+								<countDown :bgColor="bgColor" :is-day="false" :datatime="activity.endTime / 1000"
+                           :tip-text="' '" :day-text="' '" :hour-text="' : '" :minute-text="' : '" :second-text="' '" />
 							</view>
 						</view>
 					</view>
@@ -97,30 +97,30 @@
 					<view>收藏</view>
 				</view>
         <!-- 购买操作 TODO -->
-        <view class="bnt acea-row" v-if="dataShow === 0">
-					<view class="joinCart bnts" @tap="openAlone">单独购买</view>
-					<view class="buy bnts bg-color-hui">立即购买</view>
-				</view>
-				<view class="bnt acea-row" v-if="status == 2 && attribute.productSelect.quota>0 &&  datatime > new Date().getTime()/1000">
+        <view class="bnt acea-row" v-if="status === 0">
+          <view class="joinCart bnts" @tap="openAlone">单独购买</view>
+          <view class="buy bnts bg-color-hui">已关闭</view>
+        </view>
+        <view class="bnt acea-row" v-else-if="status === 1">
+          <view class="joinCart bnts" @tap="openAlone">单独购买</view>
+          <view class="buy bnts bg-color-hui">未开始</view>
+        </view>
+				<view class="bnt acea-row" v-else-if="status === 2 && attribute.productSelect.quota > 0">
 					<view class="joinCart bnts" @tap="openAlone">单独购买</view>
 					<view class="buy bnts" @tap="goCat">立即购买</view>
 				</view>
-				<view class="bnt acea-row" v-if="status == 2 && (attribute.productSelect.quota <= 0) &&  datatime > new Date().getTime()/1000">
+				<view class="bnt acea-row" v-else-if="status === 2 && (attribute.productSelect.quota <= 0)">
 					<view class="joinCart bnts" @tap="openAlone">单独购买</view>
 					<view class="buy bnts bg-color-hui">已售罄</view>
 				</view>
-				<view class="bnt acea-row" v-if="status == 0">
-					<view class="joinCart bnts" @tap="openAlone">单独购买</view>
-					<view class="buy bnts bg-color-hui">已关闭</view>
-				</view>
-				<view class="bnt acea-row" v-if="status == 1">
-					<view class="joinCart bnts" @tap="openAlone">单独购买</view>
-					<view class="buy bnts bg-color-hui">未开始</view>
-				</view>
-				<view class="bnt acea-row" v-if="status == 2 && new Date().getTime()/1000 - datatime >=0">
+				<view class="bnt acea-row" v-else-if="status === 3">
 					<view class="joinCart bnts" @tap="openAlone">单独购买</view>
 					<view class="buy bnts bg-color-hui">已结束</view>
 				</view>
+        <view class="bnt acea-row" v-else> <!-- 兜底 -->
+          <view class="joinCart bnts" @tap="openAlone">单独购买</view>
+          <view class="buy bnts bg-color-hui">未开始</view>
+        </view>
 			</view>
 		</view>
     <!-- SKU 弹窗 TODO -->
@@ -216,6 +216,7 @@
 			return {
         // 秒杀活动相关变量
         activity: {},
+        status: 1, // 0 - 已禁用；1 - 未开始；2 - 进行中；3 - 已结束
 
         // 商品相关变量
         spu: {}, // 商品 SPU 详情
@@ -229,7 +230,6 @@
 					'width': '44rpx',
 					'timeTxtwidth': '16rpx',
 				},
-				dataShow: 0,
 				id: 0,
 				time: 0,
 				countDownHour: "00",
@@ -252,7 +252,6 @@
 				isOpen: false,
 				attr: '请选择',
 				attrValue: '',
-				status: 1,
 				iShidden: false,
 				iSplus: false,
 				replyCount: 0, //总评论数量
@@ -273,7 +272,6 @@
 					table: 'width:100%',
 					video: 'width:100%'
 				},
-				datatime: 0,
 				navActive: 0,
 				meunHeight: 0,
 				backH: '',
@@ -413,6 +411,19 @@
           this.activity.quota = this.activity.products.reduce((accumulator, product) => {
             return accumulator + product.quota;
           }, 0);
+          // 计算活动状态
+          const now = new Date().getTime();
+          if (this.activity.status !== 0) {
+            if (this.activity.startTime > now) {
+              this.status = 1;
+            } else if (now <= this.activity.endTime) {
+              this.status = 2;
+            } else {
+              this.status = 3;
+            }
+          } else {
+            this.status = this.activity;
+          }
 
           // 获得商品详情
           this.getGoodsDetails();
@@ -421,12 +432,8 @@
           return;
         }
         getSeckillDetail(that.id).then(res => {
-          this.dataShow = 1;
           this.storeInfo = res.data.storeSeckill;
           this.userCollect = res.data.userCollect;
-          this.status = this.storeInfo.seckillStatus;
-          this.datatime = Number(this.storeInfo.timeSwap);
-          this.imgUrls = JSON.parse(res.data.storeSeckill.sliderImage) || [];
           this.attribute.productAttr = res.data.productAttr;
           this.productValue = res.data.productValue;
           this.attribute.productSelect.num = res.data.storeSeckill.num;
@@ -487,14 +494,8 @@
           // // 设置分销相关变量 // TODO 芋艿：待接入
           // this.$set(this.sharePacket, 'priceName', res.data.priceName);
           // this.$set(this.sharePacket, 'isState', Math.floor(res.data.priceName) === 0);
-          //
-          // // 设置营销活动
-          // PromotionActivityApi.getActivityListBySpuId(this.id).then(res => {
-          //   let activityList = res.data;
-          //   activityList = ProductUtil.sortActivityList(activityList);
-          //   this.$set(this, 'activityH5', activityList);
-          // });
-          //
+
+
           // // 设置标题
           // uni.setNavigationBarTitle({
           //   title: spu.name.substring(0, 7) + "..."
@@ -909,33 +910,6 @@
 						});
 						that.storeImage = '';
 					},
-				});
-			},
-			/**
-			 * 获取产品分销二维码
-			 * @param function successFn 下载完成回调
-			 *
-			 */
-			downloadFilePromotionCode: function(successFn) {
-				let that = this;
-				seckillCode(that.id,{stop_time:that.datatime}).then(res => {
-					uni.downloadFile({
-						url: that.setDomain(res.data.code),
-						success: function(res) {
-							that.$set(that, 'isDown', false);
-							if (typeof successFn == 'function')
-								successFn && successFn(res.tempFilePath);
-							else
-								that.$set(that, 'PromotionCode', res.tempFilePath);
-						},
-						fail: function() {
-							that.$set(that, 'isDown', false);
-							that.$set(that, 'PromotionCode', '');
-						},
-					});
-				}).catch(err => {
-					that.$set(that, 'isDown', false);
-					that.$set(that, 'PromotionCode', '');
 				});
 			},
 			getImageBase64:function(images){
