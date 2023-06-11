@@ -5,7 +5,7 @@
 			<view class='navbarH' :style='"height:"+navH+"rpx;"'>
 				<view class='navbarCon acea-row row-center-wrapper'>
 					<view class="header acea-row row-center-wrapper">
-						<view class="item" :class="navActive === index ? 'on' : ''" v-for="(item,index) in navList" :key='index' @tap="tap(item,index)">
+						<view class="item" :class="navActive === index ? 'on' : ''" v-for="(item,index) in navList" :key='index' @tap="tap( index)">
 							{{ item }}
 						</view>
 					</view>
@@ -259,7 +259,6 @@
 				opacity: 0,
 				scrollY: 0,
 				topArr: [],
-				toView: '',
 				height: 0,
 				heightArr: [],
 				lock: false,
@@ -943,67 +942,68 @@
       },
       // #endif
 
-      // TODO 芋艿：暂未整理
-
-			// 后退
-			returns: function() {
-				uni.navigateBack()
-			},
-
-
-			scroll: function(e) {
-				var that = this,
-					scrollY = e.detail.scrollTop;
-				var opacity = scrollY / 200;
-				opacity = opacity > 1 ? 1 : opacity;
-				that.opacity = opacity
-				that.scrollY = scrollY
-				if (that.lock) {
-					that.lock = false
-					return;
-				}
-				for (var i = 0; i < that.topArr.length; i++) {
-					if (scrollY < that.topArr[i] - (app.globalData.navHeight / 2) + that.heightArr[i]) {
-						that.navActive = i
-						break
-					}
-				}
-			},
-			tap: function(item, index) {
-				var id = item.id;
-				var index = index;
-				var that = this;
-				// if (!this.data.good_list.length && id == "past2") {
-				//   id = "past3"
-				// }
-				this.toView = id;
-				this.navActive = index;
-				this.lock = true;
-				this.scrollTop = index > 0 ? that.topArr[index] - (app.globalData.navHeight / 2) : that.topArr[index]
-			},
-			infoScroll: function() {
-				var that = this,
-					topArr = [],
-					heightArr = [];
-				for (var i = 0; i < that.navList.length; i++) { //productList
-					//获取元素所在位置
-					var query = wx.createSelectorQuery().in(this);
-					var idView = "#past" + i;
-					// if (!that.data.good_list.length && i == 2) {
-					//   var idView = "#past" + 3;
-					// }
-					query.select(idView).boundingClientRect();
-					query.exec(function(res) {
-						var top = res[0].top;
-						var height = res[0].height;
-						topArr.push(top);
-						heightArr.push(height);
-						that.topArr = topArr
-						that.heightArr = heightArr
-					});
-				}
-			},
-
+      // ========== 顶部 nav 相关的方法 ==========
+      /**
+       * 后退
+       */
+      returns: function() {
+        uni.navigateBack()
+      },
+      /**
+       * 点击指定 nav bar
+       *
+       * @param index 新的 navList 位置
+       */
+      tap: function(index) {
+        this.$set(this, 'navActive', index);
+        this.$set(this, 'lock', true);
+        this.$set(this, 'scrollTop', index > 0 ? this.topArr[index] - (app.globalData.navHeight / 2)
+          : this.topArr[index]);
+      },
+      /**
+       * 滚动
+       *
+       * @param e 滚动事件
+       */
+      scroll: function(e) {
+        const scrollY = e.detail.scrollTop;
+        let opacity = scrollY / 200;
+        opacity = opacity > 1 ? 1 : opacity;
+        this.$set(this, 'opacity', opacity);
+        this.$set(this, 'scrollY', scrollY);
+        if (this.lock) {
+          this.$set(this, 'lock', false)
+          return;
+        }
+        // 设置选中的 nav
+        for (let i = 0; i < this.topArr.length; i++) {
+          if (scrollY < this.topArr[i] - (app.globalData.navHeight / 2) + this.heightArr[i]) {
+            this.$set(this, 'navActive', i)
+            break
+          }
+        }
+      },
+      /**
+       * 处理器滚动条
+       */
+      infoScroll: function() {
+        const topArr = [];
+        const heightArr = [];
+        for (let i = 0; i < this.navList.length; i++) {
+          // 获取元素所在位置
+          const query = wx.createSelectorQuery().in(this);
+          const idView = "#past" + i;
+          query.select(idView).boundingClientRect();
+          query.exec(function(res) {
+            const top = res[0].top;
+            const height = res[0].height;
+            topArr.push(top);
+            heightArr.push(height);
+            this.$set(this, 'topArr', topArr);
+            this.$set(this, 'heightArr', heightArr);
+          });
+        }
+      },
 
       fen2yuan(price) {
         return Util.fen2yuan(price)
