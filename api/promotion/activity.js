@@ -4,6 +4,8 @@ import request from "@/utils/request.js";
 export function getActivityListBySpuId(spuId) {
   return request.get("app-api/promotion/activity/list-by-spu-id", {
     spuId
+  }, {
+    noAuth: true // TODO 芋艿：后续要做调整
   });
 }
 
@@ -11,5 +13,7 @@ export function getActivityListBySpuId(spuId) {
 export function getActivityListBySpuIds(spuIds) {
   return request.get("app-api/promotion/activity/list-by-spu-ids", {
     spuIds
+  }, {
+    noAuth: true // TODO 芋艿：后续要做调整
   });
 }

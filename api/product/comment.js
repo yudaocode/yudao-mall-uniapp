@@ -4,6 +4,8 @@ import request from "@/utils/request.js";
 export function getCommentStatistics(spuId) {
   return request.get('app-api/product/comment/statistics', {
     spuId
+  }, {
+    noAuth: true // TODO 芋艿：后续要做调整
   });
 }
 
@@ -12,5 +14,7 @@ export function getCommentList(spuId, count) {
   return request.get('app-api/product/comment/list', {
     spuId,
     count
+  }, {
+    noAuth: true // TODO 芋艿：后续要做调整
   });
 }

@@ -93,7 +93,7 @@
 					<view>客服</view>
 				</navigator>
 				<!-- #endif -->
-        <!-- 收藏 TODO -->
+        <!-- 收藏 -->
         <view @tap='setCollect' class='item'>
 					<view class='iconfont icon-shoucang1' v-if="userCollect"></view>
 					<view class='iconfont icon-shoucang' v-else></view>
@@ -136,7 +136,7 @@
       @close="closeAttr"
     />
 		<home></home>
-		<!-- 分享按钮  TODO-->
+		<!-- 分享按钮 -->
 		<view class="generate-posters acea-row row-middle" :class="posters ? 'on' : ''">
 			<!-- #ifndef MP -->
 			<button class="item" hover-class='none' v-if="weixinStatus === true" @click="H5ShareBox = true">
@@ -145,7 +145,7 @@
 			</button>
 			<!-- #endif -->
 			<!-- #ifdef MP -->
-			<button class="item" open-type="share" hover-class='none' @click="goFriend">
+			<button class="item" open-type="share" hover-class='none' @click="closePosters">
 				<view class="iconfont icon-weixin3"></view>
 				<view class="">发送给朋友</view>
 			</button>
@@ -156,7 +156,7 @@
 			</button>
 		</view>
 		<view class="mask"  v-if="posters" @click="closePosters"></view>
-		<view class="mask"  v-if="canvasStatus"  @click="listenerActionClose"></view>
+		<view class="mask"  v-if="canvasStatus"  @click="closePosters"></view>
 		<!-- 海报展示 TODO -->
 		<view class='poster-pop' v-if="canvasStatus">
 			<image src='/static/images/poster-close.png' class='close' @click="posterImageClose"></image>
@@ -182,19 +182,7 @@
 <script>
   const app = getApp();
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js'
-	import {
-		mapGetters
-	} from "vuex";
-	import {
-		getSeckillDetail,
-		seckillCode
-	} from '@/api/activity.js';
-	import {
-		collectAdd,
-		collectDel,
-		getReplyList,
-		getReplyConfig
-	} from '@/api/store.js';
+	import { mapGetters } from "vuex";
 	import productConSwiper from '@/components/productConSwiper/index.vue'
 	import productWindow from '@/components/productWindow/index.vue'
 	import userEvaluation from '@/components/userEvaluation/index.vue'
@@ -208,12 +196,8 @@
 	import home from '@/components/home/index.vue'
 	import countDown from '@/components/countDown';
 	import shareRedPackets from '@/components/shareRedPackets';
-	import {
-		imageBase64
-	} from "@/api/public";
-	import {
-		toLogin
-	} from '@/libs/login.js';
+	import { imageBase64 } from "@/api/public";
+	import { toLogin } from '@/libs/login.js';
 	import { silenceBindingSpread } from "@/utils";
 	import { spread } from "@/api/user";
   import * as ProductSpuApi from '@/api/product/spu.js';
@@ -293,7 +277,7 @@
 				posterImageStatus: false,
 				canvasStatus: false, //海报绘图标签
 				storeImage: '', //海报产品图
-				PromotionCode: '', //二维码图片
+				promotionCode: '', //二维码图片
 				posterImage: '', //海报路径
 				posterbackgd: '/static/images/posterbackgd.png',
 				actionSheetHidden: false,
@@ -388,6 +372,15 @@
       // 获得秒杀详情
       this.getSeckillDetail();
 		},
+    //#ifdef MP
+    onShareAppMessage() {
+      return {
+        title: this.spu.name || '',
+        imageUrl: this.spu.picUrl,
+        path: app.globalData.openPages
+      };
+    },
+    //#endif
     onReady() {
       this.$nextTick(() => {
         // 设置微信的头部 top 位置
@@ -483,7 +476,7 @@
           // #ifdef H5
           this.storeImage = spu.picUrl;
           this.make();
-          this.setShare();
+          this.ShareInfo();
           // #endif
           // #ifdef MP
           this.getQrcode();
@@ -719,35 +712,244 @@
         }
       },
 
+      // ========== 分销相关的方法 ==========
+      /**
+       * 生成二维码，设置到 promotionCode 变量
+       */
+      make() {
+        let href = location.href.split('?')[0] + "?id="+ this.id + "&spread="  + this.uid;
+        uQRCode.make({
+          canvasId: 'qrcode',
+          text: href,
+          size: this.qrcodeSize,
+          margin: 10,
+          success: res => {
+            this.promotionCode = res;
+          },
+          complete: () => {},
+          fail:res => {
+            this.$util.Tips({
+              title: '海报二维码生成失败！'
+            });
+          }
+        })
+      },
+      /**
+       * 设置微信公众号的分享标题、内容等信息
+       */
+      ShareInfo: function() {
+        // 只处理微信环境
+        if (!this.$wechat.isWeixin()) {
+          return
+        }
+        const spu = this.spu;
+        let href = location.href;
+        href = href.indexOf("?") === -1 ?
+          href + "?spread=" + this.uid :
+          href + "&spread=" + this.uid;
+        const configAppMessage = {
+          title: spu.name,
+          imgUrl: spu.picUrl,
+          desc: spu.description,
+          link: href
+        };
+        this.$wechat.wechatEvevt([
+          "updateAppMessageShareData",
+          "updateTimelineShareData",
+          "onMenuShareAppMessage",
+          "onMenuShareTimeline"
+        ], configAppMessage);
+      },
+      /**
+       * 获得商品的封面 base64
+       */
+      getImageBase64:function(images) {
+        imageBase64({
+          url: images
+        }).then(res=>{
+          this.imgTop = res.data.code
+        })
+      },
+      /**
+       * 获得小程序的二维码
+       */
+      getQrcode() {
+        let data = {
+          pid: this.uid,
+          id: this.id,
+          path: 'pages/activity/goods_seckill_details/index'
+        }
+        getQrcode(data).then(res=>{
+          base64src(res.data.code, res => {
+            this.promotionCode = res;
+          });
+        }).catch(err => {
+          this.errT = err;
+        });
+      },
+      /**
+       * 生成海报
+       */
+      goPoster: function() {
+        // 提示正在生成中
+        uni.showLoading({
+          title: '海报生成中',
+          mask: true
+        });
+        this.posters = false;
+        // 如果没有二维码图片，则说明加载失败，进行错误提示
+        if(!this.promotionCode){
+          uni.hideLoading();
+          this.$util.Tips({
+            title: this.errT
+          });
+          return
+        }
+        // 校验海报是否已经生成；如果失败，则进行错误提示
+        setTimeout(() => {
+          if (!this.imgTop) {
+            uni.hideLoading();
+            this.$util.Tips({
+              title: '无法生成商品海报！'
+            });
+          }
+        }, 1000);
+
+        // 展示海报
+        const that = this;
+        let arrImagesUrlTop = '';
+        uni.downloadFile({
+          url: this.imgTop, //仅为示例，并非真实的资源
+          success: (res) => {
+            arrImagesUrlTop = res.tempFilePath;
+            let arrImages = [that.posterbackgd, arrImagesUrlTop, that.promotionCode];
+            const name = that.spu.name;
+            const price = that.fen2yuan(that.spu.price);
+            const marketPrice = that.fen2yuan(that.spu.marketPrice);
+            setTimeout(() => {
+              that.$util.PosterCanvas(arrImages, name, price, marketPrice,
+                function(tempFilePath) {
+                that.posterImage = tempFilePath;
+                that.canvasStatus = true;
+                uni.hideLoading();
+              });
+            }, 500);
+          }
+        });
+      },
+      /**
+       * 关闭分享弹窗
+       */
+      closePosters: function() {
+        this.posters = false;
+      },
+      /**
+       * 隐藏海报
+       */
+      posterImageClose: function() {
+        this.canvasStatus = false
+      },
+      /**
+       * 获取海报产品图（解决跨域问题，只适用于小程序）
+       */
+      downloadFilestoreImage: function() {
+        let that = this;
+        uni.downloadFile({
+          url: that.setDomain(that.spu.picUrl),
+          success: function(res) {
+            that.storeImage = res.tempFilePath;
+          },
+          fail: function() {
+            return that.$util.Tips({
+              title: ''
+            });
+          },
+        });
+      },
+      /**
+       * 替换安全域名
+       */
+      setDomain: function(url) {
+        url = url ? url.toString() : '';
+        // 本地调试打开,生产请注销
+        if (url.indexOf("https://") > -1) {
+          return url;
+        }
+        return url.replace('http://', 'https://');
+      },
+      /**
+       * 分享打开
+       */
+      listenerActionSheet: function() {
+        if (!this.isLogin) {
+          toLogin();
+          return
+        }
+        // #ifdef H5
+        if (this.$wechat.isWeixin() === true) {
+          this.weixinStatus = true;
+        }
+        // #endif
+        this.posters = true;
+      },
+      /**
+       * 微信小程序的保存图片到本机
+       */
+      // #ifdef MP
+      savePosterPath: function() {
+        let that = this;
+        uni.getSetting({
+          success(res) {
+            if (!res.authSetting['scope.writePhotosAlbum']) {
+              uni.authorize({
+                scope: 'scope.writePhotosAlbum',
+                success() {
+                  uni.saveImageToPhotosAlbum({
+                    filePath: that.posterImage,
+                    success: function(res) {
+                      that.posterImageClose();
+                      that.$util.Tips({
+                        title: '保存成功',
+                        icon: 'success'
+                      });
+                    },
+                    fail: function(res) {
+                      that.$util.Tips({
+                        title: '保存失败'
+                      });
+                    }
+                  })
+                }
+              })
+            } else {
+              uni.saveImageToPhotosAlbum({
+                filePath: that.posterImage,
+                success: function(res) {
+                  that.posterImageClose();
+                  that.$util.Tips({
+                    title: '保存成功',
+                    icon: 'success'
+                  });
+                },
+                fail: function(res) {
+                  that.$util.Tips({
+                    title: '保存失败'
+                  });
+                },
+              })
+            }
+          }
+        })
+      },
+      // #endif
+
       // TODO 芋艿：暂未整理
-
-
-			closePosters:function(){
-				this.posters = false;
-			},
-
 
 			// 后退
 			returns: function() {
 				uni.navigateBack()
 			},
-			setShare: function() {
-				this.$wechat.isWeixin() &&
-					this.$wechat.wechatEvevt([
-						"updateAppMessageShareData",
-						"updateTimelineShareData",
-						"onMenuShareAppMessage",
-						"onMenuShareTimeline"
-					], {
-						desc: this.storeInfo.info,
-						title: this.storeInfo.title,
-						link: location.href,
-						imgUrl: this.storeInfo.image
-					}).then(res => {
-					}).catch(err => {
-						console.log(err);
-					});
-			},
+
 
 			scroll: function(e) {
 				var that = this,
@@ -802,230 +1004,11 @@
 				}
 			},
 
-			/**
-			 * 分享打开
-			 *
-			 */
-			listenerActionSheet: function() {
-				if (this.isLogin === false) {
-					toLogin();
-				} else {
-					// #ifdef H5
-					if(!this.imgTop)this.getImageBase64(this.storeImage);
-					if (this.$wechat.isWeixin() === true) {
-						this.weixinStatus = true;
-					}
-					// #endif
-					this.posters = true;
-
-				}
-			},
-			// 分享关闭
-			listenerActionClose: function() {
-				this.posters = false;
-			},
-			//隐藏海报
-			posterImageClose: function() {
-				this.canvasStatus = false
-			},
-			//替换安全域名
-			setDomain: function(url) {
-				url = url ? url.toString() : '';
-				//本地调试打开,生产请注销
-				if (url.indexOf("https://") > -1) return url;
-				else return url.replace('http://', 'https://');
-			},
-			//获取海报产品图
-			downloadFilestoreImage: function() {
-				let that = this;
-				uni.downloadFile({
-					url: that.setDomain(that.storeInfo.image),
-					success: function(res) {
-						that.storeImage = res.tempFilePath;
-					},
-					fail: function() {
-						return that.$util.Tips({
-							title: ''
-						});
-						that.storeImage = '';
-					},
-				});
-			},
-			getImageBase64:function(images){
-				let that = this;
-				imageBase64({url:images}).then(res=>{
-					that.imgTop = res.data.code
-				})
-			},
-			// 小程序关闭分享弹窗；
-			goFriend: function() {
-				this.posters = false;
-			},
-			/**
-			 * 生成海报
-			 */
-			goPoster: function() {
-				let that = this;
-				uni.showLoading({
-					title: '海报生成中',
-					mask: true
-				});
-				that.posters = false;
-				let arrImagesUrl = '';
-				let arrImagesUrlTop = '';
-				if(!that.PromotionCode){
-					uni.hideLoading();
-					that.$util.Tips({
-						title: that.errT
-					});
-					return
-				}
-				setTimeout(() => {
-					if (!that.imgTop) {
-						uni.hideLoading();
-						that.$util.Tips({
-							title: '无法生成商品海报！'
-						});
-						return
-					}
-				}, 1000);
-				uni.downloadFile({
-					url: that.imgTop, //仅为示例，并非真实的资源
-					success: (res) => {
-						arrImagesUrlTop = res.tempFilePath;
-						let arrImages = [that.posterbackgd, arrImagesUrlTop, that.PromotionCode];
-						let storeName = that.storeInfo.storeName;
-						let price = that.storeInfo.price;
-						setTimeout(() => {
-							that.$util.PosterCanvas(arrImages, storeName, price, that.storeInfo.otPrice,function(tempFilePath) {
-								that.posterImage = tempFilePath;
-								that.canvasStatus = true;
-								uni.hideLoading();
-							});
-						}, 500);
-					}
-				});
-			},
-			// 小程序二维码
-			getQrcode(){
-				let that = this;
-				let data = {
-					pid: that.uid,
-					id: that.id,
-					path: 'pages/activity/goods_seckill_details/index'
-				}
-				getQrcode(data).then(res=>{
-					base64src(res.data.code, res => {
-						that.PromotionCode = res;
-					});
-				}).catch(err => {
-					that.errT = err;
-				});
-			},
-			// 生成二维码；
-			make() {
-				let href = location.href.split('?')[0] + "?id="+ this.id + "&spread="  + this.uid;
-				uQRCode.make({
-					canvasId: 'qrcode',
-					text: href,
-					size: this.qrcodeSize,
-					margin: 10,
-					success: res => {
-						this.PromotionCode = res;
-					},
-					complete: (res) => {
-					},
-					fail:res=>{
-						this.$util.Tips({
-							title: '海报二维码生成失败！'
-						});
-					}
-				})
-			},
-
-			/*
-			 * 保存到手机相册
-			 */
-			// #ifdef MP
-			savePosterPath: function() {
-				let that = this;
-				uni.getSetting({
-					success(res) {
-						if (!res.authSetting['scope.writePhotosAlbum']) {
-							uni.authorize({
-								scope: 'scope.writePhotosAlbum',
-								success() {
-									uni.saveImageToPhotosAlbum({
-										filePath: that.posterImage,
-										success: function(res) {
-											that.posterImageClose();
-											that.$util.Tips({
-												title: '保存成功',
-												icon: 'success'
-											});
-										},
-										fail: function(res) {
-											that.$util.Tips({
-												title: '保存失败'
-											});
-										}
-									})
-								}
-							})
-						} else {
-							uni.saveImageToPhotosAlbum({
-								filePath: that.posterImage,
-								success: function(res) {
-									that.posterImageClose();
-									that.$util.Tips({
-										title: '保存成功',
-										icon: 'success'
-									});
-								},
-								fail: function(res) {
-									that.$util.Tips({
-										title: '保存失败'
-									});
-								},
-							})
-						}
-					}
-				})
-			},
-			// #endif
-			setShareInfoStatus: function() {
-				let data = this.storeInfo;
-				let href = location.href;
-				if (this.$wechat.isWeixin()) {
-					href =
-						href.indexOf("?") === -1 ?
-						href + "?spread=" + this.uid :
-						href + "&spread=" + this.uid;
-
-					let configAppMessage = {
-						desc: data.storeInfo,
-						title: data.storeName,
-						link: href,
-						imgUrl: data.image
-					};
-					this.$wechat.wechatEvevt(["updateAppMessageShareData", "updateTimelineShareData"], configAppMessage)
-				}
-			},
 
       fen2yuan(price) {
         return Util.fen2yuan(price)
       }
 		},
-    //#ifdef MP
-    onShareAppMessage() {
-      let that = this;
-      return {
-        title: that.storeInfo.title,
-        path: app.globalData.openPages,
-        imageUrl: that.storeInfo.image
-      };
-    },
-    //#endif
 	}
 </script>
 

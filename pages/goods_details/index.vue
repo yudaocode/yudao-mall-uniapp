@@ -983,25 +983,23 @@
         if (!this.$wechat.isWeixin()) {
           return
         }
-        let spu = this.spu;
+        const spu = this.spu;
         let href = location.href;
-        href = href.indexOf("?") === -1 ? href + "?spread=" + this.uid : href + "&spread=" + this.uid;
-        let configAppMessage = {
-          desc: spu.description,
+        href = href.indexOf("?") === -1 ?
+          href + "?spread=" + this.uid :
+          href + "&spread=" + this.uid;
+        const configAppMessage = {
           title: spu.name,
-          link: href,
-          imgUrl: spu.picUrl
+          imgUrl: spu.picUrl,
+          desc: spu.description,
+          link: href
         };
         this.$wechat.wechatEvevt([
           "updateAppMessageShareData",
           "updateTimelineShareData",
           "onMenuShareAppMessage",
           "onMenuShareTimeline"
-        ], configAppMessage).then(res => {
-          console.log(res);
-        }).catch(err => {
-          console.log(err);
-        })
+        ], configAppMessage);
       },
       /**
        * 获得商品的封面 base64
@@ -1064,12 +1062,11 @@
         uni.downloadFile({
           url: that.imgTop, // 仅为示例，并非真实的资源
           success: (res) => {
-            debugger
             arrImagesUrlTop = res.tempFilePath;
             const arrImages = [that.posterbackgd, arrImagesUrlTop, that.promotionCode];
             const name = that.spu.name;
-            const price = that.fen2yuan(this.spu.price);
-            const marketPrice = that.fen2yuan(this.spu.marketPrice);
+            const price = that.fen2yuan(that.spu.price);
+            const marketPrice = that.fen2yuan(that.spu.marketPrice);
             setTimeout(() => {
               that.$util.PosterCanvas(arrImages, name, price, marketPrice,
                 function(tempFilePath) {
