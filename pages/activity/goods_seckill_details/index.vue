@@ -109,7 +109,7 @@
         </view>
 				<view class="bnt acea-row" v-else-if="status === 2 && attribute.productSelect.quota > 0">
 					<view class="joinCart bnts" @tap="openAlone">单独购买</view>
-					<view class="buy bnts" @tap="goCat">立即购买</view>
+					<view class="buy bnts" @tap="goBuy">立即购买</view>
 				</view>
 				<view class="bnt acea-row" v-else-if="status === 2 && (attribute.productSelect.quota <= 0)">
 					<view class="joinCart bnts" @tap="openAlone">单独购买</view>
@@ -382,28 +382,24 @@
 				}
 			}
 
-      // TODO 芋艿：为什么要登录才允许获取？
-			if (this.isLogin) {
-				this.getSeckillDetail();
-			} else {
-				this.$Cache.set('login_back_url',
-					'/pages/activity/goods_seckill_details/index?id=' + this.id + '&spread=' + app.globalData.spread?app.globalData.spread:0);
-				toLogin();
-			}
-			this.$nextTick(() => {
-				// #ifdef MP
-				const menuButton = uni.getMenuButtonBoundingClientRect();
-				const query = uni.createSelectorQuery().in(this);
-				query
-					.select('#home')
-					.boundingClientRect(data => {
-						this.homeTop = menuButton.top * 2 + menuButton.height - data.height;
-					})
-					.exec();
-				// #endif
-			})
-			silenceBindingSpread();
+      // 获得秒杀详情
+      this.getSeckillDetail();
 		},
+    onReady() {
+      this.$nextTick(() => {
+        // 设置微信的头部 top 位置
+        // #ifdef MP
+        const menuButton = uni.getMenuButtonBoundingClientRect();
+        const query = uni.createSelectorQuery().in(this);
+        query.select('#home')
+          .boundingClientRect(data => {
+            this.homeTop = menuButton.top * 2 + menuButton.height - data.height;
+          })
+          .exec();
+        // #endif
+      });
+      silenceBindingSpread();
+    },
 		methods: {
       // ========== 秒杀活动相关 ==========
       getSeckillDetail: function() {
@@ -437,7 +433,8 @@
           this.getProductReplyList();
           this.getProductReplyCount();
 
-          app.globalData.openPages = '/pages/activity/goods_seckill_details/index?id=' + this.id + '&spread=' + this.uid ;
+          app.globalData.openPages = '/pages/activity/goods_seckill_details/index?id=' + this.id
+            + '&spread=' + this.uid;
         }).catch(err => {
           that.$util.Tips({
             title:err
@@ -445,13 +442,6 @@
             tab:3
           })
         });
-        if (true) {
-          return;
-        }
-        getSeckillDetail(that.id).then(res => {
-          this.storeInfo = res.data.storeSeckill;
-          this.attribute.productSelect.num = res.data.storeSeckill.num;
-        })
       },
 
       // ========== 商品详情相关 ==========
@@ -634,6 +624,37 @@
           });
         }
       },
+      /**
+			 * 单独购买
+			 */
+      openAlone: function() {
+        uni.navigateTo({
+          url: `/pages/goods_details/index?id=${this.activity.spuId}`
+        })
+      },
+      /**
+       * 下订单
+       */
+      goBuy: function() {
+        // 未登录，需要跳转
+        if (!this.isLogin) {
+          toLogin();
+          return;
+        }
+
+        // 【重要】如果 attr 组件未打开，此时需要先打开。等到选择完后，再立即购买
+        if (!this.attribute.cartAttr) {
+          this.openAttr();
+          return;
+        }
+
+        // 发起下单
+        let sku = this.attribute.productSelect;
+        uni.navigateTo({
+          url: '/pages/users/order_confirm/index?skuId=' + sku.id + '&count=' + sku.cart_num
+            + '&seckillActivityId=' + this.id
+        });
+      },
 
       // TODO 芋艿：暂未整理
 
@@ -731,7 +752,7 @@
 						that.topArr = topArr
 						that.heightArr = heightArr
 					});
-				};
+				}
 			},
 			/**
 			 * 收藏商品
@@ -747,44 +768,6 @@
 						that.userCollect = !that.userCollect
 					})
 				}
-			},
-			/*
-			 *  单独购买
-			 */
-			openAlone: function() {
-				uni.navigateTo({
-					url: `/pages/goods_details/index?id=${this.storeInfo.productId}`
-				})
-			},
-			/*
-			 *  下订单
-			 */
-			goCat: function() {
-				var that = this;
-				var productSelect = this.productValue[this.attrValue];
-				if (that.cart_num > 1) {
-					return this.$util.Tips({
-						title: `该商品每人限购1${this.storeInfo.unitName}`
-					});
-				}
-				//打开属性
-				if (this.isOpen)
-					this.attribute.cartAttr = true
-				else
-					this.attribute.cartAttr = !this.attribute.cartAttr
-				//只有关闭属性弹窗时进行加入购物车
-				if (this.attribute.cartAttr === true && this.isOpen == false) return this.isOpen = true
-				//如果有属性,没有选择,提示用户选择
-				if (this.attribute.productAttr.length && productSelect === undefined && this.isOpen == true) return app.$util.Tips({
-					title: '请选择属性'
-				});
-
-				this.$Order.getPreOrder("buyNow",[{
-						"attrValueId": parseFloat(this.attribute.productSelect.unique),
-						"seckillId": parseFloat(this.id),
-						"productNum": parseFloat(this.cart_num ? this.cart_num : this.attribute.productSelect.cart_num),
-						"productId": parseFloat(this.storeInfo.productId)
-					}]);
 			},
 			/**
 			 * 分享打开
