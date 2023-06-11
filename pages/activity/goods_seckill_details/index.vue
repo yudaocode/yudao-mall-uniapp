@@ -430,14 +430,14 @@
 
           // 获得商品详情
           this.getGoodsDetails();
-          // TODO 收藏
-          // this.isFavoriteExists();
+          // 获得商品收藏
+          this.isFavoriteExists();
           // 获得商品评价列表
           this.getProductReplyList();
           this.getProductReplyCount();
 
-          app.globalData.openPages = '/pages/activity/goods_seckill_details/index?id=' + this.id
-            + '&spread=' + this.uid;
+          app.globalData.openPages = '/pages/activity/goods_seckill_details/index?id='
+            + this.id + '&spread=' + this.uid;
         }).catch(err => {
           that.$util.Tips({
             title:err
@@ -684,6 +684,41 @@
         });
       },
 
+      // ========== 收藏相关方法 ==========
+      /**
+       * 获得是否收藏
+       */
+      isFavoriteExists: function() {
+        if (!this.isLogin) {
+          return;
+        }
+
+        ProductFavoriteApi.isFavoriteExists(this.activity.spuId).then(res => {
+          this.userCollect = res.data;
+        });
+      },
+      /**
+       * 收藏 / 取消商品
+       */
+      setCollect: function() {
+        if (!this.isLogin) {
+          toLogin();
+          return;
+        }
+
+        // 情况一：取消收藏
+        if (this.userCollect) {
+          ProductFavoriteApi.deleteFavorite(this.activity.spuId).then(res => {
+            this.$set(this, 'userCollect', false);
+          })
+          // 情况二：添加收藏
+        } else {
+          ProductFavoriteApi.createFavorite(this.activity.spuId).then(res => {
+            this.$set(this, 'userCollect', true);
+          })
+        }
+      },
+
       // TODO 芋艿：暂未整理
 
 
@@ -766,21 +801,7 @@
 					});
 				}
 			},
-			/**
-			 * 收藏商品
-			 */
-			setCollect: function() {
-				var that = this;
-				if (this.userCollect) {
-					collectDel(this.storeInfo.productId).then(res => {
-						that.userCollect = !that.userCollect
-					})
-				} else {
-					collectAdd(this.storeInfo.productId).then(res => {
-						that.userCollect = !that.userCollect
-					})
-				}
-			},
+
 			/**
 			 * 分享打开
 			 *
