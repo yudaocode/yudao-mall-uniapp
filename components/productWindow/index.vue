@@ -48,7 +48,10 @@
 							+
 						</view>
 						<view v-else class='item plus'
-							:class='(attr.productSelect.cart_num >= attr.productSelect.quota) || (attr.productSelect.cart_num >= attr.productSelect.stock) || (attr.productSelect.cart_num >= attr.productSelect.num)? "on":""'
+							:class='(attr.productSelect.cart_num >= attr.productSelect.quota) // 大于总限购
+							|| (attr.productSelect.cart_num >= attr.productSelect.stock)  // 大于库存
+							|| (attr.productSelect.cart_num >= attr.productSelect.limitCount)  // 大于单个商品限售
+							? "on":""'
 							@click='CartNumAdd'>+</view>
 					</view>
 				</view>

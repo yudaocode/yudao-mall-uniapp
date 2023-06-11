@@ -632,7 +632,8 @@
         this.$set(this.attr.productSelect, "stock", sku.stock);
         this.$set(this.attr.productSelect, "cart_num", 1);
         // SKU 关联属性
-        this.$set(this.attr.properties[propertyIndex], 'index', this.attr.properties[propertyIndex].values[valueIndex].name);
+        this.$set(this.attr.properties[propertyIndex], 'index',
+          this.attr.properties[propertyIndex].values[valueIndex].name);
         this.$set(this, "attrValue", newSkuKey);
       },
       /**

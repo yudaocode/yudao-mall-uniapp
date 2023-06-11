@@ -47,7 +47,7 @@
 							</view>
 						</view>
             <!-- SKU 选择  -->
-            <view class='attribute acea-row row-between-wrapper mb30 borRadius14' @tap='selecAttr'>
+            <view class='attribute acea-row row-between-wrapper mb30 borRadius14' @tap='openAttr'>
 							<view class="line1">{{ attrValue.length > 0 ? "已选择" : "请选择" }}：
                 <text class='atterTxt'>{{attrValue}}</text>
               </view>
@@ -129,11 +129,10 @@
     <product-window
       :attr='attribute'
       :limitNum='1'
-      @myevent="onMyEvent"
       @ChangeAttr="ChangeAttr"
       @ChangeCartNum="ChangeCartNum"
-      @attrVal="attrVal"
       @iptCartNum="iptCartNum"
+      @close="closeAttr"
     />
 		<home></home>
 		<!-- 分享按钮  TODO-->
@@ -466,8 +465,21 @@
           this.$set(this, 'spu', spu);
           this.$set(this.attribute, 'properties', ProductUtil.convertProductPropertyList(skus));
           this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
-          // TODO 芋艿：需要设置个 minPrice
-
+          // 将秒杀活动的信息，合并到 SKU 里面，实现秒杀价格的显示
+          this.activity.products.forEach(product => {
+            this.spu.price = Math.min(this.spu.price, product.seckillPrice); // 设置 SPU 的最低价格
+          });
+          skus.forEach(sku => {
+            const product = this.activity.products.find(product => product.skuId === sku.id);
+            if (product) {
+              sku.price = product.seckillPrice;
+              sku.quota = product.quota;
+              sku.limitCount = product.limitCount;
+            } else { // 找不到可能是没配置，则不能发起秒杀
+              sku.quota = 0;
+              sku.limitCount = 0;
+            }
+          });
 
           // 处理滚动条
           setTimeout(() => {
@@ -491,10 +503,6 @@
           // 选中默认 sku
           this.selectDefaultSku();
         }).catch(err => {
-          // TODO 芋艿：临时去掉
-          if (true) {
-            return
-          }
           return this.$util.Tips({
             title: err.toString()
           }, {
@@ -503,68 +511,9 @@
           });
         })
       },
-
-      // TODO 芋艿：暂未整理
-
-      kefuClick(){
-				location.href = this.chatUrl;
-			},
-			closePosters:function(){
-				this.posters = false;
-			},
-			getProductReplyList: function() {
-				getReplyList(this.storeInfo.productId, {
-					page: 1,
-					limit: 3,
-					type: 0,
-				}).then(res => {
-					this.reply = res.data.list;
-				})
-			},
-			getProductReplyCount: function() {
-				let that = this;
-				getReplyConfig(that.storeInfo.productId).then(res => {
-					that.$set(that, 'replyChance', res.data.replyChance * 100);
-					that.$set(that, 'replyCount', res.data.sumCount);
-				});
-			},
-			/**
-			 * 购物车手动填写
-			 *
-			*/
-			iptCartNum: function (e) {
-				this.$set(this.attribute.productSelect, 'cart_num', e?e:1);
-				this.$set(this, "cart_num", e);
-				if (e > 1) {
-					return this.$util.Tips({
-						title: `该商品每次限购1${this.storeInfo.unitName}`
-					});
-				}
-			},
-			// 后退
-			returns: function() {
-				uni.navigateBack()
-			},
-			setShare: function() {
-				this.$wechat.isWeixin() &&
-					this.$wechat.wechatEvevt([
-						"updateAppMessageShareData",
-						"updateTimelineShareData",
-						"onMenuShareAppMessage",
-						"onMenuShareTimeline"
-					], {
-						desc: this.storeInfo.info,
-						title: this.storeInfo.title,
-						link: location.href,
-						imgUrl: this.storeInfo.image
-					}).then(res => {
-					}).catch(err => {
-						console.log(err);
-					});
-			},
-			/**
-			 * 默认选中属性
-			 */
+      /**
+       * 默认选中属性
+       */
       selectDefaultSku: function() {
         const properties = this.attribute.properties;
         // 获得选中的属性值的名字，例如说 "黑色,大"，则 skuKey = ["黑色", "大"]
@@ -593,99 +542,145 @@
         this.$set(this.attribute.productSelect, "price", sku.price);
         this.$set(this.attribute.productSelect, "stock", sku.stock);
         this.$set(this.attribute.productSelect, "cart_num", 1);
+        // 秒杀活动特有字段
         this.$set(this.attribute.productSelect, "quota", sku.quota);
+        this.$set(this.attribute.productSelect, "limitCount", sku.limitCount);
         this.$set(this, "attrValue", skuKey.join(","));
-			},
-			selecAttr: function() {
-				this.attribute.cartAttr = true
-			},
-			onMyEvent: function() {
-				this.$set(this.attribute, 'cartAttr', false);
-				this.$set(this, 'isOpen', false);
-			},
-			/**
-			 * 购物车数量加和数量减
-			 *
-			 */
-			ChangeCartNum: function(changeValue) {
-				//changeValue:是否 加|减
-				//获取当前变动属性
-				let productSelect = this.productValue[this.attrValue];
-				if (this.cart_num) {
-					productSelect.cart_num = this.cart_num;
-					this.attribute.productSelect.cart_num = this.cart_num;
-				}
-				//如果没有属性,赋值给商品默认库存
-				if (productSelect === undefined && !this.attribute.productAttr.length)
-					productSelect = this.attribute.productSelect;
-				//无属性值即库存为0；不存在加减；
-				if (productSelect === undefined) return;
-				let stock = productSelect.stock || 0;
-				let quota = productSelect.quota || 0;
-				let num = this.attribute.productSelect;
-				//设置默认数据
-				if (productSelect.cart_num == undefined) productSelect.cart_num = 1;
-				if (changeValue) {
-					if (num.cart_num === 1) {
-						return this.$util.Tips({
-							title: `该商品每次限购 1 ${this.storeInfo.unitName}`
-						});
-					}
-					num.cart_num++;
-					let arrMin = [];
-					arrMin.push(quota);
-					arrMin.push(stock);
-					let minN = Math.min.apply(null, arrMin);
-					if (num.cart_num >= minN) {
-						this.$set(this.attribute.productSelect, "cart_num", minN ? minN : 1);
-						this.$set(this, "cart_num", minN ? minN : 1);
-					}
-					this.$set(this, "cart_num", num.cart_num);
-					this.$set(this.attribute.productSelect, "cart_num", num.cart_num);
+      },
+      /**
+       * 打开 SKU 属性的选择
+       */
+      openAttr: function() {
+        this.$set(this.attribute, 'cartAttr', true);
+      },
+      /**
+       * 关闭 productWindow 弹窗
+       */
+      closeAttr: function() {
+        this.$set(this.attribute, 'cartAttr', false);
+      },
+      /**
+       * 属性变动赋值
+       *
+       * @param newSkuKey 新的 skuKey
+       * @param propertyIndex properties 的下标
+       * @param valueIndex values 的下标
+       */
+      ChangeAttr: function(newSkuKey, propertyIndex, valueIndex) {
+        // SKU
+        let sku = this.skuMap[newSkuKey];
+        if (!sku) {
+          return;
+        }
+        this.$set(this.attribute.productSelect, "id", sku.id);
+        this.$set(this.attribute.productSelect, "picUrl", sku.picUrl);
+        this.$set(this.attribute.productSelect, "price", sku.price);
+        this.$set(this.attribute.productSelect, "stock", sku.stock);
+        this.$set(this.attribute.productSelect, "quota", sku.quota);
+        this.$set(this.attribute.productSelect, "limitCount", sku.limitCount);
+        this.$set(this.attribute.productSelect, "cart_num", 1);
+        // SKU 关联属性
+        this.$set(this.attribute.properties[propertyIndex], 'index',
+          this.attribute.properties[propertyIndex].values[valueIndex].name);
+        this.$set(this, "attrValue", newSkuKey);
+      },
+      /**
+       * 购物车数量加和数量减
+       *
+       * @param changeValue true 增加；false 减少
+       */
+      ChangeCartNum: function(changeValue) {
+        // 获取当前 sku
+        let sku = this.attribute.productSelect;
+        if (!sku) {
+          return;
+        }
 
-				} else {
-					num.cart_num--;
-					if (num.cart_num < 1) {
-						this.$set(this.attribute.productSelect, "cart_num", 1);
-						this.$set(this, "cart_num", 1);
-					}
-					this.$set(this, "cart_num", num.cart_num);
-					this.$set(this.attribute.productSelect, "cart_num", num.cart_num);
-				}
-			},
-			attrVal(val) {
-				this.attribute.productAttr[val.indexw].index = this.attribute.productAttr[val.indexw].attrValues[val.indexn];
-			},
-			/**
-			 * 属性变动赋值
-			 *
-			 */
-			ChangeAttr: function(res) {
-				this.$set(this,'cart_num',1);
-				let productSelect = this.productValue[res];
-				if (productSelect) {
-					this.$set(this.attribute.productSelect, "image", productSelect.image);
-					this.$set(this.attribute.productSelect, "price", productSelect.price);
-					this.$set(this.attribute.productSelect, "stock", productSelect.stock);
-					this.$set(this.attribute.productSelect, "unique", productSelect.id);
-					this.$set(this.attribute.productSelect, "cart_num", 1);
-					this.$set(this.attribute.productSelect, "quota", productSelect.quota);
-					this.$set(this.attribute.productSelect, "quotaShow", productSelect.quotaShow);
-					this.$set(this, "attrValue", res);
-					this.attrTxt = "已选择"
-				} else {
-					this.$set(this.attribute.productSelect, "image", this.storeInfo.image);
-					this.$set(this.attribute.productSelect, "price", this.storeInfo.price);
-					this.$set(this.attribute.productSelect, "stock", 0);
-					this.$set(this.attribute.productSelect, "unique", "");
-					this.$set(this.attribute.productSelect, "cart_num", 0);
-					this.$set(this.attribute.productSelect, "quota", 0);
-					this.$set(this.attribute.productSelect, "quotaShow", 0);
-					this.$set(this, "attrValue", "");
-					this.attrTxt = "已选择"
+        // 设置数量
+        let stock = sku.stock || 0;
+        let quota = sku.quota || 0;
+        let limitCount = sku.limitCount;
+        if (changeValue) {
+          sku.cart_num++;
+          if (limitCount !== undefined && sku.cart_num > limitCount) {
+            this.$set(this.attribute.productSelect, "cart_num", limitCount);
+            this.$util.Tips({
+              title: `该商品每次限购 ${sku.limitCount} ${this.spu.unitName}`
+            });
+          } else if (sku.cart_num > stock || sku.cart_num > quota) {
+            this.$set(this.attribute.productSelect, "cart_num", Math.min(stock, quota));
+          }
+        } else {
+          sku.cart_num--;
+          if (sku.cart_num < 1) {
+            this.$set(this.attribute.productSelect, "cart_num", 1);
+          }
+        }
+      },
+      /**
+       * 购物车手动填写
+       *
+       * @param number 数量
+       */
+      iptCartNum: function (number) {
+        this.$set(this.attribute.productSelect, 'cart_num', number ? number : 1);
+        // 判断是否超限购
+        let sku = this.attribute.productSelect;
+        let limitCount = sku.limitCount;
+        if (limitCount !== undefined && number > limitCount) {
+          this.$set(this.attribute.productSelect, "cart_num", limitCount);
+          this.$util.Tips({
+            title: `该商品每次限购 ${sku.limitCount} ${this.spu.unitName}`
+          });
+        }
+      },
 
-				}
+      // TODO 芋艿：暂未整理
+
+      kefuClick(){
+				location.href = this.chatUrl;
 			},
+			closePosters:function(){
+				this.posters = false;
+			},
+			getProductReplyList: function() {
+				getReplyList(this.storeInfo.productId, {
+					page: 1,
+					limit: 3,
+					type: 0,
+				}).then(res => {
+					this.reply = res.data.list;
+				})
+			},
+			getProductReplyCount: function() {
+				let that = this;
+				getReplyConfig(that.storeInfo.productId).then(res => {
+					that.$set(that, 'replyChance', res.data.replyChance * 100);
+					that.$set(that, 'replyCount', res.data.sumCount);
+				});
+			},
+			// 后退
+			returns: function() {
+				uni.navigateBack()
+			},
+			setShare: function() {
+				this.$wechat.isWeixin() &&
+					this.$wechat.wechatEvevt([
+						"updateAppMessageShareData",
+						"updateTimelineShareData",
+						"onMenuShareAppMessage",
+						"onMenuShareTimeline"
+					], {
+						desc: this.storeInfo.info,
+						title: this.storeInfo.title,
+						link: location.href,
+						imgUrl: this.storeInfo.image
+					}).then(res => {
+					}).catch(err => {
+						console.log(err);
+					});
+			},
+
 			scroll: function(e) {
 				var that = this,
 					scrollY = e.detail.scrollTop;
