@@ -53,16 +53,17 @@
               </view>
 							<view class='iconfont icon-jiantou'></view>
 						</view>
-            <!-- 评论 TODO -->
+            <!-- 评论  -->
             <view class='userEvaluation' id="past1">
-							<view class='title acea-row row-between-wrapper' :style="replyCount==0?'border-bottom-left-radius:14rpx;border-bottom-right-radius:14rpx;':''">
-								<view>用户评价({{replyCount}})</view>
+							<view class='title acea-row row-between-wrapper'
+                    :style="replyCount ===0?'border-bottom-left-radius:14rpx;border-bottom-right-radius:14rpx;':''">
+								<view>用户评价({{ replyCount }})</view>
 								<navigator class='praise' hover-class='none' :url="'/pages/users/goods_comment_list/index?productId='+ storeInfo.productId">
-									<text class='font-color'>{{replyChance}}%</text>好评率
+									<text class='font-color'>{{ replyChance }}%</text>好评率
 									<text class='iconfont icon-jiantou'></text>
 								</navigator>
 							</view>
-							<userEvaluation :reply="reply"></userEvaluation>
+							<userEvaluation :reply="reply" />
 						</view>
 					</view>
 				</view>
@@ -216,6 +217,8 @@
 	import { silenceBindingSpread } from "@/utils";
 	import { spread } from "@/api/user";
   import * as ProductSpuApi from '@/api/product/spu.js';
+  import * as ProductFavoriteApi from '@/api/product/favorite.js';
+  import * as ProductCommentApi from '@/api/product/comment.js';
   import * as SeckillActivityApi from '@/api/promotion/seckill.js';
   import * as Util from '@/utils/util.js';
   import * as ProductUtil from '@/utils/product.js';
@@ -655,31 +658,40 @@
             + '&seckillActivityId=' + this.id
         });
       },
+      /**
+       * 跳转到客服
+       */
+      kefuClick(){
+        location.href = this.chatUrl;
+      },
+
+      // ========== 评价相关的方法 ==========
+      /**
+       * 获得商品评价列表
+       */
+      getProductReplyList: function() {
+        ProductCommentApi.getCommentList(this.id, 3).then(res => {
+          this.reply = res.data;
+        })
+      },
+      /**
+       * 获得商品评价统计
+       */
+      getProductReplyCount: function() {
+        ProductCommentApi.getCommentStatistics(this.id).then(res => {
+          this.$set(this, 'replyChance', res.data.goodPercent);
+          this.$set(this, 'replyCount', res.data.allCount);
+        });
+      },
 
       // TODO 芋艿：暂未整理
 
-      kefuClick(){
-				location.href = this.chatUrl;
-			},
+
 			closePosters:function(){
 				this.posters = false;
 			},
-			getProductReplyList: function() {
-				getReplyList(this.storeInfo.productId, {
-					page: 1,
-					limit: 3,
-					type: 0,
-				}).then(res => {
-					this.reply = res.data.list;
-				})
-			},
-			getProductReplyCount: function() {
-				let that = this;
-				getReplyConfig(that.storeInfo.productId).then(res => {
-					that.$set(that, 'replyChance', res.data.replyChance * 100);
-					that.$set(that, 'replyCount', res.data.sumCount);
-				});
-			},
+
+
 			// 后退
 			returns: function() {
 				uni.navigateBack()

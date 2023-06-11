@@ -8,8 +8,9 @@ export function getCommentStatistics(spuId) {
 }
 
 // 获得最近的 n 条商品评价
-export function getCommentList(spuId) {
+export function getCommentList(spuId, count) {
   return request.get('app-api/product/comment/list', {
-    spuId
+    spuId,
+    count
   });
 }
