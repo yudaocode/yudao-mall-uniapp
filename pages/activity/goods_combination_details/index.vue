@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<!-- 头部 -->
+    <!-- 顶部的 nav tab -->
 		<view class='navbar' :style="{height:navH+'rpx',opacity:opacity}">
 			<view class='navbarH' :style='"height:"+navH+"rpx;"'>
 				<view class='navbarCon acea-row row-center-wrapper'>
@@ -13,35 +13,35 @@
 				</view>
 			</view>
 		</view>
-
-		<!-- <view class='iconfont icon-xiangzuo' :style="'top:'+navH/2+'rpx'" @tap='returns'></view> -->
+    <!-- 返回键 -->
+    <view id="home" class="home-nav acea-row row-center-wrapper iconfont icon-xiangzuo" :class="opacity>0.5?'on':''" :style="{ top: homeTop + 'rpx' }" v-if="returnShow" @tap="returns">
+    </view>
 		<!-- 详情 -->
 		<view class='product-con'>
 			<scroll-view :scroll-top="scrollTop" scroll-y='true' scroll-with-animation="true"
 				:style="'height:'+height+'px;'" @scroll="scroll">
 				<view id="past0">
-					<productConSwiper :imgUrls="imgUrls" class="mb30"></productConSwiper>
-					<view class="pad30">
+          <productConSwiper :imgUrls='spu.sliderPicUrls' />
+          <!-- 价格、库存、销量 -->
+          <view class="pad30">
 						<view class='wrapper mb30'>
 							<view class='share acea-row row-between row-bottom'>
-								<view class='money font-color'>
-									￥<text class='num'>{{storeInfo.price || 0}}</text><text
-										class='y-money'>￥{{storeInfo.otPrice || 0}}</text>
+								<view class='money font-color'>￥
+                  <text class='num'>{{ fen2yuan(spu.price) }}</text>
+                  <text class='y-money'>￥{{ fen2yuan(spu.marketPrice) }}</text>
 								</view>
 								<view class='iconfont icon-fenxiang' @click="listenerActionSheet"></view>
 							</view>
-							<view class='introduce line2'>{{storeInfo.storeName}}</view>
+							<view class='introduce line2'>{{ spu.name }}</view>
 							<view class='label acea-row row-between-wrapper'>
-								<view class='stock'>类型：{{storeInfo.people || 0}}人团</view>
+								<view class='stock'>类型：{{ storeInfo.people || 0}}人团</view>
 								<view>累计销量：{{parseFloat(storeInfo.sales)  + parseFloat(storeInfo.ficti)}} {{storeInfo.unitName || ''}}</view>
-								<view>限购: {{ storeInfo.quotaShow ? storeInfo.quotaShow : 0 }}
-									{{storeInfo.unitName || ''}}
-								</view>
+								<view />
 							</view>
 						</view>
 						<view class='attribute acea-row row-between-wrapper mb30 borRadius14' @tap='selecAttr'
 							v-if='attribute.productAttr.length'>
-							<view class="line1">{{attr}}：<text class='atterTxt'>{{attrValue}}</text></view>
+							<view class="line1">{{ attr }}：<text class='atterTxt'>{{attrValue}}</text></view>
 							<view class='iconfont icon-jiantou'></view>
 						</view>
 						<view class='notice acea-row row-middle mb30 borRadius14' v-if="parseFloat(pinkOkSum) >0">
@@ -125,7 +125,7 @@
 								<navigator class='praise' hover-class='none'
 									:url='"/pages/users/goods_comment_list/index?productId="+storeInfo.productId'>
 									<i>好评</i><text class='font-color'>{{replyChance || 0}}%</text>
-									
+
 									<text class='iconfont icon-jiantou'></text>
 								</navigator>
 							</view>
@@ -133,7 +133,7 @@
 						</view>
 					</view>
 				</view>
-				
+
 				<view class='product-intro' id="past2">
 					<view class='title'>
 						<image src="../../../static/images/xzuo.png"></image>
@@ -239,7 +239,6 @@
 	import {
 		mapGetters
 	} from "vuex";
-	import { silenceBindingSpread } from "@/utils";
 	// #ifdef MP
 	import {
 		base64src
@@ -257,10 +256,8 @@
 		getCombinationDetail
 	} from '@/api/activity.js';
 	import {
-		postCartAdd,
 		collectAdd,
 		collectDel,
-		getReplyList,
 		getReplyConfig,
 		getReplyProduct
 	} from '@/api/store.js';
@@ -273,10 +270,13 @@
 	import userEvaluation from '@/components/userEvaluation/index.vue'
 	import countDown from '@/components/countDown/index.vue'
 	import shareRedPackets from '@/components/shareRedPackets';
-	import {
-		getProductCode
-	} from '@/api/store.js'
 	import { spread } from "@/api/user";
+  import * as ProductSpuApi from '@/api/product/spu.js';
+  import * as ProductFavoriteApi from '@/api/product/favorite.js';
+  import * as ProductCommentApi from '@/api/product/comment.js';
+  import * as CombinationActivityApi from '@/api/promotion/combination.js';
+  import * as Util from '@/utils/util.js';
+  import * as ProductUtil from '@/utils/product.js';
 	export default {
 		components: {
 			shareRedPackets,
@@ -298,15 +298,31 @@
 		}),
 		data() {
 			return {
-				bgColor:{
-					'bgColor': '',
-					'Color': '#999999',
-					'isDay': true
-				},
+        // ========== 拼团活动相关变量 ==========
+        id: 0, // 拼团活动的编号
+        activity: {}, // 拼团活动的信息
+        status: 1, // 0 - 已禁用；1 - 未开始；2 - 进行中；3 - 已结束
+        bgColor:{
+          'bgColor': '',
+          'Color': '#999999',
+          'isDay': true
+        },
+
+        // ========== 商品相关变量 ==========
+        spu: {}, // 商品 SPU 详情
+        skuMap: [], // 商品 SKU Map
+        attrValue: '', // 已选属性名的拼接，例如说 红色,大 这样的格式
+        tagStyle: {
+          img: 'width:100%;display:block;',
+          table: 'width:100%',
+          video: 'width:100%'
+        },
+
+        // TODO 芋艿：未整理
+
+
 				userCollect:false,
 				dataShow: 0,
-				navH: '',
-				id: 0,
 				userInfo: {},
 				itemNew: [],
 				indicatorDots: false,
@@ -322,7 +338,6 @@
 				productValue: [],
 				isOpen: false,
 				attr: '请选择',
-				attrValue: '',
 				AllIndex: 2,
 				maxAllIndex: 0,
 				replyChance: '',
@@ -348,11 +363,7 @@
 				sharePacket: {
 					isState: true, //默认不显示
 				},
-				tagStyle: {
-					img: 'width:100%;display:block;',
-					table: 'width:100%',
-					video: 'width:100%'
-				},
+
 				posters: false,
 				weixinStatus: false,
 				posterImageStatus: false,
@@ -436,7 +447,7 @@
 					try {
 						uni.setStorageSync('comGoodsId', options.id);
 					} catch (e) {}
-					// #endif 
+					// #endif
 					this.$Cache.set('login_back_url',
 						`/pages/activity/goods_combination_details/index?id=${options.id}&spread=${options.pid?options.pid:0}`
 					);
@@ -460,7 +471,164 @@
 			};
 		},
 		methods: {
-			getProductReplyCount: function() {
+      // ========== 拼团活动相关 ==========
+      // 获取详情
+      combinationDetail() {
+        CombinationActivityApi.getCombinationActivity(this.id).then(res => {
+          this.activity = res.data;
+          // 计算总的 quota 数量
+          this.activity.quota = this.activity.products.reduce((accumulator, product) => {
+            return accumulator + product.quota;
+          }, 0);
+          // 计算活动状态
+          const now = new Date().getTime();
+          if (this.activity.status !== 0) {
+            if (this.activity.startTime > now) {
+              this.status = 1;
+            } else if (now <= this.activity.endTime) {
+              this.status = 2;
+            } else {
+              this.status = 3;
+            }
+          } else {
+            this.status = 0;
+          }
+
+          // 获得商品详情
+          this.getGoodsDetails();
+        });
+
+
+
+        if (true) {
+          return
+        }
+        var that = this;
+        var data = that.id;
+        getCombinationDetail(data).then(function(res) {
+          that.dataShow = 1;
+          uni.setNavigationBarTitle({
+            title: res.data.storeCombination.storeName.substring(0, 16)
+          })
+          that.storeInfo = res.data.storeCombination;
+          that.getProductReplyList();
+          that.getProductReplyCount();
+          that.imgUrls = JSON.parse(res.data.storeCombination.sliderImage);
+          that.attribute.productSelect.num = res.data.storeCombination.onceNum;
+          that.userCollect = res.data.userCollect;
+          that.pink = res.data.pinkList || [];
+          // that.pindAll = res.data.pindAll || [];
+          that.itemNew = res.data.pinkOkList || [];
+          that.pinkOkSum = res.data.pinkOkSum;
+          that.attribute.productAttr = res.data.productAttr || [];
+          that.productValue = res.data.productValue;
+          that.onceNum = res.data.storeCombination.onceNum;
+
+          //	that.PromotionCode = res.data.storeInfo.code_base
+          // #ifdef H5
+          that.setShare();
+          that.storeImage = that.storeInfo.image
+          that.make();
+          // #endif
+          // #ifdef MP
+          that.getQrcode();
+          that.imgTop = res.data.storeCombination.image;
+          // #endif
+          // #ifndef H5
+          that.downloadFilestoreImage();
+          // #endif
+          let productAttr = res.data.productAttr.map(item => {
+            return {
+              attrName : item.attrName,
+              attrValues: item.attrValues.split(','),
+              id:item.id,
+              isDel:item.isDel,
+              productId:item.productId,
+              type:item.type
+            }
+          });
+          that.$set(that.attribute,'productAttr',productAttr);
+          // that.setProductSelect();
+          that.DefaultSelect();
+
+          setTimeout(function() {
+            that.infoScroll();
+          }, 500);
+
+        }).catch(function(err) {
+          that.$util.Tips({
+            title: err
+          }, {
+            tab: 3
+          })
+        })
+      },
+      // ========== 商品详情相关 ==========
+      /**
+       * 获取产品详情
+       */
+      getGoodsDetails: function() {
+        console.log(this.activity.spuId, '== spuId ==')
+        ProductSpuApi.getSpuDetail(this.activity.spuId).then(res => {
+          let spu = res.data;
+          let skus = res.data.skus;
+          this.$set(this, 'spu', spu);
+          // TODO 芋艿：this.attribute
+          this.$set(this.attribute, 'properties', ProductUtil.convertProductPropertyList(skus));
+          this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
+          // 将拼团活动的信息，合并到 SKU 里面，实现拼团价格的显示
+          this.activity.products.forEach(product => {
+            this.spu.price = Math.min(this.spu.price, product.combinationPrice); // 设置 SPU 的最低价格
+          });
+          skus.forEach(sku => {
+            const product = this.activity.products.find(product => product.skuId === sku.id);
+            if (product) {
+              sku.price = product.combinationPrice;
+              sku.quota = product.quota;
+              sku.limitCount = product.limitCount;
+            } else { // 找不到可能是没配置，则不能发起拼团
+              sku.quota = 0;
+              sku.limitCount = 0;
+            }
+          });
+
+          // // 处理滚动条
+          // setTimeout(() => {
+          //   this.infoScroll();
+          // }, 1000);
+          //
+          // // 设置或下载分销需要的图片
+          // // #ifdef H5
+          // this.storeImage = spu.picUrl;
+          // this.make();
+          // this.ShareInfo();
+          // // #endif
+          // // #ifdef MP
+          // this.getQrcode();
+          // this.imgTop = spu.picUrl;
+          // // #endif
+          // // #ifndef H5
+          // this.downloadFilestoreImage();
+          // // #endif
+          //
+          // // 选中默认 sku
+          // this.selectDefaultSku();
+        }).catch(err => {
+          if (true) {
+            return;
+          }
+          return this.$util.Tips({
+            title: err.toString()
+          }, {
+            tab: 3,
+            url: 1
+          });
+        })
+      },
+
+      // TODO 芋艿：未整理
+
+      getProductReplyCount: function() {
 				let that = this;
 				getReplyConfig(that.storeInfo.productId).then(res => {
 					that.$set(that, 'replyChance', res.data.replyChance * 100);
@@ -494,7 +662,7 @@
 			},
 			/**
 			 * 购物车手动填写
-			 * 
+			 *
 			 */
 			iptCartNum: function(e) {
 				if (e > this.onceNum) {
@@ -511,68 +679,6 @@
 			// 返回
 			returns() {
 				uni.navigateBack();
-			},
-			// 获取详情
-			combinationDetail() {
-				var that = this;
-				var data = that.id;
-				getCombinationDetail(data).then(function(res) {
-					that.dataShow = 1;
-					uni.setNavigationBarTitle({
-						title: res.data.storeCombination.storeName.substring(0, 16)
-					})
-					that.storeInfo = res.data.storeCombination;
-					that.getProductReplyList();
-					that.getProductReplyCount();
-					that.imgUrls = JSON.parse(res.data.storeCombination.sliderImage);
-					that.attribute.productSelect.num = res.data.storeCombination.onceNum;
-					that.userCollect = res.data.userCollect;
-					that.pink = res.data.pinkList || [];
-					// that.pindAll = res.data.pindAll || [];
-					that.itemNew = res.data.pinkOkList || [];
-					that.pinkOkSum = res.data.pinkOkSum;
-					that.attribute.productAttr = res.data.productAttr || [];
-					that.productValue = res.data.productValue;
-					that.onceNum = res.data.storeCombination.onceNum;
-					
-					//	that.PromotionCode = res.data.storeInfo.code_base
-					// #ifdef H5
-					that.setShare();
-					that.storeImage = that.storeInfo.image
-					that.make();
-					// #endif
-					// #ifdef MP
-					that.getQrcode();
-					that.imgTop = res.data.storeCombination.image;
-					// #endif
-					// #ifndef H5
-					that.downloadFilestoreImage();
-					// #endif
-					let productAttr = res.data.productAttr.map(item => {
-					return {
-						attrName : item.attrName,
-						attrValues: item.attrValues.split(','),
-						id:item.id,
-						isDel:item.isDel,
-						productId:item.productId,
-						type:item.type
-					 }
-					});
-					that.$set(that.attribute,'productAttr',productAttr);
-					// that.setProductSelect();
-					that.DefaultSelect();
-					
-					setTimeout(function() {
-						that.infoScroll();
-					}, 500);
-
-				}).catch(function(err) {
-					that.$util.Tips({
-						title: err
-					}, {
-						tab: 3
-					})
-				})
 			},
 			//#ifdef H5
 			setShare: function() {
@@ -596,7 +702,7 @@
 			//#endif
 			/**
 			 * 默认选中属性
-			 * 
+			 *
 			 */
 			DefaultSelect: function() {
 				let self = this
@@ -700,7 +806,7 @@
 			},
 			/**
 			 * 购物车数量加和数量减
-			 * 
+			 *
 			 */
 			ChangeCartNum: function(changeValue) {
 				//changeValue:是否 加|减
@@ -760,7 +866,7 @@
 			},
 			/**
 			 * 属性变动赋值
-			 * 
+			 *
 			 */
 			ChangeAttr: function(res) {
 				this.$set(this, 'cart_num', 1);
@@ -840,7 +946,7 @@
 
 			/**
 			 * 分享打开
-			 * 
+			 *
 			 */
 			listenerActionSheet: function() {
 				if (this.isLogin == false) {
@@ -908,7 +1014,7 @@
 			/**
 			 * 获取产品分销二维码
 			 * @param function successFn 下载完成回调
-			 * 
+			 *
 			 */
 			downloadFilePromotionCode: function(successFn) {
 				let that = this;
@@ -1117,6 +1223,10 @@
 				this.lock = true;
 				this.scrollTop = index > 0 ? that.topArr[index] - (app.globalData.navHeight / 2) : that.topArr[index]
 			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		},
 		//#ifdef MP
 		onShareAppMessage() {

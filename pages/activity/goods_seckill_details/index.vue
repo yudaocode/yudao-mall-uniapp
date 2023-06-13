@@ -15,7 +15,8 @@
     <!-- 返回键 -->
     <view id="home" class="home-nav acea-row row-center-wrapper iconfont icon-xiangzuo" :class="opacity>0.5?'on':''" :style="{ top: homeTop + 'rpx' }" v-if="returnShow" @tap="returns">
 		</view>
-		<view class='product-con'>
+    <!-- 详情 -->
+    <view class='product-con'>
 			<scroll-view :scroll-top="scrollTop" scroll-y='true' scroll-with-animation="true" :style="'height:'+height+'px;'"
 			 @scroll="scroll">
 				<view id="past0">
@@ -209,7 +210,7 @@
 	export default {
 		data() {
 			return {
-        // 秒杀活动相关变量
+        // ========== 秒杀活动相关变量 ==========
         id: 0, // 秒杀活动的编号
         activity: {}, // 秒杀活动的信息
         status: 1, // 0 - 已禁用；1 - 未开始；2 - 进行中；3 - 已结束
@@ -221,7 +222,7 @@
           'timeTxtwidth': '16rpx',
         },
 
-        // 商品相关变量
+        // ========== 商品相关变量 ==========
         spu: {}, // 商品 SPU 详情
         skuMap: [], // 商品 SKU Map
         attrValue: '', // 已选属性名的拼接，例如说 红色,大 这样的格式
@@ -378,9 +379,7 @@
 		methods: {
       // ========== 秒杀活动相关 ==========
       getSeckillDetail: function() {
-        let that = this;
         SeckillActivityApi.getSeckillActivity(this.id).then(res => {
-          this.dataShow = 1;
           this.activity = res.data;
           // 计算总的 quota 数量
           this.activity.quota = this.activity.products.reduce((accumulator, product) => {
@@ -397,7 +396,7 @@
               this.status = 3;
             }
           } else {
-            this.status = this.activity;
+            this.status = 0;
           }
 
           // 获得商品详情
@@ -411,7 +410,7 @@
           app.globalData.openPages = '/pages/activity/goods_seckill_details/index?id='
             + this.id + '&spread=' + this.uid;
         }).catch(err => {
-          that.$util.Tips({
+          this.$util.Tips({
             title:err
           },{
             tab:3
