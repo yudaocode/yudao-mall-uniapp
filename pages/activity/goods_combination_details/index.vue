@@ -34,16 +34,19 @@
 							</view>
 							<view class='introduce line2'>{{ spu.name }}</view>
 							<view class='label acea-row row-between-wrapper'>
+                <!-- TODO 芋艿：类型 -->
 								<view class='stock'>类型：{{ storeInfo.people || 0}}人团</view>
-								<view>累计销量：{{parseFloat(storeInfo.sales)  + parseFloat(storeInfo.ficti)}} {{storeInfo.unitName || ''}}</view>
+                <view class='stock'>累计销售：{{ spu.salesCount}} {{ spu.unitName }}</view>
 								<view />
 							</view>
 						</view>
-						<view class='attribute acea-row row-between-wrapper mb30 borRadius14' @tap='selecAttr'
+            <!-- SKU 选择 TODO -->
+            <view class='attribute acea-row row-between-wrapper mb30 borRadius14' @tap='selecAttr'
 							v-if='attribute.productAttr.length'>
 							<view class="line1">{{ attr }}：<text class='atterTxt'>{{attrValue}}</text></view>
 							<view class='iconfont icon-jiantou'></view>
 						</view>
+            <!-- 拼成列表 TODO -->
 						<view class='notice acea-row row-middle mb30 borRadius14' v-if="parseFloat(pinkOkSum) >0">
 							<view class='num font-color'>
 								<text class='iconfont icon-laba'></text>
@@ -60,7 +63,8 @@
 								</swiper>
 							</view>
 						</view>
-						<view v-if='attribute.productSelect.quota > 0' class='assemble mb30 borRadius14'>
+            <!-- 待拼列表 TODO -->
+            <view v-if='attribute.productSelect.quota > 0' class='assemble mb30 borRadius14'>
 							<view class='item acea-row row-between-wrapper' v-for='(item,index) in pink' :key='index'
 								v-if="index < AllIndex">
 								<view class='pictxt acea-row row-between-wrapper'>
@@ -86,6 +90,7 @@
 									</navigator>
 								</view>
 							</view>
+              <!-- TODO 芋艿：？？？看不懂 -->
 							<template v-if="pink.length">
 								<view class='more' @tap='showAll' v-if="pink.length > AllIndex">查看更多<text
 										class='iconfont icon-xiangxia'></text></view>
@@ -97,7 +102,6 @@
 						<view class='playWay mb30 borRadius14'>
 							<view class='title acea-row row-between row-middle'>
 								<view>拼团玩法</view>
-								<!-- <navigator hover-class='none' class='font-color' url='/pages/activity/goods_combination_rule/index'>查看规则<text class="iconfont icon-jiantou"></text></navigator> -->
 							</view>
 							<view class='way acea-row row-middle'>
 								<view class='item acea-row row-middle'>
@@ -115,11 +119,11 @@
 										<text class='num'>③</text>
 										满员发货
 									</view>
-									<!-- <view class='tip'>不满自动退款</view> -->
 								</view>
 							</view>
 						</view>
-						<view class='userEvaluation borRadius14' id="past1">
+            <!-- 评论 TODO -->
+            <view class='userEvaluation borRadius14' id="past1">
 							<view class='title acea-row row-between-wrapper' :style="replyCount==0?'border-bottom-left-radius:14rpx;border-bottom-right-radius:14rpx;':''">
 								<view>用户评价<i>({{replyCount}})</i></view>
 								<navigator class='praise' hover-class='none'
@@ -133,7 +137,6 @@
 						</view>
 					</view>
 				</view>
-
 				<view class='product-intro' id="past2">
 					<view class='title'>
 						<image src="../../../static/images/xzuo.png"></image>
@@ -141,13 +144,14 @@
 						<image src="../../../static/images/xyou.png"></image>
 					</view>
 					<view class='conter'>
-						<jyf-parser :html="storeInfo.content" ref="article" :tag-style="tagStyle"></jyf-parser>
+						<jyf-parser :html="spu.description" ref="article" :tag-style="tagStyle"></jyf-parser>
 					</view>
 				</view>
 				<view style='height:120rpx;'></view>
 			</scroll-view>
 			<view class='footer acea-row row-between-wrapper'>
-				<!-- #ifdef MP -->
+        <!-- 客服 TODO 芋艿：待完成 -->
+        <!-- #ifdef MP -->
 				<button open-type="contact" hover-class='none' class='item'>
 					<view class='iconfont icon-kefu'></view>
 					<view>客服</view>
@@ -164,7 +168,8 @@
 					<view class='iconfont icon-shoucang' v-else></view>
 					<view>收藏</view>
 				</view>
-				<view class="bnt acea-row">
+        <!-- 购买操作 TODO -->
+        <view class="bnt acea-row">
 					<view class="joinCart bnts" @tap="goProduct">单独购买</view>
 					<view class="buy bnts" @tap="goCat"
 						v-if='attribute.productSelect.quota>0'>
@@ -180,6 +185,10 @@
 				</view>
 			</view>
 		</view>
+    <!-- SKU 弹窗 TODO -->
+    <product-window :attr='attribute' :limitNum='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
+                    @ChangeCartNum="ChangeCartNum" @iptCartNum="iptCartNum" @attrVal="attrVal"></product-window>
+    <!-- TODO 芋艿 -->
 		<shareRedPackets :sharePacket="sharePacket" @listenerActionSheet="listenerActionSheet"
 			@closeChange="closeChange"></shareRedPackets>
 		<!-- 分享按钮 -->
@@ -203,7 +212,6 @@
 		</view>
 		<view class="mask" v-if="posters" @click="closePosters"></view>
 		<view class="mask" v-if="canvasStatus" @click="listenerActionClose"></view>
-		<!-- <view class="mask" v-if="posters" @click="listenerActionClose"></view> -->
 
 		<!-- 海报展示 -->
 		<view class='poster-pop' v-if="canvasStatus">
@@ -224,12 +232,7 @@
 		<view class="share-box" v-if="H5ShareBox">
 			<image src="/static/images/share-info.png" @click="H5ShareBox = false"></image>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
-		<product-window :attr='attribute' :limitNum='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
-			@ChangeCartNum="ChangeCartNum" @iptCartNum="iptCartNum" @attrVal="attrVal"></product-window>
 	</view>
 </template>
 

@@ -47,14 +47,14 @@
 								<view>限量: {{ activity.quota ? activity.quota : 0 }} {{ spu.unitName }}</view>
 							</view>
 						</view>
-            <!-- SKU 选择  -->
+            <!-- SKU 选择 -->
             <view class='attribute acea-row row-between-wrapper mb30 borRadius14' @tap='openAttr'>
 							<view class="line1">{{ attrValue.length > 0 ? "已选择" : "请选择" }}：
                 <text class='atterTxt'>{{attrValue}}</text>
               </view>
 							<view class='iconfont icon-jiantou'></view>
 						</view>
-            <!-- 评论  -->
+            <!-- 评论 -->
             <view class='userEvaluation' id="past1">
 							<view class='title acea-row row-between-wrapper'
                     :style="replyCount ===0?'border-bottom-left-radius:14rpx;border-bottom-right-radius:14rpx;':''">
@@ -196,7 +196,6 @@
 	import parser from "@/components/jyf-parser/jyf-parser";
 	import home from '@/components/home/index.vue'
 	import countDown from '@/components/countDown';
-	import shareRedPackets from '@/components/shareRedPackets';
 	import { imageBase64 } from "@/api/public";
 	import { toLogin } from '@/libs/login.js';
 	import { silenceBindingSpread } from "@/utils";
@@ -277,7 +276,6 @@
 			}
 		},
 		components: {
-			shareRedPackets,
 			productConSwiper,
       productWindow,
 			userEvaluation,
