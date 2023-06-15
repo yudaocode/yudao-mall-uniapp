@@ -34,69 +34,70 @@
 							</view>
 							<view class='introduce line2'>{{ spu.name }}</view>
 							<view class='label acea-row row-between-wrapper'>
-                <!-- TODO 芋艿：类型 -->
-								<view class='stock'>类型：{{ storeInfo.people || 0}}人团</view>
+								<view class='stock'>类型：{{ activity.userSize || 0}}人团</view>
                 <view class='stock'>累计销售：{{ spu.salesCount}} {{ spu.unitName }}</view>
 								<view />
 							</view>
 						</view>
-            <!-- SKU 选择 TODO -->
-            <view class='attribute acea-row row-between-wrapper mb30 borRadius14' @tap='selecAttr'
-							v-if='attribute.productAttr.length'>
-							<view class="line1">{{ attr }}：<text class='atterTxt'>{{attrValue}}</text></view>
-							<view class='iconfont icon-jiantou'></view>
+            <!-- SKU 选择 -->
+            <view class='attribute acea-row row-between-wrapper mb30 borRadius14' @tap='openAttr'>
+              <view class="line1">{{ attrValue.length > 0 ? "已选择" : "请选择" }}：
+                <text class='atterTxt'>{{attrValue}}</text>
+              </view>
+              <view class='iconfont icon-jiantou'></view>
 						</view>
-            <!-- 拼成列表 TODO -->
-						<view class='notice acea-row row-middle mb30 borRadius14' v-if="parseFloat(pinkOkSum) >0">
+            <!-- 拼成列表 -->
+						<view class='notice acea-row row-middle mb30 borRadius14' v-if="activity.successCount > 0">
 							<view class='num font-color'>
 								<text class='iconfont icon-laba'></text>
-								已拼{{pinkOkSum}}件<text class='line'>|</text>
+								已拼{{ activity.successCount }} {{ spu.unitName }}
+                <text class='line'>|</text>
 							</view>
 							<view class='swiper'>
-								<swiper :indicator-dots="indicatorDots" :autoplay="autoplay" interval="2500"
+								<swiper :indicator-dots="false" :autoplay="autoplay" interval="2500"
 									duration="500" vertical="true" circular="true">
-									<block v-for="(item,index) in itemNew" :key='index'>
+									<block v-for="(item, index) in successRecords" :key='index'>
 										<swiper-item>
-											<view class='line1'>{{item.nickname}}拼团成功</view>
+											<view class='line1'>{{ item.nickname }}拼团成功</view>
 										</swiper-item>
 									</block>
 								</swiper>
 							</view>
 						</view>
-            <!-- 待拼列表 TODO -->
-            <view v-if='attribute.productSelect.quota > 0' class='assemble mb30 borRadius14'>
-							<view class='item acea-row row-between-wrapper' v-for='(item,index) in pink' :key='index'
-								v-if="index < AllIndex">
+            <!-- 待拼列表 -->
+            <view v-if='attr.productSelect.quota > 0' class='assemble mb30 borRadius14'>
+							<view class='item acea-row row-between-wrapper' v-for='(item,index) in runningRecords'
+                    :key='index' v-if="index < AllIndex">
 								<view class='pictxt acea-row row-between-wrapper'>
 									<view class='pictrue'>
 										<image :src='item.avatar'></image>
 									</view>
-									<view class='text line1'>{{item.nickname}}</view>
+									<view class='text line1'>{{ item.nickname }}</view>
 								</view>
 								<view class='right acea-row row-middle'>
 									<view>
-										<view class='lack'>还差<text class='font-color'>{{item.count}}</text>人成团</view>
+										<view class='lack'>
+                      还差<text class='font-color'>{{ item.userSize - item.userCount }}</text>人成团
+                    </view>
 										<view class='time acea-row'>
-											<count-down :is-day="false" :tip-text="'剩余 '" :day-text="' '" :hour-text="':'"
-												:minute-text="':'" :second-text="' '" :datatime="item.stopTime/1000" :bgColor="bgColor">
-											</count-down>
+											<count-down :is-day="false" :tip-text="'剩余 '" :day-text="' '" :hour-text="':'" :minute-text="':'"
+                                  :second-text="' '" :datatime="item.expireTime / 1000" :bgColor="bgColor" />
 										</view>
 									</view>
-									<navigator hover-class='none'
-										:url="'/pages/activity/goods_combination_status/index?id='+item.id"
-										class='spellBnt'>
-										去拼单
-										<text class='iconfont icon-jiantou'></text>
+									<navigator hover-class='none' :url="'/pages/activity/goods_combination_status/index?id='+item.id"
+                             class='spellBnt'>
+                    去拼单 <text class='iconfont icon-jiantou'></text>
 									</navigator>
 								</view>
 							</view>
-              <!-- TODO 芋艿：？？？看不懂 -->
-							<template v-if="pink.length">
-								<view class='more' @tap='showAll' v-if="pink.length > AllIndex">查看更多<text
-										class='iconfont icon-xiangxia'></text></view>
+							<template v-if="runningRecords.length">
+								<view class='more' @tap='showAll' v-if="runningRecords.length > AllIndex">
+                  查看更多 <text class='iconfont icon-xiangxia' />
+                </view>
 								<view class='more' @tap='hideAll'
-									v-else-if="pink.length === AllIndex && pink.length !== AllIndexDefault">收起<text
-										class='iconfont icon-xiangshang'></text></view>
+									v-else-if="runningRecords.length === AllIndex && runningRecords.length !== AllIndexDefault">
+                  收起 <text class='iconfont icon-xiangshang' />
+                </view>
 							</template>
 						</view>
 						<view class='playWay mb30 borRadius14'>
@@ -168,26 +169,41 @@
 					<view class='iconfont icon-shoucang' v-else></view>
 					<view>收藏</view>
 				</view>
-        <!-- 购买操作 TODO -->
-        <view class="bnt acea-row">
-					<view class="joinCart bnts" @tap="goProduct">单独购买</view>
-					<view class="buy bnts" @tap="goCat"
-						v-if='attribute.productSelect.quota>0'>
-						立即开团
-					</view>
-					<view class="buy bnts bg-color-hui" v-if="!dataShow">
-						立即开团
-					</view>
-					<view class="buy bnts bg-color-hui"
-						v-if='attribute.productSelect.quota <= 0'>
-						已售罄
-					</view>
-				</view>
+        <!-- 购买操作 -->
+        <view class="bnt acea-row" v-if="status === 0">
+          <view class="buy bnts bg-color-hui">已关闭</view>
+        </view>
+        <view class="bnt acea-row" v-else-if="status === 1">
+          <view class="joinCart bnts" @tap="openAlone">单独购买</view>
+          <view class="buy bnts bg-color-hui">未开始</view>
+        </view>
+        <view class="bnt acea-row" v-else-if="status === 2 && attr.productSelect.quota > 0">
+          <view class="joinCart bnts" @tap="openAlone">单独购买</view>
+          <view class="buy bnts" @tap="goBuy">立即购买</view>
+        </view>
+        <view class="bnt acea-row" v-else-if="status === 2 && (attr.productSelect.quota <= 0)">
+          <view class="joinCart bnts" @tap="openAlone">单独购买</view>
+          <view class="buy bnts bg-color-hui">已售罄</view>
+        </view>
+        <view class="bnt acea-row" v-else-if="status === 3">
+          <view class="joinCart bnts" @tap="openAlone">单独购买</view>
+          <view class="buy bnts bg-color-hui">已结束</view>
+        </view>
+        <view class="bnt acea-row" v-else> <!-- 兜底 -->
+          <view class="joinCart bnts" @tap="openAlone">单独购买</view>
+          <view class="buy bnts bg-color-hui">未开始</view>
+        </view>
 			</view>
 		</view>
-    <!-- SKU 弹窗 TODO -->
-    <product-window :attr='attribute' :limitNum='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
-                    @ChangeCartNum="ChangeCartNum" @iptCartNum="iptCartNum" @attrVal="attrVal"></product-window>
+    <!-- SKU 弹窗 -->
+    <product-window
+      :attr='attr'
+      :limitNum='1'
+      @ChangeAttr="ChangeAttr"
+      @ChangeCartNum="ChangeCartNum"
+      @iptCartNum="iptCartNum"
+      @close="closeAttr"
+    />
     <!-- TODO 芋艿 -->
 		<shareRedPackets :sharePacket="sharePacket" @listenerActionSheet="listenerActionSheet"
 			@closeChange="closeChange"></shareRedPackets>
@@ -239,34 +255,14 @@
 <script>
 	const app = getApp();
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js'
-	import {
-		mapGetters
-	} from "vuex";
+	import { mapGetters } from "vuex";
 	// #ifdef MP
-	import {
-		base64src
-	} from '@/utils/base64src.js'
-	import authorize from '@/components/Authorize';
-	import {
-		getQrcode
-	} from '@/api/api.js';
+	import { base64src } from '@/utils/base64src.js'
+	import { getQrcode } from '@/api/api.js';
 	// #endif
 	import productConSwiper from '@/components/productConSwiper'
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		getCombinationDetail
-	} from '@/api/activity.js';
-	import {
-		collectAdd,
-		collectDel,
-		getReplyConfig,
-		getReplyProduct
-	} from '@/api/store.js';
-	import {
-		imageBase64
-	} from "@/api/public";
+	import { toLogin } from '@/libs/login.js';
+	import { imageBase64 } from "@/api/public";
 	import parser from "@/components/jyf-parser/jyf-parser";
 	import home from '@/components/home/index.vue'
 	import productWindow from '@/components/productWindow/index.vue'
@@ -284,9 +280,6 @@
 		components: {
 			shareRedPackets,
 			productConSwiper,
-			// #ifdef MP
-			authorize,
-			// #endif
 			"jyf-parser": parser,
 			home,
 			"product-window": productWindow,
@@ -295,7 +288,6 @@
 		},
 		computed: mapGetters({
 			'isLogin': 'isLogin',
-			'userData': 'userInfo',
 			'uid': 'uid',
 			'chatUrl': 'chatUrl'
 		}),
@@ -310,40 +302,43 @@
           'Color': '#999999',
           'isDay': true
         },
+        successRecords: [], // 成功的拼团记录
+        runningRecords: [], // 进行中的拼团记录
+        AllIndex: 2, // runningRecords 展示的数量，用于收起
+        AllIndexDefault: 0, // AllIndex 的默认值，用于收起
 
         // ========== 商品相关变量 ==========
         spu: {}, // 商品 SPU 详情
         skuMap: [], // 商品 SKU Map
         attrValue: '', // 已选属性名的拼接，例如说 红色,大 这样的格式
+        attr: { // productWindow 组件，使用该属性
+          cartAttr: false,
+          // ↓↓↓ 属性数组，结构为：id = 属性编号；name = 属性编号的名字；values[].id = 属性值的编号，values[].name = 属性值的名字；index = 选中的属性值的名字
+          productAttr: [],
+          productSelect: {} // 选中的 SKU
+        },
         tagStyle: {
           img: 'width:100%;display:block;',
           table: 'width:100%',
           video: 'width:100%'
         },
 
+        // ========== 评价相关的变量 ==========
+        replyCount: 0, // 总评论数量
+        replyChance: 0, // 好评率
+        reply: [], // 评论列表
+
+        // ========== 收藏相关的变量 ==========
+        userCollect: false,
+
         // TODO 芋艿：未整理
 
-
-				userCollect:false,
-				dataShow: 0,
-				userInfo: {},
-				itemNew: [],
-				indicatorDots: false,
 				circular: true,
 				autoplay: true,
 				interval: 3000,
 				duration: 500,
-				attribute: {
-					cartAttr: false,
-					productAttr: [],
-					productSelect: {}
-				},
 				productValue: [],
-				isOpen: false,
-				attr: '请选择',
-				AllIndex: 2,
 				maxAllIndex: 0,
-				replyChance: '',
 				limitNum: 1,
 				timeer: null,
 				iSplus: false,
@@ -358,10 +353,6 @@
 				lock: false,
 				scrollTop: 0,
 				storeInfo: {},
-				pinkOkSum: 0,
-				pink: [],
-				replyCount: 0,
-				reply: [],
 				imgUrls: [],
 				sharePacket: {
 					isState: true, //默认不显示
@@ -380,12 +371,9 @@
 				attrTxt: '',
 				cart_num: '',
 				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				AllIndexDefault: 0,
 				imgTop: '',
 				qrcodeSize: 600,
 				H5ShareBox: false, //公众号分享图片
-				onceNum: 0, //一次可以购买几个
 				errT: '',
 				returnShow: true,
 				homeTop: 20
@@ -404,8 +392,6 @@
 		onLoad(options) {
 			let that = this
 			this.$store.commit("PRODUCT_TYPE", 'normal');
-			var pages = getCurrentPages();
-			//	that.returnShow = pages.length === 1 ? false : true;
 			this.$nextTick(() => {
 				// #ifdef MP
 				const menuButton = uni.getMenuButtonBoundingClientRect();
@@ -471,7 +457,7 @@
 						mask: true,
 					})
 				}
-			};
+			}
 		},
 		methods: {
       // ========== 拼团活动相关 ==========
@@ -479,6 +465,9 @@
       combinationDetail() {
         CombinationActivityApi.getCombinationActivity(this.id).then(res => {
           this.activity = res.data;
+          uni.setNavigationBarTitle({
+            title: this.activity.name.substring(0, 16)
+          })
           // 计算总的 quota 数量
           this.activity.quota = this.activity.products.reduce((accumulator, product) => {
             return accumulator + product.quota;
@@ -496,67 +485,17 @@
           } else {
             this.status = 0;
           }
+          // 参团记录
+          this.successRecords = res.data.runningRecords;
+          this.runningRecords = res.data.runningRecords;
 
           // 获得商品详情
           this.getGoodsDetails();
-        });
-
-
-
-        if (true) {
-          return
-        }
-        var that = this;
-        var data = that.id;
-        getCombinationDetail(data).then(function(res) {
-          that.dataShow = 1;
-          uni.setNavigationBarTitle({
-            title: res.data.storeCombination.storeName.substring(0, 16)
-          })
-          that.storeInfo = res.data.storeCombination;
-          that.getProductReplyList();
-          that.getProductReplyCount();
-          that.imgUrls = JSON.parse(res.data.storeCombination.sliderImage);
-          that.attribute.productSelect.num = res.data.storeCombination.onceNum;
-          that.userCollect = res.data.userCollect;
-          that.pink = res.data.pinkList || [];
-          // that.pindAll = res.data.pindAll || [];
-          that.itemNew = res.data.pinkOkList || [];
-          that.pinkOkSum = res.data.pinkOkSum;
-          that.attribute.productAttr = res.data.productAttr || [];
-          that.productValue = res.data.productValue;
-          that.onceNum = res.data.storeCombination.onceNum;
-
-          //	that.PromotionCode = res.data.storeInfo.code_base
-          // #ifdef H5
-          that.setShare();
-          that.storeImage = that.storeInfo.image
-          that.make();
-          // #endif
-          // #ifdef MP
-          that.getQrcode();
-          that.imgTop = res.data.storeCombination.image;
-          // #endif
-          // #ifndef H5
-          that.downloadFilestoreImage();
-          // #endif
-          let productAttr = res.data.productAttr.map(item => {
-            return {
-              attrName : item.attrName,
-              attrValues: item.attrValues.split(','),
-              id:item.id,
-              isDel:item.isDel,
-              productId:item.productId,
-              type:item.type
-            }
-          });
-          that.$set(that.attribute,'productAttr',productAttr);
-          // that.setProductSelect();
-          that.DefaultSelect();
-
-          setTimeout(function() {
-            that.infoScroll();
-          }, 500);
+          // 获得商品收藏
+          this.isFavoriteExists();
+          // 获得商品评价列表
+          this.getProductReplyList();
+          this.getProductReplyCount();
 
         }).catch(function(err) {
           that.$util.Tips({
@@ -566,18 +505,30 @@
           })
         })
       },
+      /**
+       * 显示所有参团记录
+       */
+      showAll: function() {
+        this.AllIndexDefault = this.AllIndex;
+        this.AllIndex = this.runningRecords.length;
+      },
+      /**
+       * 隐藏所有参团记录
+       */
+      hideAll: function() {
+        this.AllIndex = this.AllIndexDefault;
+      },
+
       // ========== 商品详情相关 ==========
       /**
        * 获取产品详情
        */
       getGoodsDetails: function() {
-        console.log(this.activity.spuId, '== spuId ==')
         ProductSpuApi.getSpuDetail(this.activity.spuId).then(res => {
           let spu = res.data;
           let skus = res.data.skus;
           this.$set(this, 'spu', spu);
-          // TODO 芋艿：this.attribute
-          this.$set(this.attribute, 'properties', ProductUtil.convertProductPropertyList(skus));
+          this.$set(this.attr, 'properties', ProductUtil.convertProductPropertyList(skus));
           this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
           // 将拼团活动的信息，合并到 SKU 里面，实现拼团价格的显示
           this.activity.products.forEach(product => {
@@ -595,31 +546,28 @@
             }
           });
 
-          // // 处理滚动条
-          // setTimeout(() => {
-          //   this.infoScroll();
-          // }, 1000);
-          //
-          // // 设置或下载分销需要的图片
-          // // #ifdef H5
-          // this.storeImage = spu.picUrl;
-          // this.make();
-          // this.ShareInfo();
-          // // #endif
-          // // #ifdef MP
-          // this.getQrcode();
-          // this.imgTop = spu.picUrl;
-          // // #endif
-          // // #ifndef H5
-          // this.downloadFilestoreImage();
-          // // #endif
-          //
-          // // 选中默认 sku
-          // this.selectDefaultSku();
+          // 处理滚动条
+          setTimeout(() => {
+            this.infoScroll();
+          }, 1000);
+
+          // 设置或下载分销需要的图片
+          // #ifdef H5
+          this.storeImage = spu.picUrl;
+          this.make();
+          // this.ShareInfo(); TODO 芋艿：稍后 fix 下，临时注释
+          // #endif
+          // #ifdef MP
+          this.getQrcode();
+          this.imgTop = spu.picUrl;
+          // #endif
+          // #ifndef H5
+          this.downloadFilestoreImage();
+          // #endif
+
+          // 选中默认 sku
+          this.selectDefaultSku();
         }).catch(err => {
-          if (true) {
-            return;
-          }
           return this.$util.Tips({
             title: err.toString()
           }, {
@@ -628,57 +576,230 @@
           });
         })
       },
+      /**
+       * 默认选中属性
+       */
+      selectDefaultSku: function() {
+        const properties = this.attr.properties;
+        // 获得选中的属性值的名字，例如说 "黑色,大"，则 skuKey = ["黑色", "大"]
+        let skuKey = undefined;
+        for (let key in this.skuMap) {
+          if (this.skuMap[key].stock > 0) {
+            skuKey = key.split(",");
+            break;
+          }
+        }
+        if (!skuKey) { // 如果找不到，则选中第一个
+          skuKey = Object.keys(this.skuMap)[0].split(",");
+        }
+        // 使用 index 属性表示当前选中的，值为属性值的名字
+        for (let i = 0; i < properties.length; i++) {
+          this.$set(properties[i], "index", skuKey[i]);
+        }
+
+        let sku = this.skuMap[skuKey.join(",")];
+        if (!sku) {
+          return
+        }
+        this.$set(this.attr.productSelect, "spuName", this.spu.name);
+        this.$set(this.attr.productSelect, "id", sku.id);
+        this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
+        this.$set(this.attr.productSelect, "price", sku.price);
+        this.$set(this.attr.productSelect, "stock", sku.stock);
+        this.$set(this.attr.productSelect, "cart_num", 1);
+        // 拼团活动特有字段
+        this.$set(this.attr.productSelect, "quota", sku.quota);
+        this.$set(this.attr.productSelect, "limitCount", sku.limitCount);
+        this.$set(this, "attrValue", skuKey.join(","));
+      },
+      /**
+       * 打开 SKU 属性的选择
+       */
+      openAttr: function() {
+        this.$set(this.attr, 'cartAttr', true);
+      },
+      /**
+       * 关闭 productWindow 弹窗
+       */
+      closeAttr: function() {
+        this.$set(this.attr, 'cartAttr', false);
+      },
+      /**
+       * 属性变动赋值
+       *
+       * @param newSkuKey 新的 skuKey
+       * @param propertyIndex properties 的下标
+       * @param valueIndex values 的下标
+       */
+      ChangeAttr: function(newSkuKey, propertyIndex, valueIndex) {
+        // SKU
+        let sku = this.skuMap[newSkuKey];
+        if (!sku) {
+          return;
+        }
+        this.$set(this.attr.productSelect, "id", sku.id);
+        this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
+        this.$set(this.attr.productSelect, "price", sku.price);
+        this.$set(this.attr.productSelect, "stock", sku.stock);
+        this.$set(this.attr.productSelect, "quota", sku.quota);
+        this.$set(this.attr.productSelect, "limitCount", sku.limitCount);
+        this.$set(this.attr.productSelect, "cart_num", 1);
+        // SKU 关联属性
+        this.$set(this.attr.properties[propertyIndex], 'index',
+          this.attr.properties[propertyIndex].values[valueIndex].name);
+        this.$set(this, "attrValue", newSkuKey);
+      },
+      /**
+       * 跳转到客服
+       */
+      kefuClick(){
+        location.href = this.chatUrl;
+      },
+
+      // ========== 评价相关的方法 ==========
+      /**
+       * 获得商品评价列表
+       */
+      getProductReplyList: function() {
+        ProductCommentApi.getCommentList(this.id, 3).then(res => {
+          this.reply = res.data;
+        })
+      },
+      /**
+       * 获得商品评价统计
+       */
+      getProductReplyCount: function() {
+        ProductCommentApi.getCommentStatistics(this.id).then(res => {
+          this.$set(this, 'replyChance', res.data.goodPercent);
+          this.$set(this, 'replyCount', res.data.allCount);
+        });
+      },
+
+      // ========== 收藏相关方法 ==========
+      /**
+       * 获得是否收藏
+       */
+      isFavoriteExists: function() {
+        if (!this.isLogin) {
+          return;
+        }
+
+        ProductFavoriteApi.isFavoriteExists(this.activity.spuId).then(res => {
+          this.userCollect = res.data;
+        });
+      },
+      /**
+       * 收藏 / 取消商品
+       */
+      setCollect: function() {
+        if (!this.isLogin) {
+          toLogin();
+          return;
+        }
+
+        // 情况一：取消收藏
+        if (this.userCollect) {
+          ProductFavoriteApi.deleteFavorite(this.activity.spuId).then(res => {
+            this.$set(this, 'userCollect', false);
+          })
+          // 情况二：添加收藏
+        } else {
+          ProductFavoriteApi.createFavorite(this.activity.spuId).then(res => {
+            this.$set(this, 'userCollect', true);
+          })
+        }
+      },
+      /**
+       * 购物车数量加和数量减
+       *
+       * @param changeValue true 增加；false 减少
+       */
+      ChangeCartNum: function(changeValue) {
+        // 获取当前 sku
+        let sku = this.attr.productSelect;
+        if (!sku) {
+          return;
+        }
+
+        // 设置数量
+        let stock = sku.stock || 0;
+        let quota = sku.quota || 0;
+        let limitCount = sku.limitCount;
+        if (changeValue) {
+          sku.cart_num++;
+          if (limitCount !== undefined && sku.cart_num > limitCount) {
+            this.$set(this.attr.productSelect, "cart_num", limitCount);
+            this.$util.Tips({
+              title: `该商品每次限购 ${sku.limitCount} ${this.spu.unitName}`
+            });
+          } else if (sku.cart_num > stock || sku.cart_num > quota) {
+            this.$set(this.attr.productSelect, "cart_num", Math.min(stock, quota));
+          }
+        } else {
+          sku.cart_num--;
+          if (sku.cart_num < 1) {
+            this.$set(this.attr.productSelect, "cart_num", 1);
+          }
+        }
+      },
+      /**
+       * 购物车手动填写
+       *
+       */
+      iptCartNum: function(number) {
+        this.$set(this.attr.productSelect, 'cart_num', number ? number : 1);
+        // 判断是否超限购
+        let sku = this.attr.productSelect;
+        let limitCount = sku.limitCount;
+        if (limitCount !== undefined && number > limitCount) {
+          this.$set(this.attr.productSelect, "cart_num", limitCount);
+          this.$util.Tips({
+            title: `该商品每次限购 ${sku.limitCount} ${this.spu.unitName}`
+          });
+        }
+      },
+      /**
+       * 单独购买
+       */
+      openAlone() {
+        uni.navigateTo({
+          url: `/pages/goods_details/index?id=${this.activity.spuId}`
+        })
+      },
+      /**
+       * 下订单
+       */
+      goBuy: function() {
+        // 未登录，需要跳转
+        if (!this.isLogin) {
+          toLogin();
+          return;
+        }
+
+        // 【重要】如果 attr 组件未打开，此时需要先打开。等到选择完后，再立即购买
+        if (!this.attr.cartAttr) {
+          this.openAttr();
+          return;
+        }
+
+        // 发起下单
+        let sku = this.attr.productSelect;
+        uni.navigateTo({
+          url: '/pages/users/order_confirm/index?skuId=' + sku.id + '&count=' + sku.cart_num
+            + '&combinationActivityId=' + this.id
+        });
+      },
 
       // TODO 芋艿：未整理
 
-      getProductReplyCount: function() {
-				let that = this;
-				getReplyConfig(that.storeInfo.productId).then(res => {
-					that.$set(that, 'replyChance', res.data.replyChance * 100);
-					that.$set(that, 'replyCount', res.data.sumCount);
-				});
-			},
-			getProductReplyList: function() {
-				getReplyProduct(this.storeInfo.productId).then(res => {
-					this.reply = res.data.productReply ? [res.data.productReply] : [];
-				})
-			},
-			kefuClick() {
-				location.href = this.chatUrl;
-			},
-			closePosters: function() {
+      closePosters: function() {
 				this.posters = false;
 			},
 			closeChange: function() {
 				this.$set(this.sharePacket, 'isState', true);
 			},
-			showAll: function() {
-				this.AllIndexDefault = this.AllIndex;
-				this.AllIndex = this.pink.length;
-			},
-			hideAll: function() {
-				this.AllIndex = this.AllIndexDefault;
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e;
-			},
-			/**
-			 * 购物车手动填写
-			 *
-			 */
-			iptCartNum: function(e) {
-				if (e > this.onceNum) {
-					this.$util.Tips({
-						title: `该商品每次限购${this.onceNum}${this.storeInfo.unitName}`
-					});
-					this.$set(this.attribute.productSelect, 'cart_num', this.onceNum);
-					this.$set(this, "cart_num", this.onceNum);
-				} else {
-					this.$set(this.attribute.productSelect, 'cart_num', e);
-					this.$set(this, "cart_num", e);
-				}
-			},
+
+
 			// 返回
 			returns() {
 				uni.navigateBack();
@@ -703,72 +824,6 @@
 					});
 			},
 			//#endif
-			/**
-			 * 默认选中属性
-			 *
-			 */
-			DefaultSelect: function() {
-				let self = this
-				let productAttr = self.attribute.productAttr;
-				let value = [];
-				for (var key in self.productValue) {
-					if (self.productValue[key].quota > 0) {
-						value = self.attribute.productAttr.length ? key.split(",") : [];
-						break;
-					}
-				}
-				for (let i = 0; i < productAttr.length; i++) {
-					self.$set(productAttr[i], "index", value[i]);
-				}
-				//sort();排序函数:数字-英文-汉字；
-				let productSelect = self.productValue[value.join(",")];
-
-				if (productSelect && productAttr.length) {
-					self.$set(
-						self.attribute.productSelect,
-						"storeName",
-						self.storeInfo.storeName
-					);
-					self.$set(self.attribute.productSelect, "image", productSelect.image);
-					self.$set(self.attribute.productSelect, "price", productSelect.price);
-					self.$set(self.attribute.productSelect, "unique", productSelect.id);
-					self.$set(self.attribute.productSelect, "quota", productSelect.quota);
-					self.$set(self.attribute.productSelect, "quotaShow", productSelect.quotaShow);
-					self.$set(self.attribute.productSelect, "cart_num", 1);
-					this.$set(this, "attrValue", value.join(","));
-					this.$set(this, "attrTxt", "已选择");
-				} else if (!productSelect && productAttr.length) {
-					self.$set(
-						self.attribute.productSelect,
-						"storeName",
-						self.storeInfo.storeName
-					);
-					self.$set(self.attribute.productSelect, "image", self.storeInfo.image);
-					self.$set(self.attribute.productSelect, "price", self.storeInfo.price);
-					self.$set(self.attribute.productSelect, "quota", 0);
-					self.$set(self.attribute.productSelect, "quotaShow", 0);
-					self.$set(self.attribute.productSelect, "unique", "");
-					self.$set(self.attribute.productSelect, "cart_num", 0);
-					self.$set(self, "attrValue", "");
-					self.$set(self, "attrTxt", "请选择");
-				} else if (!productSelect && !productAttr.length) {
-					self.$set(
-						self.attribute.productSelect,
-						"storeName",
-						self.storeInfo.storeName
-					);
-					self.$set(self.attribute.productSelect, "image", self.storeInfo.image);
-					self.$set(self.attribute.productSelect, "price", self.storeInfo.price);
-					self.$set(self.attribute.productSelect, "quota", 0);
-					self.$set(
-						self.attribute.productSelect,
-						"unique", ""
-					);
-					self.$set(self.attribute.productSelect, "cart_num", 1);
-					self.$set(self, "attrValue", "");
-					self.$set(self, "attrTxt", "请选择");
-				}
-			},
 
 			infoScroll: function() {
 				var that = this,
@@ -790,160 +845,6 @@
 						that.topArr = topArr
 						that.heightArr = heightArr
 					});
-				};
-			},
-			// 授权后回调
-			onLoadFun: function(e) {
-				this.userInfo = e
-				app.globalData.openPages = '/pages/activity/goods_combination_details/index?id=' + this.id + '&spid=' +
-					e.uid;
-				this.combinationDetail();
-				//this.downloadFilePromotionCode();
-			},
-			selecAttr: function() {
-				this.attribute.cartAttr = true
-			},
-			onMyEvent: function() {
-				this.$set(this.attribute, 'cartAttr', false);
-				this.$set(this, 'isOpen', false);
-			},
-			/**
-			 * 购物车数量加和数量减
-			 *
-			 */
-			ChangeCartNum: function(changeValue) {
-				//changeValue:是否 加|减
-				//获取当前变动属性
-				let productSelect = this.productValue[this.attrValue];
-				if (this.buyNum === productSelect.quota) {
-					return this.$util.Tips({
-						title: '您已超出当前商品每人限购数量，请浏览其他商品'
-					});
-				}
-				if (this.cart_num) {
-					productSelect.cart_num = this.cart_num;
-					this.attribute.productSelect.cart_num = this.cart_num;
-				}
-				//如果没有属性,赋值给商品默认库存
-				if (productSelect === undefined && !this.attribute.productAttr.length) productSelect = this.attribute
-					.productSelect;
-				//无属性值即库存为0；不存在加减；
-				if (productSelect === undefined) return;
-				let quotaShow = productSelect.quota_show || 0;
-				let quota = productSelect.quota || 0;
-				let num = this.attribute.productSelect;
-				let nums = this.storeInfo.onceNum || 0;
-				//设置默认数据
-				if (productSelect.cart_num == undefined) productSelect.cart_num = 1;
-				if (changeValue) {
-					if (num.cart_num === this.onceNum) {
-						return this.$util.Tips({
-							title: `该商品每次限购${this.onceNum}${this.storeInfo.unitName}`
-						});
-					}
-					num.cart_num++;
-					let arrMin = [];
-					arrMin.push(nums);
-					arrMin.push(quota);
-					// arrMin.push(stock);
-					let minN = Math.min.apply(null, arrMin);
-					if (num.cart_num >= minN) {
-						this.$set(this.attribute.productSelect, "cart_num", minN ? minN : 1);
-						this.$set(this, "cart_num", minN ? minN : 1);
-					}
-					this.$set(this, "cart_num", num.cart_num);
-					this.$set(this.attribute.productSelect, "cart_num", num.cart_num);
-				} else {
-					num.cart_num--;
-					if (num.cart_num < 1) {
-						this.$set(this.attribute.productSelect, "cart_num", 1);
-						this.$set(this, "cart_num", 1);
-					}
-					this.$set(this, "cart_num", num.cart_num);
-					this.$set(this.attribute.productSelect, "cart_num", num.cart_num);
-				}
-			},
-			attrVal(val) {
-				this.attribute.productAttr[val.indexw].index = this.attribute.productAttr[val.indexw].attrValues[val
-					.indexn];
-			},
-			/**
-			 * 属性变动赋值
-			 *
-			 */
-			ChangeAttr: function(res) {
-				this.$set(this, 'cart_num', 1);
-				let productSelect = this.productValue[res];
-				if (productSelect) {
-					this.$set(this.attribute.productSelect, "image", productSelect.image);
-					this.$set(this.attribute.productSelect, "price", productSelect.price);
-					this.$set(this.attribute.productSelect, "unique", productSelect.id);
-					this.$set(this.attribute.productSelect, "cart_num", 1);
-					this.$set(this.attribute.productSelect, "quota", productSelect.quota);
-					this.$set(this.attribute.productSelect, "quotaShow", productSelect.quotaShow);
-					this.$set(this, "attrValue", res);
-
-					this.attrTxt = "已选择"
-				} else {
-					this.$set(this.attribute.productSelect, "image", this.storeInfo.image);
-					this.$set(this.attribute.productSelect, "price", this.storeInfo.price);
-					this.$set(this.attribute.productSelect, "unique", "");
-					this.$set(this.attribute.productSelect, "cart_num", 0);
-					this.$set(this.attribute.productSelect, "quota", 0);
-					this.$set(this.attribute.productSelect, "quotaShow", 0);
-					this.$set(this, "attrValue", "");
-					this.attrTxt = "已选择"
-				}
-			},
-			// 单独购买
-			goProduct() {
-				uni.navigateTo({
-					url: '/pages/goods_details/index?id=' + this.storeInfo.productId
-				})
-			},
-			// 立即购买
-			goCat() {
-				var that = this;
-				var productSelect = this.productValue[this.attrValue];
-				//打开属性
-				if (this.isOpen)
-					this.attribute.cartAttr = true
-				else
-					this.attribute.cartAttr = !this.attribute.cartAttr
-				//只有关闭属性弹窗时进行加入购物车
-				if (this.attribute.cartAttr === true && this.isOpen == false) return this.isOpen = true
-				//如果有属性,没有选择,提示用户选择
-				if (this.attribute.productAttr.length && productSelect === undefined && this.isOpen == true) return that
-					.$util.Tips({
-						title: '请选择属性'
-					});
-				var data = {
-					productId: that.storeInfo.productId,
-					combinationId: parseFloat(that.id),
-					cartNum: that.cart_num ? this.cart_num : this.attribute.productSelect.cart_num,
-					productAttrUnique: productSelect !== undefined ? productSelect.id : '',
-					isNew: true,
-				};
-				this.$Order.getPreOrder("buyNow",[{
-						"attrValueId": parseFloat(this.attribute.productSelect.unique),
-						"combinationId": parseFloat(this.id),
-						"productNum": parseFloat(this.cart_num ? this.cart_num : this.attribute.productSelect.cart_num),
-						"productId": parseFloat(this.storeInfo.productId)
-					}]);
-			},
-			/**
-			 * 收藏商品
-			 */
-			setCollect: function() {
-				var that = this;
-				if (this.userCollect) {
-					collectDel(this.storeInfo.productId).then(res => {
-						that.userCollect = !that.userCollect
-					})
-				} else {
-					collectAdd(this.storeInfo.productId).then(res => {
-						that.userCollect = !that.userCollect
-					})
 				}
 			},
 

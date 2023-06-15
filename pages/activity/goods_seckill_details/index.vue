@@ -102,25 +102,24 @@
 				</view>
         <!-- 购买操作 -->
         <view class="bnt acea-row" v-if="status === 0">
-          <view class="joinCart bnts" @tap="openAlone">单独购买</view>
           <view class="buy bnts bg-color-hui">已关闭</view>
         </view>
         <view class="bnt acea-row" v-else-if="status === 1">
           <view class="joinCart bnts" @tap="openAlone">单独购买</view>
           <view class="buy bnts bg-color-hui">未开始</view>
         </view>
-				<view class="bnt acea-row" v-else-if="status === 2 && attr.productSelect.quota > 0">
-					<view class="joinCart bnts" @tap="openAlone">单独购买</view>
-					<view class="buy bnts" @tap="goBuy">立即购买</view>
-				</view>
-				<view class="bnt acea-row" v-else-if="status === 2 && (attr.productSelect.quota <= 0)">
-					<view class="joinCart bnts" @tap="openAlone">单独购买</view>
-					<view class="buy bnts bg-color-hui">已售罄</view>
-				</view>
-				<view class="bnt acea-row" v-else-if="status === 3">
-					<view class="joinCart bnts" @tap="openAlone">单独购买</view>
-					<view class="buy bnts bg-color-hui">已结束</view>
-				</view>
+        <view class="bnt acea-row" v-else-if="status === 2 && attr.productSelect.quota > 0">
+          <view class="joinCart bnts" @tap="openAlone">单独购买</view>
+          <view class="buy bnts" @tap="goBuy">立即购买</view>
+        </view>
+        <view class="bnt acea-row" v-else-if="status === 2 && (attr.productSelect.quota <= 0)">
+          <view class="joinCart bnts" @tap="openAlone">单独购买</view>
+          <view class="buy bnts bg-color-hui">已售罄</view>
+        </view>
+        <view class="bnt acea-row" v-else-if="status === 3">
+          <view class="joinCart bnts" @tap="openAlone">单独购买</view>
+          <view class="buy bnts bg-color-hui">已结束</view>
+        </view>
         <view class="bnt acea-row" v-else> <!-- 兜底 -->
           <view class="joinCart bnts" @tap="openAlone">单独购买</view>
           <view class="buy bnts bg-color-hui">未开始</view>
@@ -286,7 +285,7 @@
 		computed: mapGetters(['isLogin','uid','chatUrl']),
 		watch:{
 			isLogin:{
-				handler:function(newV,oldV){
+				handler: function(newV,oldV) {
 					if (newV) {
 						this.getSeckillDetail();
 					}
