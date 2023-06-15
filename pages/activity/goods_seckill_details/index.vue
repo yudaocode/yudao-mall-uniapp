@@ -252,7 +252,6 @@
         posters: false, // 分享弹窗的开关
         weixinStatus: false, // 微信分享是否打开
         canvasStatus: false, // 是否显示海报
-        imagePath: '', // 海报路径
         H5ShareBox: false, // 公众号分享的弹出
         posterbackgd: '/static/images/posterbackgd.png',  // 海报的背景，用于海报的生成
         storeImage: '', // 下载商品图片后的文件地址
@@ -330,21 +329,19 @@
 				return;
 			}
       // 解析 id 商品编号
-      if (options.hasOwnProperty('id') || options.scene){
-				if (options.scene) { // 仅仅小程序扫码进入
-          // TODO 芋艿：code 是啥
-          let qrCodeValue = this.$util.getUrlParams(decodeURIComponent(options.scene));
-					let mapeMpQrCodeValue = this.$util.formatMpQrCodeData(qrCodeValue);
-				    app.globalData.spread = mapeMpQrCodeValue.spread;
-				    this.id = mapeMpQrCodeValue.id;
-          // TODO 芋艿：code 是啥
-          setTimeout(()=>{
-				    	spread(mapeMpQrCodeValue.spread).then(res => {}).catch(res => {})
-				    },2000)
-				} else {
-					this.id = options.id;
-				}
-			}
+      if (options.scene) { // 仅仅小程序扫码进入
+        // TODO 芋艿：code 是啥
+        let qrCodeValue = this.$util.getUrlParams(decodeURIComponent(options.scene));
+        let mapeMpQrCodeValue = this.$util.formatMpQrCodeData(qrCodeValue);
+        app.globalData.spread = mapeMpQrCodeValue.spread;
+        this.id = mapeMpQrCodeValue.id;
+        // TODO 芋艿：code 是啥
+        setTimeout(()=>{
+          spread(mapeMpQrCodeValue.spread).then(res => {}).catch(res => {})
+        },2000)
+      } else {
+        this.id = options.id;
+      }
 
       // 获得秒杀详情
       this.getSeckillDetail();

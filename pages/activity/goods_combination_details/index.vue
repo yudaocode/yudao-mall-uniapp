@@ -123,14 +123,13 @@
 								</view>
 							</view>
 						</view>
-            <!-- 评论 TODO -->
+            <!-- 评论 -->
             <view class='userEvaluation borRadius14' id="past1">
-							<view class='title acea-row row-between-wrapper' :style="replyCount==0?'border-bottom-left-radius:14rpx;border-bottom-right-radius:14rpx;':''">
+							<view class='title acea-row row-between-wrapper' :style="replyCount===0?'border-bottom-left-radius:14rpx;border-bottom-right-radius:14rpx;':''">
 								<view>用户评价<i>({{replyCount}})</i></view>
 								<navigator class='praise' hover-class='none'
-									:url='"/pages/users/goods_comment_list/index?productId="+storeInfo.productId'>
-									<i>好评</i><text class='font-color'>{{replyChance || 0}}%</text>
-
+									:url='"/pages/users/goods_comment_list/index?productId="+spu.productId'>
+									<i>好评</i><text class='font-color'>{{ replyChance || 0}}%</text>
 									<text class='iconfont icon-jiantou'></text>
 								</navigator>
 							</view>
@@ -204,7 +203,7 @@
       @iptCartNum="iptCartNum"
       @close="closeAttr"
     />
-    <!-- TODO 芋艿 -->
+    <!-- 左侧的分销提示 -->
 		<shareRedPackets
       :sharePacket="sharePacket"
       @listenerActionSheet="listenerActionSheet"
@@ -309,6 +308,10 @@
         runningRecords: [], // 进行中的拼团记录
         AllIndex: 2, // runningRecords 展示的数量，用于收起
         AllIndexDefault: 0, // AllIndex 的默认值，用于收起
+        circular: true, // 进行中的拼团记录的轮播相关的 4 个变量
+        autoplay: true,
+        interval: 3000,
+        duration: 500,
 
         // ========== 商品相关变量 ==========
         spu: {}, // 商品 SPU 详情
@@ -334,52 +337,37 @@
         // ========== 收藏相关的变量 ==========
         userCollect: false,
 
-        // TODO 芋艿：未整理
+        // ========== 分销相关的变量 ==========
+        qrcodeSize: 600, // 二维码的大小
+        promotionCode: '', // 二维码图片
+        imgTop: '', // 商品图片的 base64 码
+        errT: '',  // 获得小程序码失败的提示文本
+        posters: false, // 分享弹窗的开关
+        weixinStatus: false, // 微信分享是否打开
+        canvasStatus: false, // 是否显示海报
+        H5ShareBox: false, // 公众号分享的弹出
+        posterbackgd: '/static/images/posterbackgd.png',  // 海报的背景，用于海报的生成
+        storeImage: '', // 下载商品图片后的文件地址
+        actionSheetHidden: true, // 微信小程序的右上角分享的弹出
+        posterImage: '', // 海报路径
+        sharePacket: { // 分销弹出信息
+          isState: true, // 默认不显示
+        },
 
-				circular: true,
-				autoplay: true,
-				interval: 3000,
-				duration: 500,
-				productValue: [],
-				maxAllIndex: 0,
-				limitNum: 1,
-				timeer: null,
-				iSplus: false,
-				navH: "",
-				navList: ['商品', '评价', '详情'],
-				opacity: 0,
-				scrollY: 0,
-				topArr: [],
-				toView: '',
-				height: 0,
-				heightArr: [],
-				lock: false,
-				scrollTop: 0,
+        // ========== 顶部 nav + scroll 相关的变量 ==========
+        returnShow: true, // 判断顶部 [返回] 是否出现
+        homeTop: 20, // 头部的 top 位置
+        height: 0, // 窗口 height 高度
+        scrollY: 0, // 滚动的 Y 轴
+        scrollTop: 0,  // 滚动条的 top 位置
+        lock: false,  // 是否锁定 scroll 下
+        topArr: [], // 每个 nav 的 top 位置
+        heightArr: [], // 每个 nav 的 height 高度
+        navH: "", // 头部 nav 高度
+        opacity: 0, // 头部 nav 的透明度
+        navList: ['商品', '评价', '详情'],
+        navActive: 0, // 选中的 navList 下标
 				storeInfo: {},
-				imgUrls: [],
-				sharePacket: {
-					isState: true, //默认不显示
-				},
-
-				posters: false,
-				weixinStatus: false,
-				posterImageStatus: false,
-				canvasStatus: false, //海报绘图标签
-				storeImage: '', //海报产品图
-				promotionCode: '', //二维码图片
-				posterImage: '', //海报路径
-				posterbackgd: '/static/images/posterbackgd.png',
-				navActive: 0,
-				actionSheetHidden: false,
-				attrTxt: '',
-				cart_num: '',
-				isAuto: false, //没有授权的不会自动授权
-				imgTop: '',
-				qrcodeSize: 600,
-				H5ShareBox: false, //公众号分享图片
-				errT: '',
-				returnShow: true,
-				homeTop: 20
 			}
 		},
 		watch: {
@@ -394,74 +382,47 @@
 		},
     //#endif
 		onLoad(options) {
-			let that = this
 			this.$store.commit("PRODUCT_TYPE", 'normal');
-			this.$nextTick(() => {
-				// #ifdef MP
-				const menuButton = uni.getMenuButtonBoundingClientRect();
-				const query = uni.createSelectorQuery().in(this);
-				query
-					.select('#home')
-					.boundingClientRect(data => {
-						this.homeTop = menuButton.top * 2 + menuButton.height - data.height;
-					})
-					.exec();
-				// #endif
-			});
+      // 设置商品列表高度
+      uni.getSystemInfo({
+        success: res => {
+          this.height = res.windowHeight
+          //res.windowHeight:获取整个窗口高度为px，*2为rpx；98为头部占据的高度；
+        },
+      });
 			// #ifdef MP
 			this.navH = app.globalData.navHeight;
 			// #endif
 			// #ifndef MP
 			this.navH = 96;
 			// #endif
-			//设置商品列表高度
-			uni.getSystemInfo({
-				success: function(res) {
-					that.height = res.windowHeight
-					//res.windowHeight:获取整个窗口高度为px，*2为rpx；98为头部占据的高度；
-				},
-			});
-			if (options.hasOwnProperty('id') || options.scene) {
-				if (options.scene) { // 仅仅小程序扫码进入
-					let qrCodeValue = this.$util.getUrlParams(decodeURIComponent(options.scene));
-					let mapeMpQrCodeValue = this.$util.formatMpQrCodeData(qrCodeValue);
-				    app.globalData.spread = mapeMpQrCodeValue.spread;
-				    this.id = mapeMpQrCodeValue.id;
-				    setTimeout(()=>{
-				    	spread(mapeMpQrCodeValue.spread).then(res => {}).catch(res => {})
-				    },2000)
-				}else{
-					this.id = options.id;
-				}
-				if (this.isLogin) {
-					this.combinationDetail();
-				} else {
-					// #ifdef H5 || APP-PLUS
-					try {
-						uni.setStorageSync('comGoodsId', options.id);
-					} catch (e) {}
-					// #endif
-					this.$Cache.set('login_back_url',
-						`/pages/activity/goods_combination_details/index?id=${options.id}&spread=${options.pid?options.pid:0}`
-					);
-					toLogin();
-				}
-			} else {
-				try {
-					let val = uni.getStorageSync('comGoodsId');
-					if (val != '') {
-						this.id = val
-						this.combinationDetail();
-					}
-				} catch (e) {
-					uni.showToast({
-						title: '参数错误',
-						icon: 'none',
-						duration: 1000,
-						mask: true,
-					})
-				}
-			}
+
+      // 校验参数是否正确
+      if (!options.scene && !options.id){
+        this.$util.Tips({
+          title: '缺少参数无法查看商品'
+        }, {
+          url: '/pages/index/index'
+        });
+        return;
+      }
+      // 解析 id 商品编号
+      if (options.scene) { // 仅仅小程序扫码进入
+        // TODO 芋艿：code 是啥
+        let qrCodeValue = this.$util.getUrlParams(decodeURIComponent(options.scene));
+        let mapeMpQrCodeValue = this.$util.formatMpQrCodeData(qrCodeValue);
+        app.globalData.spread = mapeMpQrCodeValue.spread;
+        this.id = mapeMpQrCodeValue.id;
+        // TODO 芋艿：code 是啥
+        setTimeout(()=>{
+          spread(mapeMpQrCodeValue.spread).then(res => {}).catch(res => {})
+        }, 2000)
+      } else {
+        this.id = options.id;
+      }
+
+      // 获取拼团信息
+      this.combinationDetail();
 		},
     //#ifdef MP
     onShareAppMessage() {
@@ -472,6 +433,20 @@
       };
     },
     //#endif
+    onReady() {
+      this.$nextTick(() => {
+        // 设置微信的头部 top 位置
+        // #ifdef MP
+        const menuButton = uni.getMenuButtonBoundingClientRect();
+        const query = uni.createSelectorQuery().in(this);
+        query.select('#home')
+          .boundingClientRect(data => {
+            this.homeTop = menuButton.top * 2 + menuButton.height - data.height;
+          })
+          .exec();
+        // #endif
+      });
+    },
 		methods: {
       // ========== 拼团活动相关 ==========
       combinationDetail() {
