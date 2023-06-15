@@ -129,7 +129,7 @@
         @tap="loadmore"
       />
       <s-empty
-        v-if="state.pagination.total === 0"
+        v-if="state.list.use_scope == 'category' && state.pagination.total === 0"
         paddingTop="0"
         icon="/static/soldout-empty.png"
         text="暂无商品"
@@ -232,8 +232,10 @@
     data.items_value.forEach((i) => {
       state.tabMaps.push({ name: i.name, value: i.id });
     });
-    state.pagination = pagination
-    getGoodsList(state.tabMaps[0].value);
+    state.pagination = pagination;
+    if (state.list.use_scope == 'category') {
+      getGoodsList(state.tabMaps[0].value);
+    }
   }
   // 加载更多
   function loadmore() {
