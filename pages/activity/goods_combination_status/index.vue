@@ -99,11 +99,11 @@
 			<div class="list acea-row row-middle">
 				<div class="item" v-for="(item, index) in storeCombinationHost" :key="index" @click="goDetail(item.id)">
 					<div class="pictrue">
-						<img :src="item.image" />
-						<div class="team" v-text="item.people + '人团'"></div>
+						<img :src="item.picUrl" />
+						<div class="team" v-text="(item.userSize - item.userCount) + '人团'"></div>
 					</div>
-					<div class="name line1" v-text="item.title"></div>
-					<div class="money font-color-red" v-text="'￥' + item.price"></div>
+					<div class="name line1" v-text="item.spuName"></div>
+					<div class="money font-color-red" v-text="'￥' + fen2yuan(item.combinationPrice)"></div>
 				</div>
 			</div>
 		</div>
@@ -150,10 +150,7 @@
 	import { imageBase64 } from "@/api/public";
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from 'vuex';
-	import {
-		postCombinationRemove,
-		getCombinationMore
-	} from '@/api/activity';
+	import { postCombinationRemove } from '@/api/activity';
   import * as ProductSpuApi from '@/api/product/spu.js';
   import * as CombinationApi from '@/api/promotion/combination.js';
   import * as Util from '@/utils/util.js';
@@ -209,10 +206,6 @@
 
         // ========== 拼团推荐相关变量 ==========
 				storeCombinationHost: [], // 拼团推荐
-				limit: 10,
-				page: 1,
-				loading: false, // 是否加载中
-				loadend: false, // 是否到底
 
         // ========== 分销相关的变量 ==========
         qrcodeSize: 600, // 二维码的大小
@@ -257,10 +250,6 @@
       // 加载拼团信息
       this.getCombinationPink();
 		},
-    // TODO 芋艿：还没搞好
-		mounted: function() {
-			this.combinationMore();
-		},
 		//#ifdef MP
 		/**
 		 * 用户点击右上角分享
@@ -295,6 +284,9 @@
             // 获得商品详情
             this.getGoodsDetails();
           })
+
+          // 加载更多拼团记录
+          this.combinationMore();
         }).catch(err => {
           this.$util.Tips({
             title: err
@@ -316,6 +308,23 @@
        */
       lookAll: function() {
         this.iShidden = !this.iShidden;
+      },
+      // 拼团取消 TODO 芋艿
+      getCombinationRemove: function() {
+        var that = this;
+        postCombinationRemove({
+          id: that.pinkId
+        }).then(res => {
+          that.$util.Tips({
+            title: res.msg
+          }, {
+            tab: 3
+          });
+        }).catch(res => {
+          that.$util.Tips({
+            title: res
+          });
+        });
       },
 
       // ========== 商品详情相关 ==========
@@ -500,72 +509,31 @@
        * 拼团详情
        */
       goDetail: function(id) {
-        this.pinkId = id;
         uni.navigateTo({
           url: '/pages/activity/goods_combination_details/index?id=' + id
         });
       },
 
-      // TODO 芋艿：
-
-
-      // 分享关闭
-			listenerActionClose: function() {
-				this.posters = false;
-				this.canvasStatus = false;
-			},
-			// 更多拼团
-			combinationMore: function() {
-				var that = this;
-				if (that.loadend) return;
-				if (that.loading) return;
-				var data = {
-					page: that.page,
-					limit: that.limit,
-					comId: that.pinkId
-				};
-				this.loading = true
-				getCombinationMore(data)
-					.then(res => {
-						var storeCombinationHost = that.storeCombinationHost;
-						var limit = that.limit;
-						that.page++;
-						that.loadend = limit > res.data.length;
-						that.storeCombinationHost = storeCombinationHost.concat(res.data.list);
-						that.page = that.data.page;
-						that.loading = false;
-					})
-					.catch(res => {
-						that.loading = false
-						that.$util.Tips({
-							title: res
-						});
-					});
-			},
-
-			// 拼团列表
-			goList: function() {
-				uni.navigateTo({
-					url: '/pages/activity/goods_combination/index'
-				});
-			},
-
-      // 拼团取消
-      getCombinationRemove: function() {
-        var that = this;
-        postCombinationRemove({
-          id: that.pinkId
-        }).then(res => {
-          that.$util.Tips({
-            title: res.msg
-          }, {
-            tab: 3
-          });
+      // ========== 拼团推荐 ==========
+      /**
+       * 前往拼团列表
+       */
+      goList: function() {
+        uni.navigateTo({
+          url: '/pages/activity/goods_combination/index'
+        });
+      },
+      /**
+       * 更多拼团
+       */
+      combinationMore: function() {
+        CombinationApi.getHeadCombinationRecordList(1, 9).then(res => {
+          this.storeCombinationHost = res.data;
         }).catch(res => {
-          that.$util.Tips({
+          this.$util.Tips({
             title: res
           });
-        });
+        })
       },
 
       // ========== 分销相关的方法 ==========
@@ -687,6 +655,13 @@
           }
         });
         //#endif
+      },
+      /**
+       * 分享关闭
+       */
+      listenerActionClose: function() {
+        this.posters = false;
+        this.canvasStatus = false;
       },
 
       fen2yuan(price) {

@@ -6,7 +6,7 @@
 				<!-- #ifdef H5 -->
 				<view class='iconfont icon-xiangzuo' @tap='goBack' :style="'top:'+ (navH/2) +'rpx'" v-if="returnShow"></view>
 				<!-- #endif -->
-				<!-- banner -->
+				<!-- banner TODO 芋艿：banner -->
 				<view class="swiper" v-if="bannerList.length">
 					<swiper indicator-dots="true" :autoplay="true" :circular="circular" :interval="interval"
 						:duration="duration" indicator-color="rgba(255,255,255,0.6)" indicator-active-color="#fff">
@@ -20,7 +20,8 @@
 						</block>
 					</swiper>
 				</view>
-				<view class="nav acea-row row-between-wrapper">
+        <!-- TODO 芋艿：头部 -->
+        <view class="nav acea-row row-between-wrapper">
 					<image src="../static/zuo.png"></image>
 					<view class="title acea-row row-center">
 						<view class="spike-bd">
@@ -38,36 +39,35 @@
 					</view>
 					<image src="../static/you.png"></image>
 				</view>
+        <!-- 拼团活动 -->
 				<view class='list'>
 					<block v-for="(item,index) in combinationList" :key='index'>
 						<view class='item acea-row row-between-wrapper' @tap="openSubcribe(item)"
 						 data-url=''>
 							<view class='pictrue'>
-								<image :src='item.image'></image>
+								<image :src='item.picUrl'></image>
 							</view>
 							<view class='text'>
-								<view class='line2'>{{item.title}}</view>
-								<text class='y-money'>￥{{item.otPrice}}</text>
+								<view class='line2'>{{ item.name }}</view>
+								<text class='y-money'>￥{{ fen2yuan(item.marketPrice) }}</text>
 								<view class='bottom acea-row row-between-wrapper'>
-									<view class='money'>￥<text class='num'>{{item.price}}</text></view>
+									<view class='money'>￥<text class='num'>{{ fen2yuan(item.combinationPrice) }}</text></view>
 									<view class="btn acea-row">
-										<view class="num">{{item.people}}人团</view>
+										<view class="num">{{ item.userSize }}人团</view>
 										<view class="goBye">去拼团</view>
 									</view>
-									<!-- <view class="nothing">已售罄</view> -->
 								</view>
 							</view>
 						</view>
 					</block>
 					<view class='loadingicon acea-row row-center-wrapper' v-if='combinationList.length > 0'>
-						<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
+						<text class='loading iconfont icon-jiazai' :hidden='!loading' /> {{loadTitle}}
 					</view>
 				</view>
 			</view>
 			<home></home>
 		</div>
 	</div>
-	
 </template>
 
 <script>
@@ -75,10 +75,11 @@
 		getCombinationList,
 		combinationHeaderApi
 	} from '@/api/activity.js';
-	import {
-		openPinkSubscribe
-	} from '../../../utils/SubscribeMessage.js';
-	import home from '@/components/home/index.vue'
+	import { openPinkSubscribe } from '../../../utils/SubscribeMessage.js';
+  import * as CombinationApi from '@/api/promotion/combination.js';
+  import * as Util from '@/utils/util.js';
+  import home from '@/components/home/index.vue'
+  import {getCombinationActivityPage} from "../../../api/promotion/combination";
 	let app = getApp();
 	export default {
 		components: {
@@ -86,19 +87,23 @@
 		},
 		data() {
 			return {
+        // 拼团活动列表
+        combinationList: [],
+        loading: false,
+        loadend: false,
+        limit: 10,
+        page: 1,
+        loadTitle: '',
+
+        // TODO 芋艿：未整理
 				indicatorDots: false,
 				circular: true,
 				autoplay: true,
 				interval: 3000,
 				duration: 500,
 				navH: '',
-				combinationList: [],
-				limit: 10,
-				page: 1,
-				loading: false,
-				loadend: false,
+
 				returnShow: true,
-				loadTitle: '',
 				avatarList: [],
 				bannerList: [],
 				totalPeople: 0
@@ -109,7 +114,7 @@
 		},
 		onLoad() {
 			var pages = getCurrentPages();
-			this.returnShow = pages.length===1?false:true;
+			this.returnShow = pages.length !== 1;
 			uni.setNavigationBarTitle({
 				title:"拼团列表"
 			})
@@ -119,33 +124,70 @@
 			// #ifdef H5
 			this.navH = app.globalData.navHeight;
 			// #endif
+
+      // 获得拼团活动列表
 			this.getCombinationList();
+      // TODO 芋艿：
 			this.getCombinationHeader();
 		},
+    onReachBottom: function() {
+      this.getCombinationList();
+    },
 		methods: {
+      /**
+       * 获得拼团活动列表
+       */
+      getCombinationList: function() {
+        if (this.loadend || this.loadend) {
+          return;
+        }
+        this.loadTitle = '';
+        this.loading = true
+        CombinationApi.getCombinationActivityPage({
+          pageNo: this.page,
+          pageSize: this.limit
+        }).then(res => {
+          let list = res.data.list;
+          let combinationList = this.$util.SplitArray(list, this.combinationList);
+          let loadend = list.length < this.limit;
+          this.loadend = loadend;
+          this.loading = false;
+          this.loadTitle = loadend ? '已全部加载' : '加载更多';
+          this.$set(this, 'combinationList', combinationList);
+          this.$set(this, 'page', this.page + 1);
+        }).catch(() => {
+          this.loading = false;
+          this.loadTitle = '加载更多';
+        })
+      },
+      /**
+       * 跳转拼团活动详情
+       *
+       * @param item 拼团活动
+       */
+      openSubcribe: function(item) {
+        // #ifndef MP
+        uni.navigateTo({
+          url: `/pages/activity/goods_combination_details/index?id=${item.id}`
+        });
+        // #endif
+
+        // #ifdef MP
+        uni.showLoading({
+          title: '正在加载',
+        })
+        openPinkSubscribe().then(res => {
+          uni.hideLoading();
+          uni.navigateTo({
+            url: `/pages/activity/goods_combination_details/index?id=${item.id}`
+          });
+        }).catch(() => {
+          uni.hideLoading();
+        });
+        // #endif
+      },
 			goBack: function() {
 				uni.navigateBack();
-			},
-			openSubcribe: function(item) {
-				let page = item;
-				// #ifndef MP
-				uni.navigateTo({
-					url: `/pages/activity/goods_combination_details/index?id=${item.id}`
-				});
-				// #endif
-				// #ifdef MP
-				uni.showLoading({
-					title: '正在加载',
-				})
-				openPinkSubscribe().then(res => {
-					uni.hideLoading();
-					uni.navigateTo({
-						url: `/pages/activity/goods_combination_details/index?id=${item.id}`
-					});
-				}).catch(() => {
-					uni.hideLoading();
-				});
-				// #endif
 			},
 			getCombinationHeader: function() {
 				combinationHeaderApi().then(res => {
@@ -157,34 +199,11 @@
 					this.loadTitle = '加载更多';
 				})
 			},
-			getCombinationList: function() {
-				var that = this;
-				if (that.loadend) return;
-				if (that.loading) return;
-				that.loadTitle = '';
-				var data = {
-					page: that.page,
-					limit: that.limit
-				};
-				this.loading = true
-				getCombinationList(data).then(function(res) {
-					let list = res.data.list;
-					let combinationList = that.$util.SplitArray(list, that.combinationList);
-					let loadend = list.length < that.limit;
-					that.loadend = loadend;
-					that.loading = false;
-					that.loadTitle = loadend ? '已全部加载' : '加载更多';
-					that.$set(that, 'combinationList', combinationList);
-					that.$set(that, 'page', that.page + 1);
-				}).catch(() => {
-					that.loading = false;
-					that.loadTitle = '加载更多';
-				})
-			},
-		},
-		onReachBottom: function() {
-			this.getCombinationList();
-		},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
+		}
 	}
 </script>
 
@@ -219,11 +238,11 @@
 		}
 	}
 	.activity_pic {
-	
+
 		.picture {
 			display: inline-table;
 		}
-	
+
 		.avatar {
 			width: 38rpx;
 			height: 38rpx;
