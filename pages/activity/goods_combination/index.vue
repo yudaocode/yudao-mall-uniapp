@@ -6,36 +6,36 @@
 				<!-- #ifdef H5 -->
 				<view class='iconfont icon-xiangzuo' @tap='goBack' :style="'top:'+ (navH/2) +'rpx'" v-if="returnShow"></view>
 				<!-- #endif -->
-				<!-- banner TODO 芋艿：banner -->
+				<!-- banner -->
 				<view class="swiper" v-if="bannerList.length">
 					<swiper indicator-dots="true" :autoplay="true" :circular="circular" :interval="interval"
 						:duration="duration" indicator-color="rgba(255,255,255,0.6)" indicator-active-color="#fff">
 						<block v-for="(item,index) in bannerList" :key="index">
 							<swiper-item>
-								<navigator :url='item.value' class='slide-navigator acea-row row-between-wrapper'
+								<navigator :url='item.url' class='slide-navigator acea-row row-between-wrapper'
 									hover-class='none'>
-									<image :src="item.value" class="slide-image" lazy-load></image>
+									<image :src="item.picUrl" class="slide-image" lazy-load />
 								</navigator>
 							</swiper-item>
 						</block>
 					</swiper>
 				</view>
-        <!-- TODO 芋艿：头部 -->
+        <!-- 拼团概要 -->
         <view class="nav acea-row row-between-wrapper">
 					<image src="../static/zuo.png"></image>
 					<view class="title acea-row row-center">
 						<view class="spike-bd">
-							<view v-if="avatarList.length > 0" class="activity_pic">
-								<view v-for="(item,index) in avatarList" :key="index" class="picture"
-									:style='index===6?"position: relative":"position: static"'>
+							<view v-if="summary.avatars.length > 0" class="activity_pic">
+								<view v-for="(item,index) in summary.avatars" :key="index" class="picture"
+									:style='index === 6?"position: relative":"position: static"'>
 									<span class="avatar" :style='"background-image: url("+item+")"'></span>
-									<span v-if="index===6 && Number(avatarList.length) > 3" class="mengceng">
+									<span v-if="index === 6 && summary.avatars.length > 3" class="mengceng">
 										<i>···</i>
 									</span>
 								</view>
 							</view>
 						</view>
-						<text class="pic_count">{{totalPeople}}人参与</text>
+						<text class="pic_count">{{ summary.userCount || 0 }}人参与</text>
 					</view>
 					<image src="../static/you.png"></image>
 				</view>
@@ -69,17 +69,12 @@
 		</div>
 	</div>
 </template>
-
 <script>
-	import {
-		getCombinationList,
-		combinationHeaderApi
-	} from '@/api/activity.js';
 	import { openPinkSubscribe } from '../../../utils/SubscribeMessage.js';
   import * as CombinationApi from '@/api/promotion/combination.js';
+  import * as BannerApi from '@/api/promotion/banner.js';
   import * as Util from '@/utils/util.js';
   import home from '@/components/home/index.vue'
-  import {getCombinationActivityPage} from "../../../api/promotion/combination";
 	let app = getApp();
 	export default {
 		components: {
@@ -95,18 +90,22 @@
         page: 1,
         loadTitle: '',
 
-        // TODO 芋艿：未整理
-				indicatorDots: false,
-				circular: true,
-				autoplay: true,
-				interval: 3000,
-				duration: 500,
-				navH: '',
+        // 拼团记录概要
+        summary: {
+          userCount: 0,
+          avatars: [],
+        },
 
+        // banner 相关
+        bannerList: [],
+        circular: true,
+        autoplay: true,
+        interval: 3000,
+        duration: 500,
+
+        // 导航相关
+				navH: '',
 				returnShow: true,
-				avatarList: [],
-				bannerList: [],
-				totalPeople: 0
 			}
 		},
 		onShow() {
@@ -116,7 +115,7 @@
 			var pages = getCurrentPages();
 			this.returnShow = pages.length !== 1;
 			uni.setNavigationBarTitle({
-				title:"拼团列表"
+				title: "拼团列表"
 			})
 			// #ifdef MP
 			this.navH = app.globalData.navH;
@@ -127,8 +126,10 @@
 
       // 获得拼团活动列表
 			this.getCombinationList();
-      // TODO 芋艿：
+      // 获得拼团概要
 			this.getCombinationHeader();
+      // 获得 banner 列表
+      this.getBannerList();
 		},
     onReachBottom: function() {
       this.getCombinationList();
@@ -189,16 +190,22 @@
 			goBack: function() {
 				uni.navigateBack();
 			},
+      /**
+       * 获得拼团记录概要
+       */
 			getCombinationHeader: function() {
-				combinationHeaderApi().then(res => {
-					this.avatarList = res.data.avatarList || [];
-					this.bannerList = res.data.bannerList || [];
-					this.totalPeople = res.data.totalPeople;
-				}).catch(() => {
-					this.loading = false;
-					this.loadTitle = '加载更多';
-				})
+        CombinationApi.getCombinationSummary().then(res => {
+          this.summary = res.data;
+        })
 			},
+      /**
+       * 获得 banner 列表
+       */
+      getBannerList() {
+        BannerApi.getBannerList(10).then(res => {
+          this.bannerList = res.data;
+        })
+      },
 
       fen2yuan(price) {
         return Util.fen2yuan(price)
