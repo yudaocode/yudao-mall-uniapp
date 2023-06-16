@@ -255,7 +255,7 @@
 </template>
 
 <script>
-	const app = getApp();
+  const app = getApp();
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js'
 	import { mapGetters } from "vuex";
 	// #ifdef MP
@@ -275,7 +275,7 @@
   import * as ProductSpuApi from '@/api/product/spu.js';
   import * as ProductFavoriteApi from '@/api/product/favorite.js';
   import * as ProductCommentApi from '@/api/product/comment.js';
-  import * as CombinationActivityApi from '@/api/promotion/combination.js';
+  import * as CombinationApi from '@/api/promotion/combination.js';
   import * as Util from '@/utils/util.js';
   import * as ProductUtil from '@/utils/product.js';
 	export default {
@@ -450,7 +450,7 @@
 		methods: {
       // ========== 拼团活动相关 ==========
       combinationDetail() {
-        CombinationActivityApi.getCombinationActivity(this.id).then(res => {
+        CombinationApi.getCombinationActivity(this.id).then(res => {
           this.activity = res.data;
           uni.setNavigationBarTitle({
             title: this.activity.name.substring(0, 16)
@@ -473,8 +473,12 @@
             this.status = 0;
           }
           // 参团记录
-          this.successRecords = res.data.runningRecords;
-          this.runningRecords = res.data.runningRecords;
+          CombinationApi.getHeadCombinationRecordList(1).then(res => {
+            this.runningRecords = res.data;
+          })
+          CombinationApi.getHeadCombinationRecordList(2).then(res => {
+            this.successRecords = res.data;
+          })
 
           // 获得商品详情
           this.getGoodsDetails();
@@ -637,6 +641,55 @@
         this.$set(this, "attrValue", newSkuKey);
       },
       /**
+       * 购物车数量加和数量减
+       *
+       * @param changeValue true 增加；false 减少
+       */
+      ChangeCartNum: function(changeValue) {
+        // 获取当前 sku
+        let sku = this.attr.productSelect;
+        if (!sku) {
+          return;
+        }
+
+        // 设置数量
+        let stock = sku.stock || 0;
+        let quota = sku.quota || 0;
+        let limitCount = sku.limitCount;
+        if (changeValue) {
+          sku.cart_num++;
+          if (limitCount !== undefined && sku.cart_num > limitCount) {
+            this.$set(this.attr.productSelect, "cart_num", limitCount);
+            this.$util.Tips({
+              title: `该商品每次限购 ${sku.limitCount} ${this.spu.unitName}`
+            });
+          } else if (sku.cart_num > stock || sku.cart_num > quota) {
+            this.$set(this.attr.productSelect, "cart_num", Math.min(stock, quota));
+          }
+        } else {
+          sku.cart_num--;
+          if (sku.cart_num < 1) {
+            this.$set(this.attr.productSelect, "cart_num", 1);
+          }
+        }
+      },
+      /**
+       * 购物车手动填写
+       *
+       */
+      iptCartNum: function(number) {
+        this.$set(this.attr.productSelect, 'cart_num', number ? number : 1);
+        // 判断是否超限购
+        let sku = this.attr.productSelect;
+        let limitCount = sku.limitCount;
+        if (limitCount !== undefined && number > limitCount) {
+          this.$set(this.attr.productSelect, "cart_num", limitCount);
+          this.$util.Tips({
+            title: `该商品每次限购 ${sku.limitCount} ${this.spu.unitName}`
+          });
+        }
+      },
+      /**
        * 跳转到客服
        */
       kefuClick(){
@@ -694,55 +747,6 @@
           ProductFavoriteApi.createFavorite(this.activity.spuId).then(res => {
             this.$set(this, 'userCollect', true);
           })
-        }
-      },
-      /**
-       * 购物车数量加和数量减
-       *
-       * @param changeValue true 增加；false 减少
-       */
-      ChangeCartNum: function(changeValue) {
-        // 获取当前 sku
-        let sku = this.attr.productSelect;
-        if (!sku) {
-          return;
-        }
-
-        // 设置数量
-        let stock = sku.stock || 0;
-        let quota = sku.quota || 0;
-        let limitCount = sku.limitCount;
-        if (changeValue) {
-          sku.cart_num++;
-          if (limitCount !== undefined && sku.cart_num > limitCount) {
-            this.$set(this.attr.productSelect, "cart_num", limitCount);
-            this.$util.Tips({
-              title: `该商品每次限购 ${sku.limitCount} ${this.spu.unitName}`
-            });
-          } else if (sku.cart_num > stock || sku.cart_num > quota) {
-            this.$set(this.attr.productSelect, "cart_num", Math.min(stock, quota));
-          }
-        } else {
-          sku.cart_num--;
-          if (sku.cart_num < 1) {
-            this.$set(this.attr.productSelect, "cart_num", 1);
-          }
-        }
-      },
-      /**
-       * 购物车手动填写
-       *
-       */
-      iptCartNum: function(number) {
-        this.$set(this.attr.productSelect, 'cart_num', number ? number : 1);
-        // 判断是否超限购
-        let sku = this.attr.productSelect;
-        let limitCount = sku.limitCount;
-        if (limitCount !== undefined && number > limitCount) {
-          this.$set(this.attr.productSelect, "cart_num", limitCount);
-          this.$util.Tips({
-            title: `该商品每次限购 ${sku.limitCount} ${this.spu.unitName}`
-          });
         }
       },
       /**

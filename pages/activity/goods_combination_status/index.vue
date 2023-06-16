@@ -1,80 +1,99 @@
 <template>
 	<div class="group-con">
 		<div class="header acea-row row-between-wrapper">
-			<div class="pictrue"><img :src="storeCombination.image" /></div>
+      <!-- 拼团活动的信息 -->
+			<div class="pictrue">
+        <img :src="pinkT.picUrl" />
+      </div>
 			<div class="text">
-				<div class="line1" v-text="storeCombination.title"></div>
+				<div class="line1" v-text="activity.name" />
 				<div class="money">
 					￥
-					<span class="num" v-text="storeCombination.price || 0"></span>
-					<span class="team cart-color">{{storeCombination.people +'人拼'}}</span>
+					<span class="num" v-text="fen2yuan(pinkT.combinationPrice) || 0"></span>
+					<span class="team cart-color">{{ pinkT.userSize + '人拼' }}</span>
 				</div>
 			</div>
-			<div v-if="pinkBool === -1" class="iconfont icon-pintuanshibai"></div>
-			<div v-else-if="pinkBool === 1" class="iconfont icon-pintuanchenggong font-color-red"></div>
+			<div v-if="status === 3" class="iconfont icon-pintuanshibai"></div>
+			<div v-else-if="status === 2" class="iconfont icon-pintuanchenggong font-color-red"></div>
 		</div>
 		<div class="wrapper">
-			<div class="title acea-row row-center-wrapper" v-if="pinkBool === 0">
+      <!-- 拼团进展：拼团中 -->
+			<div class="title acea-row row-center-wrapper" v-if="status === 1">
 				<div class="line"></div>
 				<div class="name acea-row row-center-wrapper">
 					剩余
 					<CountDown :bgColor="bgColor" :is-day="false" :tip-text="' '" :day-text="' '" :hour-text="' : '"
-						:minute-text="' : '" :second-text="' '" :datatime="pinkT.stopTime/1000"></CountDown>
+						:minute-text="' : '" :second-text="' '" :datatime="pinkT.expireTime / 1000"></CountDown>
 					<span class="end">结束</span>
 				</div>
 				<div class="line"></div>
 			</div>
-			<div class="tips font-color-red" v-if="pinkBool === 1">恭喜您拼团成功</div>
-			<div class="tips" v-else-if="pinkBool === -1">还差{{ count }}人，拼团失败</div>
-			<div class="tips font-color-red" v-else-if="pinkBool === 0">拼团中，还差{{ count }}人拼团成功</div>
+      <!-- 拼团进展：拼团成功 -->
+      <div class="tips font-color-red" v-if="status === 2">恭喜您拼团成功</div>
+      <!-- 拼团进展：拼团失败 -->
+      <div class="tips" v-else-if="status === 3">还差{{ count }}人，拼团失败</div>
+
+      <!-- 拼团中的记录列表 -->
+			<div class="tips font-color-red" v-else-if="status === 1">拼团中，还差{{ count }}人拼团成功</div>
+      <!-- 当前拼团记录列表 -->
 			<div class="list acea-row row-middle"
-				:class="[pinkBool === 1 || pinkBool === -1 ? 'result' : '', iShidden ? 'on' : '']">
+				:class="[status === 2 || status === 3 ? 'result' : '', iShidden ? 'on' : '']">
 				<div class="pinkT">
-					<div class="pictrue"><img :src="pinkT.avatar" /></div>
+					<div class="pictrue">
+            <img :src="pinkT.avatar" />
+          </div>
 					<div class="chief">团长</div>
 				</div>
 				<block v-if="pinkAll.length > 0">
-					<div class="pictrue" v-for="(item, index) in pinkAll" :key="index"><img :src="item.avatar" /></div>
+					<div class="pictrue" v-for="(item, index) in pinkAll" :key="item.id">
+            <img :src="item.avatar" />
+          </div>
 				</block>
-				<div class="pictrue" v-for="index in count" :key="index"><img class="img-none"
-						src="/static/images/vacancy.png" /></div>
+				<div class="pictrue" v-for="index in count">
+          <img class="img-none" src="/static/images/vacancy.png" />
+        </div>
 			</div>
-			<div v-if="(pinkBool === 1 || pinkBool === -1) && count > 9" class="lookAll acea-row row-center-wrapper"
-				@click="lookAll">
+			<div v-if="(status === 2 || status === 3) && count > 9"
+           class="lookAll acea-row row-center-wrapper"
+           @click="lookAll">
 				{{ iShidden ? '收起' : '查看全部' }}
-				<span class="iconfont" :class="iShidden ? 'icon-xiangshang' : 'icon-xiangxia'"></span>
+				<span class="iconfont" :class="iShidden ? 'icon-xiangshang' : 'icon-xiangxia'" />
 			</div>
+
+      <!-- 拼团操作：邀请 -->
 			<!-- #ifndef MP -->
-			<div v-if="userBool === 1 && isOk == 0 && pinkBool === 0">
-				<div class="teamBnt bg-color-red" v-if='pinkT.stopTime>timestamp' @click="goPoster">邀请好友参团</div>
+			<div v-if="userBool === 1 && status === 1">
+				<div class="teamBnt bg-color-red" @click="goPoster">邀请好友参团</div>
 			</div>
 			<!-- #endif -->
 			<!-- #ifdef MP -->
-			<button open-type="share" class="teamBnt bg-color-red"
-				v-if="userBool === 1 && isOk == 0 && pinkBool === 0 && pinkT.stopTime>timestamp">邀请好友参团</button>
+			<button open-type="share" class="teamBnt bg-color-red" v-if="userBool === 1 && status === 1">邀请好友参团</button>
 			<!-- #endif -->
-			<div class="teamBnt bg-color-hui" v-if="pinkT.stopTime<timestamp && isOk == 0 && pinkBool === 0">拼团已过期</div>
-			<div class="teamBnt bg-color-red"
-				v-else-if="userBool === 0 && pinkBool === 0 && count > 0 && pinkT.stopTime>timestamp" @click="pay">我要参团
+      <!-- 拼团操作：过期 -->
+      <div class="teamBnt bg-color-hui" v-if="status === 3">拼团已过期</div>
+      <!-- 拼团操作：参团 -->
+      <div class="teamBnt bg-color-red" v-else-if="userBool === 0 && count > 0 && status === 1" @click="openAttr">
+        我要参团
 			</div>
-			<div class="teamBnt bg-color-red" v-if="pinkBool === 1 || pinkBool === -1"
-				@click="goDetail(storeCombination.id)">再次开团</div>
-			<div class="cancel" @click="getCombinationRemove" v-if="pinkBool === 0 && userBool === 1">
-				<span class="iconfont icon-guanbi3"></span>
-				取消开团
+      <!-- 拼团操作：再次开团 -->
+      <div class="teamBnt bg-color-red" v-if="status === 2 || status === 3"
+           @click="goDetail(activity.id)">再次开团</div>
+      <!-- 拼团操作：再次开团 -->
+      <div class="cancel" @click="getCombinationRemove" v-if="status === 1 && userBool === 1">
+				<span class="iconfont icon-guanbi3" /> 取消开团
 			</div>
-
-			<div class="lookOrder" v-if="pinkBool === 1" @click="goOrder">
-				查看订单信息
-				<span class="iconfont icon-xiangyou"></span>
+      <!-- 拼团操作：查看订单 -->
+			<div class="lookOrder" v-if="status === 2" @click="goOrder">
+				查看订单信息 <span class="iconfont icon-xiangyou" />
 			</div>
 		</div>
+
+    <!-- 更多拼团 -->
 		<div class="group-recommend">
 			<div class="title acea-row row-between-wrapper">
 				<div>大家都在拼</div>
 				<div class="more" @click="goList">
-					更多拼团
-					<span class="iconfont icon-jiantou"></span>
+					更多拼团 <span class="iconfont icon-jiantou"></span>
 				</div>
 			</div>
 			<div class="list acea-row row-middle">
@@ -88,8 +107,18 @@
 				</div>
 			</div>
 		</div>
-		<product-window :attr="attr" :limitNum="1" :iSbnt="1" @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
-			@ChangeCartNum="ChangeCartNum" @iptCartNum="iptCartNum" @attrVal="attrVal" @goCat="goPay"></product-window>
+
+    <!--  SKU 选择 -->
+		<product-window
+      :attr="attr"
+      :limitNum="1"
+      :iSbnt="1"
+      @ChangeAttr="ChangeAttr"
+			@ChangeCartNum="ChangeCartNum"
+      @iptCartNum="iptCartNum"
+      @close="closeAttr"
+      @goCat="goPay"
+    />
 		<view class="mask" v-if="posters || canvasStatus" @click="listenerActionClose"></view>
 		<!-- 发送给朋友图片 -->
 		<view class="share-box" v-if="H5ShareBox">
@@ -111,10 +140,6 @@
 			<canvas canvas-id="qrcode" :style="{width: `${qrcodeSize}px`, height: `${qrcodeSize}px`}"
 				style="opacity: 0;" />
 		</view>
-
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</div>
 </template>
@@ -122,26 +147,17 @@
 	import CountDown from '@/components/countDown';
 	import ProductWindow from '@/components/productWindow';
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js';
+	import { imageBase64 } from "@/api/public";
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from 'vuex';
 	import {
-		imageBase64
-	} from "@/api/public";
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from 'vuex';
-	import {
-		getCombinationPink,
 		postCombinationRemove,
 		getCombinationMore
 	} from '@/api/activity';
-	import {
-		postCartAdd
-	} from '@/api/store';
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
+  import * as ProductSpuApi from '@/api/product/spu.js';
+  import * as CombinationApi from '@/api/promotion/combination.js';
+  import * as Util from '@/utils/util.js';
+  import * as ProductUtil from '@/utils/product.js';
 	import home from '@/components/home';
 	const NAME = 'GroupRule';
 	const app = getApp();
@@ -150,75 +166,71 @@
 		components: {
 			CountDown,
 			ProductWindow,
-			home,
-			// #ifdef MP
-			authorize
-			// #endif
+			home
 		},
 		props: {},
 		data: function() {
 			return {
-				bgColor: {
-					'bgColor': '#333333',
-					'Color': '#fff',
-					'width': '44rpx',
-					'timeTxtwidth': '16rpx',
-					'isDay': true
-				},
-				currentPinkOrder: '', //当前拼团订单
-				isOk: 0, //判断拼团是否完成
-				pinkBool: 0, //判断拼团是否成功|0=失败,1=成功
-				userBool: 0, //判断当前用户是否在团内|0=未在,1=在
-				pinkAll: [], //团员
-				pinkT: [], //团长信息
-				storeCombination: {}, //拼团产品
-				storeCombinationHost: [], //拼团推荐
-				pinkId: 0,
-				count: 0, //拼团剩余人数
-				iShidden: false,
-				isOpen: false, //是否打开属性组件
-				attr: {
-					cartAttr: false,
-					productSelect: {
-						image: '',
-						storeName: '',
-						price: '',
-						quota: 0,
-						unique: '',
-						cart_num: 1,
-						quotaShow: 0,
-						stock: 0,
-						num: 0
-					},
-					attrValue: '',
-					productAttr: []
-				},
-				cart_num: '',
+        // ========== 拼团活动相关变量 ==========
+        storeCombination: {}, //拼团产品
+        activity: {}, // 拼团活动的信息
+        bgColor: {
+          'bgColor': '#333333',
+          'Color': '#fff',
+          'width': '44rpx',
+          'timeTxtwidth': '16rpx',
+          'isDay': true
+        },
+
+        // ========== 拼团记录相关变量 ==========
+        pinkId: 0, // 拼团记录编号
+        pinkT: {}, // 团长信息
+        pinkAll: [], // 团员列表
+        count: 0, // 拼团剩余人数
+        userBool: 0, // 判断当前用户是否在团内 | 0=未在,1=在
+        status: 1, // 拼团记录的状态 | 1=进行中,2=已完成,3=未完成
+        iShidden: false, // 拼团记录是否隐藏（查看全部、收齐）
+        currentPinkOrder: '', // 当前用户的拼团订单
+        timestamp: (new Date()).getTime(), // 当前时间戳
+
+        // ========== 商品相关变量 ==========
+        spu: {}, // 商品 SPU 详情
+        skuMap: [], // 商品 SKU Map
+        attrValue: '', // 已选属性名的拼接，例如说 红色,大 这样的格式
+        attr: { // productWindow 组件，使用该属性
+          cartAttr: false,
+          // ↓↓↓ 属性数组，结构为：id = 属性编号；name = 属性编号的名字；values[].id = 属性值的编号，values[].name = 属性值的名字；index = 选中的属性值的名字
+          productAttr: [],
+          productSelect: {} // 选中的 SKU
+        },
+
+        // ========== 用户相关变量 ==========
+        userInfo: {},
+
+        // ========== 拼团推荐相关变量 ==========
+				storeCombinationHost: [], // 拼团推荐
 				limit: 10,
 				page: 1,
-				loading: false,
-				loadend: false,
-				userInfo: {},
-				posters: false, // app分享
-				H5ShareBox: false, //公众号分享图片
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				onceNum: 0, //一次可以购买几个,
-				timestamp: 0, // 当前时间戳
-				qrcodeSize: 600,
-				posterbackgd: '/static/images/canbj.png',
-				PromotionCode: '', //二维码
-				canvasStatus: false,
-				imgTop: '', //商品图base64位
-				imagePath: '' // 海报图片
-			};
+				loading: false, // 是否加载中
+				loadend: false, // 是否到底
+
+        // ========== 分销相关的变量 ==========
+        qrcodeSize: 600, // 二维码的大小
+        promotionCode: '', // 二维码图片
+        imgTop: '', // 商品图片的 base64 码
+        posters: false, // 分享弹窗的开关
+        canvasStatus: false, // 是否显示海报
+        H5ShareBox: false, // 公众号分享的弹出
+        posterbackgd: '/static/images/canbj.png',  // 海报的背景，用于海报的生成
+      };
 		},
 		watch: {
 			userData: {
 				handler: function(newV, oldV) {
 					if (newV) {
 						this.userInfo = newV;
-						app.globalData.openPages = '/pages/activity/goods_combination_status/index?id=' + this.pinkId +
+						app.globalData.openPages = '/pages/activity/goods_combination_status/index?id='
+              + this.pinkId +
 							"&spread=" + this.uid;
 					}
 				},
@@ -231,36 +243,273 @@
 			'uid': 'uid'
 		}),
 		onLoad(options) {
-			var that = this;
-			that.pinkId = options.id;
-			if (that.isLogin == false) {
+      // 未登录，需要先去登录
+			this.pinkId = options.id;
+			if (!this.isLogin) {
 				toLogin();
-			} else {
-				this.timestamp = (new Date()).getTime();
-				this.getCombinationPink();
 			}
+
+      // TODO 芋艿：这里调用下加载 userinfo 信息，目前先写死；
+      this.userInfo = {
+        nickname: '芋艿'
+      }
+
+      // 加载拼团信息
+      this.getCombinationPink();
 		},
-		onShow() {},
+    // TODO 芋艿：还没搞好
 		mounted: function() {
 			this.combinationMore();
 		},
-		// link: window.location.protocol + '//' + window.location.host +
-		// 	'/pages/activity/goods_combination_status/index?id=' + that.pinkId + "&spread=" + this.uid,
 		//#ifdef MP
 		/**
 		 * 用户点击右上角分享
 		 */
 		onShareAppMessage: function() {
-			let that = this;
 			return {
-				title: '您的好友' + that.userInfo.nickname + '邀请您参团' + that.storeCombination.title,
+				title: '您的好友' + this.userInfo.nickname + '邀请您参团' + this.activity.name,
 				path: app.globalData.openPages,
-				imageUrl: that.storeCombination.image
+				imageUrl: this.pinkT.picUrl
 			};
 		},
 		//#endif
 		methods: {
-			// 分享关闭
+      /**
+       * 获得拼团记录
+       */
+      getCombinationPink: function() {
+        CombinationApi.getCombinationRecordDetail(this.pinkId).then(res => {
+          // 记录
+          this.$set(this, 'pinkT', res.data.headRecord);
+          this.$set(this, 'pinkAll', res.data.memberRecords);
+          // 状态相关的字段
+          this.$set(this, 'count', res.data.headRecord.userSize - res.data.headRecord.userCount);
+          this.$set(this, 'userBool', res.data.orderId > 0 ? 1 : 0);
+          this.$set(this, 'status', res.data.headRecord.status);
+          this.$set(this, 'currentPinkOrder', res.data.orderId);
+
+          // 加载拼团活动
+          CombinationApi.getCombinationActivity(res.data.headRecord.activityId).then(res => {
+            this.activity = res.data;
+
+            // 获得商品详情
+            this.getGoodsDetails();
+          })
+        }).catch(err => {
+          this.$util.Tips({
+            title: err
+          }, {
+            url: '/pages/index/index'
+          });
+        });
+      },
+      /**
+       * 前往订单
+       */
+      goOrder: function() {
+        uni.navigateTo({
+          url: '/pages/order_details/index?order_id=' + this.currentPinkOrder
+        });
+      },
+      /**
+       * 查看更多 / 收齐
+       */
+      lookAll: function() {
+        this.iShidden = !this.iShidden;
+      },
+
+      // ========== 商品详情相关 ==========
+      /**
+       * 获取产品详情
+       */
+      getGoodsDetails: function() {
+        ProductSpuApi.getSpuDetail(this.activity.spuId).then(res => {
+          let spu = res.data;
+          let skus = res.data.skus;
+          this.$set(this, 'spu', spu);
+          this.$set(this.attr, 'properties', ProductUtil.convertProductPropertyList(skus));
+          this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
+          // 将拼团活动的信息，合并到 SKU 里面，实现拼团价格的显示
+          this.activity.products.forEach(product => {
+            this.spu.price = Math.min(this.spu.price, product.combinationPrice); // 设置 SPU 的最低价格
+          });
+          skus.forEach(sku => {
+            const product = this.activity.products.find(product => product.skuId === sku.id);
+            if (product) {
+              sku.price = product.combinationPrice;
+              sku.quota = product.quota;
+              sku.limitCount = product.limitCount;
+            } else { // 找不到可能是没配置，则不能发起拼团
+              sku.quota = 0;
+              sku.limitCount = 0;
+            }
+          });
+
+          //#ifdef H5
+          this.getImageBase64(spu.picUrl);
+          this.make();
+          this.setOpenShare();
+          //#endif
+
+          // 选中默认 sku
+          this.selectDefaultSku();
+        }).catch(err => {
+          return this.$util.Tips({
+            title: err.toString()
+          }, {
+            tab: 3,
+            url: 1
+          });
+        })
+      },
+      /**
+       * 默认选中属性
+       */
+      selectDefaultSku: function() {
+        const properties = this.attr.properties;
+        // 获得选中的属性值的名字，例如说 "黑色,大"，则 skuKey = ["黑色", "大"]
+        let skuKey = undefined;
+        for (let key in this.skuMap) {
+          if (this.skuMap[key].stock > 0) {
+            skuKey = key.split(",");
+            break;
+          }
+        }
+        if (!skuKey) { // 如果找不到，则选中第一个
+          skuKey = Object.keys(this.skuMap)[0].split(",");
+        }
+        // 使用 index 属性表示当前选中的，值为属性值的名字
+        for (let i = 0; i < properties.length; i++) {
+          this.$set(properties[i], "index", skuKey[i]);
+        }
+
+        let sku = this.skuMap[skuKey.join(",")];
+        if (!sku) {
+          return
+        }
+        this.$set(this.attr.productSelect, "spuName", this.spu.name);
+        this.$set(this.attr.productSelect, "id", sku.id);
+        this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
+        this.$set(this.attr.productSelect, "price", sku.price);
+        this.$set(this.attr.productSelect, "stock", sku.stock);
+        this.$set(this.attr.productSelect, "cart_num", 1);
+        // 拼团活动特有字段
+        this.$set(this.attr.productSelect, "quota", sku.quota);
+        this.$set(this.attr.productSelect, "limitCount", sku.limitCount);
+        this.$set(this, "attrValue", skuKey.join(","));
+      },
+      /**
+       * 打开 SKU 属性的选择
+       */
+      openAttr: function() {
+        this.$set(this.attr, 'cartAttr', true);
+      },
+      /**
+       * 关闭 productWindow 弹窗
+       */
+      closeAttr: function() {
+        this.$set(this.attr, 'cartAttr', false);
+      },
+      /**
+       * 属性变动赋值
+       *
+       * @param newSkuKey 新的 skuKey
+       * @param propertyIndex properties 的下标
+       * @param valueIndex values 的下标
+       */
+      ChangeAttr: function(newSkuKey, propertyIndex, valueIndex) {
+        // SKU
+        let sku = this.skuMap[newSkuKey];
+        if (!sku) {
+          return;
+        }
+        this.$set(this.attr.productSelect, "id", sku.id);
+        this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
+        this.$set(this.attr.productSelect, "price", sku.price);
+        this.$set(this.attr.productSelect, "stock", sku.stock);
+        this.$set(this.attr.productSelect, "quota", sku.quota);
+        this.$set(this.attr.productSelect, "limitCount", sku.limitCount);
+        this.$set(this.attr.productSelect, "cart_num", 1);
+        // SKU 关联属性
+        this.$set(this.attr.properties[propertyIndex], 'index',
+          this.attr.properties[propertyIndex].values[valueIndex].name);
+        this.$set(this, "attrValue", newSkuKey);
+      },
+      /**
+       * 购物车数量加和数量减
+       *
+       * @param changeValue true 增加；false 减少
+       */
+      ChangeCartNum: function(changeValue) {
+        // 获取当前 sku
+        let sku = this.attr.productSelect;
+        if (!sku) {
+          return;
+        }
+
+        // 设置数量
+        let stock = sku.stock || 0;
+        let quota = sku.quota || 0;
+        let limitCount = sku.limitCount;
+        if (changeValue) {
+          sku.cart_num++;
+          if (limitCount !== undefined && sku.cart_num > limitCount) {
+            this.$set(this.attr.productSelect, "cart_num", limitCount);
+            this.$util.Tips({
+              title: `该商品每次限购 ${sku.limitCount} ${this.spu.unitName}`
+            });
+          } else if (sku.cart_num > stock || sku.cart_num > quota) {
+            this.$set(this.attr.productSelect, "cart_num", Math.min(stock, quota));
+          }
+        } else {
+          sku.cart_num--;
+          if (sku.cart_num < 1) {
+            this.$set(this.attr.productSelect, "cart_num", 1);
+          }
+        }
+      },
+      /**
+       * 购物车手动填写
+       *
+       * @param number 数量
+       */
+      iptCartNum: function(number) {
+        this.$set(this.attr.productSelect, 'cart_num', number ? number : 1);
+        // 判断是否超限购
+        let sku = this.attr.productSelect;
+        let limitCount = sku.limitCount;
+        if (limitCount !== undefined && number > limitCount) {
+          this.$set(this.attr.productSelect, "cart_num", limitCount);
+          this.$util.Tips({
+            title: `该商品每次限购 ${sku.limitCount} ${this.spu.unitName}`
+          });
+        }
+      },
+      /**
+       * 下订单
+       */
+      goPay() {
+        let sku = this.attr.productSelect;
+        uni.navigateTo({
+          url: '/pages/users/order_confirm/index?skuId=' + sku.id + '&count=' + sku.cart_num
+            + '&combinationActivityId=' + this.activity.id
+            + '&combinationHeadId=' + this.pinkId
+        });
+      },
+      /**
+       * 拼团详情
+       */
+      goDetail: function(id) {
+        this.pinkId = id;
+        uni.navigateTo({
+          url: '/pages/activity/goods_combination_details/index?id=' + id
+        });
+      },
+
+      // TODO 芋艿：
+
+
+      // 分享关闭
 			listenerActionClose: function() {
 				this.posters = false;
 				this.canvasStatus = false;
@@ -293,388 +542,156 @@
 						});
 					});
 			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e;
-			},
-			// 授权后回调
-			onLoadFun: function(e) {
-				this.userInfo = e;
-				app.globalData.openPages = '/pages/activity/goods_combination_status/index?id=' + this.pinkId;
-				this.getCombinationPink();
-			},
-			/**
-			 * 购物车手动填写
-			 *
-			 */
-			iptCartNum: function(e) {
-				if (e > this.onceNum) {
-					this.$util.Tips({
-						title: `该商品每次限购${this.onceNum}${this.storeCombination.unitName}`
-					});
-					this.$set(this.attr.productSelect, 'cart_num', this.onceNum);
-					this.$set(this, "cart_num", this.onceNum);
-				} else {
-					this.$set(this.attr.productSelect, 'cart_num', e);
-					this.$set(this, "cart_num", e);
-				}
-			},
-			attrVal(val) {
-				this.attr.productAttr[val.indexw].index = this.attr.productAttr[val.indexw].attrValues[val.indexn];
-			},
-			onMyEvent: function() {
-				this.$set(this.attr, 'cartAttr', false);
-				this.$set(this, 'isOpen', false);
-			},
-			//将父级向子集多次传送的函数合二为一；
-			// changeFun: function(opt) {
-			// 	if (typeof opt !== "object") opt = {};
-			// 	let action = opt.action || "";
-			// 	let value = opt.value === undefined ? "" : opt.value;
-			// 	this[action] && this[action](value);
-			// },
-			// changeattr: function(res) {
-			// 	var that = this;
-			// 	that.attr.cartAttr = res;
-			// },
-			//选择属性；
-			ChangeAttr: function(res) {
-				this.$set(this, 'cart_num', 1);
-				let productSelect = this.productValue[res];
-				if (productSelect) {
-					this.$set(this.attr.productSelect, 'image', productSelect.image);
-					this.$set(this.attr.productSelect, 'price', productSelect.price);
-					this.$set(this.attr.productSelect, 'quota', productSelect.quota);
-					this.$set(this.attr.productSelect, 'unique', productSelect.id);
-					this.$set(this.attr.productSelect, 'cart_num', 1);
-					this.$set(this.attr.productSelect, 'stock', productSelect.stock);
-					this.$set(this.attr.productSelect, 'quotaShow', productSelect.quotaShow);
-					this.attrValue = res;
-					this.attrTxt = '已选择';
-				} else {
-					this.$set(this.attr.productSelect, 'image', this.storeCombination.image);
-					this.$set(this.attr.productSelect, 'price', this.storeCombination.price);
-					this.$set(this.attr.productSelect, 'quota', 0);
-					this.$set(this.attr.productSelect, 'unique', '');
-					this.$set(this.attr.productSelect, 'cart_num', 0);
-					this.$set(this.attr.productSelect, 'quotaShow', 0);
-					this.$set(this.attr.productSelect, 'stock', 0);
-					this.attrValue = '';
-					this.attrTxt = '请选择';
-				}
-			},
-			ChangeCartNum: function(res) {
-				//changeValue:是否 加|减
-				//获取当前变动属性
-				let productSelect = this.productValue[this.attrValue];
-				if (this.cart_num) {
-					productSelect.cart_num = this.cart_num;
-					this.attr.productSelect.cart_num = this.cart_num;
-				}
-				//如果没有属性,赋值给商品默认库存
-				if (productSelect === undefined && !this.attr.productAttr.length) productSelect = this.attr
-					.productSelect;
-				if (productSelect === undefined) return;
-				let stock = productSelect.stock || 0;
-				let quotaShow = productSelect.quotaShow || 0;
-				let quota = productSelect.quota || 0;
-				let num = this.attr.productSelect;
-				let nums = this.storeCombination.num || 0;
-				//设置默认数据
-				if (productSelect.cart_num == undefined) productSelect.cart_num = 1;
-				if (res) {
-					num.cart_num++;
-					let arrMin = [];
-					arrMin.push(nums);
-					arrMin.push(quota);
-					arrMin.push(stock);
-					let minN = Math.min.apply(null, arrMin);
-					if (num.cart_num >= minN) {
-						this.$set(this.attr.productSelect, 'cart_num', minN ? minN : 1);
-						this.$set(this, 'cart_num', minN ? minN : 1);
-					}
-					this.$set(this, 'cart_num', num.cart_num);
-					this.$set(this.attr.productSelect, 'cart_num', num.cart_num);
-				} else {
-					num.cart_num--;
-					if (num.cart_num < 1) {
-						this.$set(this.attr.productSelect, 'cart_num', 1);
-						this.$set(this, 'cart_num', 1);
-					}
-					this.$set(this, 'cart_num', num.cart_num);
-					this.$set(this.attr.productSelect, 'cart_num', num.cart_num);
-				}
-			},
-			//默认选中属性；
-			DefaultSelect() {
-				let productAttr = this.attr.productAttr,
-					value = [];
-				for (var key in this.productValue) {
-					if (this.productValue[key].quota > 0) {
-						value = this.attr.productAttr.length ? key.split(',') : [];
-						break;
-					}
-				}
-				for (let i = 0; i < productAttr.length; i++) {
-					this.$set(productAttr[i], 'index', value[i]);
-				}
-				//sort();排序函数:数字-英文-汉字；
-				let productSelect = this.productValue[value.join(',')];
-				if (productSelect && productAttr.length) {
-					this.$set(this.attr.productSelect, 'storeName', this.storeCombination.title);
-					this.$set(this.attr.productSelect, 'image', productSelect.image);
-					this.$set(this.attr.productSelect, 'price', productSelect.price);
-					this.$set(this.attr.productSelect, 'quota', productSelect.quota);
-					this.$set(this.attr.productSelect, 'unique', productSelect.id);
-					this.$set(this.attr.productSelect, 'cart_num', 1);
-					this.$set(this.attr.productSelect, 'stock', productSelect.stock);
-					this.$set(this.attr.productSelect, 'quotaShow', productSelect.quotaShow);
-					//this.$set(this, 'attrValue', value.join(','));
-					this.attrValue = value.join(',');
-					this.attrTxt = '已选择';
-					//this.$set(this, 'attrTxt', '已选择');
-				} else if (!productSelect && productAttr.length) {
-					this.$set(this.attr.productSelect, 'storeName', this.storeCombination.title);
-					this.$set(this.attr.productSelect, 'image', this.storeCombination.image);
-					this.$set(this.attr.productSelect, 'price', this.storeCombination.price);
-					this.$set(this.attr.productSelect, 'quota', 0);
-					this.$set(this.attr.productSelect, 'unique', '');
-					this.$set(this.attr.productSelect, 'cart_num', 0);
-					this.$set(this.attr.productSelect, 'stock', 0);
-					this.$set(this.attr.productSelect, 'quotaShow', 0);
-					//this.$set(this, 'attrValue', '');
-					this.attrValue = '';
-					this.attrTxt = '请选择';
-					//	this.$set(this, 'attrTxt', '请选择');
-				} else if (!productSelect && !productAttr.length) {
-					this.$set(this.attr.productSelect, 'storeName', this.storeCombination.title);
-					this.$set(this.attr.productSelect, 'image', this.storeCombination.image);
-					this.$set(this.attr.productSelect, 'price', this.storeCombination.price);
-					this.$set(this.attr.productSelect, 'quota', 0);
-					this.$set(this.attr.productSelect, 'unique', this.storeCombination.id || '');
-					this.$set(this.attr.productSelect, 'cart_num', 1);
-					this.$set(this.attr.productSelect, 'quotaShow', 0);
-					this.$set(this.attr.productSelect, 'stock', 0);
-					//this.$set(this, 'attrValue', '');
-					this.attrValue = '';
-					this.attrTxt = '请选择';
-					//this.$set(this, 'attrTxt', '请选择');
-				}
-			},
-			setProductSelect: function() {
-				var that = this;
-				var attr = that.attr;
-				attr.productSelect.image = that.storeCombination.image;
-				attr.productSelect.storeName = that.storeCombination.title;
-				attr.productSelect.price = that.storeCombination.price;
-				attr.productSelect.quota = 0;
-				attr.productSelect.quotaShow = 0;
-				attr.productSelect.stock = 0;
-				attr.cartAttr = false;
-				that.$set(that, 'attr', attr);
-			},
-			pay: function() {
-				var that = this;
-				that.attr.cartAttr = true;
-				that.isOpen = true;
-			},
-			goPay() {
-				this.$Order.getPreOrder("buyNow", [{
-					"attrValueId": parseFloat(this.attr.productSelect.unique),
-					"combinationId": parseFloat(this.storeCombination.id),
-					"productNum": parseFloat(this.attr.productSelect.cart_num),
-					"productId": parseFloat(this.storeCombination.productId),
-					"pinkId": parseFloat(this.pinkId)
-				}]);
-			},
-			goPoster: function() {
-				//#ifdef H5
-				if (this.$wechat.isWeixin()) {
-					this.H5ShareBox = true;
-				} else {
-					uni.showLoading({
-						title: '海报生成中',
-						mask: true
-					});
-					this.posters = false;
-					let arrImagesUrl = '';
-					let arrImagesUrlTop = '';
-					if (!this.PromotionCode) {
-						uni.hideLoading();
-						this.$util.Tips({
-							title: this.errT
-						});
-						return
-					}
-					setTimeout(() => {
-						if (!this.imgTop) {
-							uni.hideLoading();
-							this.$util.Tips({
-								title: '无法生成商品海报！'
-							});
-							return
-						}
-					}, 1000);
-					uni.downloadFile({
-						url: this.imgTop,
-						success: (res) => {
-							arrImagesUrlTop = res.tempFilePath;
-							let arrImages = [this.posterbackgd, arrImagesUrlTop, this.PromotionCode];
-							setTimeout(() => {
-								this.$util.activityCanvas(arrImages, this.storeCombination.title,
-									this.storeCombination.price, this.storeCombination.people +
-									'人团', '还差' + this.count + '人拼团成功', 9,
-									(tempFilePath) => {
-										this.imagePath = tempFilePath;
-										this.canvasStatus = true;
-										uni.hideLoading();
-									});
-							}, 500);
-						}
-					});
-				}
-				//#endif
-			},
-			goOrder: function() {
-				var that = this;
-				uni.navigateTo({
-					url: '/pages/order_details/index?order_id=' + that.currentPinkOrder
-				});
-			},
-			//拼团列表
+
+			// 拼团列表
 			goList: function() {
 				uni.navigateTo({
 					url: '/pages/activity/goods_combination/index'
 				});
 			},
-			//拼团详情
-			goDetail: function(id) {
-				this.pinkId = id;
-				uni.navigateTo({
-					url: '/pages/activity/goods_combination_details/index?id=' + id
-				});
-			},
-			// 商品图片转base64
-			getImageBase64: function(images) {
-				let that = this;
-				imageBase64({
-					url: images
-				}).then(res => {
-					that.imgTop = res.data.code;
-				})
-			},
-			// 生成二维码；
-			make() {
-				let href = location.protocol + '//' + location.host +
-					'/pages/activity/goods_combination_status/index?id=' + this.pinkId + "&spread=" + this.uid;
-				uQRCode.make({
-					canvasId: 'qrcode',
-					text: href,
-					size: this.qrcodeSize,
-					margin: 10,
-					success: res => {
-						this.PromotionCode = res;
-					},
-					complete: () => {},
-					fail: res => {
-						this.$util.Tips({
-							title: '海报二维码生成失败！'
-						});
-					}
-				})
-			},
-			//拼团信息
-			getCombinationPink: function() {
-				var that = this;
-				getCombinationPink(that.pinkId)
-					.then(res => {
-						let storeCombination = res.data.storeCombination;
-						res.data.pinkT.stop_time = parseInt(res.data.pinkT.stopTime);
-						that.$set(that, 'storeCombination', storeCombination);
-						that.$set(that.attr.productSelect, 'num', storeCombination.totalNum);
-						that.$set(that, 'pinkT', res.data.pinkT);
-						that.$set(that, 'pinkAll', res.data.pinkAll);
-						that.$set(that, 'count', res.data.count);
-						that.$set(that, 'userBool', res.data.userBool);
-						that.$set(that, 'pinkBool', res.data.pinkBool);
-						that.$set(that, 'isOk', res.data.isOk);
-						that.$set(that, 'currentPinkOrder', res.data.currentPinkOrder);
-						that.$set(that, 'userInfo', res.data.userInfo);
-						that.onceNum = storeCombination.onceNum;
-						that.attr.productAttr = storeCombination.productAttr;
-						that.productValue = storeCombination.productValue;
-						//#ifdef H5
-						this.getImageBase64(storeCombination.image);
-						that.make();
 
-						that.setOpenShare();
-						//#endif
-						that.setProductSelect();
-						if (that.attr.productAttr != 0) that.DefaultSelect();
+      // 拼团取消
+      getCombinationRemove: function() {
+        var that = this;
+        postCombinationRemove({
+          id: that.pinkId
+        }).then(res => {
+          that.$util.Tips({
+            title: res.msg
+          }, {
+            tab: 3
+          });
+        }).catch(res => {
+          that.$util.Tips({
+            title: res
+          });
+        });
+      },
 
-					})
-					.catch(err => {
-						if (that.isLogin) {
-							that.$util.Tips({
-								title: err
-							}, {
-								url: '/pages/index/index'
-							});
-						}
-					});
-			},
-			//#ifdef H5
-			setOpenShare() {
-				let that = this;
-				let configTimeline = {
-					title: '您的好友' + that.userInfo.nickname + '邀请您参团' + that.storeCombination.title,
-					desc: that.storeCombination.title,
-					link: window.location.protocol + '//' + window.location.host +
-						'/pages/activity/goods_combination_status/index?id=' + that.pinkId + "&spread=" + this.uid,
-					imgUrl: that.storeCombination.image
-				};
-				if (this.$wechat.isWeixin()) {
-					this.$wechat
-						.wechatEvevt(['updateAppMessageShareData', 'updateTimelineShareData', 'onMenuShareAppMessage',
-							'onMenuShareTimeline'
-						], configTimeline)
-						.then(res => {
-							console.log(res);
-						})
-						.catch(res => {
-							if (res.is_ready) {
-								res.wx.updateAppMessageShareData(configTimeline);
-								res.wx.updateTimelineShareData(configTimeline);
-								res.wx.onMenuShareAppMessage(configTimeline);
-								res.wx.onMenuShareTimeline(configTimeline);
-							}
-						});
-				}
-			},
-			//#endif
-			//拼团取消
-			getCombinationRemove: function() {
-				var that = this;
-				postCombinationRemove({
-						id: that.pinkId,
-						cid: that.storeCombination.id
-					})
-					.then(res => {
-						that.$util.Tips({
-							title: res.msg
-						}, {
-							tab: 3
-						});
-					})
-					.catch(res => {
-						that.$util.Tips({
-							title: res
-						});
-					});
-			},
-			lookAll: function() {
-				this.iShidden = !this.iShidden;
-			}
+      // ========== 分销相关的方法 ==========
+      /**
+       * 生成二维码，设置到 promotionCode 变量
+       */
+      make() {
+        let href = location.protocol + '//' + location.host +
+          '/pages/activity/goods_combination_status/index?id=' + this.pinkId + "&spread=" + this.uid;
+        uQRCode.make({
+          canvasId: 'qrcode',
+          text: href,
+          size: this.qrcodeSize,
+          margin: 10,
+          success: res => {
+            this.promotionCode = res;
+          },
+          fail: res => {
+            this.$util.Tips({
+              title: '海报二维码生成失败！'
+            });
+          }
+        })
+      },
+      //#ifdef H5
+      /**
+       * 设置微信公众号的分享标题、内容等信息
+       */
+      setOpenShare() {
+        // 只处理微信环境
+        if (!this.$wechat.isWeixin()) {
+          return
+        }
+        let configTimeline = {
+          title: '您的好友' + this.userInfo.nickname + '邀请您参团' + this.spu.name,
+          desc: this.spu.name,
+          link: window.location.protocol + '//' + window.location.host +
+            '/pages/activity/goods_combination_status/index?id=' + this.pinkId + "&spread=" + this.uid,
+          imgUrl: this.spu.picUrl
+        };
+        this.$wechat.wechatEvevt([
+          'updateAppMessageShareData',
+          'updateTimelineShareData',
+          'onMenuShareAppMessage',
+          'onMenuShareTimeline'], configTimeline)
+          .then(res => {
+            console.log(res);
+          }).catch(res => {
+            if (res.is_ready) {
+              res.wx.updateAppMessageShareData(configTimeline);
+              res.wx.updateTimelineShareData(configTimeline);
+              res.wx.onMenuShareAppMessage(configTimeline);
+              res.wx.onMenuShareTimeline(configTimeline);
+            }
+          });
+      },
+      //#endif
+      /**
+       * 获得商品的封面 base64
+       */
+      getImageBase64: function(images) {
+        imageBase64({
+          url: images
+        }).then(res => {
+          this.imgTop = res.data.code;
+        })
+      },
+      /**
+       * 生成海报
+       */
+      goPoster: function() {
+        //#ifdef H5
+        if (this.$wechat.isWeixin()) {
+          this.H5ShareBox = true;
+          return
+        }
+        // 提示正在生成中
+        uni.showLoading({
+          title: '海报生成中',
+          mask: true
+        });
+        this.posters = false;
+        // 如果没有二维码图片，则说明加载失败，进行错误提示
+        if (!this.promotionCode) {
+          uni.hideLoading();
+          this.$util.Tips({
+            title: this.errT
+          });
+          return
+        }
+        // 校验海报是否已经生成；如果失败，则进行错误提示
+        setTimeout(() => {
+          if (!this.imgTop) {
+            uni.hideLoading();
+            this.$util.Tips({
+              title: '无法生成商品海报！'
+            });
+          }
+        }, 1000);
+
+        // 展示海报
+        let arrImagesUrlTop = '';
+        uni.downloadFile({
+          url: this.imgTop,
+          success: (res) => {
+            arrImagesUrlTop = res.tempFilePath;
+            let arrImages = [this.posterbackgd, arrImagesUrlTop, this.promotionCode];
+            const price = this.fen2yuan(this.pinkT.combinationPrice);
+            setTimeout(() => {
+              this.$util.activityCanvas(arrImages, this.spu.name,
+                price, this.pinkT.userSize +
+                '人团', '还差' + this.count + '人拼团成功', 9,
+                (tempFilePath) => {
+                  this.imagePath = tempFilePath;
+                  this.canvasStatus = true;
+                  uni.hideLoading();
+                });
+            }, 500);
+          }
+        });
+        //#endif
+      },
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		}
 	};
 </script>
@@ -710,21 +727,21 @@
 		z-index: 999;
 		top: 50%;
 		margin-top: -466rpx;
-	
+
 		image {
 			width: 100%;
 			height: 100%;
 			display: block;
 			border-radius: 10rpx;
 		}
-	
+
 		.close {
 			text-align: center;
 			margin-top: 55rpx;
 			color: #fff;
 			font-size: 52rpx;
 		}
-	
+
 		.save-poster {
 			background-color: #df2d0a;
 			font-size: ：22rpx;
@@ -734,7 +751,7 @@
 			line-height: 76rpx;
 			width: 100%;
 		}
-	
+
 		.keep {
 			color: #fff;
 			text-align: center;
@@ -742,7 +759,7 @@
 			margin-top: 25rpx;
 		}
 	}
-	
+
 	/*开团*/
 	.group-con .header {
 		width: 100%;
