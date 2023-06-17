@@ -1,5 +1,5 @@
 <template>
-	<view :class="{borderShow:isBorader}">
+	<view :class="{borderShow: false}">
 		<view class="combination" v-if="combinationList.length">
 			<view class="title acea-row row-between">
 				<view class="spike-bd">
@@ -11,11 +11,13 @@
 								<i>···</i>
 							</span>
 						</view>
-						<text class="pic_count">{{assistUserCount}}人参与</text>
+						<text class="pic_count">{{ assistUserCount }}人参与</text>
 					</view>
 				</view>
 				<navigator url="/pages/activity/goods_combination/index" hover-class="none"
-					class="more acea-row row-center-wrapper">GO<text class="iconfont icon-xiangyou"></text></navigator>
+					class="more acea-row row-center-wrapper">
+          GO<text class="iconfont icon-xiangyou"></text>
+        </navigator>
 			</view>
 			<view class="conter acea-row">
 				<scroll-view scroll-x="true" style="white-space: nowrap; vertical-align: middle;"
@@ -23,68 +25,63 @@
 					<view class="itemCon" v-for="(item, index) in combinationList" :key="index" @click="goDetail(item)">
 						<view class="item">
 							<view class="pictrue">
-								<image :src="item.image"></image>
+								<image :src="item.picUrl" />
 							</view>
 							<view class="text lines1">
-								<view class="name line1">{{item.title}}</view>
-								<view class="money">¥<text class="num">{{item.price}}</text></view>
-								<view class="y_money">¥{{item.otPrice}}</view>
+								<view class="name line1">{{ item.name }}</view>
+								<view class="money">¥<text class="num">{{ fen2yuan(item.combinationPrice) }}</text></view>
+								<view class="y_money">¥{{ fen2yuan(item.marketPrice) }}</view>
 							</view>
 						</view>
 					</view>
-					<!-- <navigator :url="`/pages/activity/goods_combination_details/index?id=${item.id}`" hover-class="none" class="item" v-for="(item, index) in combinationList" :key="index">
-						<view class="pictrue">
-							<image :src="item.image"></image>
-						</view>
-						<view class="text lines1">
-							<text class="money">¥<text class="num">{{item.price}}</text></text>
-							<text class="y_money">¥{{item.otPrice}}</text>
-						</view>
-					</navigator> -->
 				</scroll-view>
 			</view>
 		</view>
 	</view>
 </template>
-
 <script>
-	let app = getApp();
-	import {
-		getCombinationIndexApi
-	} from '@/api/activity.js';
-	export default {
+  let app = getApp();
+  import * as CombinationApi from '@/api/promotion/combination.js';
+  import * as Util from '@/utils/util.js';
+  export default {
 		name: 'b_combination',
 		data() {
 			return {
-				combinationList: [],
-				isBorader: false,
-				assistUserList: [],
-				assistUserCount: 0
+				combinationList: [], // 拼团列表（由团长发起的）
+				assistUserList: [], // 拼团用户头像列表
+				assistUserCount: 0 // 拼团用户数量
 			};
 		},
 		created() {
-			this.getCombinationList();
+      // 获得拼团列表
+      CombinationApi.getCombinationActivityList(6).then((res) => {
+        this.combinationList = res.data;
+      }).catch((res) => {
+        return this.$util.Tips({
+          title: res
+        });
+      })
+
+      // 获得拼团概要
+      CombinationApi.getCombinationSummary().then((res) => {
+        this.assistUserList = res.data.avatars;
+        this.assistUserCount = res.data.userCount;
+      }).catch((res) => {
+        return this.$util.Tips({
+          title: res
+        });
+      })
 		},
-		mounted() {},
 		methods: {
-			// 拼团列表
-			getCombinationList: function() {
-				let that = this;
-				getCombinationIndexApi().then(function(res) {
-					that.combinationList = res.data.productList;
-					that.assistUserList = res.data.avatarList;
-					that.assistUserCount = res.data.totalPeople;
-				}).catch((res) => {
-					return that.$util.Tips({
-						title: res
-					});
-				})
-			},
 			goDetail(item) {
 				uni.navigateTo({
 					url: `/pages/activity/goods_combination_details/index?id=${item.id}`
 				})
-			}
+			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		}
 	}
 </script>

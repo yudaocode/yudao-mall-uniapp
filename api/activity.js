@@ -1,24 +1,16 @@
 import request from "@/utils/request.js";
 /**
- * 
+ *
  * 所有活动接口 包括：拼团，砍价，秒杀
- * 
+ *
 */
 
 /**
  * 拼团列表
- * 
+ *
 */
 export function getCombinationList(data) {
   return request.get('combination/list', data,{noAuth:true});
-}
-
-/**
- * 拼团详情
- * 
-*/
-export function getCombinationDetail(id) {
-  return request.get('combination/detail/'+id);
 }
 
 /**
@@ -36,13 +28,6 @@ export function postCombinationRemove(data) {
 }
 
 /**
- * 拼团 更多拼团
- */
-export function getCombinationMore(data) {
-  return request.get("combination/more",data,{noAuth:true});
-}
-
-/**
  * 砍价列表
  */
 export function getBargainList(data) {
@@ -50,7 +35,7 @@ export function getBargainList(data) {
 }
 
 /**
- * 
+ *
  * 砍价列表(已参与)
  * @param object data
 */
@@ -60,7 +45,7 @@ export function getBargainUserList(data){
 
 
 /**
- * 
+ *
  * 取消砍价
  * @param int bargainId
 */
@@ -105,7 +90,7 @@ export function postBargainHelpPrice(data) {
 }
 
 /**
- * 砍价 砍价帮 
+ * 砍价 砍价帮
  */
 export function postBargainHelpList(params,data) {
   return request.get("bargain/help/list?limit="+params.limit+"&page="+params.page, data,{});
@@ -113,7 +98,7 @@ export function postBargainHelpList(params,data) {
 
 /**
  * 秒杀产品时间区间
- * 
+ *
 */
 export function getSeckillIndexTime(){
   return request.get('seckill/index',{},{noAuth:true});
@@ -139,7 +124,7 @@ export function getSeckillDetail(id){
 /**
  * 砍价海报
  * @param object data
- * 
+ *
 */
 export function getBargainPoster(data){
   return request.post('bargain/poster',data)
@@ -148,7 +133,7 @@ export function getBargainPoster(data){
 /**
  * 拼团海报
  * @param object data
- * 
+ *
 */
 export function getCombinationPoster(data){
   return request.post('combination/poster',data)

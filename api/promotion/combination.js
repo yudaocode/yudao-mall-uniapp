@@ -1,5 +1,14 @@
 import request from "@/utils/request.js";
 
+// 获得拼团活动列表
+export function getCombinationActivityList(count) {
+  return request.get("app-api/promotion/combination-activity/list", {
+    count
+  }, {
+    noAuth: true // TODO 芋艿：后续要做调整
+  });
+}
+
 // 获得拼团活动分页
 export function getCombinationActivityPage(data) {
   return request.get("app-api/promotion/combination-activity/page", data, {
@@ -17,8 +26,9 @@ export function getCombinationActivity(id) {
 }
 
 // 获得最近 n 条拼团记录（团长发起的）
-export function getHeadCombinationRecordList(status, count) {
+export function getHeadCombinationRecordList(activityId, status, count) {
   return request.get("app-api/promotion/combination-record/get-head-list", {
+    activityId,
     status,
     count
   }, {

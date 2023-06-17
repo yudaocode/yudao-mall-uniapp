@@ -527,7 +527,7 @@
        * 更多拼团
        */
       combinationMore: function() {
-        CombinationApi.getHeadCombinationRecordList(1, 9).then(res => {
+        CombinationApi.getHeadCombinationRecordList(undefined, 1, 9).then(res => {
           this.storeCombinationHost = res.data;
         }).catch(res => {
           this.$util.Tips({

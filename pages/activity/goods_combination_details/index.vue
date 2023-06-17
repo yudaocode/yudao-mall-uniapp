@@ -473,10 +473,10 @@
             this.status = 0;
           }
           // 参团记录
-          CombinationApi.getHeadCombinationRecordList(1).then(res => {
+          CombinationApi.getHeadCombinationRecordList(this.id, 1).then(res => {
             this.runningRecords = res.data;
           })
-          CombinationApi.getHeadCombinationRecordList(2).then(res => {
+          CombinationApi.getHeadCombinationRecordList(this.id, 2).then(res => {
             this.successRecords = res.data;
           })
 
