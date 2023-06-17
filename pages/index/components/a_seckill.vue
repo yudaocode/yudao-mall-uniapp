@@ -9,34 +9,34 @@
 				<view class="lines"></view>
 				<view class="point">{{point}} 场</view>
 				<countDown :is-day="false" :tip-text="' '" :day-text="' '" :hour-text="' : '" :minute-text="' : '" :second-text="' '"
-				 :datatime="datatime" :is-col="true" :bgColor="bgColor"></countDown>
+				 :datatime="datatime" :is-col="true" :bgColor="bgColor" />
 			</view>
-			<navigator url="/pages/activity/goods_seckill/index" hover-class="none" class="more acea-row row-center-wrapper">GO<text class="iconfont icon-xiangyou"></text></navigator>
+			<navigator url="/pages/activity/goods_seckill/index" hover-class="none" class="more acea-row row-center-wrapper">
+        GO<text class="iconfont icon-xiangyou"></text>
+      </navigator>
 		</view>
 		<view class="conter">
 			<scroll-view scroll-x="true" style="white-space: nowrap; vertical-align: middle;" show-scrollbar="false">
 				<view class="itemCon" v-for="(item, index) in spikeList" :key="index" @click="goDetail(item)">
 					<view class="item">
 						<view class="pictrue">
-							<image :src="item.image"></image>
+							<image :src="item.picUrl"></image>
 						</view>
-						<view class="name line1">{{item.title}}</view>
-						<view class="x_money line1">¥<text class="num">{{item.price}}</text></view>
-						<view class="y_money line1">¥{{item.otPrice}}</view>
+						<view class="name line1">{{ item.name }}</view>
+						<view class="x_money line1">¥<text class="num">{{ fen2yuan(item.seckillPrice ) }}</text></view>
+						<view class="y_money line1">¥{{ fen2yuan(item.marketPrice) }}</view>
 					</view>
 				</view>
 			</scroll-view>
 		</view>
 	</view>
 </template>
-
 <script>
-	let app = getApp();
+  let app = getApp();
 	import countDown from "@/components/countDown";
-	import {
-		getSeckillIndexApi
-	} from '@/api/activity.js';
-	export default {
+  import * as SeckillApi from '@/api/promotion/seckill.js';
+  import * as Util from '@/utils/util.js';
+  export default {
 		name: 'a_seckill',
 		components: {
 			countDown
@@ -50,33 +50,39 @@
 					'timeTxtwidth': '16rpx',
 					'isDay': true
 				},
-				spikeList: [], // 秒杀
-				point: '',
-				datatime: 0,
-				status: 0
+				spikeList: [], // 秒杀活动数组
+				point: '', // 秒杀开始时间
+				datatime: 0 // 秒杀剩余结束时间
 			}
 		},
 		created() {
-			this.getSeckillIndexTime();
+      SeckillApi.getNowSeckillActivity().then(res => {
+        // 如果为空，说明没有活动
+        const config = res.data.config;
+        if (!config) {
+          return;
+        }
+        this.spikeList = res.data.activities;
+        this.point = config.startTime;
+        // 计算结束时间
+        const now = new Date();
+        this.datatime = new Date(now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate()
+          + ' ' + config.endTime).getTime() / 1000;
+      })
 		},
 		methods: {
-			getSeckillIndexTime() {
-				getSeckillIndexApi().then(({data}) => {
-					this.spikeList = data ? data.productList : [];
-					this.point = data ? data.secKillResponse.time.split(',')[0] : '';
-					this.datatime = data ? parseFloat(data.secKillResponse.timeSwap) : '';
-					this.status =  data ? data.secKillResponse.status : 0;
-				})
-			},
 			goDetail(item){
 				uni.navigateTo({
 					url: '/pages/activity/goods_seckill_details/index?id=' + item.id
 				})
-			}
+			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		}
 	}
 </script>
-
 <style lang="scss" scoped>
 	.default{
 		width: 690rpx;
@@ -187,7 +193,7 @@
 						color: #999999;
 						text-decoration: line-through;
 					}
-					
+
 					.x_money {
 						color: #FD502F;
 						font-size: 28rpx;
