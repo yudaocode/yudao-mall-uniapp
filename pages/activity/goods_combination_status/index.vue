@@ -111,7 +111,6 @@
     <!--  SKU 选择 -->
 		<product-window
       :attr="attr"
-      :limitNum="1"
       :iSbnt="1"
       @ChangeAttr="ChangeAttr"
 			@ChangeCartNum="ChangeCartNum"
@@ -346,11 +345,16 @@
             const product = this.activity.products.find(product => product.skuId === sku.id);
             if (product) {
               sku.price = product.combinationPrice;
-              sku.quota = product.quota;
-              sku.limitCount = product.limitCount;
             } else { // 找不到可能是没配置，则不能发起拼团
-              sku.quota = 0;
-              sku.limitCount = 0;
+              sku.stock = 0;
+            }
+            // 设置限购数量
+            if (this.activity.totalLimitCount > 0 && this.activity.singleLimitCount > 0) {
+              sku.limitCount = Math.min(this.activity.totalLimitCount, this.activity.singleLimitCount);
+            } else if (this.activity.totalLimitCount > 0) {
+              sku.limitCount = this.activity.totalLimitCount;
+            } else if (this.activity.singleLimitCount > 0) {
+              sku.limitCount = this.activity.singleLimitCount;
             }
           });
 
@@ -402,9 +406,7 @@
         this.$set(this.attr.productSelect, "price", sku.price);
         this.$set(this.attr.productSelect, "stock", sku.stock);
         this.$set(this.attr.productSelect, "cart_num", 1);
-        // 拼团活动特有字段
-        this.$set(this.attr.productSelect, "quota", sku.quota);
-        this.$set(this.attr.productSelect, "limitCount", sku.limitCount);
+        this.$set(this.attr.productSelect, "limitCount", sku.limitCount); // 拼团活动特有字段
         this.$set(this, "attrValue", skuKey.join(","));
       },
       /**
@@ -436,7 +438,6 @@
         this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
         this.$set(this.attr.productSelect, "price", sku.price);
         this.$set(this.attr.productSelect, "stock", sku.stock);
-        this.$set(this.attr.productSelect, "quota", sku.quota);
         this.$set(this.attr.productSelect, "limitCount", sku.limitCount);
         this.$set(this.attr.productSelect, "cart_num", 1);
         // SKU 关联属性
@@ -458,17 +459,16 @@
 
         // 设置数量
         let stock = sku.stock || 0;
-        let quota = sku.quota || 0;
         let limitCount = sku.limitCount;
         if (changeValue) {
           sku.cart_num++;
-          if (limitCount !== undefined && sku.cart_num > limitCount) {
+          if (limitCount > 0 && sku.cart_num > limitCount) {
             this.$set(this.attr.productSelect, "cart_num", limitCount);
             this.$util.Tips({
               title: `该商品每次限购 ${sku.limitCount} ${this.spu.unitName}`
             });
-          } else if (sku.cart_num > stock || sku.cart_num > quota) {
-            this.$set(this.attr.productSelect, "cart_num", Math.min(stock, quota));
+          } else if (sku.cart_num > stock) {
+            this.$set(this.attr.productSelect, "cart_num", stock);
           }
         } else {
           sku.cart_num--;
@@ -487,7 +487,7 @@
         // 判断是否超限购
         let sku = this.attr.productSelect;
         let limitCount = sku.limitCount;
-        if (limitCount !== undefined && number > limitCount) {
+        if (limitCount > 0 && number > limitCount) {
           this.$set(this.attr.productSelect, "cart_num", limitCount);
           this.$util.Tips({
             title: `该商品每次限购 ${sku.limitCount} ${this.spu.unitName}`

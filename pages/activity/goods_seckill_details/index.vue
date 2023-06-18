@@ -44,7 +44,7 @@
 							</view>
 							<view class='label acea-row row-middle'>
 								<view class='stock'>累计销售：{{ spu.salesCount}} {{ spu.unitName }}</view>
-								<view>限量: {{ activity.quota ? activity.quota : 0 }} {{ spu.unitName }}</view>
+								<view>限量: {{ activity.stock || 0 }} {{ spu.unitName }}</view>
 							</view>
 						</view>
             <!-- SKU 选择 -->
@@ -108,11 +108,11 @@
           <view class="joinCart bnts" @tap="openAlone">单独购买</view>
           <view class="buy bnts bg-color-hui">未开始</view>
         </view>
-        <view class="bnt acea-row" v-else-if="status === 2 && attr.productSelect.quota > 0">
+        <view class="bnt acea-row" v-else-if="status === 2 && attr.productSelect.stock > 0">
           <view class="joinCart bnts" @tap="openAlone">单独购买</view>
           <view class="buy bnts" @tap="goBuy">立即购买</view>
         </view>
-        <view class="bnt acea-row" v-else-if="status === 2 && (attr.productSelect.quota <= 0)">
+        <view class="bnt acea-row" v-else-if="status === 2 && (attr.productSelect.stock <= 0)">
           <view class="joinCart bnts" @tap="openAlone">单独购买</view>
           <view class="buy bnts bg-color-hui">已售罄</view>
         </view>
@@ -129,7 +129,6 @@
     <!-- SKU 弹窗 -->
     <product-window
       :attr='attr'
-      :limitNum='1'
       @ChangeAttr="ChangeAttr"
       @ChangeCartNum="ChangeCartNum"
       @iptCartNum="iptCartNum"
@@ -375,10 +374,6 @@
       getSeckillDetail: function() {
         SeckillActivityApi.getSeckillActivity(this.id).then(res => {
           this.activity = res.data;
-          // 计算总的 quota 数量
-          this.activity.quota = this.activity.products.reduce((accumulator, product) => {
-            return accumulator + product.quota;
-          }, 0);
           // 计算活动状态
           const now = new Date().getTime();
           if (this.activity.status !== 0) {
@@ -431,11 +426,17 @@
             const product = this.activity.products.find(product => product.skuId === sku.id);
             if (product) {
               sku.price = product.seckillPrice;
-              sku.quota = product.quota;
-              sku.limitCount = product.limitCount;
+              sku.stock = Math.min(sku.stock, product.stock);
             } else { // 找不到可能是没配置，则不能发起秒杀
-              sku.quota = 0;
-              sku.limitCount = 0;
+              sku.stock = 0;
+            }
+            // 设置限购数量
+            if (this.activity.totalLimitCount > 0 && this.activity.singleLimitCount > 0) {
+              sku.limitCount = Math.min(this.activity.totalLimitCount, this.activity.singleLimitCount);
+            } else if (this.activity.totalLimitCount > 0) {
+              sku.limitCount = this.activity.totalLimitCount;
+            } else if (this.activity.singleLimitCount > 0) {
+              sku.limitCount = this.activity.singleLimitCount;
             }
           });
 
@@ -500,9 +501,7 @@
         this.$set(this.attr.productSelect, "price", sku.price);
         this.$set(this.attr.productSelect, "stock", sku.stock);
         this.$set(this.attr.productSelect, "cart_num", 1);
-        // 秒杀活动特有字段
-        this.$set(this.attr.productSelect, "quota", sku.quota);
-        this.$set(this.attr.productSelect, "limitCount", sku.limitCount);
+        this.$set(this.attr.productSelect, "limitCount", sku.limitCount); // 秒杀活动特有字段
         this.$set(this, "attrValue", skuKey.join(","));
       },
       /**
@@ -534,7 +533,6 @@
         this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
         this.$set(this.attr.productSelect, "price", sku.price);
         this.$set(this.attr.productSelect, "stock", sku.stock);
-        this.$set(this.attr.productSelect, "quota", sku.quota);
         this.$set(this.attr.productSelect, "limitCount", sku.limitCount);
         this.$set(this.attr.productSelect, "cart_num", 1);
         // SKU 关联属性
@@ -556,17 +554,16 @@
 
         // 设置数量
         let stock = sku.stock || 0;
-        let quota = sku.quota || 0;
         let limitCount = sku.limitCount;
         if (changeValue) {
           sku.cart_num++;
-          if (limitCount !== undefined && sku.cart_num > limitCount) {
+          if (limitCount > 0 && sku.cart_num > limitCount) {
             this.$set(this.attr.productSelect, "cart_num", limitCount);
             this.$util.Tips({
               title: `该商品每次限购 ${sku.limitCount} ${this.spu.unitName}`
             });
-          } else if (sku.cart_num > stock || sku.cart_num > quota) {
-            this.$set(this.attr.productSelect, "cart_num", Math.min(stock, quota));
+          } else if (sku.cart_num > stock) {
+            this.$set(this.attr.productSelect, "cart_num", stock);
           }
         } else {
           sku.cart_num--;
@@ -967,7 +964,7 @@
           const query = wx.createSelectorQuery().in(this);
           const idView = "#past" + i;
           query.select(idView).boundingClientRect();
-          query.exec(function(res) {
+          query.exec(res => {
             const top = res[0].top;
             const height = res[0].height;
             topArr.push(top);

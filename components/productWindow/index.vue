@@ -13,7 +13,7 @@
 					<view class="money font-color">
 						￥<text class="num">{{ fen2yuan(attr.productSelect.price) }}</text>
 						<text class="stock" v-if='isShow'>库存: {{ attr.productSelect.stock }}</text>
-						<text class='stock' v-if="limitNum">限量: {{ attr.productSelect.quota }}</text>
+						<text class='stock' v-if="attr.productSelect.limitCount > 0">限购: {{ attr.productSelect.limitCount }}</text>
 					</view>
 				</view>
 				<view class="iconfont icon-guanbi" @click="close"></view>
@@ -48,8 +48,7 @@
 							+
 						</view>
 						<view v-else class='item plus'
-							:class='(attr.productSelect.cart_num >= attr.productSelect.quota)
-							|| (attr.productSelect.cart_num >= attr.productSelect.stock)
+							:class='(attr.productSelect.cart_num >= attr.productSelect.stock)
 							|| (attr.productSelect.cart_num >= attr.productSelect.limitCount)
 							? "on":""'
 							@click='CartNumAdd'>+</view>
@@ -57,10 +56,10 @@
 				</view>
 			</view>
       <!-- TODO 芋艿：拼团 -->
-			<view class="joinBnt bg-color" v-if="iSbnt && attr.productSelect.stock > 0 && attr.productSelect.quota > 0"
+			<view class="joinBnt bg-color" v-if="iSbnt && attr.productSelect.stock > 0"
             @click="goCat">我要参团</view>
 			<view class="joinBnt on"
-            v-else-if="(iSbnt && attr.productSelect.quota<=0)||(iSbnt &&attr.productSelect.stock<=0)">已售罄</view>
+            v-else-if="iSbnt && attr.productSelect.stock <= 0">已售罄</view>
 			<!-- TODO 芋艿：购物车 -->
       <view class="joinBnt bg-color" v-if="iScart && attr.productSelect.stock"
             @click="goCat">确定</view>
@@ -78,10 +77,6 @@
 			attr: {
 				type: Object,
 				default: () => {}
-			},
-			limitNum: { // 是否展示限售
-				type: Number,
-				value: 0
 			},
 			isShow: { // 是否展示库存
 				type: Number,
