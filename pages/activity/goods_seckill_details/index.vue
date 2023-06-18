@@ -187,9 +187,7 @@
 	import userEvaluation from '@/components/userEvaluation/index.vue'
 	// #ifdef MP
 	import { base64src } from '@/utils/base64src.js'
-	import {
-		getQrcode
-	} from '@/api/api.js';
+	import { getQrcode } from '@/api/api.js';
 	// #endif
 	import parser from "@/components/jyf-parser/jyf-parser";
 	import home from '@/components/home/index.vue'
@@ -201,7 +199,7 @@
   import * as ProductSpuApi from '@/api/product/spu.js';
   import * as ProductFavoriteApi from '@/api/product/favorite.js';
   import * as ProductCommentApi from '@/api/product/comment.js';
-  import * as SeckillActivityApi from '@/api/promotion/seckill.js';
+  import * as SeckillApi from '@/api/promotion/seckill.js';
   import * as Util from '@/utils/util.js';
   import * as ProductUtil from '@/utils/product.js';
 	export default {
@@ -372,7 +370,7 @@
 		methods: {
       // ========== 秒杀活动相关 ==========
       getSeckillDetail: function() {
-        SeckillActivityApi.getSeckillActivity(this.id).then(res => {
+        SeckillApi.getSeckillActivity(this.id).then(res => {
           this.activity = res.data;
           // 计算活动状态
           const now = new Date().getTime();
