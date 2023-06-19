@@ -5,6 +5,7 @@
 			<view class='iconfont icon-xiangzuo' @tap='goBack' :style="'top:'+ (navH/2) +'rpx'" v-if="returnShow">
 			</view>
 			<!-- #endif -->
+      <!-- 砍价记录的概要 -->
 			<view class='header'>
 				<view class="pic">
 					<view class='swipers'>
@@ -14,17 +15,19 @@
 								<swiper-item >
 									<view class="acea-row row-middle">
 										<image :src="item.avatar" class="mr9"></image>
-										<view class='mr9 nickName'>{{$util.formatName(item.nickName)}}</view>
+										<view class='mr9 nickName'>{{ item.nickname }}</view>
 										<text class='mr9'>拿了</text>
-										<view class='line1'>{{item.title}}</view>
+										<view class='line1'>{{ item.activityName }}</view>
 									</view>
 								</swiper-item>
 							</block>
 						</swiper>
 					</view>
 				</view>
-				<view class="tit">已有{{bargainTotal}}人砍成功</view>
+				<view class="tit">已有{{ bargainTotal }}人砍成功</view>
 			</view>
+
+      <!-- TODO 芋艿 -->
 			<view class='list'>
 				<block v-for="(item,index) in bargainList" :key="index">
 					<view class='item acea-row row-between-wrapper'
@@ -35,9 +38,8 @@
 						<view class='text acea-row row-column-around'>
 							<view class='name line2'>{{item.title}}</view>
 							<view v-if="item.quota>0" class="acea-row" style="margin-bottom: 14rpx;">
-								<countDown :tipText="' '" :bgColor="bgColor" :dayText="':'" :hourText="':'"
-									:minuteText="':'" :secondText="' '" :datatime="item.stopTime/1000" :isDay="true"
-									></countDown>
+								<countDown :tipText="' '" :bgColor="bgColor" :dayText="':'" :hourText="':'" :minuteText="':'" :secondText="' '"
+                           :datatime="item.stopTime/1000" :isDay="true" />
 								<text class="txt">后结束</text>
 							</view>
 							<view v-if="new Date().getTime()- item.stopTime >=0">
@@ -46,76 +48,63 @@
 							<view v-if="item.quota==0">
 								<view style="font-size: 22rpx;" @tap='currentBargainUser'>已售罄</view>
 							</view>
-							<!-- <view class='num'><text class='iconfont icon-pintuan'></text>{{item.countPeopleAll}}人正在参与
-							</view> -->
 							<view class='money font-color'>最低: ￥<text class='price'>{{item.minPrice}}</text></view>
 						</view>
-						<view v-if="item.quota>0" class='cutBnt bg-color'>参与砍价</view>
-						<view  v-if="item.quota==0" class='cutBnt bg-color-hui'>已售罄</view>
+						<view v-if="item.quota > 0" class='cutBnt bg-color'>参与砍价</view>
+						<view v-if="item.quota === 0" class='cutBnt bg-color-hui'>已售罄</view>
 					</view>
 				</block>
 				<view class='loadingicon acea-row row-center-wrapper' v-if='bargainList.length > 0'>
-					<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
+					<text class='loading iconfont icon-jiazai' :hidden='!loading'></text>{{loadTitle}}
 				</view>
 			</view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</view>
 </template>
 <script>
-	let app = getApp();
+  import {getBargainRecordSummary} from "../../../api/promotion/bargain";
+
+  let app = getApp();
 	import {
 		getBargainList,
 		bargainHeaderApi
 	} from '@/api/activity.js';
-	import {
-		openBargainSubscribe
-	} from '@/utils/SubscribeMessage.js';
+	import { openBargainSubscribe } from '@/utils/SubscribeMessage.js';
 	import home from '@/components/home';
 	import countDown from '@/components/countDown';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	export default {
+	import { mapGetters } from "vuex";
+  import * as BargainApi from '@/api/promotion/bargain.js';
+  export default {
 		components: {
 			countDown,
 			home,
-			// #ifdef MP
-			authorize
-			// #endif
 		},
 		data() {
 			return {
-				bgColor: {
+        navH: '',
+        returnShow: true,
+
+        // ========== 砍价记录概要的相关变量 ==========
+        bargainTotal: 0,
+        bargainSuccessList: [],
+        autoplay: true,
+        indicatorDots: false,
+
+        // ========== 砍价活动的相关变量 ==========
+        bargainList: [],
+        page: 1,
+        limit: 10,
+        loading: false,
+        loadend: false,
+        bgColor: {
 					'bgColor': '#E93323',
 					'Color': '#fff',
 					'width': '44rpx',
 					'timeTxtwidth': '16rpx',
 					'isDay': true
 				},
-				bargainList: [],
-				page: 1,
-				limit: 10,
-				loading: false,
-				loadend: false,
-				navH: '',
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				returnShow: true,
 				loadTitle: '加载更多',
-				bargainSuccessList: [],
-				bargainTotal: 0,
-				indicatorDots: false,
-				autoplay: true,
 			};
 		},
 		computed: mapGetters(['isLogin', 'uid']),
@@ -130,43 +119,33 @@
 				deep: true
 			}
 		},
-		onLoad: function(options) {
-			var pages = getCurrentPages();
-			this.returnShow = pages.length === 1 ? false : true;
+		onLoad: function() {
+			const pages = getCurrentPages();
+			this.returnShow = pages.length !== 1;
 			uni.setNavigationBarTitle({
 				title: "砍价列表"
 			})
 			this.navH = app.globalData.navHeight;
-			if (this.isLogin) {
-				this.getBargainList();
-				this.getBargainHeader();
-			} else {
-				toLogin();
-			}
+
+      // 获得砍价信息
+      this.getBargainList();
+      this.getBargainHeader();
 		},
 		methods: {
 			getBargainHeader: function() {
-				bargainHeaderApi().then(res => {
-					this.bargainTotal = res.data.bargainTotal;
-					this.bargainSuccessList = res.data.bargainSuccessList;
-				}).catch(err => {
-					return this.$util.Tips({
-						title: err
-					});
-				})
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
+        BargainApi.getBargainRecordSummary().then(res => {
+          this.bargainTotal = res.data.userCount;
+          this.bargainSuccessList = res.data.successRecords;
+        }).catch(err => {
+          return this.$util.Tips({
+            title: err
+          });
+        })
 			},
 			goBack: function() {
 				uni.navigateBack({
 					delta: 1
 				});
-			},
-			onLoadFun: function(e) {
-				this.getBargainList();
-
 			},
 			openSubscribe: function(e) {
 				let page = e;
@@ -218,7 +197,6 @@
 		},
 	}
 </script>
-
 <style lang="scss">
 	page {
 		background-color: #E93323 !important;
@@ -322,7 +300,7 @@
 		width: 432rpx;
 		font-size: 28rpx;
 		color: #333333;
-		
+
 		.txt{
 			font-size: 22rpx;
 			margin-left: 4rpx;

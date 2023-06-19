@@ -290,7 +290,6 @@
 <script>
 	import {
 		getBargainDetail,
-		postBargainStartUser,
 		postBargainStart,
 		postBargainHelp,
 		getBargainUser
@@ -299,9 +298,6 @@
 		imageBase64
 	} from "@/api/public";
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js';
-	import {
-		postCartAdd
-	} from '../../../api/store.js';
 	import util from '../../../utils/util.js';
 	import {
 		toLogin
@@ -342,7 +338,7 @@
 		/**
 		 * 页面的初始数据
 		 */
-		
+
 		data() {
 			return {
 				bgColor: {
@@ -741,13 +737,6 @@
 				this.$set(this, 'canvasStatus', false);
 			}
 		},
-
-		/**
-		 * 生命周期函数--监听页面初次渲染完成
-		 */
-		onReady: function() {
-
-		},
 		/**
 		 * 生命周期函数--监听页面显示
 		 */
@@ -768,21 +757,6 @@
 		onUnload: function() {
 			if (this.interval !== null) clearInterval(this.interval);
 		},
-
-		/**
-		 * 页面相关事件处理函数--监听用户下拉动作
-		 */
-		onPullDownRefresh: function() {
-
-		},
-
-		/**
-		 * 页面上拉触底事件的处理函数
-		 */
-		onReachBottom: function() {
-
-		},
-
 		//#ifdef MP
 		/**
 		 * 用户点击右上角分享
@@ -801,7 +775,6 @@
 		//#endif
 	}
 </script>
-
 <style lang="scss">
 	page {
 		background-color: $theme-color !important;

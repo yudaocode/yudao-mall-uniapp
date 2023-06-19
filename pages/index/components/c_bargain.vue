@@ -12,11 +12,11 @@
 					<view class="itemCon" v-for="(item, index) in bargList" :key="index" @click="bargDetail(item)">
 						<view class="item">
 							<view class="pictrue">
-								<image :src="item.image"></image>
+								<image :src="item.picUrl"></image>
 							</view>
 							<view class="text lines1">
-								<view class="name line1">{{item.title}}</view>
-								<view class="money">¥<text class="num">{{item.minPrice}}</text></view>
+								<view class="name line1">{{ item.name }}</view>
+								<view class="money">¥<text class="num">{{ fen2yuan(item.bargainPrice) }}</text></view>
 								<view class="btn">参与砍价</view>
 							</view>
 						</view>
@@ -26,45 +26,41 @@
 		</view>
 	</view>
 </template>
-
 <script>
-	let app = getApp();
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		getBargainIndexApi
-	} from '@/api/activity.js';
-	import { mapGetters } from 'vuex';
+  let app = getApp();
+  import * as BargainApi from '@/api/promotion/bargain.js';
+  import * as Util from '@/utils/util.js';
+  import { mapGetters } from 'vuex';
 	export default {
 		name: 'c_bargain',
-		computed: mapGetters({
-			'userData': 'userInfo',
-			'uid': 'uid'
-		}),
+		computed: mapGetters({'uid': 'uid'}),
 		data() {
 			return {
 				bargList: [],
-				isBorader:false
+				isBorader: false
 			};
 		},
 		created() {
 			this.getBargainList();
 		},
-		mounted() {
-		},
 		methods: {
-			// 砍价列表
+      /**
+       * 砍价列表
+       */
 			getBargainList() {
-				getBargainIndexApi().then(res => {
-					this.bargList = res.data ? res.data.productList : [];
-				})
+        BargainApi.getBargainActivityList().then(res => {
+          this.bargList = res.data ? res.data : [];
+        })
 			},
 			bargDetail(item){
 			   uni.navigateTo({
 			   	url: `/pages/activity/goods_bargain_details/index?id=${item.id}&startBargainUid=${this.uid}`
 			   });
-			}
+			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		}
 	}
 </script>
@@ -95,7 +91,7 @@
 		border-radius: 14rpx;
 		margin: 30rpx auto 0 auto;
 		padding: 25rpx 20rpx 25rpx 20rpx;
-		
+
 		.title {
 			.sign {
 				font-size: 32rpx;
@@ -104,16 +100,16 @@
 				font-weight: bold;
 				margin-bottom: 10rpx;
 			}
-		
+
 			.name {
-				
+
 				text {
 					color: #333333;
 					font-size: 26rpx;
 					font-weight: 400;
 				}
 			}
-		
+
 			.more {
 				width: 86rpx;
 				height: 40rpx;
