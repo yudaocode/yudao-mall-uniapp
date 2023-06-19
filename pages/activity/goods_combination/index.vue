@@ -75,6 +75,7 @@
   import * as BannerApi from '@/api/promotion/banner.js';
   import * as Util from '@/utils/util.js';
   import home from '@/components/home/index.vue'
+  import {getCombinationRecordSummary} from "../../../api/promotion/combination";
 	let app = getApp();
 	export default {
 		components: {
@@ -194,7 +195,7 @@
        * 获得拼团记录概要
        */
 			getCombinationHeader: function() {
-        CombinationApi.getCombinationSummary().then(res => {
+        CombinationApi.getCombinationRecordSummary().then(res => {
           this.summary = res.data;
         })
 			},

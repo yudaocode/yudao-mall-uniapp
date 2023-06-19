@@ -40,6 +40,8 @@
 	</view>
 </template>
 <script>
+  import {getCombinationRecordSummary} from "../../../api/promotion/combination";
+
   let app = getApp();
   import * as CombinationApi from '@/api/promotion/combination.js';
   import * as Util from '@/utils/util.js';
@@ -63,7 +65,7 @@
       })
 
       // 获得拼团概要
-      CombinationApi.getCombinationSummary().then((res) => {
+      CombinationApi.getCombinationRecordSummary().then((res) => {
         this.assistUserList = res.data.avatars;
         this.assistUserCount = res.data.userCount;
       }).catch((res) => {

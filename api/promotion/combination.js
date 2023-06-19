@@ -45,8 +45,8 @@ export function getCombinationRecordDetail(id) {
   });
 }
 
-// 获得拼团活动的概要信息
-export function getCombinationSummary() {
+// 获得拼团记录的概要信息
+export function getCombinationRecordSummary() {
   return request.get("app-api/promotion/combination-record/get-summary", {}, {
     noAuth: true // TODO 芋艿：后续要做调整
   });

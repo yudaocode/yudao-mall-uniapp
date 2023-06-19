@@ -286,7 +286,6 @@
 		<home></home>
 	</view>
 </template>
-
 <script>
 	import {
 		getBargainDetail,

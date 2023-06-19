@@ -5,6 +5,7 @@
 			<view class='iconfont icon-xiangzuo' @tap='goBack' :style="'top:'+ (navH/2) +'rpx'" v-if="returnShow">
 			</view>
 			<!-- #endif -->
+
       <!-- 砍价记录的概要 -->
 			<view class='header'>
 				<view class="pic">
@@ -27,31 +28,28 @@
 				<view class="tit">已有{{ bargainTotal }}人砍成功</view>
 			</view>
 
-      <!-- TODO 芋艿 -->
+      <!-- 砍价活动列表 -->
 			<view class='list'>
 				<block v-for="(item,index) in bargainList" :key="index">
 					<view class='item acea-row row-between-wrapper'
-						@tap="openSubscribe('/pages/activity/goods_bargain_details/index?id='+ item.id +'&startBargainUid='+ uid)">
+                @tap="openSubscribe('/pages/activity/goods_bargain_details/index?id='+ item.id +'&startBargainUid='+ uid)">
 						<view class='pictrue'>
-							<image :src='item.image'></image>
+							<image :src='item.picUrl'></image>
 						</view>
 						<view class='text acea-row row-column-around'>
-							<view class='name line2'>{{item.title}}</view>
-							<view v-if="item.quota>0" class="acea-row" style="margin-bottom: 14rpx;">
+							<view class='name line2'>{{ item.name }}</view>
+							<view class="acea-row" style="margin-bottom: 14rpx;">
 								<countDown :tipText="' '" :bgColor="bgColor" :dayText="':'" :hourText="':'" :minuteText="':'" :secondText="' '"
-                           :datatime="item.stopTime/1000" :isDay="true" />
+                           :datatime="item.endTime / 1000" :isDay="true" />
 								<text class="txt">后结束</text>
 							</view>
-							<view v-if="new Date().getTime()- item.stopTime >=0">
-								<view style="font-size: 22rpx;" @tap='currentBargainUser'>已结束</view>
+							<view v-if="item.stock === 0">
+								<view style="font-size: 22rpx;" @tap="openSubscribe('/pages/activity/goods_bargain_details/index?id='+ item.id +'&startBargainUid='+ uid)">已售罄</view>
 							</view>
-							<view v-if="item.quota==0">
-								<view style="font-size: 22rpx;" @tap='currentBargainUser'>已售罄</view>
-							</view>
-							<view class='money font-color'>最低: ￥<text class='price'>{{item.minPrice}}</text></view>
+							<view class='money font-color'>最低: ￥<text class='price'>{{ fen2yuan(item.bargainPrice) }}</text></view>
 						</view>
-						<view v-if="item.quota > 0" class='cutBnt bg-color'>参与砍价</view>
-						<view v-if="item.quota === 0" class='cutBnt bg-color-hui'>已售罄</view>
+						<view v-if="item.stock > 0" class='cutBnt bg-color'>参与砍价</view>
+						<view v-if="item.stock === 0" class='cutBnt bg-color-hui'>已售罄</view>
 					</view>
 				</block>
 				<view class='loadingicon acea-row row-center-wrapper' v-if='bargainList.length > 0'>
@@ -63,18 +61,13 @@
 	</view>
 </template>
 <script>
-  import {getBargainRecordSummary} from "../../../api/promotion/bargain";
-
   let app = getApp();
-	import {
-		getBargainList,
-		bargainHeaderApi
-	} from '@/api/activity.js';
 	import { openBargainSubscribe } from '@/utils/SubscribeMessage.js';
 	import home from '@/components/home';
 	import countDown from '@/components/countDown';
 	import { mapGetters } from "vuex";
   import * as BargainApi from '@/api/promotion/bargain.js';
+  import * as Util from '@/utils/util.js';
   export default {
 		components: {
 			countDown,
@@ -132,6 +125,9 @@
       this.getBargainHeader();
 		},
 		methods: {
+      /**
+       * 获得砍价记录的概要
+       */
 			getBargainHeader: function() {
         BargainApi.getBargainRecordSummary().then(res => {
           this.bargainTotal = res.data.userCount;
@@ -142,11 +138,37 @@
           });
         })
 			},
-			goBack: function() {
-				uni.navigateBack({
-					delta: 1
-				});
-			},
+      /**
+       * 获得砍价活动列表
+       */
+      getBargainList: function() {
+        if (this.loadend || this.loading) {
+          return;
+        }
+        this.loading = true;
+        this.loadTitle = '';
+        BargainApi.getBargainActivityPage({
+          pageNo: this.page,
+          pageSize: this.limit
+        }).then(res => {
+          const list = res.data.list;
+          const bargainList = this.$util.SplitArray(list, this.bargainList);
+          const loadend = list.length < this.limit;
+          this.loadend = loadend;
+          this.loading = false;
+          this.loadTitle = loadend ? '已全部加载' : '加载更多';
+          this.$set(this, 'bargainList', bargainList);
+          this.$set(this, 'page', this.page + 1);
+        }).catch(res => {
+          this.loading = false;
+          this.loadTitle = '加载更多';
+        });
+      },
+      /**
+       * 跳转到砍价详情
+       *
+       * @param e 跳转的地址
+       */
 			openSubscribe: function(e) {
 				let page = e;
 				// #ifndef MP
@@ -168,33 +190,19 @@
 				});
 				// #endif
 			},
-			getBargainList: function() {
-				let that = this;
-				if (that.loadend) return;
-				if (that.loading) return;
-				that.loading = true;
-				that.loadTitle = '';
-				getBargainList({
-					page: that.page,
-					limit: that.limit
-				}).then(function(res) {
-					let list = res.data.list;
-					let bargainList = that.$util.SplitArray(list, that.bargainList);
-					let loadend = list.length < that.limit;
-					that.loadend = loadend;
-					that.loading = false;
-					that.loadTitle = loadend ? '已全部加载' : '加载更多';
-					that.$set(that, 'bargainList', bargainList);
-					that.$set(that, 'page', that.page + 1);
-				}).catch(res => {
-					that.loading = false;
-					that.loadTitle = '加载更多';
-				});
-			}
+      goBack: function() {
+        uni.navigateBack({
+          delta: 1
+        });
+      },
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		},
 		onReachBottom: function() {
 			this.getBargainList();
-		},
+		}
 	}
 </script>
 <style lang="scss">
