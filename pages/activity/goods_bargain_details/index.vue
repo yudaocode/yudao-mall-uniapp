@@ -91,14 +91,14 @@
 						</view>
 						<view class='bargainBnt' @tap='currentBargainUser'>我也要参与</view>
 					</view>
-					<view v-if="startBargainUid != uid && bargainStatus==7">
+					<view v-if="startBargainUid != uid && bargainStatus === 7">
 						<view class='bargainSuccess'>
 							<image src="../static/cheng.png"></image>
 							您已帮其他好友砍过此商品
 						</view>
 						<view class='bargainBnt' @tap='currentBargainUser'>我也要参与</view>
 					</view>
-					<view v-if="startBargainUid != uid && bargainStatus==6">
+					<view v-if="startBargainUid !== uid && bargainStatus === 6">
 						<view class='bargainSuccess'>
 							<image src="../static/chengh.png"></image>
 							已成功帮助好友砍价
@@ -203,7 +203,7 @@
 				<view class='goodsDetails borRadius14'>
 					<view class='conter borRadius14'>
 						<jyf-parser v-if="bargainInfo.content" :html="bargainInfo.content" ref="article"
-							:tag-style="tagStyle"></jyf-parser>
+							:tag-style="tagStyle" />
 						<view v-else class="contentNo">
 							<text class="iconfont icon-xiaolian mr8"></text>
 							暂无商品详情
@@ -211,7 +211,7 @@
 					</view>
 				</view>
 
-				<view class='bargainTip' :class='active==true?"on":""'>
+				<view class='bargainTip' :class='active ? "on":""'>
 					<view class='pictrue'>
 						<image src="../../../static/images/bargainBg.png"></image>
 					</view>
@@ -293,51 +293,25 @@
 		postBargainHelp,
 		getBargainUser
 	} from '../../../api/activity.js';
-	import {
-		imageBase64
-	} from "@/api/public";
+	import { imageBase64 } from "@/api/public";
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js';
 	import util from '../../../utils/util.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	import countDown from '@/components/countDown';
 	import home from '@/components/home';
 	import parser from "@/components/jyf-parser/jyf-parser";
-	import {
-		silenceBindingSpread
-	} from "@/utils";
+	import { silenceBindingSpread } from "@/utils";
 	const app = getApp();
-
 	export default {
 		components: {
 			countDown,
-			// #ifdef MP
-			authorize,
-			// #endif
 			home,
 			"jyf-parser": parser
-		},
-		filters: {
-			picFilter(status) {
-				const statusMap = {
-					'0': 'num1',
-					'1': 'num2',
-					'2': 'num3'
-				}
-				return statusMap[status]
-			}
 		},
 		/**
 		 * 页面的初始数据
 		 */
-
 		data() {
 			return {
 				bgColor: {
@@ -382,8 +356,6 @@
 				},
 				H5ShareBox: false, //公众号分享图片
 				systemH: 0,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
 				pages: '',
 				couponsHidden: true,
 				loading: false,
@@ -397,7 +369,6 @@
 				imgTop: '', //商品图base64位
 				imagePath: '' // 海报图片
 			}
-
 		},
 		computed: mapGetters(['isLogin', 'userInfo', 'uid']),
 		/**
@@ -414,8 +385,6 @@
 				}
 			})
 			// #endif
-
-
 			var pages = getCurrentPages();
 			if (pages.length <= 1) {
 				that.retunTop = false
@@ -439,18 +408,14 @@
 			if (options.hasOwnProperty('id')) {
 				options.id ? that.id = options.id : that.id = ''
 			}
-			options.startBargainUid == 'undefined' ? that.startBargainUid = 0 : that.startBargainUid = Number(options
+			options.startBargainUid === 'undefined' ? that.startBargainUid = 0 : that.startBargainUid = Number(options
 				.startBargainUid);
 			if (this.isLogin) {
-				if (that.startBargainUid == 0) {
+				if (that.startBargainUid === 0) {
 					that.startBargainUid = Number(that.$store.state.app.uid)
 				}
 				this.storeBargainId = options.storeBargainId ? Number(options.storeBargainId) : 0;
 				this.page = 1;
-				//this.getBargainDetails();
-				// app.globalData.openPages = '/pages/activity/goods_bargain_details/index?id=' + this.id + '&bargain=' + this.bargainUid +
-				// 	'&spid=' + e.detail.uid;
-				// this.$set(that, 'bargainPartake', e.detail.uid);
 			} else {
 				this.$Cache.set('login_back_url',
 					'/pages/activity/goods_bargain_details/index?id=' + options.id +
@@ -520,13 +485,12 @@
 			},
 			// 自己砍价；
 			userBargain: function() {
-				if (this.uid == this.startBargainUid) {
+				if (this.uid === this.startBargainUid) {
 					this.setBargain();
 				}
 			},
 			goBack: function() {
 				uni.navigateBack({
-
 					delta: 1
 				})
 			},
@@ -682,14 +646,12 @@
 				})
 			},
 			getBargainUserBargainPricePoster: function() {
-				var that = this;
 				this.active = false
 				uni.showLoading({
 					title: '海报生成中',
 					mask: true
 				});
 				this.posters = false;
-				let arrImagesUrl = '';
 				let arrImagesUrlTop = '';
 				if (!this.PromotionCode) {
 					uni.hideLoading();
