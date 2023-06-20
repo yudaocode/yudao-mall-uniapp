@@ -75,7 +75,6 @@
   import * as BannerApi from '@/api/promotion/banner.js';
   import * as Util from '@/utils/util.js';
   import home from '@/components/home/index.vue'
-  import {getCombinationRecordSummary} from "../../../api/promotion/combination";
 	let app = getApp();
 	export default {
 		components: {

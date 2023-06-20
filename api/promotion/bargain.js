@@ -9,6 +9,15 @@ export function getBargainActivityList(count) {
   });
 }
 
+// 获得砍价活动详情
+export function getBargainActivityDetail(id) {
+  return request.get("app-api/promotion/bargain-activity/get-detail", {
+    id
+  }, {
+    noAuth: true // TODO 芋艿：后续要做调整
+  });
+}
+
 // 获得砍价活动分页
 export function getBargainActivityPage(count) {
   return request.get("app-api/promotion/bargain-activity/page", {
