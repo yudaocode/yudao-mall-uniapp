@@ -33,3 +33,13 @@ export function getBargainRecordSummary() {
     noAuth: true // TODO 芋艿：后续要做调整
   });
 }
+
+// 获得砍价活动详情
+export function getBargainRecordDetail(id, activityId) {
+  return request.get("app-api/promotion/bargain-record/get-detail", {
+    id,
+    activityId
+  }, {
+    noAuth: true // TODO 芋艿：后续要做调整
+  });
+}
