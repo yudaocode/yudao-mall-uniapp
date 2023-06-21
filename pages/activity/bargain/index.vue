@@ -40,7 +40,7 @@
 				<Loading :loaded="status" :loading="loadingList"></Loading>
 			</div>
 		</block>
-		<block v-if="bargain.length == 0">
+		<block v-if="bargain.length === 0">
 			<emptyPage title="暂无砍价记录～"></emptyPage>
 		</block>
 		<home></home>
@@ -121,7 +121,7 @@
 		methods: {
 			/**
 			 * 打开支付组件
-			 * 
+			 *
 			 */
 			goPay(pay_price, order_id) {
 				this.$set(this, 'pay_close', true);
@@ -130,7 +130,7 @@
 			},
 			/**
 			 * 事件回调
-			 * 
+			 *
 			 */
 			onChangeFun: function(e) {
 				let opt = e;
@@ -140,14 +140,12 @@
 			},
 			/**
 			 * 关闭支付组件
-			 * 
 			 */
 			payClose: function() {
 				this.pay_close = false;
 			},
 			/**
 			 * 支付成功回调
-			 * 
 			 */
 			pay_complete: function() {
 				this.status = false;
@@ -158,7 +156,6 @@
 			},
 			/**
 			 * 支付失败回调
-			 * 
 			 */
 			pay_fail: function() {
 				this.pay_close = false;
@@ -277,11 +274,11 @@
 		color: #868686;
 		justify-content: left !important;
 	}
-	
+
 	.bargain-record .item .picTxt .text .successTxt{
 		font-size:24rpx;
 	}
-	
+
 	.bargain-record .item .picTxt .text .endTxt{
 		font-size:24rpx;
 		color: #999;

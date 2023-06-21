@@ -345,7 +345,7 @@
         weixinStatus: false, // 微信分享是否打开
         canvasStatus: false, // 是否显示海报
         H5ShareBox: false, // 公众号分享的弹出
-        posterbackgd: '/static/images/posterbackgd.png',  // 海报的背景，用于海报的生成
+        posterbackgd: '/static/images/posterbackgd.png', // 海报的背景，用于海报的生成
         storeImage: '', // 下载商品图片后的文件地址
         actionSheetHidden: true, // 微信小程序的右上角分享的弹出
         posterImage: '', // 海报路径

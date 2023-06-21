@@ -43,3 +43,26 @@ export function getBargainRecordDetail(id, activityId) {
     noAuth: true // TODO 芋艿：后续要做调整
   });
 }
+
+// 创建砍价记录（参与拼团活动）
+export function createBargainRecord(activityId) {
+  return request.post("app-api/promotion/bargain-record/create", {
+    activityId
+  });
+}
+
+// 创建砍价助力（给拼团记录砍一刀）
+export function createBargainHelp(recordId) {
+  return request.post("app-api/promotion/bargain-help/create", {
+    recordId: recordId
+  });
+}
+
+// 获得砍价助力列表
+export function getBargainHelpList(recordId) {
+  return request.get("app-api/promotion/bargain-help/list", {
+    recordId: recordId
+  }, {
+    noAuth: true // TODO 芋艿：后续要做调整
+  });
+}
