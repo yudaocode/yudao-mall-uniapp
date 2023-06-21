@@ -459,17 +459,6 @@
 					}
 				},
 				{
-					"path": "poster-poster/index",
-					"style": {
-						"navigationBarTitleText": "砍价海报"
-							// #ifdef MP
-							,
-						"navigationBarTextStyle": "#fff",
-						"navigationBarBackgroundColor": "#e93323"
-							// #endif
-					}
-				},
-				{
 					"path": "bargain/index",
 					"style": {
 						"navigationBarTitleText": "砍价记录"
