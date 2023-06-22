@@ -8,23 +8,23 @@
 		<view class='recommendList acea-row row-between-wrapper'>
 			<view class='item' v-for="(item,index) in hostProduct" :key="index" hover-class='none' @tap="goDetail(item)">
 				<view class='pictrue'>
-					<image :src='item.image'></image>
-					<span class="pictrue_log_big pictrue_log_class" v-if="item.activityH5 && item.activityH5.type === '1'">秒杀</span>
-					<span class="pictrue_log_big pictrue_log_class" v-if="item.activityH5 && item.activityH5.type === '2'">砍价</span>
-					<span class="pictrue_log_big pictrue_log_class" v-if="item.activityH5 && item.activityH5.type === '3'">拼团</span>
+					<image :src='item.picUrl'></image>
+					<span class="pictrue_log_big pictrue_log_class" v-if="item.activityList && item.activityList[0] && item.activityList[0].type === 1">秒杀</span>
+					<span class="pictrue_log_big pictrue_log_class" v-if="item.activityList && item.activityList[0] && item.activityList[0].type === 2">砍价</span>
+					<span class="pictrue_log_big pictrue_log_class" v-if="item.activityList && item.activityList[0] && item.activityList[0].type === 3">拼团</span>
 				</view>
-				<view class='name line1'>{{item.storeName}}</view>
-				<view class='money font-color'>￥<text class='num'>{{item.price}}</text></view>
+				<view class='name line1'>{{ item.name }}</view>
+				<view class='money font-color'>￥<text class='num'>{{ item.price }}</text></view>
 			</view>
 		</view>
 	</view>
 </template>
 
 <script>
-	import {mapGetters} from "vuex";
+	import { mapGetters } from "vuex";
 	import { goShopDetail } from '@/libs/order.js'
 	export default {
-	computed: mapGetters(['uid']),
+	  computed: mapGetters(['uid']),
 		props: {
 			hostProduct: {
 				type: Array,
@@ -33,15 +33,9 @@
 				}
 			}
 		},
-		data() {
-			return {
-
-			};
-		},
-
 		methods: {
 			goDetail(item){
-				goShopDetail(item,this.uid).then(res=>{
+				goShopDetail(item,this.uid).then(() => {
 					uni.navigateTo({
 						url:`/pages/goods_details/index?id=${item.id}`
 					})
