@@ -476,7 +476,7 @@
         BargainApi.getBargainRecordDetail(this.bargainId, this.id).then(res => {
           const bargainUserInfo = res.data;
           this.bargainUserInfo = bargainUserInfo;
-          this.action = bargainUserInfo.action;
+          this.action = this.calculateAction(bargainUserInfo);
           this.helpAction = bargainUserInfo.helpAction;
           this.storeBargainId = bargainUserInfo.id || this.storeBargainId;
           this.buyPrice = this.bargainUserInfo.payPrice || this.buyPrice;
@@ -507,6 +507,30 @@
             url: 1
           });
         });
+      },
+      /**
+       * 计算 action 值
+       */
+      calculateAction: function (item) {
+        if (!item || !item.status) {
+          return 1; // 参与动作 - 未参与，可参与
+        }
+        if (item.status === 1) {
+          return 2; // 参与动作 - 参与中，等待砍价
+        }
+        if (item.status === 3) {
+          return 6; // 参与动作 - 砍价失败；TODO 芋艿：看看后续这个场景，应该做什么
+        }
+        if (!item.orderId) {
+          return 3; // 参与动作 - 砍价成功，待下单
+        }
+        if (!item.payStatus) {
+          return 4; // 参与动作 - 砍价成功，待下单
+        }
+        if (!item.payStatus) {
+          return 5; // 参与动作 - 已下单，已付款
+        }
+        return 1; // 兜底逻辑
       },
       /**
        * 参与砍价
