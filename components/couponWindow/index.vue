@@ -35,11 +35,6 @@
 				},
 			}
 		},
-		data() {
-			return {
-
-			};
-		},
 		methods: {
 			close:function(){
 			      this.$emit('onColse');

@@ -102,7 +102,6 @@
 								<view class="priceM">满{{item.minPrice?Number(item.minPrice):''}}元可用</view>
 							</view>
 						</view>
-
 					</view>
 				</view>
 				<!-- 活动-->
@@ -161,7 +160,6 @@
 </template>
 
 <script>
-	import Auth from '@/libs/wechat';
 	import Cache from '../../utils/cache';
 	var statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
 	let app = getApp();
@@ -171,18 +169,7 @@
 		setCouponReceive
 	} from '@/api/api.js';
 	// #ifdef MP-WEIXIN
-	import {
-		getTemlIds
-	} from '@/api/api.js';
-	// import {
-	// 	SUBSCRIBE_MESSAGE,
-	// 	TIPS_KEY
-	// } from '@/config/cache';
-	// #endif
-	// #ifdef H5  
-	import {
-		follow
-	} from '@/api/public.js';
+	import { getTemlIds } from '@/api/api.js';
 	// #endif
 	import {
 		getShare
@@ -192,8 +179,6 @@
 	import c_bargain from './components/c_bargain';
 	import goodList from '@/components/goodList';
 	import promotionGood from '@/components/promotionGood';
-	import couponWindow from '@/components/couponWindow';
-	import ClipboardJS from "@/plugin/clipboard/clipboard.js";
 	import {
 		goShopDetail
 	} from '@/libs/order.js'
@@ -203,14 +188,9 @@
 	import tabNav from '@/components/tabNav.vue'
 	import countDown from '@/components/countDown';
 	import {
-		getCategoryList,
-		getProductslist,
 		getProductHot,
 		getGroomList
 	} from '@/api/store.js';
-	// import {
-	// 	setVisit
-	// } from '@/api/user.js'
 	import recommend from '@/components/recommend';
 	// #ifdef MP
 	import authorize from '@/components/Authorize';
@@ -234,7 +214,6 @@
 			tabNav,
 			goodList,
 			promotionGood,
-			couponWindow,
 			countDown,
 			a_seckill,
 			b_combination,
@@ -254,9 +233,6 @@
 				statusBarHeight: statusBarHeight,
 				navIndex: 0,
 				navTop: [],
-				followUrl: "",
-				followHid: true,
-				followCode: false,
 				logoUrl: "",
 				imgUrls: [],
 				itemNew: [],
@@ -622,7 +598,7 @@
 			get_host_product: function() {
 				let that = this;
 				that.loading = true;
-			
+
 				if (that.hotScroll) return
 				getProductHot(
 					that.hotPage,
@@ -722,7 +698,7 @@
 		.iconfont {
 			color: #999999;
 			font-size: 20rpx;
-		} 
+		}
 	}
 	.couponIndex {
 		width: auto;
@@ -731,7 +707,7 @@
 		background-size: 100% 100%;
 		padding-left: 42rpx;
 		margin-bottom: 30rpx;
-		
+
 		.titBox {
 			padding: 47rpx 0;
 			text-align: center;
@@ -832,7 +808,7 @@
 		/* #ifdef H5*/
 		top: var(--window-top);
 		/* #endif */
-		
+
 		z-index: 99;
 		flex-direction: row;
 		margin: 0px;
