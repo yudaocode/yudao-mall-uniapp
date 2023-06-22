@@ -2,7 +2,8 @@
 	<view class='product-bg'>
 		<swiper :indicator-dots="indicatorDots" indicator-active-color="#e93323" :autoplay="autoplay"
 			:circular="circular" :interval="interval" :duration="duration" @change="change">
-			
+
+      <!-- 视频 -->
 			<swiper-item v-if="videoline">
 				<view class="item">
 					<view v-show="!controls" style="width:100%;height:100% ">
@@ -18,8 +19,9 @@
 					</view>
 				</view>
 			</swiper-item>
-			
-			<block v-for="(item,index) in imgUrls" :key='index'>
+
+      <!-- 图片 -->
+      <block v-for="(item,index) in imgUrls" :key='index'>
 				<swiper-item>
 					<image :src="item" class="slide-image" />
 				</swiper-item>
@@ -56,7 +58,7 @@
 			};
 		},
 		mounted() {
-			if(this.videoline){
+			if (this.videoline) {
 				this.imgUrls.shift()
 			}
 		},
