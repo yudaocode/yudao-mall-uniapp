@@ -164,7 +164,6 @@
 					that.hotPage++
 					that.hotScroll = res.data.list.length < that.hotLimit
 					that.hostProduct = that.hostProduct.concat(res.data.list)
-					// that.$set(that, 'hostProduct', res.data)
 				});
 			},
 			//点击事件处理
@@ -223,15 +222,12 @@
 					that.$set(that.where, 'page', that.where.page + 1);
 					if (that.productList.length === 0) {
 						this.get_host_product();
-					} 
+					}
 				}).catch(err => {
 					that.loading = false;
 					that.loadTitle = '加载更多';
 				});
 			},
-		},
-		onPullDownRefresh() {
-
 		},
 		onReachBottom() {
 			if (this.productList.length > 0) {
@@ -239,7 +235,6 @@
 			} else {
 				this.get_host_product();
 			}
-
 		}
 	}
 </script>

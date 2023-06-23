@@ -1,35 +1,36 @@
 <template>
 	<view class='productSort'>
+    <!-- 商品搜索 -->
 		<view class='header acea-row row-center-wrapper'>
 			<view class='acea-row row-between-wrapper input'>
 				<text class='iconfont icon-sousuo'></text>
-				<input type='text' placeholder='点击搜索商品信息' @confirm="searchSubmitValue" confirm-type='search' name="search"
-				 placeholder-class='placeholder'></input>
+				<input type='text' placeholder='点击搜索商品信息' @confirm="searchSubmitValue" confirm-type='search'
+               name="search" placeholder-class='placeholder' />
 			</view>
 		</view>
-		<view class='aside' :style="{bottom: tabbarH + 'px',height: height + 'rpx'}">
+    <!-- 商品分类（左） -->
+    <view class='aside' :style="{bottom: tabbarH + 'px',height: height + 'rpx'}">
 			<scroll-view scroll-y="true" scroll-with-animation='true' style="height: 100%;">
 				<view class='item acea-row row-center-wrapper' :class='index==navActive?"on":""' v-for="(item,index) in productList"
 			 :key="index" @click='tap(index,"b"+index)'><text>{{item.name}}</text></view>
 			 </scroll-view>
-			
 		</view>
+    <!-- 商品分类（右） -->
 		<view class='conter'>
 			<scroll-view scroll-y="true" :scroll-into-view="toView" :style='"height:"+height+"rpx;margin-top: 96rpx;"' @scroll="scroll"
 			 scroll-with-animation='true'>
 				<block v-for="(item,index) in productList" :key="index">
-					
 					<view class='listw' :id="'b'+index">
 						<view class='title acea-row row-center-wrapper'>
-							<view class='line'></view>
-							<view class='name'>{{item.name}}</view>
-							<view class='line'></view>
+							<view class='line' />
+							<view class='name'>{{ item.name }}</view>
+							<view class='line' />
 						</view>
 						<view class='list acea-row'>
-							<block v-for="(itemn,indexn) in item.child" :key="indexn">
+							<block v-for="(itemn,indexn) in item.children" :key="indexn">
 								<navigator hover-class='none' :url='"/pages/goods_list/index?cid="+itemn.id+"&title="+itemn.name' class='item acea-row row-column row-middle'>
-							        <view class='picture' :style="{'background-color':itemn.extra?'none':'#f7f7f7'}">
-										<image :src='itemn.extra'></image>
+                  <view class='picture' :style="{'background-color':itemn.picUrl?'none':'#f7f7f7'}">
+										<image :src='itemn.picUrl' />
 									</view>
 									<view class='name line1'>{{itemn.name}}</view>
 								</navigator>
@@ -37,22 +38,19 @@
 						</view>
 					</view>
 				</block>
-				<view :style='"height:"+(height-300)+"rpx;"' v-if="number<15"></view>
+				<view :style='"height:"+(height-300)+"rpx;"' v-if="number < 15" />
 			</scroll-view>
 		</view>
 	</view>
 </template>
-
 <script>
-	import {
-		getCategoryList
-	} from '@/api/store.js';
-	import ClipboardJS from "@/plugin/clipboard/clipboard.js";
-	export default {
+  import * as CategoryApi from '@/api/product/category.js';
+  import * as Util from '@/utils/util.js';
+  export default {
 		data() {
 			return {
 				navlist: [],
-				productList: [],
+				productList: [], // 商品分类，树形结构
 				navActive: 0,
 				number: "",
 				height: 0,
@@ -64,25 +62,22 @@
 		onLoad(options) {
 			this.getAllCategory();
 		},
-		onShow(){
-		},
 		methods: {
 			infoScroll: function() {
-				let that = this;
-				let len = that.productList.length;
-				let child = that.productList[len - 1]&&that.productList[len - 1].child?that.productList[len - 1].child:[];
-				this.number = child?child.length:0;
-				
-				//设置商品列表高度
-				uni.getSystemInfo({
+				let len = this.productList.length;
+				let child = this.productList[len - 1] && this.productList[len - 1].child ? this.productList[len - 1].child : [];
+				this.number = child ? child.length:0;
+
+				// 设置商品列表高度
+        let that = this;
+        uni.getSystemInfo({
 					success: function(res) {
-						that.height = (res.windowHeight) * (750 / res.windowWidth) - 98;
+            that.height = (res.windowHeight) * (750 / res.windowWidth) - 98;
 					},
 				});
-				let height = 0;
 				let hightArr = [];
 				for (let i = 0; i < len; i++) {
-					//获取元素所在位置
+					// 获取元素所在位置
 					let query = uni.createSelectorQuery().in(this);
 					let idView = "#b" + i;
 					query.select(idView).boundingClientRect();
@@ -91,18 +86,17 @@
 						hightArr.push(top);
 						that.hightArr = hightArr
 					});
-				};
+				}
 			},
 			tap: function(index, id) {
 				this.toView = id;
 				this.navActive = index;
 			},
 			getAllCategory: function() {
-				let that = this;
-				getCategoryList().then(res => {
-					that.productList = res.data;
-					setTimeout(function(){
-						that.infoScroll();
+        CategoryApi.getCategoryList().then(res => {
+					this.productList = Util.handleTree(res.data);
+					setTimeout(() => {
+						this.infoScroll();
 					},500)
 				})
 			},
@@ -120,19 +114,19 @@
 				}
 			},
 			searchSubmitValue: function(e) {
-				if (this.$util.trim(e.detail.value).length > 0)
-					uni.navigateTo({
-						url: '/pages/goods_list/index?searchValue=' + e.detail.value
-					})
-				else
-					return this.$util.Tips({
-						title: '请填写要搜索的产品信息'
-					});
-			},
+				if (this.$util.trim(e.detail.value).length > 0) {
+          uni.navigateTo({
+            url: '/pages/goods_list/index?searchValue=' + e.detail.value
+          })
+        } else {
+          return this.$util.Tips({
+            title: '请填写要搜索的产品信息'
+          });
+        }
+			}
 		}
 	}
 </script>
-
 <style scoped lang="scss">
 	.productSort .header {
 		width: 100%;
@@ -145,7 +139,7 @@
 		z-index: 9;
 		border-bottom: 1rpx solid #f5f5f5;
 	}
-	
+
 	.productSort .header .input {
 		width: 700rpx;
 		height: 60rpx;
@@ -154,22 +148,22 @@
 		box-sizing: border-box;
 		padding: 0 25rpx;
 	}
-	
+
 	.productSort .header .input .iconfont {
 		font-size: 26rpx;
 		color: #555;
 	}
-	
+
 	.productSort .header .input .placeholder {
 		color: #999;
 	}
-	
+
 	.productSort .header .input input {
 		font-size: 26rpx;
 		height: 100%;
 		width: 597rpx;
 	}
-	
+
 	.productSort .aside {
 		position: fixed;
 		width: 180rpx;
@@ -178,18 +172,18 @@
 		background-color: #f7f7f7;
 		overflow-y: scroll;
 		overflow-x: hidden;
-		
+
 		height: auto;
 		margin-top: 96rpx;
 	}
-	
+
 	.productSort .aside .item {
 		height: 100rpx;
 		width: 100%;
 		font-size: 26rpx;
 		color: #424242;
 	}
-	
+
 	.productSort .aside .item.on {
 		background-color: #fff;
 		border-left: 4rpx solid #fc4141;
@@ -198,49 +192,49 @@
 		color: #fc4141;
 		font-weight: bold;
 	}
-	
+
 	.productSort .conter {
 		margin: 96rpx 0 0 180rpx;
 		padding: 0 14rpx;
 		background-color: #fff;
 	}
-	
+
 	.productSort .conter .listw {
 		padding-top: 20rpx;
 	}
-	
+
 	.productSort .conter .listw .title {
 		height: 90rpx;
 	}
-	
+
 	.productSort .conter .listw .title .line {
 		width: 100rpx;
 		height: 2rpx;
 		background-color: #f0f0f0;
 	}
-	
+
 	.productSort .conter .listw .title .name {
 		font-size: 28rpx;
 		color: #333;
 		margin: 0 30rpx;
 		font-weight: bold;
 	}
-	
+
 	.productSort .conter .list {
 		flex-wrap: wrap;
 	}
-	
+
 	.productSort .conter .list .item {
 		width: 177rpx;
 		margin-top: 26rpx;
 	}
-	
+
 	.productSort .conter .list .item .picture {
 		width: 120rpx;
 		height: 120rpx;
 		border-radius: 50%;
 	}
-	
+
 	.productSort .conter .list .item .picture image {
 		width: 100%;
 		height: 100%;
@@ -249,7 +243,7 @@
 			background-color: #f7f7f7;
 		}
 	}
-	
+
 	.productSort .conter .list .item .name {
 		font-size: 24rpx;
 		color: #333;
