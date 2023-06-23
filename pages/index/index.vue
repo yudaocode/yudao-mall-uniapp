@@ -5,11 +5,11 @@
 			<view class="header">
 				<view class="serch-wrapper flex">
 					<view class="logo">
-						<image :src="logoUrl" mode=""></image>
+						<image :src="logoUrl" mode="" />
 					</view>
-					<navigator url="/pages/goods_search/index" class="input" hover-class="none"><text
-							class="iconfont icon-xiazai5"></text>
-						搜索商品</navigator>
+					<navigator url="/pages/goods_search/index" class="input" hover-class="none">
+            <text class="iconfont icon-xiazai5" /> 搜索商品
+          </navigator>
 				</view>
 			</view>
 			<!-- #endif -->
@@ -104,13 +104,13 @@
 						</view>
 					</view>
 				</view>
-				<!-- 活动-->
-				<a_seckill></a_seckill>
-				<b_combination></b_combination>
-				<c_bargain></c_bargain>
+
+				<!-- 营销活动 -->
+				<a_seckill />
+				<b_combination />
+				<c_bargain />
 
 				<!-- 首页推荐 -->
-				<!-- :class="iSshowH?'on':''" -->
 				<view class="sticky-box" :style="'top:'+(marTop)+'px;'">
 					<scroll-view class="scroll-view_H" style="width: 100%;" scroll-x="true" scroll-with-animation
 						:scroll-left="tabsScrollLeft" @scroll="scroll">
@@ -123,32 +123,30 @@
 						</view>
 					</scroll-view>
 				</view>
-
 				<!-- 首发新品 -->
 				<view class="index-product-wrapper" :class="iSshowH?'on':''">
 					<view class="list-box animated" :class='tempArr.length > 0?"fadeIn on":""'>
 						<view class="item" v-for="(item,index) in tempArr" :key="index" @click="goDetail(item)">
 							<view class="pictrue">
 								<span class="pictrue_log pictrue_log_class"
-									v-if="item.activityH5 && item.activityH5.type === '1'">秒杀</span>
+									v-if="item.activityList && item.activityList[0] && item.activityList[0].type === 1">秒杀</span>
 								<span class="pictrue_log pictrue_log_class"
-									v-if="item.activityH5 && item.activityH5.type === '2'">砍价</span>
+									v-if="item.activityList && item.activityList[0] && item.activityList[0].type === 2">砍价</span>
 								<span class="pictrue_log pictrue_log_class"
-									v-if="item.activityH5 && item.activityH5.type === '3'">拼团</span>
-								<image :src="item.image" mode=""></image>
+									v-if="item.activityList && item.activityList[0] && item.activityList[0].type === 3">拼团</span>
+								<image :src="item.picUrl" mode="" />
 							</view>
 							<view class="text-info">
-								<view class="title line1">{{item.storeName}}</view>
-								<view class="old-price"><text>¥{{item.otPrice}}</text></view>
+								<view class="title line1">{{ item.name }}</view>
+								<view class="old-price"><text>¥{{ fen2yuan(item.marketPrice) }}</text></view>
 								<view class="price">
-									<text>￥</text>{{item.price}}
-									<view class="txt" v-if="item.checkCoupon">券</view>
+									<text>￥</text>{{ fen2yuan(item.price) }}
 								</view>
 							</view>
 						</view>
 					</view>
 					<view class='loadingicon acea-row row-center-wrapper' v-if="goodScroll">
-						<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>
+						<text class='loading iconfont icon-jiazai' :hidden='!loading' />
 					</view>
 					<view class="mores-txt flex" v-if="!goodScroll">
 						<text>我是有底线的</text>
@@ -158,7 +156,6 @@
 		</view>
 	</view>
 </template>
-
 <script>
 	import Cache from '../../utils/cache';
 	var statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
@@ -179,35 +176,23 @@
 	import c_bargain from './components/c_bargain';
 	import goodList from '@/components/goodList';
 	import promotionGood from '@/components/promotionGood';
-	import {
-		goShopDetail
-	} from '@/libs/order.js'
+	import { goShopDetail } from '@/libs/order.js'
 	import {
 		mapGetters
 	} from "vuex";
 	import tabNav from '@/components/tabNav.vue'
 	import countDown from '@/components/countDown';
-	import {
-		getProductHot,
-		getGroomList
-	} from '@/api/store.js';
+	import { getProductHot, } from '@/api/store.js';
 	import recommend from '@/components/recommend';
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
 	import {
 		silenceBindingSpread
 	} from '@/utils';
-	// #ifndef MP
-	import {
-		kefuConfig
-	} from "@/api/public";
-	import {
-		getWechatConfig
-	} from "@/api/public";
-	// #endif
 	import Loading from '@/components/Loading/index.vue';
-	const arrTemp = ["beforePay", "afterPay", "refundApply", "beforeRecharge", "createBargain", "pink"];
+  import * as ProductSpuApi from '@/api/product/spu.js';
+  import * as PromotionActivityApi from '@/api/promotion/activity.js';
+  import * as ProductUtil from '@/utils/product.js';
+  import * as Util from '@/utils/util.js';
+  const arrTemp = ["beforePay", "afterPay", "refundApply", "beforeRecharge", "createBargain", "pink"];
 	export default {
 		computed: mapGetters(['isLogin', 'uid']),
 		components: {
@@ -219,17 +204,12 @@
 			b_combination,
 			c_bargain,
 			recommend,
-			// #ifdef MP
-			authorize,
-			// #endif
 			Loading
 		},
 		data() {
 			return {
 				loaded: false,
 				loading: false,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
 				statusBarHeight: statusBarHeight,
 				navIndex: 0,
 				navTop: [],
@@ -260,9 +240,7 @@
 				}, {
 					pic: '/static/images/hot_003.png'
 				}],
-				ProductNavindex: 0,
 				marTop: 0,
-				childID: 0,
 				loadend: false,
 				loadTitle: '加载更多',
 				sortProduct: [],
@@ -279,13 +257,6 @@
 				prodeuctTop: 0,
 				searchH: 0,
 				isFixed: false,
-				goodType: 0, //精品推荐Type
-				goodScroll: true, //精品推荐开关
-				params: { //精品推荐分页
-					page: 1,
-					limit: 10,
-				},
-				tempArr: [], //精品推荐临时数组
 				roll: [], // 新闻简报
 				site_name: '', //首页title
 				iSshowH: false,
@@ -298,8 +269,17 @@
 				lineColor: 'red',
 				lineStyle: {}, // 下划线位置--动态甲酸
 				listActive: 0, // 当前选中项
+				duration: 0.2, // 下划线动画时长
 
-				duration: 0.2 // 下划线动画时长
+        // ========== 精品推荐 ===========
+        goodScroll: true, // 精品推荐开关
+        ProductNavindex: 0,
+        goodType: 1, //精品推荐 Type
+        params: { //精品推荐分页
+          page: 1,
+          limit: 10,
+        },
+        tempArr: [], // 精品推荐临时数组
 			}
 		},
 		watch: {
@@ -462,7 +442,7 @@
 					Cache.set('chatUrl', res.data.yzfUrl);
 					// #endif
 					that.$set(that, "explosiveMoney", res.data.explosiveMoney);
-					that.goodType = res.data.explosiveMoney[0].type
+					that.goodType = parseInt(res.data.explosiveMoney[0].type)
 					this.getGroomList();
 					this.shareApi();
 					this.getcouponList();
@@ -513,13 +493,6 @@
 					// #endif
 				})
 			},
-			getChatUrL() {
-				kefuConfig().then(res => {
-					let data = res.data;
-					this.$store.commit("SET_CHATURL", data.yzfUrl);
-					Cache.set('chatUrl', data.yzfUrl);
-				})
-			},
 			// 微信分享；
 			setOpenShare: function(data) {
 				let that = this;
@@ -534,66 +507,70 @@
 						configAppMessage);
 				}
 			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
-			// 授权回调
-			onLoadFun() {
 
-			},
-			// 首发新品切换
-			ProductNavTab(item, index) {
-				this.listActive = index
-				this.goodType = item.type
-				this.listActive = index
-				this.ProductNavindex = index
-				this.tempArr = []
-				this.params.page = 1
-				this.goodScroll = true
-				let onloadH = true
-				this.getGroomList(onloadH)
-			},
-			// 首发新品详情
-			goDetail(item) {
-				if (item.activityH5 && item.activityH5.type === "2" && !this.isLogin) {
-					toLogin();
-				} else {
-					goShopDetail(item, this.uid).then(res => {
-						uni.navigateTo({
-							url: `/pages/goods_details/index?id=${item.id}`
-						})
-					})
-				}
-			},
-			// 分类详情
-			godDetail(item) {
-				goShopDetail(item, this.uid).then(res => {
-					uni.navigateTo({
-						url: `/pages/goods_details/index?id=${item.id}`
-					})
-				})
-			},
-			// 精品推荐
+      // ========== 精品推荐 ===========
+      /**
+       * 首发新品切换
+       */
+      ProductNavTab(item, index) {
+        this.listActive = index
+        this.goodType = parseInt(item.type)
+        this.listActive = index
+        this.ProductNavindex = index
+        this.tempArr = []
+        this.params.page = 1
+        this.goodScroll = true
+        let onloadH = true
+        this.getGroomList(onloadH)
+      },
+      /**
+       * 商品精品推荐
+       */
 			getGroomList(onloadH) {
-				this.loading = true
-				let type = this.goodType;
-				if (!this.goodScroll) return
+				if (!this.goodScroll) {
+          return
+        }
 				if (onloadH) {
 					this.iSshowH = true
 				}
-				getGroomList(type, this.params).then(({
-					data
-				}) => {
-					this.iSshowH = false
+        this.loading = true
+        console.log(this.goodType, '====')
+        const type = this.goodType === 1 ? 'best' :
+          this.goodType === 2 ? 'hot' :
+            this.goodType === 3 ? 'new' :
+              this.goodType === 4 ? 'benefit':
+                this.goodType === 5 ? 'good': ''
+        ProductSpuApi.getSpuPage({
+          recommendType: type,
+          pageNo: this.params.page,
+          pageSize: this.params.limit
+        }).then(res => {
+          const good_list = res.data.list;
+          this.iSshowH = false
 					this.loading = false
-					this.goodScroll = data.list.length >= this.params.limit
+					this.goodScroll = good_list.length >= this.params.limit
 					this.params.page++
-					this.tempArr = this.tempArr.concat(data.list)
+
+          // 设置营销活动
+          const spuIds = good_list.map(item => item.id);
+          PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+            ProductUtil.setActivityList(good_list, res.data);
+            this.tempArr = this.tempArr.concat(good_list); // 放在此处，避免 Vue 监控不到数组里的元素变化
+          });
 				})
 			},
+      /**
+       * 前往商品详情
+       */
+      goDetail(item) {
+        goShopDetail(item, this.uid).then(res => {
+          uni.navigateTo({
+            url: `/pages/goods_details/index?id=${item.id}`
+          })
+        })
+      },
 			/**
-			 * 获取我的推荐
+			 * 获取我的推荐 TODO 芋艿：没实现
 			 */
 			get_host_product: function() {
 				let that = this;
@@ -609,11 +586,13 @@
 					that.hostProduct = that.hostProduct.concat(res.data.list)
 				});
 			},
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		},
 		mounted() {
 			let self = this
 			// #ifdef H5
-			//self.getChatUrL();
 			// 获取H5 搜索框高度
 			let appSearchH = uni.createSelectorQuery().select(".serch-wrapper");
 			appSearchH.boundingClientRect(function(data) {
