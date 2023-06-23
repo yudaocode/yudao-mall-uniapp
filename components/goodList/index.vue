@@ -3,15 +3,15 @@
 		<block v-for="(item,index) in bastList" :key="index">
 			<view @click="goDetail(item)" class='item acea-row row-between-wrapper' hover-class="none">
 				<view class='pictrue'>
-					<image :src='item.image'></image>
-					<span class="pictrue_log pictrue_log_class" v-if="item.activityH5 && item.activityH5.type === '1'">秒杀</span>
-					<span class="pictrue_log pictrue_log_class" v-if="item.activityH5 && item.activityH5.type === '2'">砍价</span>
-					<span class="pictrue_log pictrue_log_class" v-if="item.activityH5 && item.activityH5.type === '3'">拼团</span>
+					<image :src='item.picUrl'></image>
+					<span class="pictrue_log pictrue_log_class" v-if="item.activityList && item.activityList[0] && item.activityList[0].type === 1">秒杀</span>
+					<span class="pictrue_log pictrue_log_class" v-if="item.activityList && item.activityList[0] && item.activityList[0].type === 2">砍价</span>
+					<span class="pictrue_log pictrue_log_class" v-if="item.activityList && item.activityList[0] && item.activityList[0].type === 3">拼团</span>
 				</view>
 				<view class='underline'>
 					<view class='text'>
-						<view class='line1'>{{item.storeName}}</view>
-						<view class='money font-color'>￥<text class='num'>{{item.price}}</text></view>
+						<view class='line1'>{{ item.name }}</view>
+						<view class='money font-color'>￥<text class='num'>{{ fen2yuan(item.price) }}</text></view>
 						<view class='vip-money acea-row row-middle' v-if="item.vip_price && item.vip_price > 0">￥{{item.vip_price || 0}}
 							<image src='../../static/images/vip.png'></image><text class='num'>已售{{Number(item.sales) + Number(item.ficti) || 0}}{{item.unitName}}</text>
 						</view>
@@ -27,7 +27,8 @@
 <script>
 	import {mapGetters} from "vuex";
 	import { goShopDetail } from '@/libs/order.js'
-	export default {
+  import * as Util from '@/utils/util.js';
+  export default {
 		computed: mapGetters(['uid']),
 		props: {
 			status: {
@@ -41,24 +42,20 @@
 				}
 			}
 		},
-		data() {
-			return {
-
-			};
-		},
 		methods: {
-			goDetail(item){
-				goShopDetail(item,this.uid).then(res=>{
+			goDetail(item) {
+				goShopDetail(item,this.uid).then(() =>{
 					uni.navigateTo({
 						url:`/pages/goods_details/index?id=${item.id}`
 					})
 				})
-			}
-			
+			},
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		}
 	}
 </script>
-
 <style scoped lang='scss'>
 	.goodList .item {
 		position: relative;

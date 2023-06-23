@@ -4,10 +4,12 @@
 			<view class='search acea-row row-between-wrapper'>
 				<view class='input acea-row row-between-wrapper'>
 					<text class='iconfont icon-sousuo2'></text>
-					<input type='text' :value='searchValue' :focus="focus" placeholder='点击搜索商品' placeholder-class='placeholder' @input="setValue"></input>
+					<input type='text' :value='searchValue' :focus="focus" placeholder='点击搜索商品'
+                 placeholder-class='placeholder' @input="setValue" />
 				</view>
 				<view class='bnt' @tap='searchBut'>搜索</view>
 			</view>
+      <!-- 搜索词 -->
 			<view class='title'>热门搜索</view>
 			<view class='list acea-row'>
 				<block v-for="(item,index) in hotSearchList" :key="index">
@@ -15,139 +17,177 @@
 				</block>
 			</view>
 			<view class='line'></view>
-			<goodList :bastList="bastList" v-if="bastList.length > 0"></goodList>
+      <!-- 搜索结果 -->
+			<goodList :bastList="bastList" v-if="bastList.length > 0" />
 			<view class='loadingicon acea-row row-center-wrapper' v-if="bastList.length > 0">
-				<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
+				<text class='loading iconfont icon-jiazai' :hidden='!loading' /> {{loadTitle}}
 			</view>
 		</view>
+
+    <!-- 商品推荐 -->
 		<view class='noCommodity'>
-			<view class='pictrue'  v-if="bastList.length == 0 && isbastList">
+			<view class='pictrue'  v-if="bastList.length === 0 && isbastList">
 				<image src='../../static/images/noSearch.png'></image>
 			</view>
-			<recommend :hostProduct='hostProduct' v-if="bastList.length == 0"></recommend>
+			<recommend :hostProduct='hostProduct' v-if="bastList.length === 0"></recommend>
 		</view>
 	</view>
 </template>
 
 <script>
-	import {
-		getSearchKeyword,
-		getProductslist,
-		getProductHot
-	} from '@/api/store.js';
+	import { getSearchKeyword } from '@/api/store.js';
 	import goodList from '@/components/goodList';
 	import recommend from '@/components/recommend';
-	export default {
+  import * as ProductSpuApi from '@/api/product/spu.js';
+  import * as PromotionActivityApi from '@/api/promotion/activity.js';
+  import * as ProductUtil from '@/utils/product.js';
+  export default {
 		components: {
 			goodList,
 			recommend
 		},
 		data() {
 			return {
-				hostProduct: [],
-				searchValue: '',
+        // ========== 商品搜索 ==========
+        hotSearchList: [], // 热门搜索词
+        searchValue: '',
 				focus: true,
-				bastList: [],
-				hotSearchList: [],
-				first: 0,
+
+				bastList: [],  // 商品搜索结果
 				limit: 8,
 				page: 1,
 				loading: false,
 				loadend: false,
 				loadTitle: '加载更多',
-				hotPage:1,
-				isScroll:true,
-				isbastList: false
-			};
+				isbastList: false,
+
+        // ========== 商品推荐 ==========
+        hostProduct: [],
+        hotPage: 1,
+        isScroll: true,
+      };
 		},
 		onShow: function() {
 			this.getRoutineHotSearch();
 			this.getHostProduct();
 		},
 		onReachBottom: function() {
-			if(this.bastList.length>0){
+			if(this.bastList.length > 0){
 				this.getProductList();
-			}else{
+			} else {
 				this.getHostProduct();
 			}
-			
 		},
 		methods: {
+      /**
+       * TODO 芋艿：待接入
+       */
 			getRoutineHotSearch: function() {
-				let that = this;
 				getSearchKeyword().then(res => {
-					that.$set(that, 'hotSearchList', res.data);
+					this.$set(this, 'hotSearchList', res.data);
 				});
 			},
+      /**
+       * 输入搜索热词
+       *
+       * @param searchValue 搜索热词
+       */
+      setHotSearchValue: function(searchValue) {
+        this.setValue(searchValue);
+        this.page = 1;
+        this.loadend = false;
+        this.$set(this, 'bastList', []);
+        this.getProductList();
+      },
+      /**
+       * 输入搜索词
+       *
+       * @param searchValue 搜索词
+       */
+      setValue: function(searchValue) {
+        this.$set(this, 'searchValue', searchValue.detail.value);
+      },
+      /**
+       * 点击搜索
+       */
+      searchBut: function() {
+        this.focus = false;
+        if (this.searchValue.length > 0) {
+          this.page = 1;
+          this.loadend = false;
+          this.$set(this, 'bastList', []);
+          uni.showLoading({
+            title: '正在搜索中'
+          });
+          this.getProductList();
+          uni.hideLoading();
+        } else {
+          return this.$util.Tips({
+            title: '请输入要搜索的商品',
+            icon: 'none',
+            duration: 1000,
+            mask: true,
+          });
+        }
+      },
+      /**
+       * 执行搜索商品
+       */
 			getProductList: function() {
-				let that = this;
-				if (that.loadend) return;
-				if (that.loading) return;
-				that.loading = true;
-				that.loadTitle = '';
-				getProductslist({
-					keyword: that.searchValue,
-					page: that.page,
-					limit: that.limit
+				if (this.loadend || this.loading) {
+          return;
+        }
+				this.loading = true;
+				this.loadTitle = '';
+        ProductSpuApi.getSpuPage({
+					keyword: this.searchValue,
+          pageNo: this.page,
+          pageSize: this.limit
 				}).then(res => {
-					let list = res.data.list,
-						loadend = list.length < that.limit;
-					that.bastList = that.$util.SplitArray(list, that.bastList);
-					that.$set(that,'bastList',that.bastList);
-					that.loading = false;
-					that.loadend = loadend;
-					that.loadTitle = loadend ? "😕人家是有底线的~~" : "加载更多";
-					that.page = that.page + 1;
-					that.isbastList = true;
-				}).catch(err => {
-					that.loading = false,
-					that.loadTitle = '加载更多'
+					const good_list = res.data.list;
+          const	loadend = good_list.length < this.limit;
+					this.loading = false;
+					this.loadend = loadend;
+					this.loadTitle = loadend ? "😕人家是有底线的~~" : "加载更多";
+					this.page = this.page + 1;
+					this.isbastList = true;
+          // 设置营销活动
+          const spuIds = good_list.map(item => item.id);
+          PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+            ProductUtil.setActivityList(good_list, res.data);
+            this.bastList = this.$util.SplitArray(good_list, this.bastList); // 放在此处，避免 Vue 监控不到数组里的元素变化
+          });
+        }).catch(err => {
+					this.loading = false
+					this.loadTitle = '加载更多'
 				});
 			},
+      /**
+       * 获得热门推荐
+       */
 			getHostProduct: function() {
-				let that = this;
-				if(!this.isScroll) return
-				getProductHot(that.hotPage,that.limit).then(res => {
-					that.isScroll = res.data.list.length>=that.limit
-					that.hostProduct = that.hostProduct.concat(res.data.list)
-					that.hotPage += 1;
+				if (!this.isScroll) {
+          return
+        }
+        ProductSpuApi.getSpuPage({
+          recommendType: 'hot',
+          pageNo: this.hotPage,
+          pageSize: this.limit
+        }).then(res => {
+          const good_list = res.data.list;
+          this.isScroll = good_list.length >= this.limit
+          this.hotPage += 1;
+          // 设置营销活动
+          const spuIds = good_list.map(item => item.id);
+          PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+            ProductUtil.setActivityList(good_list, res.data);
+            this.hostProduct = this.hostProduct.concat(good_list); // 放在此处，避免 Vue 监控不到数组里的元素变化
+          });
 				});
-			},
-			setHotSearchValue: function(event) {
-				this.$set(this, 'searchValue', event);
-				this.page = 1;
-				this.loadend = false;
-				this.$set(this, 'bastList', []);
-				this.getProductList();
-			},
-			setValue: function(event) {
-				this.$set(this, 'searchValue', event.detail.value);
-			},
-			searchBut: function() {
-				let that = this;
-				that.focus = false;
-				if (that.searchValue.length > 0) {
-					that.page = 1;
-					that.loadend = false;
-					that.$set(that, 'bastList', []);
-					uni.showLoading({
-						title: '正在搜索中'
-					});
-					that.getProductList();
-					uni.hideLoading();
-				} else {
-					return this.$util.Tips({
-						title: '请输入要搜索的商品',
-						icon: 'none',
-						duration: 1000,
-						mask: true,
-					});
-				}
 			}
 		}
 	}
 </script>
-
 <style lang="scss">
 	page {
 		background-color: #fff !important;

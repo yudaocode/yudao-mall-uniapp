@@ -14,16 +14,16 @@
 					<span class="pictrue_log_big pictrue_log_class" v-if="item.activityList && item.activityList[0] && item.activityList[0].type === 3">拼团</span>
 				</view>
 				<view class='name line1'>{{ item.name }}</view>
-				<view class='money font-color'>￥<text class='num'>{{ item.price }}</text></view>
+				<view class='money font-color'>￥<text class='num'>{{ fen2yuan(item.price) }}</text></view>
 			</view>
 		</view>
 	</view>
 </template>
-
 <script>
 	import { mapGetters } from "vuex";
 	import { goShopDetail } from '@/libs/order.js'
-	export default {
+  import * as Util from '@/utils/util.js';
+  export default {
 	  computed: mapGetters(['uid']),
 		props: {
 			hostProduct: {
@@ -40,7 +40,10 @@
 						url:`/pages/goods_details/index?id=${item.id}`
 					})
 				})
-			}
+			},
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		}
 	}
 </script>
