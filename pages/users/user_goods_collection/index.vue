@@ -1,7 +1,8 @@
 <template>
 	<view>
 		<view class="hdbj"></view>
-		<view class='collectionGoods' v-if="collectProductList.length">
+		<!-- 收藏列表 -->
+    <view class='collectionGoods' v-if="collectProductList.length">
 			<!-- #ifdef  H5 || MP-->
 			<view class='nav acea-row row-between-wrapper'>
 				<view>当前共 <text class='num font-color'>{{ totals }}</text>件商品</view>
@@ -14,21 +15,21 @@
 					<view v-for="(item,index) in collectProductList" :key="index" class='item acea-row row-middle'>
 						<checkbox :value="item.id.toString()" :checked="item.checked" v-if="!footerswitch"
 							style="margin-right: 10rpx;" />
-						<navigator :url='"/pages/goods_details/index?id="+item.productId' hover-class='none'
+						<navigator :url='"/pages/goods_details/index?id="+item.spuId' hover-class='none'
 							class="acea-row">
 							<view class='pictrue'>
-								<image :src="item.image"></image>
+								<image :src="item.picUrl" />
 							</view>
 							<view>
-								<view class='name line1'>{{item.storeName}}</view>
-								<view class='money font-color'>￥{{item.price}}</view>
+								<view class='name line1'>{{ item.spuName }}</view>
+								<view class='money font-color'>￥{{ item.price }}</view>
 							</view>
 						</navigator>
 					</view>
 				</checkbox-group>
 			</view>
 			<view class='loadingicon acea-row row-center-wrapper'>
-				<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
+				<text class='loading iconfont icon-jiazai' :hidden='!loading' />{{loadTitle}}
 			</view>
 			<view v-if="!footerswitch" class='footer acea-row row-between-wrapper'>
 				<view>
@@ -44,75 +45,62 @@
 				</view>
 			</view>
 		</view>
-		<view class='noCommodity' v-else-if="!collectProductList.length && page > 1">
+
+    <!-- 热门商品 -->
+    <view class='noCommodity' v-else-if="!collectProductList.length && page > 1">
 			<view class='pictrue'>
 				<image src='../static/noCollection.png'></image>
 			</view>
 			<recommend :hostProduct="hostProduct"></recommend>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</view>
 </template>
 
 <script>
-	import {
-		getCollectUserList,
-		getProductHot,
-		collectDelete
-	} from '@/api/store.js';
-	import {
-		mapGetters
-	} from "vuex";
-	import {
-		toLogin
-	} from '@/libs/login.js';
+	import { mapGetters } from "vuex";
+	import { toLogin } from '@/libs/login.js';
 	import recommend from '@/components/recommend';
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
 	import home from '@/components/home';
+  import * as ProductSpuApi from '@/api/product/spu.js';
+  import * as ProductFavoriteApi from '@/api/product/favorite.js';
+  import * as PromotionActivityApi from '@/api/promotion/activity.js';
+  import * as ProductUtil from '@/utils/product.js';
 	export default {
 		components: {
 			recommend,
-			// #ifdef MP
-			authorize,
-			// #endif
 			home
 		},
 		data() {
 			return {
 				footerswitch: true,
-				hostProduct: [],
 				loadTitle: '加载更多',
 				loading: false,
 				loadend: false,
-				collectProductList: [],
+				collectProductList: [], // 收藏列表
 				limit: 8,
 				page: 1,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				hotScroll: false,
-				hotPage: 1,
-				hotLimit: 10,
-				isAllSelect: false, //全选
-				selectValue: [], //选中的数据
-				delBtnWidth: 80, //左滑默认宽度
-				totals: 0
-			};
+				isAllSelect: false, // 全选
+				selectValue: [], // 选中的数据
+				totals: 0,
+
+        // ========== 热门推荐 ==========
+        hostProduct: [],
+        hotPage: 1,
+        hotLimit: 10,
+        hotScroll: false,
+      };
 		},
 		computed: mapGetters(['isLogin']),
 		onLoad() {
-			if (this.isLogin) {
-				this.loadend = false;
-				this.page = 1;
-				this.collectProductList = [];
-				this.get_user_collect_product();
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+				return
 			}
+      this.loadend = false;
+      this.page = 1;
+      this.collectProductList = [];
+      this.get_user_collect_product();
 		},
 		onShow() {
 			this.loadend = false;
@@ -121,53 +109,91 @@
 			this.get_user_collect_product();
 		},
 		methods: {
-			// #ifdef MP
-			drawStart(e) {
-				var touch = e.touches[0];
-				this.startX = touch.clientX;
-			},
-			//触摸滑动
-			drawMove(e) {
-				var touch = e.touches[0];
-				var item = this.collectProductList[e.currentTarget.dataset.index];
-				var disX = this.startX - touch.clientX;
-				if (disX >= 20) {
-					if (disX > this.delBtnWidth) {
-						disX = this.delBtnWidth;
-					}
-					this.$set(this.collectProductList[e.currentTarget.dataset.index], 'right', disX);
-				} else {
-					this.$set(this.collectProductList[e.currentTarget.dataset.index], 'right', 0);
-				}
-			},
-			//触摸滑动结束
-			drawEnd(e) {
-				var item = this.collectProductList[e.currentTarget.dataset.index];
-				if (item.right >= this.delBtnWidth / 2) {
-					this.$set(this.collectProductList[e.currentTarget.dataset.index], 'right', this.delBtnWidth);
-				} else {
-					this.$set(this.collectProductList[e.currentTarget.dataset.index], 'right', 0);
-				}
-			},
-			// #endif
+      /**
+       * 获取收藏产品
+       */
+      get_user_collect_product: function() {
+        let that = this;
+        if (this.loading || this.loadend) {
+          return;
+        }
+        this.loading = true;
+        this.loadTitle = "";
+        ProductFavoriteApi.getFavoritePage({
+          pageNo: this.page,
+          pageSize: this.limit
+        }).then(res => {
+          this.totals = res.data.total;
+          const collectProductList = res.data.list;
+          const loadend = collectProductList.length < this.limit;
+          this.collectProductList = this.$util.SplitArray(collectProductList, this.collectProductList);
+          this.$set(that, 'collectProductList', this.collectProductList);
+          this.loadend = loadend;
+          this.loadTitle = loadend ? '我也是有底线的' : '加载更多';
+          this.page = this.page + 1;
+          this.loading = false;
+
+          // 如果没有收藏，加载热门商品
+          if (this.totals === 0) {
+            this.get_host_product();
+          }
+        }).catch(err => {
+          this.loading = false;
+          this.loadTitle = "加载更多";
+        });
+      },
+      /**
+       * 删除多个收藏
+       */
+      delCollectionAll: function() {
+        // 取消收藏
+        if (!this.selectValue || this.selectValue.length === 0) {
+          return this.$util.Tips({
+            title: '请选择商品'
+          });
+        }
+        ProductFavoriteApi.deleteFavoriteList(this.selectValue).then(res => {
+          this.$util.Tips({
+            title: '取消收藏成功',
+            icon: 'success'
+          });
+          // 重新获得收藏列表
+          this.collectProductList = [];
+          this.loadend = false;
+          this.page = 1;
+          this.get_user_collect_product();
+        }).catch(err => {
+          return this.$util.Tips({
+            title: err
+          })
+        });
+      },
+      /**
+       * 进入【管理】
+       */
 			manage: function() {
 				this.footerswitch = !this.footerswitch;
 			},
-
+      /**
+       * 选中某个收藏
+       */
 			checkboxChange: function(event) {
-				var items = this.collectProductList,
-					values = event.detail.value;
-				for (var i = 0, lenI = items.length; i < lenI; ++i) {
+        const items = this.collectProductList;
+        const values = event.detail.value;
+        for (let i = 0; i < items.length; ++i) {
 					const item = items[i]
-					if (values.includes(item.id.toString())) {
+					if (values.includes(item.spuId)) {
 						this.$set(item, 'checked', true)
 					} else {
 						this.$set(item, 'checked', false)
 					}
 				}
-				this.selectValue = values.toString();
+				this.selectValue = values;
 				this.isAllSelect = items.length === values.length;
 			},
+      /**
+       * 全选收藏
+       */
 			checkboxAllChange: function(event) {
 				let value = event.detail.value;
 				if (value.length > 0) {
@@ -176,13 +202,16 @@
 					this.setAllSelectValue(0)
 				}
 			},
+      /**
+       * 全选收藏
+       */
 			setAllSelectValue: function(status) {
-				let selectValue = [];
+				const selectValue = [];
 				if (this.collectProductList.length > 0) {
 					this.collectProductList.map(item => {
 						if (status) {
 							this.$set(item, 'checked', true)
-							selectValue.push(item.id);
+							selectValue.push(item.spuId);
 							this.isAllSelect = true;
 						} else {
 							this.$set(item, 'checked', false)
@@ -193,96 +222,30 @@
 				}
 			},
 			/**
-			 * 授权回调
-			 */
-			onLoadFun: function() {
-				this.get_user_collect_product();
-				this.get_host_product();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
-			/**
-			 * 获取收藏产品
-			 */
-			get_user_collect_product: function() {
-				let that = this;
-				if (this.loading) return;
-				if (this.loadend) return;
-				that.loading = true;
-				that.loadTitle = "";
-				getCollectUserList({
-					page: that.page,
-					limit: that.limit
-				}).then(res => {
-					res.data.list.map(item => {
-						that.$set(item, 'right', 0);
-					});
-					that.totals = res.data.total;
-					let collectProductList = res.data.list;
-					let loadend = collectProductList.length < that.limit;
-					that.collectProductList = that.$util.SplitArray(collectProductList, that
-						.collectProductList);
-					that.$set(that, 'collectProductList', that.collectProductList);
-					if (that.collectProductList.length === 0) that.get_host_product();
-					that.loadend = loadend;
-					that.loadTitle = loadend ? '我也是有底线的' : '加载更多';
-					that.page = that.page + 1;
-					that.loading = false;
-				}).catch(err => {
-					that.loading = false;
-					that.loadTitle = "加载更多";
-				});
-			},
-			/**
-			 * 取消收藏
-			 */
-			delCollection: function(id, index) {
-				this.selectValue = id;
-				this.del({
-					ids: this.selectValue.toString()
-				});
-			},
-			delCollectionAll: function() {
-				if (!this.selectValue || this.selectValue.length == 0) return this.$util.Tips({
-					title: '请选择商品'
-				});
-				this.del({
-					ids: this.selectValue
-				});
-			},
-			del: function(data) {
-				collectDelete(data).then(res => {
-					this.$util.Tips({
-						title: '取消收藏成功',
-						icon: 'success'
-					});
-					// this.collectProductList = this.collectProductList.filter(item=>item!==this.selectValue)
-					this.collectProductList = [];
-					this.loadend = false;
-					this.page = 1;
-					this.get_user_collect_product();
-				}).catch(err => {
-					return this.$util.Tips({
-						title: err
-					})
-				});
-			},
-			/**
 			 * 获取我的推荐
 			 */
 			get_host_product: function() {
-				let that = this;
-				if (that.hotScroll) return
-				getProductHot(
-					that.hotPage,
-					that.hotLimit,
-				).then(res => {
-					that.hotPage++
-					that.hotScroll = res.data.list.length < that.hotLimit
-					that.hostProduct = that.hostProduct.concat(res.data.list)
-				});
+				if (this.hotScroll) {
+          return
+        }
+        ProductSpuApi.getSpuPage({
+          recommendType: 'hot',
+          pageNo: this.hotPage,
+          pageSize: this.hotLimit
+        }).then(res => {
+          const good_list = res.data.list;
+          this.hotPage++
+          this.hotScroll = good_list.length < this.hotLimit
+
+          // 设置营销活动
+          const spuIds = good_list.map(item => item.id);
+          if (spuIds.length > 0) {
+            PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+              ProductUtil.setActivityList(good_list, res.data);
+              this.hostProduct = this.hostProduct.concat(good_list) // 放在此处，避免 Vue 监控不到数组里的元素变化
+            });
+          }
+        });
 			}
 		},
 		/**
