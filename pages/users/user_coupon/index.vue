@@ -1,87 +1,80 @@
 <template>
 	<view>
 		<view class="navbar acea-row row-around">
-			<view class="item acea-row row-center-wrapper" :class="{ on: navOn === 'usable' }" @click="onNav('usable')">未使用</view>
-			<view class="item acea-row row-center-wrapper" :class="{ on: navOn === 'unusable' }" @click="onNav('unusable')">已使用/过期</view>
+			<view class="item acea-row row-center-wrapper" :class="{ on: navOn === 1 }" @click="onNav(1)">未使用</view>
+			<view class="item acea-row row-center-wrapper" :class="{ on: navOn === 2 }" @click="onNav(2)">已使用</view>
+			<view class="item acea-row row-center-wrapper" :class="{ on: navOn === 3 }" @click="onNav(3)">已过期</view>
 		</view>
 		<view class='coupon-list' v-if="couponsList.length">
 			<view class='item acea-row row-center-wrapper' v-for='(item,index) in couponsList' :key="index">
-				<view class='money' :class="item.validStr==='unusable'||item.validStr==='overdue'||item.validStr==='notStart' ? 'moneyGray' : ''">
-					<view>￥<text class='num'>{{item.money?Number(item.money):''}}</text></view>
-					<view class="pic-num">满{{ item.minPrice?Number(item.minPrice):'' }}元可用</view>
+				<view class='money' :class="item.status !== 1 ? 'moneyGray' : ''">
+          <view>￥
+            <text v-if="item.discountType === 1" class='num'>{{ fen2yuan(item.discountPrice) }}</text>
+            <text v-else class='num'>{{ (item.discountPercent / 10.0).toFixed(1) }} 折</text>
+          </view>
+          <view class="pic-num">满 {{ fen2yuan(item.usePrice) }} 元可用</view>
 				</view>
 				<view class='text'>
 					<view class='condition line2'>
-						<span class="line-title" :class="item.validStr==='unusable'||item.validStr==='overdue'||item.validStr==='notStart' ? 'bg-color-huic' : 'bg-color-check'" v-if="item.useType === 1">通用</span>
-						<span class="line-title" :class="item.validStr==='unusable'||item.validStr==='overdue'||item.validStr==='notStart' ? 'bg-color-huic' : 'bg-color-check'"  v-else-if="item.useType === 2">商品</span>
-						<span class="line-title" :class="item.validStr==='unusable'||item.validStr==='overdue'||item.validStr==='notStart' ? 'bg-color-huic' : 'bg-color-check'" v-else-if="item.useType === 3">品类</span>
+						<span class="line-title" :class="item.status !== 1 ? 'bg-color-huic' : 'bg-color-check'"
+                  v-if="item.useType === 1">通用</span>
+						<span class="line-title" :class="item.status !== 1 ? 'bg-color-huic' : 'bg-color-check'"
+                  v-else-if="item.useType === 2">商品</span>
+						<span class="line-title" :class="item.status !== 1 ? 'bg-color-huic' : 'bg-color-check'"
+                  v-else-if="item.useType === 3">品类</span>
 						<span>{{item.name}}</span>
 					</view>
 					<view class='data acea-row row-between-wrapper'>
-						<view>{{item.useStartTimeStr}}~{{item.useEndTimeStr}}</view>
-						<view class='bnt' :class="item.validStr==='unusable'||item.validStr==='overdue'||item.validStr==='notStart'?'gray':'bg-color'">{{item.validStr | validStrFilter}}</view>
+						<view>
+              {{ formatDate(item.validStartTime) + " - " + formatDate(item.validEndTime) }}
+            </view>
+						<view class='bnt' :class="item.status !== 1 ?'gray':'bg-color'">{{ item.status | validStrFilter }}</view>
 					</view>
 				</view>
 			</view>
 		</view>
 		<view class='loadingicon acea-row row-center-wrapper' v-if="couponsList.length">
-		     <text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
-		  </view>
+       <text class='loading iconfont icon-jiazai' :hidden='!loading' />{{loadTitle}}
+    </view>
 		<view class='noCommodity' v-if="!couponsList.length">
 			<view class='pictrue'>
-				<image src='../../../static/images/noCoupon.png'></image>
+				<image src='../../../static/images/noCoupon.png' />
 			</view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</view>
 </template>
-
 <script>
-	import {
-		getUserCoupons
-	} from '@/api/api.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	import home from '@/components/home';
-	export default {
+  import * as CouponApi from '@/api/promotion/coupon.js';
+  import * as Util from '@/utils/util.js';
+  import dayjs from "@/plugin/dayjs/dayjs.min.js";
+  export default {
 		components: {
-			// #ifdef MP
-			authorize,
-			// #endif
 			home
 		},
 		filters: {
-		    validStrFilter(status) {
-		      const statusMap = {
-		        'usable': '可用',
-		        'unusable': '已用',
-				'overdue': '过期',
-				'notStart': '未开始'
-		      }
-		      return statusMap[status]
-		    }
+      validStrFilter(status) {
+        const statusMap = {
+          '1': '可用',
+          '2': '已用',
+          '3': '过期',
+          '0': '未开始'
+        }
+        return statusMap[status + '']
+      }
 		},
 		data() {
 			return {
-				couponsList: [],
+        navOn: 1,
+        couponsList: [],
 				loading: false,
 				loadend: false,
-				loadTitle: '加载更多',//提示语
+				loadTitle: '加载更多', // 提示语
 				page: 1,
 				limit: 20,
-				navOn: 'usable',
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -96,23 +89,13 @@
 			}
 		},
 		onLoad() {
-			if (this.isLogin) {
-				this.getUseCoupons();
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return;
 			}
+      this.getUseCoupons();
 		},
 		methods: {
-			/**
-			 * 授权回调
-			 */
-			onLoadFun: function() {
-				this.getUseCoupons();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
 			onNav: function(type) {
 				this.navOn = type;
 				this.couponsList = [];
@@ -124,32 +107,50 @@
 			 * 获取领取优惠券列表
 			 */
 			getUseCoupons: function() {
-				let that = this;
-				if(this.loadend) return false;
-				if(this.loading) return false;
-				getUserCoupons({ page: that.page, limit: that.limit, type: that.navOn}).then(res => {
-					let list= res.data ? res.data.list : [],loadend=list.length < that.limit;
-					let couponsList = that.$util.SplitArray(list, that.couponsList);
-					that.$set(that,'couponsList',couponsList);
-					that.loadend = loadend;
-					that.loadTitle = loadend ? '我也是有底线的' : '加载更多';
-					that.page = that.page + 1;
-					that.loading = false;
-				}).catch(err=>{
-					  that.loading = false;
-					  that.loadTitle = '加载更多';
-				  });
-			}
+				if(this.loadend || this.loading) {
+          return false;
+        }
+        CouponApi.getCouponPage({
+          pageNo: this.page,
+          pageSize: this.limit,
+          status: this.navOn
+        }).then(res => {
+					const list= res.data ? res.data.list : [];
+          // 处理状态
+          list.forEach(item => {
+            if (item.status === 1 && item.validStartTime > new Date().getTime()) {
+              item.status = 0;
+            }
+          })
+
+          const loadend = list.length < this.limit;
+					let couponsList = this.$util.SplitArray(list, this.couponsList);
+					this.$set(this, 'couponsList', couponsList);
+					this.loadend = loadend;
+					this.loadTitle = loadend ? '我也是有底线的' : '加载更多';
+					this.page = this.page + 1;
+					this.loading = false;
+				}).catch(err => {
+          this.loading = false;
+          this.loadTitle = '加载更多';
+        });
+			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD");
+      }
 		},
 		/**
 		  * 页面上拉触底事件的处理函数
 		  */
-		 onReachBottom: function () {
-		   this.getUseCoupons();
-		 }
+   onReachBottom: function () {
+     this.getUseCoupons();
+   }
 	}
 </script>
-
 <style lang="scss" scoped>
 	.navbar {
 		position: fixed;
@@ -159,13 +160,13 @@
 		height: 106rpx;
 		background-color: #FFFFFF;
 		z-index: 9;
-	
+
 		.item {
 			border-top: 5rpx solid transparent;
 			border-bottom: 5rpx solid transparent;
 			font-size: 30rpx;
 			color: #999999;
-	
+
 			&.on {
 				border-bottom-color: #E93323;
 				color: #282828;

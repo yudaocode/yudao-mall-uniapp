@@ -6,6 +6,10 @@ export function takeCoupon(templateId) {
   });
 }
 
+export function getCouponPage(data) {
+  return request.get("app-api/promotion/coupon/page", data);
+}
+
 export function getCouponTemplateList(spuId, useType) {
   return request.get("app-api/promotion/coupon-template/list", {
     spuId,
