@@ -29,7 +29,7 @@
 			</view>
 			<!-- #endif -->
 			<!-- 首页展示 -->
-			<view class="page_content" :style="'margin-top:'+(marTop)+'px;'" v-if="navIndex == 0">
+			<view class="page_content" :style="'margin-top:'+(marTop)+'px;'" v-if="navIndex === 0">
 				<view class="mp-bg"></view>
 				<!-- banner -->
 				<view class="swiper" v-if="imgUrls.length">
@@ -68,8 +68,8 @@
 				<!-- menu -->
 				<view class='nav acea-row' v-if="menus.length">
 					<block v-for="(item,index) in menus" :key="index">
-						<navigator class='item' v-if="item.show == '1'" :url='item.url' open-type='switchTab'
-							hover-class='none'>
+						<navigator class='item' v-if="item.show === '1'" :url='item.url' open-type='switchTab'
+                       hover-class='none'>
 							<view class='pictrue'>
 								<image :src='item.pic'></image>
 							</view>
@@ -115,8 +115,8 @@
 					<scroll-view class="scroll-view_H" style="width: 100%;" scroll-x="true" scroll-with-animation
 						:scroll-left="tabsScrollLeft" @scroll="scroll">
 						<view class="tab nav-bd" id="tab_list">
-							<view id="tab_item" :class="{ 'active': listActive == index}" class="item"
-								v-for="(item, index) in explosiveMoney" :key="index" @click="ProductNavTab(item,index)">
+							<view id="tab_item" :class="{ 'active': listActive === index}" class="item"
+                    v-for="(item, index) in explosiveMoney" :key="index" @click="ProductNavTab(item,index)">
 								<view class="txt">{{item.name}}</view>
 								<view class="label">{{item.info}}</view>
 							</view>
@@ -158,31 +158,23 @@
 </template>
 <script>
 	import Cache from '../../utils/cache';
-	var statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
+	const statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
 	let app = getApp();
 	import {
 		getIndexData,
 		getCoupons,
 		setCouponReceive
 	} from '@/api/api.js';
-	// #ifdef MP-WEIXIN
-	import { getTemlIds } from '@/api/api.js';
-	// #endif
-	import {
-		getShare
-	} from '@/api/public.js';
+	import { getShare } from '@/api/public.js';
 	import a_seckill from './components/a_seckill';
 	import b_combination from './components/b_combination';
 	import c_bargain from './components/c_bargain';
 	import goodList from '@/components/goodList';
 	import promotionGood from '@/components/promotionGood';
 	import { goShopDetail } from '@/libs/order.js'
-	import {
-		mapGetters
-	} from "vuex";
+	import { mapGetters } from "vuex";
 	import tabNav from '@/components/tabNav.vue'
 	import countDown from '@/components/countDown';
-	import { getProductHot, } from '@/api/store.js';
 	import recommend from '@/components/recommend';
 	import {
 		silenceBindingSpread
@@ -208,84 +200,40 @@
 		},
 		data() {
 			return {
-				loaded: false,
-				loading: false,
 				statusBarHeight: statusBarHeight,
 				navIndex: 0,
 				navTop: [],
 				logoUrl: "",
 				imgUrls: [],
-				itemNew: [],
 				menus: [],
-				bastInfo: '',
-				fastInfo: '',
-				fastList: [],
-				firstInfo: '',
-				salesInfo: '',
 				indicatorDots: false,
 				circular: true,
 				autoplay: true,
 				interval: 3000,
 				duration: 500,
-				window: false,
-				iShidden: false,
-				navH: "",
-				newGoodsBananr: '',
 				couponList: [],
-				liveList: [],
-				hotList: [{
-					pic: '/static/images/hot_001.png'
-				}, {
-					pic: '/static/images/hot_002.png'
-				}, {
-					pic: '/static/images/hot_003.png'
-				}],
 				marTop: 0,
-				loadend: false,
-				loadTitle: '加载更多',
-				sortProduct: [],
-				where: {
-					cid: 0,
-					page: 1,
-					limit: 10,
-				},
-				is_switch: true,
-				hotPage: 1,
-				hotLimit: 10,
-				hotScroll: false,
 				explosiveMoney: [],
-				prodeuctTop: 0,
-				searchH: 0,
-				isFixed: false,
 				roll: [], // 新闻简报
 				site_name: '', //首页title
-				iSshowH: false,
 				configApi: {}, //分享类容配置
-				spikeList: [], // 秒杀
-				point: '',
-				privacyStatus: false, // 隐私政策是否同意过
 				tabsScrollLeft: 0, // tabs当前偏移量
 				scrollLeft: 0,
-				lineColor: 'red',
-				lineStyle: {}, // 下划线位置--动态甲酸
-				listActive: 0, // 当前选中项
-				duration: 0.2, // 下划线动画时长
 
         // ========== 精品推荐 ===========
         goodScroll: true, // 精品推荐开关
-        ProductNavindex: 0,
+        listActive: 0, // 当前选中项
         goodType: 1, //精品推荐 Type
         params: { //精品推荐分页
           page: 1,
           limit: 10,
         },
+        loading: false,
         tempArr: [], // 精品推荐临时数组
-			}
+        iSshowH: false,
+      }
 		},
 		watch: {
-			ProductNavindex(newVal) { // 监听当前选中项
-				this.setTabList()
-			},
 			listActive(newVal) { // 监听当前选中项
 				this.setTabList()
 			}
@@ -312,27 +260,8 @@
 					} catch {}
 				}
 			});
-			let self = this
-			// #ifdef MP
-			// 获取小程序头部高度
-			this.navH = app.globalData.navHeight;
-			let info = uni.createSelectorQuery().select(".mp-header");
-			info.boundingClientRect(function(data) {
-				self.marTop = data.height
-				self.poTop = Number(data.height) + 84
-			}).exec()
-			// #endif
-			// #ifndef MP
-			this.navH = 0;
-			// #endif
 			this.isLogin && silenceBindingSpread();
-			// Promise.all([this.getAllCategory(), this.getIndexConfig()
-			// 	// , this.setVisit()
-			// ]);
 			this.getIndexConfig();
-			// #ifdef MP
-			this.getTemlIds()
-			// #endif
 		},
 		onShow() {
 			let self = this
@@ -355,16 +284,12 @@
 					});
 				})
 			},
-			clickSort(index) {
-				this.listActive = index
-			},
 			// scroll-view滑动事件
 			scroll(e) {
 				this.scrollLeft = e.detail.scrollLeft;
 			},
 			setTabList() {
 				this.$nextTick(() => {
-					//this.setLine()
 					this.scrollIntoView()
 				})
 			},
@@ -380,51 +305,11 @@
 					})
 				})
 			},
-			//  计算下划线位置
-			setLine() {
-				let lineWidth = 0,
-					lineLeft = 0
-				this.getElementData(`#tab_item`, (data) => {
-					let el = data[this.listActive]
-					lineWidth = el.width / 2
-					// lineLeft = el.width * (this.currentIndex + 0.5)  // 此种只能针对每个item长度一致的
-					lineLeft = el.width / 2 + (-data[0].left) + el.left
-					this.lineStyle = {
-						width: `${lineWidth}px`,
-						transform: `translateX(${lineLeft}px) translateX(-50%)`,
-						transitionDuration: `${this.duration}s`
-					};
-				})
-			},
 			getElementData(el, callback) {
 				uni.createSelectorQuery().in(this).selectAll(el).boundingClientRect().exec((data) => {
 					callback(data[0]);
 				});
 			},
-			xieyiApp() {
-				uni.navigateTo({
-					url: '/pages/users/web_page/index?webUel=https://admin.java.crmeb.net/useragreement/xieyi.html&title=协议内容'
-				})
-			},
-			// #ifdef MP
-			getTemlIds() {
-				for (var i in arrTemp) {
-					this.getTem(arrTemp[i]);
-				}
-			},
-			getTem(data) {
-				getTemlIds({
-					type: data
-				}).then(res => {
-					if (res.data) {
-						let arr = res.data.map((item) => {
-							return item.tempId
-						})
-						wx.setStorageSync('tempID' + data, arr);
-					}
-				})
-			},
-			// #endif
 			// 首页数据
 			getIndexConfig: function() {
 				let that = this;
@@ -446,10 +331,6 @@
 					this.getGroomList();
 					this.shareApi();
 					this.getcouponList();
-					// #ifdef H5
-					// that.subscribe = res.data.subscribe;
-					// #endif
-
 				})
 			},
 			getcouponList() {
@@ -459,26 +340,6 @@
 					limit: 6
 				}).then(res => {
 					that.$set(that, "couponList", res.data);
-					// 小程序判断用户是否授权；
-					// #ifdef MP
-					uni.getSetting({
-						success(res) {
-							if (!res.authSetting['scope.userInfo']) {
-								that.window = that.couponList.length ? true : false;
-							} else {
-								that.window = false;
-								that.iShidden = true;
-							}
-						}
-					});
-					// #endif
-					// #ifndef MP
-					if (that.isLogin) {
-						that.window = false;
-					} else {
-						that.window = res.data.length ? true : false;
-					}
-					// #endif
 				}).catch(err => {
 					return this.$util.Tips({
 						title: err
@@ -516,12 +377,10 @@
         this.listActive = index
         this.goodType = parseInt(item.type)
         this.listActive = index
-        this.ProductNavindex = index
         this.tempArr = []
         this.params.page = 1
         this.goodScroll = true
-        let onloadH = true
-        this.getGroomList(onloadH)
+        this.getGroomList(true)
       },
       /**
        * 商品精品推荐
@@ -570,36 +429,9 @@
           })
         })
       },
-			/**
-			 * 获取我的推荐 TODO 芋艿：没实现
-			 */
-			get_host_product: function() {
-				let that = this;
-				that.loading = true;
-
-				if (that.hotScroll) return
-				getProductHot(
-					that.hotPage,
-					that.hotLimit,
-				).then(res => {
-					that.hotPage++
-					that.hotScroll = res.data.list.length < that.hotLimit
-					that.hostProduct = that.hostProduct.concat(res.data.list)
-				});
-			},
       fen2yuan(price) {
         return Util.fen2yuan(price)
       }
-		},
-		mounted() {
-			let self = this
-			// #ifdef H5
-			// 获取H5 搜索框高度
-			let appSearchH = uni.createSelectorQuery().select(".serch-wrapper");
-			appSearchH.boundingClientRect(function(data) {
-				self.searchH = data.height
-			}).exec()
-			// #endif
 		},
 		/**
 		 * 用户点击右上角分享
@@ -615,20 +447,13 @@
 		},
 		// #endif
 		onReachBottom() {
-			if (this.navIndex == 0) {
+			if (this.navIndex === 0) {
 				// 首页加载更多
-				if (this.params.page != 1) {
+				if (this.params.page !== 1) {
 					this.getGroomList();
 				}
-			} else {
-				// 分类栏目加载更多
-				if (this.sortProduct.length > 0) {
-					//this.get_product_list();
-				} else {
-					this.get_host_product();
-				}
 			}
-		},
+		}
 	}
 </script>
 <style>
