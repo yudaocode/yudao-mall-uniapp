@@ -3,35 +3,41 @@
 		<view class='line'>
 			<image src='../../../static/images/line.jpg' v-if="addressList.length"></image>
 		</view>
-		<view class='address-management' :class='addressList.length < 1 && page > 1 ? "fff":""'>
+		<view class='address-management' :class='addressList.length === 0 ? "fff":""'>
 			<radio-group class="radio-group" @change="radioChange" v-if="addressList.length">
 				<view class='item borRadius14' v-for="(item,index) in addressList" :key="index">
 					<view class='address' @click='goOrder(item.id)'>
-						<view class='consignee'>收货人：{{item.realName}}<text class='phone'>{{item.phone}}</text></view>
-						<view>收货地址：{{item.province}}{{item.city}}{{item.district}}{{item.detail}}</view>
+						<view class='consignee'>收货人：{{ item.name }}
+              <text class='phone'>{{item.mobile}}</text>
+            </view>
+						<view>收货地址：{{item.areaName}} {{item.detailAddress}}</view>
 					</view>
 					<view class='operation acea-row row-between-wrapper'>
 						<!-- #ifndef MP -->
-						<radio class="radio" :value="index.toString()" :checked="item.isDefault">
+						<radio class="radio" :value="index.toString()" :checked="item.defaultStatus">
 							<text>设为默认</text>
 						</radio>
 						<!-- #endif -->
 						<!-- #ifdef MP -->
-						<radio class="radio" :value="index" :checked="item.isDefault">
+						<radio class="radio" :value="index" :checked="item.defaultStatus">
 							<text>设为默认</text>
 						</radio>
 						<!-- #endif -->
 						<view class='acea-row row-middle'>
-							<view @click='editAddress(item.id)'><text class='iconfont icon-bianji'></text>编辑</view>
-							<view @click='delAddress(index)'><text class='iconfont icon-shanchu'></text>删除</view>
+							<view @click='editAddress(item.id)'>
+                <text class='iconfont icon-bianji' />编辑
+              </view>
+							<view @click='delAddress(index)'>
+                <text class='iconfont icon-shanchu' />删除
+              </view>
 						</view>
 					</view>
 				</view>
 			</radio-group>
 			<view class='loadingicon acea-row row-center-wrapper' v-if="addressList.length">
-				<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
+				<text class='loading iconfont icon-jiazai' :hidden='!loading'></text>{{loadTitle}}
 			</view>
-			<view class='noCommodity' v-if="addressList.length < 1 && page > 1">
+			<view class='noCommodity' v-if="addressList.length < 1">
 				<view class='pictrue'>
 					<image src='../../../static/images/noAddress.png'></image>
 				</view>
@@ -40,69 +46,56 @@
 		</view>
 		<view class='footer acea-row row-between-wrapper'>
 			<!-- #ifdef MP-->
-			<view class='addressBnt bg-color' @click='addAddress'><text class='iconfont icon-tianjiadizhi'></text>添加新地址</view>
-			<view class='addressBnt wxbnt' @click='getWxAddress'><text class='iconfont icon-weixin2'></text>导入微信地址</view>
+			<view class='addressBnt bg-color' @click='addAddress'>
+        <text class='iconfont icon-tianjiadizhi' />添加新地址
+      </view>
+			<view class='addressBnt wxbnt' @click='getWxAddress'>
+        <text class='iconfont icon-weixin2' />导入微信地址
+      </view>
 			<!-- #endif -->
 			<!-- #ifdef H5-->
-			<view class='addressBnt bg-color' :class="this.$wechat.isWeixin()?'':'on'" @click='addAddress'><text class='iconfont icon-tianjiadizhi'></text>添加新地址</view>
-			<view v-if="this.$wechat.isWeixin()" class='addressBnt wxbnt' @click='getAddress'><text class='iconfont icon-weixin2'></text>导入微信地址</view>
+			<view class='addressBnt bg-color' :class="this.$wechat.isWeixin()?'':'on'" @click='addAddress'>
+        <text class='iconfont icon-tianjiadizhi' />添加新地址
+      </view>
+			<view v-if="this.$wechat.isWeixin()" class='addressBnt wxbnt' @click='getAddress'>
+        <text class='iconfont icon-weixin2' />导入微信地址
+      </view>
 			<!-- #endif -->
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</view>
 </template>
-
 <script>
-	import {
-		getAddressList,
-		setAddressDefault,
-		delAddress,
-		editAddress,
-		postAddress
-	} from '@/api/user.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
+	import { editAddress } from '@/api/user.js';
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	import home from '@/components/home';
-	export default {
+  import * as AddressApi from '@/api/member/address.js';
+  export default {
 		components: {
-			// #ifdef MP
-			authorize,
-			// #endif
 			home
 		},
 		data() {
 			return {
 				addressList: [],
-				cartId: '',
-				pinkId: 0,
-				couponId: 0,
 				loading: false,
-				loadend: false,
 				loadTitle: '加载更多',
-				page: 1,
-				limit: 20,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				bargain: false, //是否是砍价
-				combination: false, //是否是拼团
-				secKill: false, //是否是秒杀
+
+        // TODO 芋艿：看看后面咋搞回来
+        preOrderNo: '',
+        cartId: '',
+        pinkId: 0,
+        couponId: 0,
+				bargain: false, // 是否是砍价
+				combination: false, // 是否是拼团
+				secKill: false, // 是否是秒杀
 			};
 		},
 		computed: mapGetters(['isLogin']),
 		watch:{
 			isLogin:{
-				handler:function(newV,oldV){
-					if(newV){
+				handler: function(newV, oldV) {
+					if (newV) {
 						this.getUserAddress(true);
 					}
 				},
@@ -110,31 +103,122 @@
 			}
 		},
 		onLoad(options) {
-			if (this.isLogin) {
-				this.preOrderNo = options.preOrderNo || 0;
-				// this.pinkId = options.pinkId || 0;
-				// this.couponId = options.couponId || 0;
-				// this.secKill = options.secKill || false;
-				// this.combination = options.combination || false;
-				// this.bargain = options.bargain || false;
-				this.getAddressList(true);
-			} else {
-				toLogin();
-			}
+      if (!this.isLogin) {
+        toLogin();
+        return;
+      }
+      this.preOrderNo = options.preOrderNo || 0;
+      this.getAddressList();
 		},
 		onShow: function() {
-			let that = this;
-			that.getAddressList(true);
+			this.getAddressList();
 		},
 		methods: {
-			onLoadFun: function() {
-				this.getAddressList();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
-			/*
+      /**
+       * 获取地址列表
+       */
+      getAddressList: function() {
+        if (this.loading) {
+          return;
+        }
+        this.loading = true;
+        this.loadTitle = '';
+        AddressApi.getAddressList().then(res => {
+          this.$set(this, 'addressList', res.data);
+          this.loadTitle = '我也是有底线的';
+          this.loading = false;
+        }).catch(err => {
+          this.loading = false;
+          this.loadTitle = '加载更多';
+        });
+      },
+      /**
+       * 设置默认地址
+       */
+      radioChange: function(e) {
+        const index = parseInt(e.detail.value);
+        const address = this.addressList[index];
+        if (address === undefined) {
+          return this.$util.Tips({
+            title: '您设置的默认地址不存在!'
+          });
+        }
+        AddressApi.updateAddress({
+          ...address,
+          defaultStatus: true
+        }).then(res => {
+          for (let i = 0, len = this.addressList.length; i < len; i++) {
+            if (i === index) {
+              this.addressList[i].defaultStatus = true;
+            } else {
+              this.addressList[i].defaultStatus = false;
+            }
+          }
+          this.$util.Tips({
+            title: '设置成功',
+            icon: 'success'
+          }, () => {
+            this.$set(this, 'addressList', this.addressList);
+          });
+        }).catch(err => {
+          return this.$util.Tips({
+            title: err
+          });
+        });
+      },
+      /**
+       * 编辑地址
+       */
+      editAddress: function(id) {
+        let cartId = this.cartId,
+          pinkId = this.pinkId,
+          couponId = this.couponId;
+        this.cartId = '';
+        this.pinkId = '';
+        this.couponId = '';
+        uni.navigateTo({
+          url: '/pages/users/user_address/index?id=' + id + '&cartId=' + cartId + '&pinkId=' + pinkId + '&couponId=' +
+            couponId + '&secKill' + this.secKill + '&combination=' + this.combination + '&bargain=' + this.bargain
+        })
+      },
+      /**
+       * 删除地址
+       */
+      delAddress: function(index) {
+        const address = this.addressList[index];
+        if (address === undefined) {
+          return this.$util.Tips({
+            title: '您删除的地址不存在!'
+          });
+        }
+        AddressApi.deleteAddress(address.id).then(res => {
+          this.$util.Tips({
+            title: '删除成功',
+            icon: 'success'
+          }, () => {
+            this.addressList.splice(index, 1);
+            this.$set(this, 'addressList', this.addressList);
+          });
+        }).catch(err => {
+          return this.$util.Tips({
+            title: err
+          });
+        });
+      },
+      /**
+       * 新增地址
+       */
+      addAddress: function() {
+        this.cartId = '';
+        this.pinkId = '';
+        this.couponId = '';
+        uni.navigateTo({
+          url: '/pages/users/user_address/index?preOrderNo=' + this.preOrderNo
+        })
+      },
+
+      // TODO 芋艿：微信导入；
+			/**
 			 * 导入微信地址（小程序）
 			 */
 			getWxAddress: function() {
@@ -151,7 +235,7 @@
 								addressP.cityId = 0;
 								editAddress({
 									address: addressP,
-									isDefault: true,
+									defaultStatus: true,
 									realName: res.userName,
 									postCode: res.postalCode,
 									phone: res.telNumber,
@@ -199,7 +283,8 @@
 					}
 				})
 			},
-			/*
+      // TODO 芋艿：微信导入；
+      /**
 			 * 导入微信地址（公众号）
 			 */
 			getAddress() {
@@ -217,7 +302,7 @@
 							},
 							detail: userInfo.detailInfo,
 							postCode: userInfo.postalCode,
-							isDefault: true
+							defaultStatus: true
 						})
 						.then(() => {
 							that.$util.Tips({
@@ -225,7 +310,7 @@
 								icon: 'success'
 							}, function() {
 								// close();
-								that.getAddressList(true);
+								that.getAddressList();
 							});
 						})
 						.catch(err => {
@@ -236,127 +321,13 @@
 						});
 				});
 			},
-			/**
-			 * 获取地址列表
-			 * 
-			 */
-			getAddressList: function(isPage) {
-				let that = this;
-				if (isPage) {
-					that.loadend = false;
-					that.page = 1;
-					that.$set(that, 'addressList', []);
-				};
-				if (that.loading) return;
-				if (that.loadend) return;
-				that.loading = true;
-				that.loadTitle = '';
-				getAddressList({
-					page: that.page,
-					limit: that.limit
-				}).then(res => {
-					let list = res.data.list;
-					let loadend = list.length < that.limit;
-					that.addressList = that.$util.SplitArray(list, that.addressList);
-					that.$set(that, 'addressList', that.addressList);
-					that.loadend = loadend;
-					that.loadTitle = loadend ? '我也是有底线的' : '加载更多';
-					that.page = that.page + 1;
-					that.loading = false;
-				}).catch(err => {
-					that.loading = false;
-					that.loadTitle = '加载更多';
-				});
-			},
-			/**
-			 * 设置默认地址
-			 */
-			radioChange: function(e) {
-				let index = parseInt(e.detail.value),
-					that = this;
-				let address = this.addressList[index];
-				if (address == undefined) return that.$util.Tips({
-					title: '您设置的默认地址不存在!'
-				});
-				setAddressDefault(address.id).then(res => {
-					for (let i = 0, len = that.addressList.length; i < len; i++) {
-						if (i == index) that.addressList[i].isDefault = true;
-						else that.addressList[i].isDefault = false;
-					}
-					that.$util.Tips({
-						title: '设置成功',
-						icon: 'success'
-					}, function() {
-						that.$set(that, 'addressList', that.addressList);
-					});
-				}).catch(err => {
-					return that.$util.Tips({
-						title: err
-					});
-				});
-			},
-			/**
-			 * 编辑地址
-			 */
-			editAddress: function(id) {
-				let cartId = this.cartId,
-					pinkId = this.pinkId,
-					couponId = this.couponId;
-				this.cartId = '';
-				this.pinkId = '';
-				this.couponId = '';
-				uni.navigateTo({
-					url: '/pages/users/user_address/index?id=' + id + '&cartId=' + cartId + '&pinkId=' + pinkId + '&couponId=' +
-						couponId + '&secKill' + this.secKill + '&combination=' + this.combination + '&bargain=' + this.bargain
-				})
-			},
-			/**
-			 * 删除地址
-			 */
-			delAddress: function(index) {
-				let that = this,
-					address = this.addressList[index];
-				if (address == undefined) return that.$util.Tips({
-					title: '您删除的地址不存在!'
-				});
-				delAddress(address.id).then(res => {
-					that.$util.Tips({
-						title: '删除成功',
-						icon: 'success'
-					}, function() {
-						that.addressList.splice(index, 1);
-						that.$set(that, 'addressList', that.addressList);
-					});
-				}).catch(err => {
-					return that.$util.Tips({
-						title: err
-					});
-				});
-			},
-			/**
-			 * 新增地址
-			 */
-			addAddress: function() {
-				let cartId = this.cartId,
-					pinkId = this.pinkId,
-					couponId = this.couponId;
-				this.cartId = '';
-				this.pinkId = '';
-				this.couponId = '';
-				uni.navigateTo({
-					url: '/pages/users/user_address/index?preOrderNo=' + this.preOrderNo
-				})
-			},
 			goOrder: function(id) {
 				if(this.preOrderNo){
 					uni.redirectTo({
-						url: '/pages/users/order_confirm/index?is_address=1&preOrderNo=' + this.preOrderNo + '&addressId=' +  id 
+						url: '/pages/users/order_confirm/index?is_address=1&preOrderNo=' + this.preOrderNo + '&addressId=' +  id
 					})
 				}
 			}
-		},
-		onReachBottom: function() {
-			this.getAddressList();
 		}
 	}
 </script>
