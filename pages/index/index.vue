@@ -534,7 +534,6 @@
 					this.iSshowH = true
 				}
         this.loading = true
-        console.log(this.goodType, '====')
         const type = this.goodType === 1 ? 'best' :
           this.goodType === 2 ? 'hot' :
             this.goodType === 3 ? 'new' :

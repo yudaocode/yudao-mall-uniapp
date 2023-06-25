@@ -12,10 +12,10 @@
 					<view class='text'>
 						<view class='line1'>{{ item.name }}</view>
 						<view class='money font-color'>￥<text class='num'>{{ fen2yuan(item.price) }}</text></view>
-						<view class='vip-money acea-row row-middle' v-if="item.vip_price && item.vip_price > 0">￥{{item.vip_price || 0}}
-							<image src='../../static/images/vip.png'></image><text class='num'>已售{{Number(item.sales) + Number(item.ficti) || 0}}{{item.unitName}}</text>
+						<view class='vip-money acea-row row-middle' v-if="item.vipPrice > 0">￥{{ fen2yuan(item.vipPrice || 0) }}
+							<image src='../../static/images/vip.png'></image><text class='num'>已售{{ item.salesCount }}{{item.unitName}}</text>
 						</view>
-						<view class='vip-money acea-row row-middle' v-else><text class='num'>已售{{Number(item.sales) + Number(item.ficti) || 0}}{{item.unitName}}</text></view>
+						<view class='vip-money acea-row row-middle' v-else><text class='num'>已售{{ item.salesCount }}{{item.unitName}}</text></view>
 					</view>
 				</view>
 				<view class='iconfont icon-gouwuche cart-color acea-row row-center-wrapper'></view>
