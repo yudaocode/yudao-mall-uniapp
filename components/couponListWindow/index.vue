@@ -21,9 +21,9 @@
 						<view class='text'>
               <!-- 类型 -->
 							<view class='condition line2'>
-								<span class='line-title' :class='item.isUse?"gray":""' v-if='item.useType===1'>通用</span>
+								<span class='line-title' :class='item.isUse?"gray":""' v-if='type === 1'>通用</span>
 								<span class='line-title' :class='item.isUse?"gray":""'
-									v-else-if='item.useType===3'>品类</span>
+									v-else-if='type === 3'>品类</span>
 								<span class='line-title' :class='item.isUse?"gray":""' v-else>商品</span>
 								<span>{{item.name}}</span>
 							</view>

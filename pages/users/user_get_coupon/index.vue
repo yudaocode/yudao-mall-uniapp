@@ -9,65 +9,50 @@
 		<view style="height: 106rpx;"></view>
 		<view class='coupon-list' v-if="couponsList.length">
 			<view class='item acea-row row-center-wrapper' v-for="(item,index) in couponsList" :key="index">
-				<view class='money' :class='item.isUse ? "moneyGray" : "" '>
-					<view>￥<text class='num'>{{item.money?Number(item.money):''}}</text></view>
-					<view class="pic-num">满{{item.minPrice?Number(item.minPrice):''}}元可用</view>
+				<view class='money' :class='item.takeStatus ? "moneyGray" : "" '>
+          <view>￥
+            <text v-if="item.discountType === 1" class='num'>{{ fen2yuan(item.discountPrice) }}</text>
+            <text v-else class='num'>{{ (item.discountPercent / 10.0).toFixed(1) }} 折</text>
+          </view>
+          <view class="pic-num">满 {{ fen2yuan(item.usePrice) }} 元可用</view>
 				</view>
 				<view class='text'>
 					<view class='condition line2'>
-						<span class='line-title' :class='(item.isUse==true || item.isUse==2)?"gray":""'
-							v-if='item.useType===1'>通用</span>
-						<span class='line-title' :class='(item.isUse==true || item.isUse==2)?"gray":""'
-							v-else-if='item.useType===3'>品类</span>
-						<span class='line-title' :class='(item.isUse==true || item.isUse==2)?"gray":""' v-else>商品</span>
+						<span class='line-title' :class='(item.takeStatus)?"gray":""'
+							v-if='type === 1'>通用</span>
+						<span class='line-title' :class='(item.takeStatus)?"gray":""'
+							v-else-if='type === 3'>品类</span>
+						<span class='line-title' :class='(item.takeStatus)?"gray":""' v-else>商品</span>
 						<span>{{item.name}}</span>
 					</view>
 					<view class='data acea-row row-between-wrapper'>
-						<view v-if="item.day>0">领取后{{item.day}}天内可用</view>
-						<view v-else>
-							{{ item.useStartTimeStr&& item.useEndTimeStr ? item.useStartTimeStr + " - " + item.useEndTimeStr : ""}}
-						</view>
-						<view class='bnt gray' v-if="item.isUse==true">已领取</view>
-						<view class='bnt bg-color' v-else @click='getCoupon(item.id,index)'>立即领取</view>
+            <view v-if="item.validityType > 1">领取后 {{ item.fixedEndTerm }} 天内可用</view>
+            <view v-else>
+              {{ formatDate(item.validStartTime) + " - " + formatDate(item.validEndTime) }}
+            </view>
+            <view class='bnt gray' v-if="item.takeStatus">已领取</view>
+						<view class='bnt bg-color' v-else @click='getCoupon(item.id, index)'>立即领取</view>
 					</view>
 				</view>
 			</view>
 		</view>
 		<view class='loadingicon acea-row row-center-wrapper'>
-			<text class='loading iconfont icon-jiazai'
-				:hidden='loading==false'></text>{{couponsList.length?loadTitle:''}}
+			<text class='loading iconfont icon-jiazai' :hidden='!loading' />{{couponsList.length?loadTitle:''}}
 		</view>
 		<view class='noCommodity' v-if="!couponsList.length && isShow && !loading">
 			<view class='pictrue'>
-				<image src='../../../static/images/noCoupon.png'></image>
+				<image src='../../../static/images/noCoupon.png' />
 			</view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 	</view>
 </template>
-
 <script>
-	import {
-		getCoupons,
-		setCouponReceive
-	} from '@/api/api.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	export default {
-		components: {
-			// #ifdef MP
-			authorize
-			// #endif
-		},
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
+  import * as CouponApi from '@/api/promotion/coupon.js';
+  import * as Util from '@/utils/util.js';
+  import dayjs from "@/plugin/dayjs/dayjs.min.js";
+  export default {
 		data() {
 			return {
 				couponsList: [],
@@ -76,24 +61,20 @@
 				loadTitle: '加载更多', //提示语
 				page: 1,
 				limit: 20,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
 				type: 1,
 				isShow: false,
 				navList: [{
-						type: 1,
-						name: '通用券',
-						count: 0
-					},
-					{
-						type: 2,
-						name: '商品券',
-						count: 0
-					},
-					{
-						type: 3,
-						name: '品类券',
-						count: 0
+          type: 1,
+          name: '通用券',
+          count: 0
+        }, {
+          type: 2,
+          name: '商品券',
+          count: 0
+        }, {
+          type: 3,
+          name: '品类券',
+          count: 0
 					},
 				],
 				count: 0
@@ -111,13 +92,11 @@
 			}
 		},
 		onLoad() {
-
-			if (this.isLogin) {
-				this.getUseCoupons();
-
-			} else {
-				toLogin();
-			}
+			if (!this.isLogin) {
+        toLogin();
+        return
+      }
+      this.getUseCoupons();
 		},
 		/**
 		 * 页面上拉触底事件的处理函数
@@ -126,28 +105,20 @@
 			this.getUseCoupons();
 		},
 		methods: {
-			onLoadFun() {
-				this.getUseCoupons();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
+      /**
+       * 领取优惠劵
+       */
 			getCoupon: function(id, index) {
-				let that = this;
-				let list = that.couponsList;
-				let ids = [];
-				ids.push(id);
-				//领取优惠券
-				setCouponReceive(id).then(function(res) {
-					list[index].isUse = true;
-					that.$set(that, 'couponsList', list);
-					that.$util.Tips({
+				// 领取优惠券
+        CouponApi.takeCoupon(id).then(res => {
+          this.couponsList[index].takeStatus = true;
+					this.$set(this, 'couponsList', this.couponsList);
+          this.$util.Tips({
 						title: '领取成功'
 					});
-				}, function(res) {
-					return that.$util.Tips({
-						title: res
+				}).catch(err => {
+          return this.$util.Tips({
+						title: err
 					});
 				})
 			},
@@ -155,27 +126,27 @@
 			 * 获取领取优惠券列表
 			 */
 			getUseCoupons: function() {
-				let that = this
-				if (that.loadend) return false;
-				if (that.loading) return false;
-				that.loading = true;
-				getCoupons({
-					page: that.page,
-					limit: that.limit,
-					type: that.type
+				if (this.loadend || this.loading) {
+          return false;
+        }
+				this.loading = true;
+        CouponApi.getCouponTemplatePage({
+					pageNo: this.page,
+          pageSize: this.limit,
+					useType: this.type
 				}).then(res => {
-					let list = res.data,
-						loadend = list.length < that.limit;
-					let couponsList = that.$util.SplitArray(list, that.couponsList);
-					that.$set(that, 'couponsList', couponsList);
-					that.loadend = loadend;
-					that.loadTitle = loadend ? '我也是有底线的' : '加载更多';
-					that.page = that.page + 1;
-					that.loading = false;
-					that.isShow = true;
+					const list = res.data.list;
+          const loadend = list.length < this.limit;
+					const couponsList = this.$util.SplitArray(list, this.couponsList);
+					this.$set(this, 'couponsList', couponsList);
+					this.loadend = loadend;
+					this.loadTitle = loadend ? '我也是有底线的' : '加载更多';
+					this.page = this.page + 1;
+					this.loading = false;
+					this.isShow = true;
 				}).catch(err => {
-					that.loading = false;
-					that.loadTitle = '加载更多';
+					this.loading = false;
+					this.loadTitle = '加载更多';
 				});
 			},
 			setType: function(type) {
@@ -186,11 +157,17 @@
 					this.loadend = false;
 					this.getUseCoupons();
 				}
-			}
+			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD");
+      }
 		}
 	}
 </script>
-
 <style scoped>
 	.nav {
 		position: fixed;

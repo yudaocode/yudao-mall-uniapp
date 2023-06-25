@@ -290,7 +290,7 @@
   import * as ProductSpuApi from '@/api/product/spu.js';
   import * as ProductFavoriteApi from '@/api/product/favorite.js';
   import * as ProductCommentApi from '@/api/product/comment.js';
-  import * as CouponTemplateApi from '@/api/promotion/couponTemplate.js';
+  import * as CouponApi from '@/api/promotion/coupon.js';
   import * as PromotionActivityApi from '@/api/promotion/activity.js';
   import * as TradeCartApi from '@/api/trade/cart.js';
   import * as Util from '@/utils/util.js';
@@ -820,7 +820,7 @@
        * 获取优惠券
        */
       getCouponList(useType) {
-        CouponTemplateApi.getCouponTemplateList(this.id, useType).then(res => {
+        CouponApi.getCouponTemplateList(this.id, useType).then(res => {
           this.$set(this.coupon, 'list', res.data);
         })
       },

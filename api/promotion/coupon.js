@@ -5,3 +5,14 @@ export function takeCoupon(templateId) {
     templateId
   });
 }
+
+export function getCouponTemplateList(spuId, useType) {
+  return request.get("app-api/promotion/coupon-template/list", {
+    spuId,
+    useType
+  });
+}
+
+export function getCouponTemplatePage(data) {
+  return request.get("app-api/promotion/coupon-template/page", data);
+}
