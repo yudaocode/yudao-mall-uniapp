@@ -83,6 +83,7 @@
 						</navigator>
 					</block>
 				</view>
+
 				<!-- 优惠券 -->
 				<view class="couponIndex" v-if="couponList.length>0">
 					<view class="acea-row" style="height: 100%;">
@@ -94,12 +95,17 @@
 							</navigator>
 						</view>
 						<view class="listBox acea-row">
-							<view class="list" :class='item.isUse ? "listHui" : "listActive" ' v-for="(item, index) in couponList.slice(0,2)" :key="index">
-								<view class="tit line1" :class='item.isUse ? "pricehui" : "titActive" '>{{item.name}}</view>
-								<view class="price" :class='item.isUse ? "pricehui" : "icon-color" '>{{item.money?Number(item.money):''}}<text class="yuan">元</text></view>
-								<view class="ling" v-if="!item.isUse" :class='item.isUse ? "pricehui" : "icon-color" '  @click="getCoupon(item.id,index)">领取</view>
-								<view class="ling" v-else :class='item.isUse ? "pricehui fonthui" : "icon-color" '>已领取</view>
-								<view class="priceM">满{{item.minPrice?Number(item.minPrice):''}}元可用</view>
+							<view class="list" :class='item.takeStatus ? "listHui" : "listActive" '
+                    v-for="(item, index) in couponList.slice(0,2)" :key="index">
+								<view class="tit line1" :class='item.takeStatus ? "pricehui" : "titActive" '>{{ item.name }}</view>
+								<view class="price" :class='item.takeStatus ? "pricehui" : "icon-color" '>
+                  <text v-if="item.discountType === 1">{{ fen2yuan(item.discountPrice) }} 元</text>
+                  <text v-else>{{ (item.discountPercent / 10.0).toFixed(1) }} 折</text>
+                </view>
+								<view class="ling" v-if="!item.takeStatus" :class='item.takeStatus ? "pricehui" : "icon-color" '
+                      @click="getCoupon(item.id,index)">领取</view>
+								<view class="ling" v-else :class='item.takeStatus ? "pricehui fonthui" : "icon-color" '>已领取</view>
+								<view class="priceM">满{{ fen2yuan(item.usePrice) }}元可用</view>
 							</view>
 						</view>
 					</view>
@@ -176,12 +182,11 @@
 	import tabNav from '@/components/tabNav.vue'
 	import countDown from '@/components/countDown';
 	import recommend from '@/components/recommend';
-	import {
-		silenceBindingSpread
-	} from '@/utils';
+	import { silenceBindingSpread } from '@/utils';
 	import Loading from '@/components/Loading/index.vue';
   import * as ProductSpuApi from '@/api/product/spu.js';
   import * as PromotionActivityApi from '@/api/promotion/activity.js';
+  import * as CouponApi from '@/api/promotion/coupon.js';
   import * as ProductUtil from '@/utils/product.js';
   import * as Util from '@/utils/util.js';
   const arrTemp = ["beforePay", "afterPay", "refundApply", "beforeRecharge", "createBargain", "pink"];
@@ -270,20 +275,6 @@
 			})
 		},
 		methods: {
-			getCoupon: function(id, index) {
-				let that = this;
-				//领取优惠券
-				setCouponReceive(id).then(function(res) {
-					that.$set(that.couponList[index], 'isUse', true);
-					that.$util.Tips({
-						title: '领取成功'
-					});
-				}, function(res) {
-					return that.$util.Tips({
-						title: res
-					});
-				})
-			},
 			// scroll-view滑动事件
 			scroll(e) {
 				this.scrollLeft = e.detail.scrollLeft;
@@ -333,19 +324,7 @@
 					this.getcouponList();
 				})
 			},
-			getcouponList() {
-				let that = this;
-				getCoupons({
-					page: 1,
-					limit: 6
-				}).then(res => {
-					that.$set(that, "couponList", res.data);
-				}).catch(err => {
-					return this.$util.Tips({
-						title: err
-					});
-				});
-			},
+
 			shareApi: function() {
 				getShare().then(res => {
 					this.$set(this, 'configApi', res.data);
@@ -368,6 +347,35 @@
 						configAppMessage);
 				}
 			},
+
+      // ========== 优惠劵 ===========
+      /**
+       * 获得优惠劵列表
+       */
+      getcouponList() {
+        CouponApi.getCouponTemplateList().then(res => {
+          this.$set(this, 'couponList', res.data);
+        }).catch(err => {
+          return this.$util.Tips({
+            title: err
+          });
+        });
+      },
+      /**
+       * 领取优惠劵
+       */
+      getCoupon: function(id, index) {
+        CouponApi.takeCoupon(id).then(res => {
+          this.$set(this.couponList[index], 'takeStatus', true);
+          this.$util.Tips({
+            title: '领取成功'
+          });
+        }).catch(err => {
+          return this.$util.Tips({
+            title: err
+          });
+        })
+      },
 
       // ========== 精品推荐 ===========
       /**
