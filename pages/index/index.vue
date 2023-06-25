@@ -553,10 +553,12 @@
 
           // 设置营销活动
           const spuIds = good_list.map(item => item.id);
-          PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
-            ProductUtil.setActivityList(good_list, res.data);
-            this.tempArr = this.tempArr.concat(good_list); // 放在此处，避免 Vue 监控不到数组里的元素变化
-          });
+          if (spuIds.length > 0) {
+            PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+              ProductUtil.setActivityList(good_list, res.data);
+              this.tempArr = this.tempArr.concat(good_list); // 放在此处，避免 Vue 监控不到数组里的元素变化
+            });
+          }
 				})
 			},
       /**

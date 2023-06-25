@@ -153,10 +153,12 @@
 					this.isbastList = true;
           // 设置营销活动
           const spuIds = good_list.map(item => item.id);
-          PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
-            ProductUtil.setActivityList(good_list, res.data);
-            this.bastList = this.$util.SplitArray(good_list, this.bastList); // 放在此处，避免 Vue 监控不到数组里的元素变化
-          });
+          if (spuIds.length > 0) {
+            PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+              ProductUtil.setActivityList(good_list, res.data);
+              this.bastList = this.$util.SplitArray(good_list, this.bastList); // 放在此处，避免 Vue 监控不到数组里的元素变化
+            });
+          }
         }).catch(err => {
 					this.loading = false
 					this.loadTitle = '加载更多'
@@ -179,10 +181,12 @@
           this.hotPage += 1;
           // 设置营销活动
           const spuIds = good_list.map(item => item.id);
-          PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
-            ProductUtil.setActivityList(good_list, res.data);
-            this.hostProduct = this.hostProduct.concat(good_list); // 放在此处，避免 Vue 监控不到数组里的元素变化
-          });
+          if (spuIds.length > 0) {
+            PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+              ProductUtil.setActivityList(good_list, res.data);
+              this.hostProduct = this.hostProduct.concat(good_list); // 放在此处，避免 Vue 监控不到数组里的元素变化
+            });
+          }
 				});
 			}
 		}

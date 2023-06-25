@@ -105,5 +105,4 @@ export function setActivityList(spuList, activityListMap) {
     spu.activityList = activityListMap[spu.id + ''] || [];
     spu.activityList = sortActivityList(spu.activityList, spu);
   }
-  console.log(spuList);
 }

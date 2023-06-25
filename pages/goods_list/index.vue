@@ -7,84 +7,79 @@
 				<!-- #endif -->
 				<view class='input acea-row row-between-wrapper'><text class='iconfont icon-sousuo'></text>
 					<input placeholder='搜索商品名称' placeholder-class='placeholder' confirm-type='search' name="search"
-						:value='where.keyword' @confirm="searchSubmit"></input>
+						:value='where.keyword' @confirm="searchSubmit" />
 				</view>
-				<view class='iconfont' :class='is_switch==true?"icon-pailie":"icon-tupianpailie"' @click='Changswitch'>
+				<view class='iconfont' :class='is_switch ? "icon-pailie":"icon-tupianpailie"' @click='Changswitch'>
 				</view>
 			</view>
 			<view class='nav acea-row row-middle'>
 				<view class='item' :class='title ? "font-color":""' @click='set_where(1)'>{{title ? title:'默认'}}</view>
 				<view class='item' @click='set_where(2)'>
 					价格
-					<image v-if="price==1" src='../../static/images/up.png'></image>
-					<image v-else-if="price==2" src='../../static/images/down.png'></image>
+					<image v-if="price === 1" src='../../static/images/up.png'></image>
+					<image v-else-if="price === 2" src='../../static/images/down.png'></image>
 					<image v-else src='../../static/images/horn.png'></image>
 				</view>
 				<view class='item' @click='set_where(3)'>
 					销量
-					<image v-if="stock==1" src='../../static/images/up.png'></image>
-					<image v-else-if="stock==2" src='../../static/images/down.png'></image>
+					<image v-if="stock === 1" src='../../static/images/up.png'></image>
+					<image v-else-if="stock === 2" src='../../static/images/down.png'></image>
 					<image v-else src='../../static/images/horn.png'></image>
 				</view>
 				<!-- down -->
 				<view class='item' :class='nows ? "font-color":""' @click='set_where(4)'>新品</view>
 			</view>
-			<view :class='is_switch==true?"":"listBox"' v-if="productList.length>0">
-				<view class='list acea-row row-between-wrapper' :class='is_switch==true?"":"on"'>
-					<view class='item' :class='is_switch==true?"":"on"' hover-class='none'
+			<view :class='is_switch?"":"listBox"' v-if="productList.length > 0">
+				<view class='list acea-row row-between-wrapper' :class='is_switch?"":"on"'>
+					<view class='item' :class='is_switch?"":"on"' hover-class='none'
 						v-for="(item,index) in productList" :key="index" @click="godDetail(item)">
-						<view class='pictrue' :class='is_switch==true?"":"on"'>
-							<image :src='item.image' :class='is_switch==true?"":"on"'></image>
+						<view class='pictrue' :class='is_switch?"":"on"'>
+							<image :src='item.picUrl' :class='is_switch?"":"on"'></image>
 							<span class="pictrue_log_class"
-								:class="is_switch === true ? 'pictrue_log_big' : 'pictrue_log'"
-								v-if="item.activityH5 && item.activityH5.type === '1'">秒杀</span>
+								:class="is_switch ? 'pictrue_log_big' : 'pictrue_log'"
+								v-if="item.activityList && item.activityList[0] && item.activityList[0].type === 1">秒杀</span>
 							<span class="pictrue_log_class"
-								:class="is_switch === true ? 'pictrue_log_big' : 'pictrue_log'"
-								v-if="item.activityH5 && item.activityH5.type === '2'">砍价</span>
+								:class="is_switch ? 'pictrue_log_big' : 'pictrue_log'"
+								v-if="item.activityList && item.activityList[0] && item.activityList[0].type === 2">砍价</span>
 							<span class="pictrue_log_class"
-								:class="is_switch === true ? 'pictrue_log_big' : 'pictrue_log'"
-								v-if="item.activityH5 && item.activityH5.type === '3'">拼团</span>
+								:class="is_switch ? 'pictrue_log_big' : 'pictrue_log'"
+								v-if="item.activityList && item.activityList[0] && item.activityList[0].type === 3">拼团</span>
 						</view>
-						<view class='text' :class='is_switch==true?"":"on"'>
-							<view class='name line1'>{{item.storeName}}</view>
-							<view class='money font-color' :class='is_switch==true?"":"on"'>￥<text
-									class='num'>{{item.price}}</text></view>
-							<view class='vip acea-row row-between-wrapper' :class='is_switch==true?"":"on"'>
-								<view class='vip-money' v-if="item.vip_price && item.vip_price > 0">￥{{item.vip_price}}
+						<view class='text' :class='is_switch?"":"on"'>
+							<view class='name line1'>{{item.name}}</view>
+							<view class='money font-color' :class='is_switch?"":"on"'>￥<text
+									class='num'>{{ fen2yuan(item.price) }}</text></view>
+							<view class='vip acea-row row-between-wrapper' :class='is_switch?"":"on"'>
+								<view class='vip-money' v-if="item.vipPrice > 0">￥{{ fen2yuan(item.vipPrice) }}
 									<image src='../../static/images/vip.png'></image>
 								</view>
-								<view>已售{{Number(item.sales) + Number(item.ficti) || 0}}{{item.unitName}}</view>
+								<view>已售 {{ item.salesCount || 0}} {{item.unitName}}</view>
 							</view>
 						</view>
 					</view>
 				</view>
 				<view class='loadingicon acea-row row-center-wrapper' v-if='productList.length > 0'>
-					<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
+					<text class='loading iconfont icon-jiazai' :hidden='!loading'/> {{loadTitle}}
 				</view>
 			</view>
 		</view>
-		<view class='noCommodity' v-if="productList.length==0 && where.page > 1">
+		<view class='noCommodity' v-if="productList.length === 0 && where.pageNo > 1">
 			<view class='pictrue'>
 				<image src='../../static/images/noShopper.png'></image>
 			</view>
-			<recommend :hostProduct="hostProduct"></recommend>
+			<recommend :hostProduct="hostProduct" />
 		</view>
 	</view>
 </template>
-
 <script>
-	import {
-		getProductslist,
-		getProductHot
-	} from '@/api/store.js';
 	import recommend from '@/components/recommend';
-	import {
-		mapGetters
-	} from "vuex";
-	import {
-		goShopDetail
-	} from '@/libs/order.js'
-	export default {
+	import { mapGetters } from "vuex";
+	import { goShopDetail } from '@/libs/order.js'
+  import * as ProductSpuApi from '@/api/product/spu.js';
+  import * as PromotionActivityApi from '@/api/promotion/activity.js';
+  import * as ProductUtil from '@/utils/product.js';
+  import * as Util from '@/utils/util.js';
+  export default {
 		computed: mapGetters(['uid']),
 		components: {
 			recommend
@@ -93,14 +88,14 @@
 			return {
 				productList: [],
 				is_switch: true,
-				where: {
+				where: { // 筛选条件
 					keyword: '',
-					priceOrder: '',
-					salesOrder: '',
-					news: 0,
-					page: 1,
-					limit: 20,
-					cid: 0,
+          sortField: '',
+          sortAsc: '',
+          recommendType: '',
+					pageNo: 1,
+					pageSize: 20,
+          categoryId: 0,
 				},
 				price: 0,
 				stock: 0,
@@ -109,6 +104,8 @@
 				loading: false,
 				loadTitle: '加载更多',
 				title: '',
+
+        // ========== 热门商品 ==========
 				hostProduct: [],
 				hotPage: 1,
 				hotLimit: 10,
@@ -116,7 +113,7 @@
 			};
 		},
 		onLoad: function(options) {
-			this.$set(this.where, 'cid', options.cid || 0);
+			this.$set(this.where, 'categoryId', options.cid || 0);
 			this.title = options.title || '';
 			this.$set(this.where, 'keyword', options.searchValue || '');
 			this.get_product_list();
@@ -141,47 +138,32 @@
 				})
 			},
 			Changswitch: function() {
-				let that = this;
-				that.is_switch = !that.is_switch
+				this.is_switch = !this.is_switch
 			},
 			searchSubmit: function(e) {
-				let that = this;
-				that.$set(that.where, 'keyword', e.detail.value);
-				that.loadend = false;
-				that.$set(that.where, 'page', 1)
+        this.$set(this.where, 'keyword', e.detail.value);
+        this.loadend = false;
+        this.$set(this.where, 'pageNo', 1)
 				this.get_product_list(true);
 			},
-			/**
-			 * 获取我的推荐
-			 */
-			get_host_product: function() {
-				let that = this;
-				if (that.hotScroll) return
-				getProductHot(
-					that.hotPage,
-					that.hotLimit,
-				).then(res => {
-					that.hotPage++
-					that.hotScroll = res.data.list.length < that.hotLimit
-					that.hostProduct = that.hostProduct.concat(res.data.list)
-				});
-			},
-			//点击事件处理
+      /**
+       * 点击事件处理
+       */
 			set_where: function(e) {
 				switch (e) {
 					case 1:
 						return;
 						break;
 					case 2:
-						if (this.price == 0) this.price = 1;
-						else if (this.price == 1) this.price = 2;
-						else if (this.price == 2) this.price = 0;
+						if (this.price === 0) this.price = 1;
+						else if (this.price === 1) this.price = 2;
+						else if (this.price === 2) this.price = 0;
 						this.stock = 0;
 						break;
 					case 3:
-						if (this.stock == 0) this.stock = 1;
-						else if (this.stock == 1) this.stock = 2;
-						else if (this.stock == 2) this.stock = 0;
+						if (this.stock === 0) this.stock = 1;
+						else if (this.stock === 1) this.stock = 2;
+						else if (this.stock === 2) this.stock = 0;
 						this.price = 0
 						break;
 					case 4:
@@ -189,45 +171,100 @@
 						break;
 				}
 				this.loadend = false;
-				this.$set(this.where, 'page', 1);
+				this.$set(this.where, 'pageNo', 1);
 				this.get_product_list(true);
 			},
-			//设置where条件
+      /**
+       * 设置where条件
+       */
 			setWhere: function() {
-				if (this.price == 0) this.where.priceOrder = '';
-				else if (this.price == 1) this.where.priceOrder = 'asc';
-				else if (this.price == 2) this.where.priceOrder = 'desc';
-				if (this.stock == 0) this.where.salesOrder = '';
-				else if (this.stock == 1) this.where.salesOrder = 'asc';
-				else if (this.stock == 2) this.where.salesOrder = 'desc';
-				this.where.news = this.nows ? 1 : 0;
+				if (this.price === 0 && this.stock === 0) {
+          this.where.sortField = undefined;
+          this.where.sortAsc = undefined;
+        } else if (this.price === 1) {
+          this.where.sortField = 'price';
+          this.where.sortAsc = true;
+        } else if (this.price === 2) {
+          this.where.sortField = 'price';
+          this.where.sortAsc = false;
+        } else if (this.stock === 1) {
+          this.where.sortField = 'salesCount';
+          this.where.sortAsc = true;
+        } else if (this.stock === 2) {
+          this.where.sortField = 'salesCount';
+          this.where.sortAsc = false;
+        }
+				this.where.recommendType = this.nows ? 'new' : undefined;
 			},
-			//查找产品
+      /**
+       * 查找产品
+       */
 			get_product_list: function(isPage) {
-				let that = this;
-				that.setWhere();
-				if (that.loadend) return;
-				if (that.loading) return;
-				if (isPage === true) that.$set(that, 'productList', []);
-				that.loading = true;
-				that.loadTitle = '';
-				getProductslist(that.where).then(res => {
-					let list = res.data.list;
-					let productList = that.$util.SplitArray(list, that.productList);
-					let loadend = list.length < that.where.limit;
-					that.loadend = loadend;
-					that.loading = false;
-					that.loadTitle = loadend ? '已全部加载' : '加载更多';
-					that.$set(that, 'productList', productList);
-					that.$set(that.where, 'page', that.where.page + 1);
-					if (that.productList.length === 0) {
+				this.setWhere();
+				if (this.loadend || this.loading) {
+          return;
+        }
+				if (isPage === true) {
+          this.$set(this, 'productList', []);
+        }
+				this.loading = true;
+				this.loadTitle = '';
+        ProductSpuApi.getSpuPage(this.where).then(res => {
+          const good_list = res.data.list;
+          const loadend = good_list.length < this.where.limit;
+					this.loadend = loadend;
+					this.loading = false;
+					this.loadTitle = loadend ? '已全部加载' : '加载更多';
+					this.$set(this.where, 'pageNo', this.where.pageNo + 1);
+          // 设置营销活动
+          const spuIds = good_list.map(item => item.id);
+          if (spuIds.length > 0) {
+            PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+              ProductUtil.setActivityList(good_list, res.data);
+              const productList = this.$util.SplitArray(good_list, this.productList)
+              this.$set(this, 'productList', productList); // 放在此处，避免 Vue 监控不到数组里的元素变化
+            });
+          }
+
+          // 加载不到商品的情况下，加载热门商品
+					if (good_list.length === 0 && this.productList.length === 0) {
 						this.get_host_product();
 					}
-				}).catch(err => {
-					that.loading = false;
-					that.loadTitle = '加载更多';
+        }).catch(err => {
+					this.loading = false;
+					this.loadTitle = '加载更多';
 				});
 			},
+      /**
+       * 获取我的推荐
+       */
+      get_host_product: function() {
+        if (this.hotScroll) {
+          return
+        }
+        ProductSpuApi.getSpuPage({
+          recommendType: 'hot',
+          pageNo: this.hotPage,
+          pageSize: this.hotLimit
+        }).then(res => {
+          const good_list = res.data.list;
+          this.hotPage++
+          this.hotScroll = good_list.length < this.hotLimit
+
+          // 设置营销活动
+          const spuIds = good_list.map(item => item.id);
+          if (spuIds.length > 0) {
+            PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+              ProductUtil.setActivityList(good_list, res.data);
+              this.hostProduct = this.hostProduct.concat(good_list) // 放在此处，避免 Vue 监控不到数组里的元素变化
+            });
+          }
+        });
+      },
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		},
 		onReachBottom() {
 			if (this.productList.length > 0) {

@@ -913,9 +913,11 @@
 
           // 设置营销活动
           const spuIds = good_list.map(item => item.id);
-          PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
-            ProductUtil.setActivityList(good_list, res.data);
-          });
+          if (spuIds.length > 0) {
+            PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+              ProductUtil.setActivityList(good_list, res.data);
+            });
+          }
         })
       },
 			/**
