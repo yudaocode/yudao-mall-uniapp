@@ -8,15 +8,16 @@
 					<view class="item font-color" :class="shippingType == 1 ? 'on' : 'on2'" @tap="addressType(1)"
 						v-if='store_self_mention'></view>
 				</view>
-				<view class='address acea-row row-between-wrapper' @tap='onAddress' v-if='shippingType == 0' :style="store_self_mention ? '':'border-top-left-radius: 14rpx;border-top-right-radius: 14rpx;'">
-					<view class='addressCon' v-if="addressInfo.realName">
-						<view class='name'>{{addressInfo.realName}}
-							<text class='phone'>{{addressInfo.phone}}</text>
+        <!-- 收货地址的选择 -->
+				<view class='address acea-row row-between-wrapper' @tap='onAddress' v-if='shippingType === 0'
+              :style="store_self_mention ? '':'border-top-left-radius: 14rpx;border-top-right-radius: 14rpx;'">
+					<view class='addressCon' v-if="addressInfo.name">
+						<view class='name'>{{ addressInfo.name }}
+							<text class='phone'>{{ addressInfo.mobile }}</text>
 						</view>
 						<view class="acea-row">
-							<text class='default font-color'
-								v-if="addressInfo.isDefault">[默认]</text>
-							<text class="line2">{{addressInfo.province}}{{addressInfo.city}}{{addressInfo.district}}{{addressInfo.detail}}</text>	
+							<text class='default font-color' v-if="addressInfo.defaultStatus">[默认]</text>
+							<text class="line2">{{ addressInfo.areaName }} {{addressInfo.detailAddress}}</text>
 						</view>
 					</view>
 					<view class='addressCon' v-else>
@@ -24,6 +25,7 @@
 					</view>
 					<view class='iconfont icon-jiantou'></view>
 				</view>
+        <!-- TODO 芋艿：还在搞 -->
 				<view class='address acea-row row-between-wrapper' v-else @tap="showStoreList">
 					<block v-if="storeList.length>0">
 						<view class='addressCon'>
@@ -53,7 +55,7 @@
 							<text class='iconfont icon-jiantou'></text>
 						</view>
 					</view>
-					
+
 					<view class='item acea-row row-between-wrapper'
 						v-if="!orderInfoVo.bargainId && !orderInfoVo.combinationId && !orderInfoVo.seckillId && productType==='normal'">
 						<view>积分抵扣</view>
@@ -84,7 +86,7 @@
 							<view>联系人</view>
 							<view class="discount textR">
 								<input type="text" placeholder="请填写您的联系姓名" placeholder-style="color:#ccc;" placeholder-class="placeholder"
-									@blur='realName'></input>
+									@blur='realName' />
 							</view>
 						</view>
 						<view class="item acea-row row-between-wrapper">
@@ -151,17 +153,20 @@
 			</view>
 		</view>
 		<couponListWindow :coupon='coupon' @ChangCouponsClone="ChangCouponsClone" :openType='openType' @ChangCoupons="ChangCoupons" :orderShow="orderShow"></couponListWindow>
-		<addressWindow ref="addressWindow" @changeTextareaStatus="changeTextareaStatus" :address='address'
-			:pagesUrl="pagesUrl" @OnDefaultAddress="OnDefaultAddress"  @OnChangeAddress="OnChangeAddress" @changeClose="changeClose"></addressWindow>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
+
+    <!-- 收货地址的弹窗选择 -->
+    <addressWindow
+      ref="addressWindow"
+      :address='address'
+			:pagesUrl="pagesUrl"
+      @OnChangeAddress="OnChangeAddress"
+      @changeClose="changeClose"
+    />
 		<home></home>
 	</view>
 </template>
 <script>
 	import {
-		//orderConfirm,
 		getCouponsOrderPrice,
 		orderCreate,
 		postOrderComputed,
@@ -169,42 +174,25 @@
 		wechatQueryPayResult,
 		loadPreOrderApi
 	} from '@/api/order.js';
-	import {
-		getAddressList,
-		getAddressDetail
-	} from '@/api/user.js';
+  import * as AddressApi from '@/api/member/address.js';
 	import {
 		openPaySubscribe
 	} from '@/utils/SubscribeMessage.js';
 	import {
 		storeListApi
 	} from '@/api/store.js';
-	import {
-		CACHE_LONGITUDE,
-		CACHE_LATITUDE
-	} from '@/config/cache.js';
 	import couponListWindow from '@/components/couponListWindow';
 	import addressWindow from '@/components/addressWindow';
 	import orderGoods from '@/components/orderGoods';
 	import home from '@/components/home';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	export default {
 		components: {
 			couponListWindow,
 			addressWindow,
 			orderGoods,
-			home,
-			// #ifdef MP
-			authorize
-			// #endif
+			home
 		},
 		data() {
 			return {
@@ -225,13 +213,6 @@
 						title: '可用余额:',
 						payStatus: 1,
 					}
-					// {
-					// 	"name": "线下支付", //offlinePayStatu：1开启线下支付；2关闭；offlinePostage：true有邮费
-					// 	"icon": "icon-yinhangqia",
-					// 	value: 'offline',
-					// 	title: '线下支付',
-					// 	payStatus: 1,
-					// },
 				],
 				payType: 'weixin', //支付方式
 				openType: 1, //优惠券打开方式 1=使用
@@ -241,12 +222,7 @@
 					list: [],
 					statusTile: '立即使用'
 				}, //优惠券组件
-				address: {
-					address: false,
-					addressId: 0
-				}, //地址组件
-				addressInfo: {}, //地址信息
-				addressId: 0, //地址id
+
 				couponId: 0, //优惠券id
 				cartId: '', //购物车id
 				userInfo: {}, //用户信息
@@ -259,7 +235,6 @@
 				ChangePrice: 0, //使用积分抵扣变动后的金额
 				formIds: [], //收集formid
 				status: 0,
-				is_address: false,
 				toPay: false, //修复进入支付时页面隐藏从新刷新页面
 				shippingType: 0,
 				system_store: {},
@@ -276,10 +251,7 @@
 				integralRatio: "0",
 				pagesUrl: "",
 				orderKey: "",
-				// usableCoupon: {},
 				offlinePostage: "",
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
 				payChannel: '',
 				news: true,
 				again: false,
@@ -290,8 +262,16 @@
 				orderInfoVo: {},
 				addressList: [], //地址列表数据
 				orderProNum: 0,
-				preOrderNo: '' //预下单订单号
-			};
+				preOrderNo: '', //预下单订单号
+
+        // ========== 收货地址 ==========
+        addressId: 0, // 页面传递的 param 对应的地址 id
+        addressInfo: {}, // 选中的地址信息
+        address: { // 地址组件
+          address: false, // 是否 addressWindow 展示
+          addressId: 0 // 真正选中的 address 编号，优先级大于 addressId
+        },
+      };
 		},
 		computed: mapGetters(['isLogin', 'systemPlatform', 'productType']),
 		watch: {
@@ -299,45 +279,39 @@
 				handler: function(newV, oldV) {
 					if (newV) {
 						this.getloadPreOrder();
-						//this.getaddressInfo();
+						this.getaddressInfo();
 					}
 				},
 				deep: true
 			}
 		},
 		onLoad(options) {
+      if (!this.isLogin) {
+        toLogin();
+        return
+      }
+
 			// #ifdef H5
 			this.payChannel = this.$wechat.isWeixin() ? 'public' : 'weixinh5';
 			// #endif
 			// #ifdef MP
 			this.payChannel = 'routine';
 			// #endif
-			// if (!options.cartId) return this.$util.Tips({
-			// 	title: '请选择要购买的商品'
-			// }, {
-			// 	tab: 3,
-			// 	url: 1
-			// });
-            this.preOrderNo = options.preOrderNo || 0;
-			this.addressId = options.addressId || 0;
-			this.is_address = options.is_address ? true : false;
-			if (this.isLogin) {
-				//this.getaddressInfo();
-				this.getloadPreOrder();
-			} else {
-				toLogin();
-			}
+      this.preOrderNo = options.preOrderNo || 0;
+      this.getloadPreOrder();
+
+      // 处理 address 地址
+      this.addressId = options.addressId || 0;
+      this.getaddressInfo();
 		},
 		/**
 		 * 生命周期函数--监听页面显示
 		 */
 		onShow: function() {
 			let _this = this
-			// wx.getLaunchOptionsSync 
 			this.textareaStatus = true;
-			if (this.isLogin && this.toPay == false) {
-				//this.getaddressInfo();
-				
+			if (this.isLogin && !this.toPay) {
+				this.getaddressInfo();
 			}
 
 			uni.$on("handClick", res => {
@@ -347,21 +321,7 @@
 				// 清除监听
 				uni.$off('handClick');
 			})
-
-			// let pages = getCurrentPages();
-			// let currPage = pages[pages.length - 1]; //当前页面
-			// if (currPage.data.storeItem) {
-			// 	let json = currPage.data.storeItem;
-			// 	this.$set(this, 'system_store', json);
-			// }
 		},
-		/**
-		 * 生命周期函数--监听页面隐藏
-		 */
-		// onHide: function() {
-		// 	console.log(999);
-		// 	this.isClose = true
-		// },
 		methods: {
 			// 订单详情
 			getloadPreOrder: function() {
@@ -375,24 +335,16 @@
 					this.cartArr[1].payStatus = parseInt(res.data.yuePayStatus) === 1 ? 1 : 2;
 					this.cartArr[0].payStatus = parseInt(res.data.payWeixinOpen) === 1 ? 1 : 0;
 					this.store_self_mention = res.data.storeSelfMention == 'true'&& this.productType === 'normal' ? true : false;
-					//调用子页面方法授权后执行获取地址列表
-					this.$nextTick(function() {
-						this.$refs.addressWindow.getAddressList();
-					})
-				}).catch(err => {
+
+          // 获得收件地址列表 TODO 芋艿：
+        }).catch(err => {
 					return this.$util.Tips({
 						title: err
 					});
 				})
-			},
-			/**
-			 * 授权回调事件
-			 * 
-			 */
-			onLoadFun: function() {
-				//this.getaddressInfo();
-				//调用子页面方法授权后执行获取地址列表
-				// this.$scope.selectComponent('#address-window').getAddressList();
+        this.$nextTick(function() {
+          this.$refs.addressWindow.getAddressList();
+        })
 			},
 			/**
 			 * 获取门店列表数据
@@ -416,15 +368,10 @@
 					});
 				})
 			},
-			// 关闭地址弹窗；
-			changeClose: function() {
-				this.$set(this.address, 'address', false);
-			},
 			/*
 			 * 跳转门店列表
 			 */
 			showStoreList: function() {
-
 				let _this = this
 				if (this.storeList.length > 0) {
 					uni.navigateTo({
@@ -485,7 +432,6 @@
 			},
 			/**
 			 * 处理点击优惠券后的事件
-			 * 
 			 */
 			ChangCoupons: function(e) {
 				// this.usableCoupon = e
@@ -524,63 +470,18 @@
 				this.useIntegral = !this.useIntegral;
 				this.computedPrice();
 			},
-			/**
-			 * 首次进页面展示默认地址
-			 */
-			OnDefaultAddress: function(e) {
-				this.addressInfo = e;
-				this.address.addressId = e.id;
-			},
-			/**
-			 * 选择地址后改变事件
-			 * @param object e
-			 */
-			OnChangeAddress: function(e) {
-				this.addressInfo = e;
-				this.address.addressId = e.id;
-				this.textareaStatus = true;
-				//this.orderInfoVo.addressId = e;
-				this.address.address = false;
-				//this.getaddressInfo();
-				this.computedPrice();
-			},
 			bindHideKeyboard: function(e) {
 				this.mark = e.detail.value;
 			},
 			/**
 			 * 获取当前金额可用优惠券
-			 * 
+			 *
 			 */
 			getCouponList: function() {
 				getCouponsOrderPrice(this.preOrderNo).then(res => {
 					this.$set(this.coupon, 'list', res.data);
 					this.openType = 1;
 				});
-			},
-			/*
-			 * 获取默认收货地址或者获取某条地址信息
-			 */
-			getaddressInfo: function() {
-				let that = this;
-				if (that.addressId) {
-					getAddressDetail(that.addressId).then(res => {
-						if (res.data) {
-							res.data.isDefault = parseInt(res.data.isDefault);
-							that.addressInfo = res.data || {};
-							that.addressId = res.data.id || 0;
-							that.address.addressId = res.data.id || 0;
-						}
-					})
-				} else {
-					getAddressDefault().then(res => {
-						if (res.data) {
-							res.data.isDefault = parseInt(res.data.isDefault);
-							that.addressInfo = res.data || {};
-							that.addressId = res.data.id || 0;
-							that.address.addressId = res.data.id || 0;
-						}
-					})
-				}
 			},
 			payItem: function(e) {
 				let that = this;
@@ -600,12 +501,6 @@
 			car: function() {
 				let that = this;
 				that.animated = false;
-			},
-			onAddress: function() {
-				let that = this;
-				that.textareaStatus = false;
-				that.address.address = true;
-				that.pagesUrl = '/pages/users/user_address_list/index?preOrderNo='+ this.preOrderNo;
 			},
 			realName: function(e) {
 				this.contacts = e.detail.value;
@@ -671,7 +566,7 @@
 											title: err
 										});
 									})
-								
+
 								},
 								fail: function(e) {
 									uni.hideLoading();
@@ -968,8 +863,57 @@
 				// #ifndef MP
 				that.payment(data);
 				// #endif
-			}
-		}
+			},
+
+      // ========== 收货地址 ==========
+      /**
+       * 打开选择地址的弹窗
+       */
+      onAddress: function() {
+        this.textareaStatus = false;
+        this.address.address = true;
+        this.pagesUrl = '/pages/users/user_address_list/index?preOrderNo='+ this.preOrderNo;
+      },
+      /**
+       * 选择地址后改变事件
+       */
+      OnChangeAddress: function(e) {
+        this.addressInfo = e;
+        this.address.addressId = e.id;
+        this.textareaStatus = true;
+        this.address.address = false;
+        this.getaddressInfo();
+        this.computedPrice();
+      },
+      /**
+			 * 获取默认收货地址或者获取某条地址信息
+			 */
+      getaddressInfo: function() {
+        if (this.addressId) {
+          AddressApi.getAddress(this.addressId).then(res => {
+            if (res.data) {
+              this.addressInfo = res.data || {};
+              this.addressId = res.data.id || 0;
+              this.address.addressId = res.data.id || 0;
+            }
+          })
+        } else {
+          AddressApi.getDefaultUserAddress().then(res => {
+            if (res.data) {
+              this.addressInfo = res.data || {};
+              this.addressId = res.data.id || 0;
+              this.address.addressId = res.data.id || 0;
+            }
+          })
+        }
+      },
+      /**
+       * 关闭地址弹窗
+       */
+      changeClose: function() {
+        this.$set(this.address, 'address', false);
+      },
+    }
 	}
 </script>
 

@@ -3,14 +3,17 @@
 		<view class="address-window" :class="address.address ? 'on' : ''">
 			<view class='title'>选择地址<text class='iconfont icon-guanbi' @tap='close'></text></view>
 			<view class='list'>
-				<view class='item acea-row row-between-wrapper' :class='active==index?"font-color":""' v-for="(item,index) in addressList"
-				 @tap='tapAddress(index,item.id)' :key='index'>
-					<text class='iconfont icon-ditu' :class='active==index?"font-color":""'></text>
+				<view class='item acea-row row-between-wrapper' :class='active === index?"font-color":""'
+              v-for="(item,index) in addressList" @tap='tapAddress(index,item.id)' :key='index'>
+					<text class='iconfont icon-ditu' :class='active===index?"font-color":""' />
 					<view class='address'>
-						<view class='name' :class='active==index?"font-color":""'>{{item.realName}}<text class='phone'>{{item.phone}}</text></view>
-						<view class='line1'>{{item.province}}{{item.city}}{{item.district}}{{item.detail}}</view>
+						<view class='name' :class='active==index?"font-color":""'>
+              {{ item.name }}
+              <text class='phone'>{{ item.mobile }}</text>
+            </view>
+						<view class='line1'>{{ item.areaName }} {{ item.detailAddress }}</view>
 					</view>
-					<text class='iconfont icon-complete' :class='active==index?"font-color":""'></text>
+					<text class='iconfont icon-complete' :class='active === index?"font-color":""' />
 				</view>
 			</view>
 			<!-- 无地址 -->
@@ -24,10 +27,8 @@
 </template>
 
 <script>
-	import {
-		getAddressList
-	} from '@/api/user.js';
-	export default {
+  import * as AddressApi from '@/api/member/address.js';
+  export default {
 		props: {
 			pagesUrl: {
 				type: String,
@@ -49,58 +50,54 @@
 		},
 		data() {
 			return {
-				active: 0,
+				active: 0, // 激活的 addressList 下标
 				is_loading: true,
 				addressList: []
 			};
 		},
 		methods: {
+      /**
+       * 选中某个地址
+       */
 			tapAddress: function(e, addressid) {
 				this.active = e;
-				let a = {};
-				for (let i = 0, leng = this.addressList.length; i < leng; i++) {
+				for (let i = 0; i < this.addressList.length; i++) {
 					if (this.addressList[i].id === addressid) {
-						a = this.addressList[i];
-					}
+            this.$emit('OnChangeAddress', this.addressList[i]);
+            break
+          }
 				}
-				this.$emit('OnChangeAddress', a);
 			},
 			close: function() {
 				this.$emit('changeClose');
-				this.$emit('changeTextareaStatus');
 			},
 			goAddressPages: function() {
 				this.$emit('changeClose');
-				this.$emit('changeTextareaStatus');
 				uni.navigateTo({
 					url: this.pagesUrl
 				});
 			},
 			getAddressList: function() {
-				let that = this;
-				getAddressList({
-					page: 1,
-					limit: 5
-				}).then(res => {
-					let addressList = res.data.list;
-					that.$set(that, 'addressList', addressList);
-					that.is_loading = false;
-					let defaultAddress = {};
-					//处理默认选中项
-					if(!that.address.addressId) return;
-					for (let i = 0, leng = addressList.length; i < leng; i++) {
-						if (addressList[i].id == that.address.addressId) {
-							that.active = i;
+        AddressApi.getAddressList().then(res => {
+					const addressList = res.data;
+					this.$set(this, 'addressList', addressList);
+					this.is_loading = false;
+          // 处理默认选中项
+					if (!this.address.addressId) {
+            return;
+          }
+          let defaultAddress = {};
+          for (let i = 0; i < addressList.length; i++) {
+						if (addressList[i].id === this.address.addressId) {
+							this.active = i;
 							defaultAddress = this.addressList[i];
 						}
 					}
-					this.$emit('OnDefaultAddress', defaultAddress);
 				})
 			}
 		}
 	}
 </script>
-
 <style scoped lang="scss">
 	.address-window {
 		background-color: #fff;

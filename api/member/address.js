@@ -7,6 +7,11 @@ export function getAddress(id) {
   });
 }
 
+// 获得默认的用户收件地址
+export function getDefaultUserAddress() {
+  return request.get('app-api/member/address/get-default', {});
+}
+
 // 获得用户收件地址列表
 export function getAddressList() {
   return request.get('app-api/member/address/list', {});

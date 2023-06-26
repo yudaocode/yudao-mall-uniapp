@@ -244,40 +244,6 @@ export function userLevelDetection(){
 }
 
 /**
- *
- * 地址列表
- * @param object data
-*/
-export function getAddressList(data){
-  return request.get('address/list',data);
-}
-
-/**
- * 设置默认地址
- * @param int id
-*/
-export function setAddressDefault(id){
-  return request.post('address/default/set',{id:id})
-}
-
-/**
- * 修改 添加地址
- * @param object data
-*/
-export function editAddress(data){
-  return request.post('address/edit',data);
-}
-
-/**
- * 删除地址
- * @param int id
- *
-*/
-export function delAddress(id){
-  return request.post('address/del',{id:id})
-}
-
-/**
  * 获取单个地址
  * @param int id
 */
