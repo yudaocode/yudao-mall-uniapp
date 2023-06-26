@@ -168,11 +168,7 @@
 	import Cache from '../../utils/cache';
 	const statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
 	let app = getApp();
-	import {
-		getIndexData,
-		getCoupons,
-		setCouponReceive
-	} from '@/api/api.js';
+	import { getIndexData } from '@/api/api.js';
 	import { getShare } from '@/api/public.js';
 	import a_seckill from './components/a_seckill';
 	import b_combination from './components/b_combination';
@@ -181,7 +177,6 @@
 	import promotionGood from '@/components/promotionGood';
 	import { goShopDetail } from '@/libs/order.js'
 	import { mapGetters } from "vuex";
-	import tabNav from '@/components/tabNav.vue'
 	import countDown from '@/components/countDown';
 	import recommend from '@/components/recommend';
 	import { silenceBindingSpread } from '@/utils';
@@ -195,7 +190,6 @@
 	export default {
 		computed: mapGetters(['isLogin', 'uid']),
 		components: {
-			tabNav,
 			goodList,
 			promotionGood,
 			countDown,
