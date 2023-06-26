@@ -56,36 +56,12 @@ export function getUserCoupons(data){
 }
 
 /**
- * 文章分类列表
- *
-*/
-export function getArticleCategoryList(){
-  return request.get('article/category/list',{},{noAuth:true})
-}
-
-/**
  * 文章列表
  * @param int cid
  *
 */
 export function getArticleList(cid,data){
   return request.get('article/list/' + cid, data,{noAuth:true})
-}
-
-/**
- * 文章 热门列表
- *
-*/
-export function getArticleHotList(){
-  return request.get('article/hot/list',{},{noAuth:true});
-}
-
-/**
- * 文章 轮播列表
- *
-*/
-export function getArticleBannerList(){
-  return request.get('article/banner/list',{},{noAuth:true})
 }
 
 /**

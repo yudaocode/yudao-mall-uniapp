@@ -45,15 +45,16 @@
 						</block>
 					</swiper>
 				</view>
+
 				<!-- 新闻简报 -->
 				<view class='notice acea-row row-middle row-between' v-if="roll.length">
 					<view class="pic">
-						<image src="/static/images/xinjian.png"></image>
+						<image src="/static/images/xinjian.png" />
 					</view>
 					<text class='line'>|</text>
 					<view class='swipers'>
-						<swiper :indicator-dots="indicatorDots" :autoplay="autoplay" interval="2500" duration="500" vertical="true"
-						 circular="true">
+						<swiper :indicator-dots="indicatorDots" :autoplay="autoplay" interval="2500" duration="500"
+                    vertical="true" circular="true">
 							<block v-for="(item,index) in roll" :key='index'>
 								<swiper-item>
 									<navigator class='item' :url='item.url' hover-class='none'>
@@ -63,8 +64,9 @@
 							</block>
 						</swiper>
 					</view>
-					<view class="iconfont icon-xiangyou"></view>
+					<view class="iconfont icon-xiangyou" />
 				</view>
+
 				<!-- menu -->
 				<view class='nav acea-row' v-if="menus.length">
 					<block v-for="(item,index) in menus" :key="index">

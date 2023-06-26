@@ -1,75 +1,76 @@
 <template>
 	<view>
 		<view class='newsList'>
+      <!-- Banner 文章 -->
 			<view class='swiper' v-if="imgUrls.length > 0">
 				<swiper indicator-dots="true" :autoplay="autoplay" :circular="circular" :interval="interval" :duration="duration"
 				 indicator-color="rgba(102,102,102,0.3)" indicator-active-color="#666">
 					<block v-for="(item,index) in imgUrls" :key="index">
 						<swiper-item>
 							<navigator :url="'/pages/news_details/index?id='+item.id">
-								<image :src="item.imageInput" class="slide-image" />
+								<image :src="item.picUrl" class="slide-image" />
 							</navigator>
 						</swiper-item>
 					</block>
 				</swiper>
 			</view>
-			<view class='nav' v-if="navList.length > 0">
+
+      <!-- 文章分类 -->
+      <view class='nav' v-if="navList.length > 0">
 				<scroll-view class="scroll-view_x" scroll-x scroll-with-animation :scroll-left="scrollLeft" style="width:auto;overflow:hidden;">
 					<block v-for="(item,index) in navList" :key="index">
-						<view class='item borRadius14' :class='active==item.id?"on":""' @click='tabSelect(item.id, index)'>
+						<view class='item borRadius14' :class='active === item.id?"on":""' @click='tabSelect(item.id, index)'>
 							<view>{{item.name}}</view>
-							<view class='line bg-color' v-if="active==item.id"></view>
+							<view class='line bg-color' v-if="active === item.id"></view>
 						</view>
 					</block>
 				</scroll-view>
 			</view>
-			<view class='list'>
+
+      <!-- 文章分类 -->
+      <view class='list'>
 				<block v-for="(item,index) in articleList" :key="index">
 					<navigator :url='"/pages/news_details/index?id="+item.id' hover-class='none' class='item acea-row row-between-wrapper'>
 						<view class='text acea-row row-column-between'>
 							<view class='name line2'>{{item.title}}</view>
-							<view>{{item.createTime}}</view>
+							<view>{{ formatDate(item.createTime) }}</view>
 						</view>
 						<view class='pictrue'>
-							<image :src='item.imageInput'></image>
+							<image :src='item.picUrl'></image>
 						</view>
 					</navigator>
 				</block>
 			</view>
 		</view>
-		<view class='noCommodity' v-if="articleList.length == 0 && (page != 1 || active== 0)">
+		<view class='noCommodity' v-if="articleList.length === 0 && (page !== 1 || active === 0)">
 			<view class='pictrue'>
-				<image src='../../static/images/noNews.png'></image>
+				<image src='../../static/images/noNews.png' />
 			</view>
 		</view>
 		<home></home>
 	</view>
 </template>
-
 <script>
-	import {
-		getArticleCategoryList,
-		getArticleList,
-		getArticleHotList,
-		getArticleBannerList
-	} from '@/api/api.js';
-	import home from '@/components/home';
+  import * as ArticleApi from '@/api/promotion/article.js';
+  import dayjs from "@/plugin/dayjs/dayjs.min.js";
+  import home from '@/components/home';
 	export default {
 		components: {
 			home
 		},
 		data() {
 			return {
-				imgUrls: [],
-				articleList: [],
-				indicatorDots: false,
+        navList: [], // 文章分类
+        active: 0, // 选中的分类编号，0 为热门
+
+        imgUrls: [], // Banner 文章
 				circular: true,
 				autoplay: true,
 				interval: 3000,
 				duration: 500,
-				navList: [],
-				active: 0,
-				page: 1,
+
+        articleList: [], // 普通文章
+        page: 1,
 				limit: 8,
 				status: false,
 				scrollLeft: 0
@@ -87,69 +88,89 @@
 			this.articleList = [];
 			this.getCidArticle();
 		},
-		  /**
-		   * 页面上拉触底事件的处理函数
-		   */
-		  onReachBottom: function () {
-		    this.getCidArticle();
-		  },
+    /**
+     * 页面上拉触底事件的处理函数
+     */
+    onReachBottom: function () {
+      this.getCidArticle();
+    },
 		methods: {
+      /**
+       * 获得分类
+       */
+      getArticleCate: function() {
+        ArticleApi.getArticleCategoryList().then(res => {
+          let list = res.data;
+          list.unshift({
+            id: 0,
+            name: '热门'
+          });
+          this.$set(this, 'navList', list);
+        });
+      },
+      /**
+       * 获得热门文章
+       */
 			getArticleHot: function() {
-				let that = this;
-				getArticleHotList().then(res => {
-					that.$set(that, 'articleList', res.data.list);
+				ArticleApi.getArticleList({
+          recommendHot: true
+        }).then(res => {
+					this.$set(this, 'articleList', res.data);
 				});
 			},
+      /**
+       * 获得 Banner 文章
+       */
 			getArticleBanner: function() {
-				let that = this;
-				getArticleBannerList().then(res => {
-					that.imgUrls = res.data.list;
+				ArticleApi.getArticleList({
+          recommendBanner: true
+        }).then(res => {
+					this.imgUrls = res.data;
 				});
 			},
+      /**
+       * 获得指定分类的文章列表
+       */
 			getCidArticle: function() {
-				let that = this;
-				if (that.active == 0) return;
-				let limit = that.limit;
-				let page = that.page;
-				let articleList = that.articleList;
-				if (that.status) return;
-				getArticleList(that.active, {
-					page: page,
-					limit: limit
+				if (this.active === 0) {
+          return;
+        }
+				if (this.status) {
+          return;
+        }
+				ArticleApi.getArticlePage({
+          categoryId: this.active,
+          pageNo: this.page,
+					pageSize: this.limit
 				}).then(res => {
-					let articleListNew = [];
-					let len = res.data.list.length;
-					articleListNew = articleList.concat(res.data.list);
-					that.page++;
-					that.$set(that, 'articleList', articleListNew);
-					that.status = limit > len;
-					that.page = that.page;
+					let articleListNew = this.articleList.concat(res.data.list);
+					this.page++;
+					this.$set(this, 'articleList', articleListNew);
+					this.status = this.limit > res.data.list.length;
 				});
 			},
-			getArticleCate: function() {
-				let that = this;
-				getArticleCategoryList().then(res => {
-					let list = res.data.list;
-					list.unshift({id:0,name:'热门'});
-					that.$set(that, 'navList', list);
-				});
-			},
-			tabSelect(active,e) {
+      /**
+       * 分类切换，重新加载文章列表
+       */
+			tabSelect(active, e) {
 				this.active = active;
 				this.scrollLeft =  e * 60;
-				// this.scrollLeft = (active - 1) * 50;
-				if (this.active == 0) this.getArticleHot();
-				else {
+				if (this.active === 0) {
+          this.getArticleHot();
+        } else {
 					this.$set(this, 'articleList', []);
 					this.page = 1;
 					this.status = false;
 					this.getCidArticle();
 				}
-			}
+			},
+
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD");
+      }
 		}
 	}
 </script>
-
 <style lang="scss">
 	page {
 		background-color: #fff !important;
@@ -181,7 +202,7 @@
 		transform: rotate(-45deg);
 		transform-origin: 0 100%;
 	}
-	
+
 	.newsList .swiper .wx-swiper-dot~.wx-swiper-dot {
 		margin-left: 5rpx;
 	}
@@ -197,11 +218,11 @@
 			transform: rotate(-45deg);
 			transform-origin: 0 100%;
 	}
-	
+
 	.newsList .swiper .uni-swiper-dot~.uni-swiper-dot {
 		margin-left: 5rpx;
 	}
-	
+
 	.newsList .swiper .uni-swiper-dots.uni-swiper-dots-horizontal {
 		margin-bottom: -15rpx;
 	}

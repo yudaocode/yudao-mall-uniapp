@@ -4,7 +4,7 @@
 			<view class='title'>{{articleInfo.title}}</view>
 			<view class='list acea-row row-middle'>
 				<view class='label'>{{articleInfo.author}}</view>
-				<view class='item'></text>{{articleInfo.createTime}}</view>
+				<view class='item'>{{articleInfo.createTime}}</view>
 				<view class='item'><text class='iconfont icon-liulan'></text>{{articleInfo.visit}}</view>
 			</view>
 			<view class='conters'>
@@ -21,7 +21,9 @@
 					</view>
 					<view class="y_money">￥{{store_info.otPrice}}</view>
 				</view>
-				<navigator :url="'/pages/goods_details/index?id='+store_info.id" hover-class="none" class="label"><text class="span">查看商品</text></navigator>
+				<navigator :url="'/pages/goods_details/index?id='+store_info.id" hover-class="none" class="label">
+          <text class="span">查看商品</text>
+        </navigator>
 			</view>
 			<!-- #ifdef H5 -->
 			<button class="bnt bg-color" hover-class='none' @click="listenerActionSheet" v-if="this.$wechat.isWeixin()">和好友一起分享</button>
@@ -30,7 +32,7 @@
 			<button class="bnt bg-color" open-type="share" hover-class='none'>和好友一起分享</button>
 			<!-- #endif -->
 		</view>
-		<shareInfo @setShareInfoStatus="setShareInfoStatus" :shareInfoStatus="shareInfoStatus"></shareInfo>
+		<shareInfo @setShareInfoStatus="setShareInfoStatus" :shareInfoStatus="shareInfoStatus" />
 		<home></home>
 	</view>
 </template>
@@ -64,39 +66,39 @@
 				productId: 0
 			};
 		},
-		 /**
-		   * 生命周期函数--监听页面加载
-		   */
-		  onLoad: function (options) {
-		    if (options.hasOwnProperty('id')){
-			   this.id = options.id;
-		    }else{
-			  // #ifndef H5
-		      uni.navigateBack({delta: 1 });
-			  // #endif
-			  // #ifdef H5
-			  history.back();
-			  // #endif
-		    }
-		  },
-		   onShow: function () {
-		      this.getArticleOne();
-		    },
-			/**
-			 * 用户点击右上角分享
-			 */
-			// #ifdef MP
-			onShareAppMessage: function() {
-				return {
-					title: this.articleInfo.title,
-					imageUrl: this.articleInfo.imageInput.length ? this.articleInfo.imageInput[0] : "",
-					desc: this.articleInfo.synopsis,
-					path: '/pages/news_details/index?id=' + this.id
-				};
-			},
-			// #endif
+    /**
+     * 生命周期函数--监听页面加载
+     */
+    onLoad: function (options) {
+      if (options.hasOwnProperty('id')) {
+       this.id = options.id;
+      } else{
+        // #ifndef H5
+        uni.navigateBack({delta: 1 });
+        // #endif
+        // #ifdef H5
+        history.back();
+        // #endif
+      }
+    },
+    onShow: function () {
+      this.getArticleOne();
+    },
+    /**
+     * 用户点击右上角分享
+     */
+    // #ifdef MP
+    onShareAppMessage: function() {
+      return {
+        title: this.articleInfo.title,
+        imageUrl: this.articleInfo.imageInput.length ? this.articleInfo.imageInput[0] : "",
+        desc: this.articleInfo.synopsis,
+        path: '/pages/news_details/index?id=' + this.id
+      };
+    },
+    // #endif
 		methods: {
-			 getArticleOne:function(){
+      getArticleOne:function(){
 			    let that = this;
 			    getArticleDetails({id:that.id}).then(res=>{
 					uni.setNavigationBarTitle({
@@ -109,7 +111,7 @@
 					}
 					that.content = res.data.content;
 					// #ifdef H5
-					if(this.$wechat.isWeixin()){
+					if (this.$wechat.isWeixin()) {
 						this.setShareInfo();
 					}
 					// #endif
