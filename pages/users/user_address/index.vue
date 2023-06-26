@@ -5,19 +5,19 @@
 				<view class='list borRadius14'>
 					<view class='item acea-row row-between-wrapper' style="border: none;">
 						<view class='name'>姓名</view>
-						<input type='text' placeholder='请输入姓名' placeholder-style="color:#ccc;" name='realName' :value="userAddress.realName"
-							placeholder-class='placeholder' maxlength="4"></input>
+						<input type='text' placeholder='请输入姓名' placeholder-style="color:#ccc;" name='name'
+                   :value="userAddress.name" placeholder-class='placeholder' maxlength="4" />
 					</view>
 					<view class='item acea-row row-between-wrapper'>
 						<view class='name'>联系电话</view>
-						<input type='number' placeholder='请输入联系电话' placeholder-style="color:#ccc;" name="phone" :value='userAddress.phone'
-							placeholder-class='placeholder' maxlength="11"></input>
+						<input type='number' placeholder='请输入联系电话' placeholder-style="color:#ccc;" name="mobile"
+                   :value='userAddress.mobile' placeholder-class='placeholder' maxlength="11" />
 					</view>
 					<view class='item acea-row row-between-wrapper relative'>
 						<view class='name'>所在地区</view>
 						<view class="address">
 							<picker mode="multiSelector" @change="bindRegionChange"
-								@columnchange="bindMultiPickerColumnChange" :value="valueRegion" :range="multiArray">
+								@columnchange="bindMultiPickerColumnChange" :range="multiArray">
 								<view class='acea-row'>
 									<view class="picker line1">{{region[0]}}，{{region[1]}}，{{region[2]}}</view>
 									<view class='iconfont icon-xiangyou abs_right'></view>
@@ -27,14 +27,14 @@
 					</view>
 					<view class='item acea-row row-between-wrapper relative'>
 						<view class='name'>详细地址</view>
-						<input type='text' placeholder='请填写具体地址' placeholder-style="color:#ccc;" name='detail' placeholder-class='placeholder'
-							v-model='userAddress.detail' maxlength="18"></input>
-							<view class='iconfont icon-dizhi font-color abs_right' @tap="chooseLocation"></view>
+						<input type='text' placeholder='请填写具体地址' placeholder-style="color:#ccc;" name='detailAddress'
+                   placeholder-class='placeholder' v-model='userAddress.detailAddress' maxlength="18" />
+            <view class='iconfont icon-dizhi font-color abs_right' @tap="chooseLocation" />
 					</view>
 				</view>
 				<view class='default acea-row row-middle borRadius14'>
 					<checkbox-group @change='ChangeIsDefault'>
-						<checkbox :checked="userAddress.isDefault" />设置为默认地址
+						<checkbox :checked="userAddress.defaultStatus" />设置为默认地址
 					</checkbox-group>
 				</view>
 
@@ -47,63 +47,40 @@
 				<!-- #endif -->
 			</view>
 		</form>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
-		<!-- <home></home> -->
 	</view>
 </template>
 
 <script>
-	import {
-		editAddress,
-		getAddressDetail
-	} from '@/api/user.js';
-	import {
-		getCity
-	} from '@/api/api.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
+	import { editAddress } from '@/api/user.js';
+  import * as AddressApi from '@/api/member/address.js';
+  import * as AreaApi from '@/api/system/area.js';
+  import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	import home from '@/components/home';
-	// import city from '@/utils/cityData';
 	let app = getApp();
 	export default {
 		components: {
-			// #ifdef MP
-			authorize,
-			// #endif
 			home
 		},
 		data() {
 			return {
-				regionDval: ['浙江省', '杭州市', '滨江区'],
-				cartId: '', //购物车id
-				pinkId: 0, //拼团id
-				couponId: 0, //优惠券id
-				id: 0, //地址id
+        id: 0, // 地址 id
+        district: [], // 地区，树形结构
 				userAddress: {
-					isDefault: false
-				}, //地址详情
-				region: ['省', '市', '区'],
-				valueRegion: [0, 0, 0],
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				district: [],
-				multiArray: [],
-				multiIndex: [0, 0, 0],
-				cityId: 0,
-				defaultRegion: ['广东省', '广州市', '番禺区'],
-				defaultRegionCode: '440113',
-				bargain: false, //是否是砍价
-				combination: false, //是否是拼团
-				secKill: false, //是否是秒杀
+					defaultStatus: false
+				}, // 地址详情
+				region: ['省', '市', '区'], // userAddress 对应的省市区
+        multiArray: [], // 当前的省、市、区
+        multiIndex: [0, 0, 0], // 当前选中的省 index、市 index、区 index
+				cityId: 0, // 区的编号~ 变量名暂时没改过来
+
+        // TODO 芋艿：看看后面咋搞回来
+        cartId: '', // 购物车id
+        pinkId: 0, // 拼团id
+        couponId: 0, // 优惠券id
+        bargain: false, // 是否是砍价
+				combination: false, // 是否是拼团
+				secKill: false, // 是否是秒杀
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -119,105 +96,208 @@
 			}
 		},
 		onLoad(options) {
-			if (this.isLogin) {
-				this.preOrderNo = options.preOrderNo || 0;
-				this.id = options.id || 0;
-				uni.setNavigationBarTitle({
-					title: options.id ? '修改地址' : '添加地址'
-				})
-				this.getUserAddress();
-				if(this.$Cache.has('cityList')){
-					//检测城市数据是否存在缓存，有的话从缓存取，没有的话请求接口
-					this.district = this.$Cache.getItem('cityList')
-					this.initialize();
-				}else{
-					this.getCityList();
-				}
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return
 			}
+
+      this.preOrderNo = options.preOrderNo || 0;
+      this.id = options.id || 0;
+      uni.setNavigationBarTitle({
+        title: options.id ? '修改地址' : '添加地址'
+      })
+
+      // 获取地址详情
+      this.getUserAddress();
+
+      // 检测城市数据是否存在缓存，有的话从缓存取，没有的话请求接口
+      if (this.$Cache.has('cityList')) {
+        this.district = this.$Cache.getItem('cityList')
+        this.initialize();
+      } else {
+        this.getCityList();
+      }
 		},
 		methods: {
-			// #ifdef APP-PLUS
-			// 获取选择的地区
-			handleGetRegion(region) {
-				this.region = region
-			},
-			// #endif
-			// 获取地址数据
+      /**
+       * 获得地址
+       */
+      getUserAddress: function() {
+        if (!this.id) {
+          return false;
+        }
+        AddressApi.getAddress(this.id).then(res => {
+          this.$set(this, 'userAddress', res.data);
+          this.$set(this, 'region', res.data.areaName.split(' '));
+          this.city_id = res.data.areaId
+        });
+      },
+      /**
+       * 提交用户添加地址
+       */
+      formSubmit: function(e) {
+        // 参数校验
+        const value = e.detail.value;
+        if (!value.name) {
+          return this.$util.Tips({
+            title: '请填写收货人姓名'
+          });
+        }
+        if (!value.mobile) {
+          return this.$util.Tips({
+            title: '请填写联系电话'
+          });
+        }
+        if (!/^1(3|4|5|7|8|9|6)\d{9}$/i.test(value.mobile)) {
+          return this.$util.Tips({
+            title: '请输入正确的手机号码'
+          });
+        }
+        if (this.region === '省-市-区') {
+          return this.$util.Tips({
+            title: '请选择所在地区'
+          });
+        }
+        if (!value.detailAddress) {
+          return this.$util.Tips({
+            title: '请填写详细地址'
+          });
+        }
+        value.id = this.id;
+        value.areaId = this.cityId;
+        value.defaultStatus = this.userAddress.defaultStatus;
+
+        // 提交保存
+        uni.showLoading({
+          title: '保存中',
+          mask: true
+        })
+        const saveOrUpdateAddress = this.id > 0 ? AddressApi.updateAddress : AddressApi.createAddress;
+        saveOrUpdateAddress(value).then(res => {
+          if (this.id) {
+            this.$util.Tips({
+              title: '修改成功',
+              icon: 'success'
+            });
+          } else {
+            this.$util.Tips({
+              title: '添加成功',
+              icon: 'success'
+            });
+          }
+          setTimeout(() => {
+            if (this.preOrderNo > 0) {
+              uni.redirectTo({
+                url: '/pages/users/order_confirm/index?preOrderNo=' + this.preOrderNo + '&addressId=' + (this.id ? this.id : res.data)
+              })
+            } else {
+              // #ifdef H5
+              return history.back();
+              // #endif
+              // #ifndef H5
+              return uni.navigateBack({
+                delta: 1,
+              })
+              // #endif
+            }
+          }, 1000);
+        }).catch(err => {
+          return this.$util.Tips({
+            title: err
+          });
+        })
+      },
+      // TODO 芋艿：需要改下
+      ChangeIsDefault: function(e) {
+        this.$set(this.userAddress, 'defaultStatus', !this.userAddress.defaultStatus);
+      },
+
+      /**
+       * 获取地址数据
+       */
 			getCityList: function() {
-				let that = this;
-				getCity().then(res => {
+        AreaApi.getAreaTree().then(res => {
 					this.district = res.data;
 					let oneDay = 24 * 3600 * 1000;
-					// this.$Cache.set('cityList', JSON.stringify(res.data)); //设置不过期时间的方法 
-					this.$Cache.setItem({name:'cityList',value:res.data,expires:oneDay * 7});  //设置七天过期时间
-					that.initialize();
+					this.$Cache.setItem({name: 'cityList', value:res.data, expires:oneDay * 7});  //设置七天过期时间
+					this.initialize();
 				})
 			},
+      /**
+       * 初始化当前的 multiArray
+       */
 			initialize: function() {
-				let that = this,province = [],city = [],area = [];
-				if (that.district.length) {
-					let cityChildren = that.district[0].child || [];
-					let areaChildren = cityChildren.length ? (cityChildren[0].child || []) : [];
-					that.district.forEach(function(item) {
+        const province = [];
+        const city = [];
+        const area = [];
+				if (this.district.length) {
+          // 省
+          this.district.forEach(item => {
 						province.push(item.name);
 					});
-					cityChildren.forEach(function(item) {
+          // 市
+          const cityChildren = this.district[0].children || [];
+          cityChildren.forEach(item => {
 						city.push(item.name);
 					});
-					areaChildren.forEach(function(item) {
+          // 区
+          const areaChildren = cityChildren.length ? (cityChildren[0].children || []) : [];
+          areaChildren.forEach(item => {
 						area.push(item.name);
 					});
 					this.multiArray = [province, city, area]
 				}
 			},
+      /**
+       * 提交省市区的选择
+       */
 			bindRegionChange: function(e) {
-				let multiIndex = this.multiIndex,
-					province = this.district[multiIndex[0]] || {
-						child: []
-					},
-					city = province.child[multiIndex[1]] || {
-						cityId: 0
-					},
-					multiArray = this.multiArray,
-					value = e.detail.value;
-
+				const multiIndex = this.multiIndex;
+        const multiArray = this.multiArray;
+        const value = e.detail.value;
+        const province = this.district[multiIndex[0]] || {
+						children: []
+        };
+				const city = province.children[multiIndex[1]] || {
+          children: []
+        };
+        const area = city.children[multiIndex[2]] || {
+          id: 0
+        };
 				this.region = [multiArray[0][value[0]], multiArray[1][value[1]], multiArray[2][value[2]]]
-				this.cityId = city.cityId
-				this.valueRegion = [0, 0, 0]
-				this.initialize();
-			},
+				this.cityId = area.id
+      },
+      /**
+       * 选择省市区的滚动
+       */
 			bindMultiPickerColumnChange: function(e) {
-				let that = this,
-					column = e.detail.column,
-					value = e.detail.value,
-					currentCity = this.district[value] || {
-						child: []
-					},
-					multiArray = that.multiArray,
-					multiIndex = that.multiIndex;
+        const column = e.detail.column; // multiArray 的下标
+				const value = e.detail.value; // multiArray 的值，即选中的第几个
+				const multiArray = this.multiArray;
+				const multiIndex = this.multiIndex;
 				multiIndex[column] = value;
 				switch (column) {
-					case 0:
-						let areaList = currentCity.child[0] || {
+					case 0: // 选择【省】
+            const currentCity = this.district[value] || {
+              child: []
+            };
+						const areaList = currentCity.children[0] || {
 							child: []
 						};
-						multiArray[1] = currentCity.child.map((item) => {
+						multiArray[1] = currentCity.children.map((item) => {
 							return item.name;
 						});
-						multiArray[2] = areaList.child.map((item) => {
-							return item.name;
-						});
-						break;
-					case 1:
-						let cityList = that.district[multiIndex[0]].child[multiIndex[1]].child || [];
-						multiArray[2] = cityList.map((item) => {
+						multiArray[2] = areaList.children.map((item) => {
 							return item.name;
 						});
 						break;
-					case 2:
-
+					case 1: // 选择【市】
+						const cityList = this.district[multiIndex[0]].children[multiIndex[1]].children || [];
+						multiArray[2] = cityList.map(item => {
+							return item.name;
+						});
+						break;
+					case 2: // 选择【区】
 						break;
 				}
 				// #ifdef MP || APP-PLUS
@@ -229,40 +309,19 @@
 				this.multiArray = multiArray;
 				// #endif
 				this.multiIndex = multiIndex
-				// this.setData({ multiArray: multiArray, multiIndex: multiIndex});
 			},
-			// 授权回调
-			onLoadFun: function() {
-				this.getUserAddress();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
-			toggleTab(str) {
-				this.$refs[str].show();
-			},
-			onConfirm(val) {
-				this.region = val.checkArr[0] + '-' + val.checkArr[1] + '-' + val.checkArr[2];
-			},
-			getUserAddress: function() {
-				if (!this.id) return false;
-				let that = this;
-				getAddressDetail(this.id).then(res => {
-					let region = [res.data.province, res.data.city, res.data.district];
-					that.$set(that, 'userAddress', res.data);
-					that.$set(that, 'region', region);
-					that.city_id = res.data.cityId
-				});
-			},
+      /**
+       * 通过地图，选择到具体的地址
+       * TODO 芋艿：需要测试下；
+       */
 			chooseLocation: function () {
 				uni.chooseLocation({
 					success: (res) => {
-						this.$set(this.userAddress,'detail',res.address.replace(/.+?(省|市|自治区|自治州|县|区)/g,''));
+						this.$set(this.userAddress, 'detailAddress', res.address.replace(/.+?(省|市|自治区|自治州|县|区)/g,''));
 					}
 				})
 			},
-			// 导入共享地址（小程序）
+			// 导入共享地址（小程序）TODO 芋艿：待实现
 			getWxAddress: function() {
 				let that = this;
 				uni.authorize({
@@ -277,10 +336,10 @@
 								addressP.cityId = 0;
 								editAddress({
 									address: addressP,
-									isDefault: 1,
-									realName: res.userName,
+									defaultStatus: 1,
+									name: res.userName,
 									postCode: res.postalCode,
-									phone: res.telNumber,
+									mobile: res.telNumber,
 									detail: res.detailInfo,
 									id: 0
 								}).then(res => {
@@ -354,15 +413,15 @@
 					},
 				})
 			},
-			// 导入共享地址（微信）；
+			// 导入共享地址（微信）；TODO 芋艿：待实现
 			getAddress() {
 				let that = this;
 				that.$wechat.openAddress().then(userInfo => {
 					// open();
 					editAddress({
 							id: this.id,
-							realName: userInfo.userName,
-							phone: userInfo.telNumber,
+							name: userInfo.userName,
+							mobile: userInfo.telNumber,
 							address: {
 								province: userInfo.provinceName,
 								city: userInfo.cityName,
@@ -370,7 +429,7 @@
 								cityId: 0
 							},
 							detail: userInfo.detailInfo,
-							isDefault: 1,
+							defaultStatus: 1,
 							postCode: userInfo.postalCode
 						})
 						.then(() => {
@@ -414,78 +473,6 @@
 					console.log(err);
 				});
 			},
-			/**
-			 * 提交用户添加地址
-			 * 
-			 */
-			formSubmit: function(e) {
-				let that = this,
-					value = e.detail.value;
-				if (!value.realName) return that.$util.Tips({
-					title: '请填写收货人姓名'
-				});
-				if (!value.phone) return that.$util.Tips({
-					title: '请填写联系电话'
-				});
-				if (!/^1(3|4|5|7|8|9|6)\d{9}$/i.test(value.phone)) return that.$util.Tips({
-					title: '请输入正确的手机号码'
-				});
-				if (that.region == '省-市-区') return that.$util.Tips({
-					title: '请选择所在地区'
-				});
-				if (!value.detail) return that.$util.Tips({
-					title: '请填写详细地址'
-				});
-				value.id = that.id;
-				let regionArray = that.region;
-				value.address = {
-					province: regionArray[0],
-					city: regionArray[1],
-					district: regionArray[2],
-					cityId: that.cityId,
-				};
-				value.isDefault = that.userAddress.isDefault;
-
-				uni.showLoading({
-					title: '保存中',
-					mask: true
-				})
-				editAddress(value).then(res => {
-					if (that.id)
-						that.$util.Tips({
-							title: '修改成功',
-							icon: 'success'
-						});
-					else
-						that.$util.Tips({
-							title: '添加成功',
-							icon: 'success'
-						});
-					setTimeout(function() {
-						if (that.preOrderNo>0) {
-							uni.redirectTo({
-								url: '/pages/users/order_confirm/index?preOrderNo=' + that.preOrderNo + '&addressId=' + (that.id ? that.id : res.data.id)
-							})
-						} else {
-							// #ifdef H5
-							return history.back();
-							// #endif
-							// #ifndef H5
-							return uni.navigateBack({
-								delta: 1,
-							})
-							// #endif
-						}
-					}, 1000);
-				}).catch(err => {
-					return that.$util.Tips({
-						title: err
-					});
-				})
-			},
-			ChangeIsDefault: function(e) {
-				this.$set(this.userAddress, 'isDefault', !this.userAddress.isDefault);
-			}
 		}
 	}
 </script>

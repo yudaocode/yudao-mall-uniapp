@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<view class="address-window" :class="address.address==true?'on':''">
+		<view class="address-window" :class="address.address ? 'on' : ''">
 			<view class='title'>选择地址<text class='iconfont icon-guanbi' @tap='close'></text></view>
 			<view class='list'>
 				<view class='item acea-row row-between-wrapper' :class='active==index?"font-color":""' v-for="(item,index) in addressList"
@@ -19,7 +19,7 @@
 			</view>
 			<view class='addressBnt bg-color' @tap='goAddressPages'>选择其地址</view>
 		</view>
-		<view class='mask' catchtouchmove="true" :hidden='address.address==false' @tap='close'></view>
+		<view class='mask' catchtouchmove="true" :hidden='!address.address' @tap='close' />
 	</view>
 </template>
 
@@ -37,7 +37,7 @@
 				type: Object,
 				default: function() {
 					return {
-						address: true,
+						address: true, // 是否打开
 						addressId: 0,
 					};
 				}
@@ -54,13 +54,12 @@
 				addressList: []
 			};
 		},
-
 		methods: {
 			tapAddress: function(e, addressid) {
 				this.active = e;
 				let a = {};
 				for (let i = 0, leng = this.addressList.length; i < leng; i++) {
-					if (this.addressList[i].id == addressid) {
+					if (this.addressList[i].id === addressid) {
 						a = this.addressList[i];
 					}
 				}

@@ -1,12 +1,12 @@
 import request from "@/utils/request.js";
 /**
  * 公共接口 ，优惠券接口 , 行业此讯 , 手机号码注册
- * 
+ *
 */
 
 /**
  * 获取主页数据 无需授权
- * 
+ *
 */
 export function getIndexData()
 {
@@ -15,7 +15,7 @@ export function getIndexData()
 
 /**
  * 获取登录授权login
- * 
+ *
 */
 export function getLogo()
 {
@@ -25,7 +25,7 @@ export function getLogo()
 
 /**
  * 保存form_id
- * @param string formId 
+ * @param string formId
  */
 export function setFormId(formId) {
   return request.post("wechat/set_form_id", { formId: formId});
@@ -34,7 +34,7 @@ export function setFormId(formId) {
 /**
  * 领取优惠卷
  * @param int couponId
- * 
+ *
 */
 export function setCouponReceive(couponId){
   return request.post('coupon/receive', { couponId: couponId});
@@ -57,7 +57,7 @@ export function getUserCoupons(data){
 
 /**
  * 文章分类列表
- * 
+ *
 */
 export function getArticleCategoryList(){
   return request.get('article/category/list',{},{noAuth:true})
@@ -66,7 +66,7 @@ export function getArticleCategoryList(){
 /**
  * 文章列表
  * @param int cid
- * 
+ *
 */
 export function getArticleList(cid,data){
   return request.get('article/list/' + cid, data,{noAuth:true})
@@ -74,7 +74,7 @@ export function getArticleList(cid,data){
 
 /**
  * 文章 热门列表
- * 
+ *
 */
 export function getArticleHotList(){
   return request.get('article/hot/list',{},{noAuth:true});
@@ -82,7 +82,7 @@ export function getArticleHotList(){
 
 /**
  * 文章 轮播列表
- * 
+ *
 */
 export function getArticleBannerList(){
   return request.get('article/banner/list',{},{noAuth:true})
@@ -90,8 +90,8 @@ export function getArticleBannerList(){
 
 /**
  * 文章详情
- * @param int id 
- * 
+ * @param int id
+ *
 */
 export function getArticleDetails(id){
   return request.get('article/info',id,{noAuth:true});
@@ -124,7 +124,7 @@ export function registerVerify(phone){
 /**
  * 手机号注册
  * @param object data
- * 
+ *
 */
 export function phoneRegister(data){
   return request.post('register',data,{noAuth:true});
@@ -133,7 +133,7 @@ export function phoneRegister(data){
 /**
  * 手机号修改密码
  * @param object data
- * 
+ *
 */
 export function phoneRegisterReset(data){
   return request.post('register/reset',data,{noAuth:true})
@@ -142,7 +142,7 @@ export function phoneRegisterReset(data){
 /**
  * 手机号+密码登录
  * @param object data
- * 
+ *
 */
 export function phoneLogin(data){
   return request.post('login',data,{noAuth:true})
@@ -169,7 +169,7 @@ export function switchH5Login() {
 
 /**
  * 换绑手机号
- * 
+ *
 */
 export function bindingPhone(data){
   return request.post('update/binding',data);
@@ -177,7 +177,7 @@ export function bindingPhone(data){
 
 /**
  * 换绑手机号校验
- * 
+ *
 */
 export function bindingVerify(data){
   return request.post('update/binding/verify',data);
@@ -185,7 +185,7 @@ export function bindingVerify(data){
 
 /**
  * 退出登錄
- * 
+ *
 */
 export function logout(){
   return request.get('logout');
@@ -197,21 +197,6 @@ export function logout(){
 export function getTemlIds(data)
 {
   return request.get('wechat/program/my/temp/list', data , { noAuth:true});
-}
-
-/**
- * 首页拼团数据
- */
-export function pink()
-{
-  return request.get('pink', {}, { noAuth:true});
-}
-
-/**
- * 获取城市信息
- */
-export function getCity() {
-  return request.get('city/list', { }, { noAuth: true });
 }
 
 /**

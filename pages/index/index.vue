@@ -291,8 +291,10 @@
 					let list = data[0]
 					this.getElementData(`#tab_item`, (data) => {
 						let el = data[this.listActive]
-						lineLeft = el.width / 2 + (-list.left) + el.left - list.width / 2 - this.scrollLeft
-						this.tabsScrollLeft = this.scrollLeft + lineLeft
+            if (el) {
+              lineLeft = el.width / 2 + (-list.left) + el.left - list.width / 2 - this.scrollLeft
+              this.tabsScrollLeft = this.scrollLeft + lineLeft
+            }
 					})
 				})
 			},
