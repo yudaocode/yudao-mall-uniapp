@@ -630,7 +630,7 @@
        * 获得商品评价列表
        */
       getProductReplyList: function() {
-        ProductCommentApi.getCommentList(this.id, 3).then(res => {
+        ProductCommentApi.getCommentList(this.activity.spuId, 3).then(res => {
           this.reply = res.data;
         })
       },
@@ -638,9 +638,10 @@
        * 获得商品评价统计
        */
       getProductReplyCount: function() {
-        ProductCommentApi.getCommentStatistics(this.id).then(res => {
-          this.$set(this, 'replyChance', res.data.goodPercent);
-          this.$set(this, 'replyCount', res.data.allCount);
+        ProductCommentApi.getCommentStatistics(this.activity.spuId).then(res => {
+          const count = res.data.goodCount + res.data.mediocreCount + res.data.negativeCount;
+          this.$set(this, 'replyChance', 100.0 * res.data.goodCount / count);
+          this.$set(this, 'replyCount', count);
         });
       },
 
