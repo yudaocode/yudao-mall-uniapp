@@ -48,32 +48,6 @@ export function getCoupons(data){
 }
 
 /**
- * 我的优惠券
- * @param int types 0全部  1未使用 2已使用
-*/
-export function getUserCoupons(data){
-  return request.get('coupon/list',data)
-}
-
-/**
- * 文章列表
- * @param int cid
- *
-*/
-export function getArticleList(cid,data){
-  return request.get('article/list/' + cid, data,{noAuth:true})
-}
-
-/**
- * 文章详情
- * @param int id
- *
-*/
-export function getArticleDetails(id){
-  return request.get('article/info',id,{noAuth:true});
-}
-
-/**
  * 手机号+验证码登录接口
  * @param object data
 */

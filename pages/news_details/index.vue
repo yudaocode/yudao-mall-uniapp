@@ -1,32 +1,34 @@
 <template>
 	<view>
 		<view class='newsDetail'>
-			<view class='title'>{{articleInfo.title}}</view>
+			<view class='title'>{{ articleInfo.title }}</view>
 			<view class='list acea-row row-middle'>
-				<view class='label'>{{articleInfo.author}}</view>
-				<view class='item'>{{articleInfo.createTime}}</view>
-				<view class='item'><text class='iconfont icon-liulan'></text>{{articleInfo.visit}}</view>
+				<view class='label'>{{ articleInfo.author }}</view>
+				<view class='item'>{{ formatDate(articleInfo.createTime) }}</view>
+				<view class='item'><text class='iconfont icon-liulan'></text>{{ articleInfo.browseCount }}</view>
 			</view>
 			<view class='conters'>
-				<jyf-parser :html="content" ref="article" :tag-style="tagStyle"></jyf-parser>
+				<jyf-parser :html="content" ref="article" :tag-style="tagStyle" />
 			</view>
 			<view class="picTxt acea-row row-between-wrapper" v-if="store_info.id">
 				<view class="pictrue">
-					<image :src="store_info.image"></image>
+					<image :src="store_info.picUrl" />
 				</view>
 				<view class="text">
-					<view class="name line1">{{store_info.storeName}}</view>
+					<view class="name line1">{{ store_info.storeName }}</view>
 					<view class="money font-color">
-						￥<text class="num">{{store_info.price}}</text>
+						￥<text class="num">{{ fen2yuan(store_info.price) }}</text>
 					</view>
-					<view class="y_money">￥{{store_info.otPrice}}</view>
+					<view class="y_money">￥{{ fen2yuan(store_info.marketPrice) }}</view>
 				</view>
-				<navigator :url="'/pages/goods_details/index?id='+store_info.id" hover-class="none" class="label">
+				<navigator :url="'/pages/goods_details/index?id=' + store_info.id" hover-class="none" class="label">
           <text class="span">查看商品</text>
         </navigator>
 			</view>
 			<!-- #ifdef H5 -->
-			<button class="bnt bg-color" hover-class='none' @click="listenerActionSheet" v-if="this.$wechat.isWeixin()">和好友一起分享</button>
+			<button class="bnt bg-color" hover-class='none' @click="listenerActionSheet" v-if="this.$wechat.isWeixin()">
+        和好友一起分享
+      </button>
 			<!-- #endif -->
 			<!-- #ifdef MP -->
 			<button class="bnt bg-color" open-type="share" hover-class='none'>和好友一起分享</button>
@@ -36,18 +38,15 @@
 		<home></home>
 	</view>
 </template>
-
 <script>
-	import {
-		getArticleDetails
-	} from '@/api/api.js';
-	import {
-		getProductDetail
-	} from '@/api/store.js';
 	import shareInfo from '@/components/shareInfo';
 	import home from '@/components/home';
 	import parser from "@/components/jyf-parser/jyf-parser";
-	export default {
+  import * as ArticleApi from '@/api/promotion/article.js';
+  import * as ProductSpuApi from '@/api/product/spu.js';
+  import dayjs from "@/plugin/dayjs/dayjs.min.js";
+  import * as Util from '@/utils/util.js';
+  export default {
 		components: {
 			shareInfo,
 			home,
@@ -59,12 +58,12 @@
 				articleInfo: [],
 				store_info: {},
 				content:'',
-				shareInfoStatus:false,
 				tagStyle: {
 					img: 'width:100%;'
 				},
-				productId: 0
-			};
+				productId: 0,
+        shareInfoStatus: false,
+      };
 		},
     /**
      * 生命周期函数--监听页面加载
@@ -98,50 +97,58 @@
     },
     // #endif
 		methods: {
-      getArticleOne:function(){
-			    let that = this;
-			    getArticleDetails({id:that.id}).then(res=>{
-					uni.setNavigationBarTitle({
-					   title:res.data.title.substring(0,7) + "..."
-					});
-					that.$set(that,'articleInfo',res.data);
-					that.$set(that,'productId',res.data.productId);
-					if(res.data.productId){
-						that.goodInfo(res.data.productId);
-					}
-					that.content = res.data.content;
-					// #ifdef H5
-					if (this.$wechat.isWeixin()) {
-						this.setShareInfo();
-					}
-					// #endif
-			    });
-			  },
-			  goodInfo(id){
-				  getProductDetail(id).then(res=>{
-					  this.$set(this,'store_info',res.data.storeInfo?res.data.storeInfo:{});
-				  })
-			  },
-			  listenerActionSheet(){
-				  this.shareInfoStatus = true
-			  },
-			  setShareInfoStatus(){
-				  this.shareInfoStatus = false
-			  },
-			  setShareInfo: function() {
-			  	let href = location.href;
-			  	let configAppMessage = {
-			  		desc: this.articleInfo.synopsis,
-			  		title: this.articleInfo.title,
-			  		link: href,
-			  		imgUrl: this.articleInfo.imageInput.length ? this.articleInfo.imageInput[0] : ""
-			  	};
-			  	this.$wechat.wechatEvevt(["updateAppMessageShareData", "updateTimelineShareData"], configAppMessage);
-			  }
+      getArticleOne: function() {
+        ArticleApi.getArticle(this.id).then(res => {
+          uni.setNavigationBarTitle({
+             title: res.data.title.substring(0,7) + "..."
+          });
+          this.$set(this, 'articleInfo', res.data);
+          this.$set(this, 'productId', res.data.productId);
+          if (res.data.spuId) {
+            this.goodInfo(res.data.spuId);
+          }
+          this.content = res.data.description;
+          // #ifdef H5
+          if (this.$wechat.isWeixin()) {
+            this.setShareInfo();
+          }
+          // #endif
+        });
+      },
+      goodInfo(id) {
+        ProductSpuApi.getSpuDetail(id).then(res=>{
+          this.$set(this, 'store_info', res.data);
+        })
+      },
+      listenerActionSheet() {
+        this.shareInfoStatus = true
+      },
+      setShareInfoStatus() {
+        this.shareInfoStatus = false
+      },
+      setShareInfo: function() {
+        let href = location.href;
+        let configAppMessage = {
+          title: this.articleInfo.title,
+          desc: this.articleInfo.introduction,
+          link: href,
+          imgUrl: this.articleInfo.picUrl
+        };
+        this.$wechat.wechatEvevt([
+          "updateAppMessageShareData",
+          "updateTimelineShareData"
+        ], configAppMessage);
+      },
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD");
+      }
 		}
 	}
 </script>
-
 <style lang="scss" scoped>
 	page {
 		background-color: #fff !important;

@@ -20,3 +20,12 @@ export function getArticlePage(data) {
     noAuth: true // TODO 芋艿：后续要做调整
   });
 }
+
+// 获得文章
+export function getArticle(id) {
+  return request.get("app-api/promotion/article/get", {
+    id
+  }, {
+    noAuth: true // TODO 芋艿：后续要做调整
+  });
+}

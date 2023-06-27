@@ -1,19 +1,17 @@
 <template>
 	<view v-if="shareInfoStatus" class="poster-first">
 	    <view class="mask-share">
-			<image src="/static/images/share-info.png" @click="shareInfoClose" @touchmove.stop.prevent="false"></image>
+			<image src="/static/images/share-info.png" @click="shareInfoClose" @touchmove.stop.prevent="false" />
 	    </view>
 	  </view>
 </template>
-
 <script>
-	
 export default {
 	props: {
 		 shareInfoStatus: {
-		      type: Boolean,
-		      default:false,
-		    }
+        type: Boolean,
+        default:false,
+      }
 	},
   data: function() {
     return {};
@@ -25,9 +23,7 @@ export default {
     }
   }
 };
-
 </script>
-
 <style scoped lang="scss">
 	.poster-first {
 	  overscroll-behavior: contain;
