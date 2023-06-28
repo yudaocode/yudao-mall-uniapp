@@ -2,37 +2,36 @@
 	<div>
 		<div class="storeBox" ref="container">
 			<div class="storeBox-box" v-for="(item, index) in storeList" :key="index" @click.stop="checked(item)">
-				<div class="store-img"><img :src="item.image" lazy-load="true" /></div>
+				<div class="store-img">
+          <img :src="item.logo" lazy-load="true" />
+        </div>
 				<div class="store-cent-left">
 					<div class="store-name">{{ item.name }}</div>
 					<div class="store-address line1">
-						{{ item.address }}{{ ", " + item.detailedAddress }}
+						{{ item.areaName }}{{ ", " + item.detailAddress }}
 					</div>
 				</div>
 				<div class="row-right">
 					<div>
 						<!-- #ifdef H5 -->
-						<a class="store-phone" :href="'tel:' + item.phone"><span
-								class="iconfont icon-dadianhua01"></span></a>
+						<a class="store-phone" :href="'tel:' + item.phone">
+              <span class="iconfont icon-dadianhua01" />
+            </a>
 						<!-- #endif -->
 						<!-- #ifdef MP -->
-						<view class="store-phone" @click="call(item.phone)"><text
-								class="iconfont icon-dadianhua01"></text></view>
+						<view class="store-phone" @click="call(item.phone)">
+              <text class="iconfont icon-dadianhua01" />
+            </view>
 						<!-- #endif -->
 					</div>
-					<!-- <div>
-						<a class="store-phone" :href="'tel:' + item.phone"><span class="iconfont icon-dadianhua01"></span></a>
-					</div> -->
 					<div class="store-distance" @click.stop="showMaoLocation(item)">
-						<span class="addressTxt" v-if="item.distance">距离{{ item.distance/1000 }}千米</span>
+						<span class="addressTxt" v-if="item.distance">距离{{ item.distance / 1000.0 }}千米</span>
 						<span class="addressTxt" v-else>查看地图</span>
-						<span class="iconfont icon-youjian"></span>
+						<span class="iconfont icon-youjian" />
 					</div>
 				</div>
 			</div>
-
-
-			<Loading :loaded="loaded" :loading="loading"></Loading>
+			<Loading :loaded="loaded" :loading="loading" />
 		</div>
 		<div>
 			<!-- <iframe v-if="locationShow && !isWeixin" ref="geoPage" width="0" height="0" frameborder="0" style="display:none;"
@@ -48,24 +47,8 @@
 
 <script>
 	import Loading from "@/components/Loading";
-	import {
-		storeListApi
-	} from "@/api/store";
-	import {
-		isWeixin
-	} from "@/utils/index";
-	// #ifdef H5
-	import {
-		wechatEvevt,
-		wxShowLocation
-	} from "@/libs/wechat";
-	// #endif
-
-	import {
-		mapGetters
-	} from "vuex";
-	// import cookie from "@/utils/store/cookie";
-	const LONGITUDE = "user_longitude";
+  import * as DeliveryApi from '@/api/trade/delivery.js';
+  const LONGITUDE = "user_longitude";
 	const LATITUDE = "user_latitude";
 	const MAPKEY = "mapKey";
 	export default {
@@ -73,11 +56,8 @@
 		components: {
 			Loading
 		},
-		// computed: mapGetters(["goName"]),
 		data() {
 			return {
-				page: 1,
-				limit: 20,
 				loaded: false,
 				loading: false,
 				storeList: [],
@@ -103,9 +83,6 @@
 				this.selfLocation();
 				this.getList();
 			}
-			// this.$scroll(this.$refs.container, () => {
-			//   !this.loading && this.getList();
-			// });
 		},
 		methods: {
 			call(phone) {
@@ -114,18 +91,17 @@
 				});
 			},
 			selfLocation() {
-				let self = this
 				// #ifdef H5
-				if (self.$wechat.isWeixin()) {
-					self.$wechat.location().then(res => {
+				if (this.$wechat.isWeixin()) {
+          this.$wechat.location().then(res => {
 						this.user_latitude = res.latitude;
 						this.user_longitude = res.longitude;
 						uni.setStorageSync('user_latitude', res.latitude);
 						uni.setStorageSync('user_longitude', res.longitude);
-						self.getList();
+            this.getList();
 					})
 				} else {
-				// #endif	
+				// #endif
 					uni.getLocation({
 						type: 'wgs84',
 						success: (res) => {
@@ -135,28 +111,27 @@
 								uni.setStorageSync('user_latitude', res.latitude);
 								uni.setStorageSync('user_longitude', res.longitude);
 							} catch {}
-							self.getList();
+							this.getList();
 						},
-						complete: function() {
-							self.getList();
+						complete: () => {
+							this.getList();
 						}
 					});
-					// #ifdef H5	
+					// #ifdef H5
 				}
 				// #endif
 			},
 			showMaoLocation(e) {
-				let self = this;
 				// #ifdef H5
-				if (self.$wechat.isWeixin()) {
-					self.$wechat.seeLocation({
+				if (this.$wechat.isWeixin()) {
+          this.$wechat.seeLocation({
 						latitude: Number(e.latitude),
 						longitude: Number(e.longitude)
 					}).then(res => {
 						console.log('success');
 					})
 				} else {
-					// #endif	
+					// #endif
 					uni.openLocation({
 						latitude: Number(e.latitude),
 						longitude: Number(e.longitude),
@@ -166,42 +141,38 @@
 							console.log('success');
 						}
 					});
-					// #ifdef H5	
+					// #ifdef H5
 				}
 				// #endif
 			},
-			// 选中门店
+			//
+      /**
+       * 选中门店
+       */
 			checked(e) {
-
 				uni.$emit("handClick", {
 					address: e
 				});
 				uni.navigateBack();
-				// if (this.goName === "orders") {
-				//   this.$store.commit("GET_STORE", e);
-				//   this.$router.go(-1); //返回上一层
-				// }
 			},
-			// 获取门店列表数据
+      /**
+       * 获取门店列表数据
+       */
 			getList: function() {
-				if (this.loading || this.loaded) return;
+				if (this.loading || this.loaded) {
+          return;
+        }
 				this.loading = true;
-				let data = {
-					latitude: this.user_latitude || "", //纬度
-					longitude: this.user_longitude || "", //经度
-					page: this.page,
-					limit: this.limit
-				};
-				storeListApi(data)
-					.then(res => {
-						this.loading = false;
-						this.loaded = res.data.list.length < this.limit;
-						this.storeList.push.apply(this.storeList, res.data.list);
-						this.page = this.page + 1;
-					})
-					.catch(err => {
-						this.$dialog.error(err);
-					});
+        DeliveryApi.getDeliveryPickUpStoreList({
+          latitude: this.user_latitude,
+          longitude: this.user_longitude
+        }).then(res => {
+          this.loading = false;
+          this.loaded = res.data.length < this.limit;
+          this.storeList = res.data;
+        }).catch(err => {
+          this.$dialog.error(err);
+        });
 			}
 		},
 		onReachBottom() {
@@ -209,7 +180,6 @@
 		}
 	};
 </script>
-
 <style>
 	.geoPage {
 		position: fixed;

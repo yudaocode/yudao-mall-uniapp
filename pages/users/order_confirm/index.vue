@@ -3,10 +3,10 @@
 		<view class='order-submission'>
 			<view class="allAddress" :style="store_self_mention ? '':'padding-top:10rpx;'">
 				<view class="nav acea-row">
-					<view class="item font-color" :class="shippingType == 0 ? 'on' : 'on2'" @tap="addressType(0)"
-						v-if='store_self_mention'></view>
-					<view class="item font-color" :class="shippingType == 1 ? 'on' : 'on2'" @tap="addressType(1)"
-						v-if='store_self_mention'></view>
+					<view class="item font-color" :class="shippingType === 0 ? 'on' : 'on2'"
+                @tap="addressType(0)" v-if='store_self_mention' />
+					<view class="item font-color" :class="shippingType === 1 ? 'on' : 'on2'"
+                @tap="addressType(1)" v-if='store_self_mention' />
 				</view>
         <!-- 收货地址的选择 -->
 				<view class='address acea-row row-between-wrapper' @tap='onAddress' v-if='shippingType === 0'
@@ -25,14 +25,14 @@
 					</view>
 					<view class='iconfont icon-jiantou'></view>
 				</view>
-        <!-- TODO 芋艿：还在搞 -->
+        <!-- 门店的选择 -->
 				<view class='address acea-row row-between-wrapper' v-else @tap="showStoreList">
 					<block v-if="storeList.length>0">
 						<view class='addressCon'>
-							<view class='name'>{{system_store.name}}
-								<text class='phone'>{{system_store.phone}}</text>
+							<view class='name'>{{ system_store.name }}
+								<text class='phone'>{{ system_store.phone }}</text>
 							</view>
-							<view class="line1"> {{system_store.address}}{{", " + system_store.detailedAddress}}
+							<view class="line1"> {{ system_store.areaName }}{{", " + system_store.detailAddress}}
 							</view>
 						</view>
 						<view class='iconfont icon-jiantou'></view>
@@ -97,10 +97,6 @@
 							</view>
 						</view>
 					</view>
-					<!-- <view class='item acea-row row-between-wrapper' wx:else>
-		      <view>自提门店</view>
-		      <view class='discount'>{{system_store.name}}</view>
-		    </view> -->
 					<view class='item' v-if="textareaStatus">
 						<view>备注信息</view>
 						<textarea v-if="coupon.coupon===false" placeholder-class='placeholder' @input='bindHideKeyboard'
@@ -178,10 +174,8 @@
 	import {
 		openPaySubscribe
 	} from '@/utils/SubscribeMessage.js';
-	import {
-		storeListApi
-	} from '@/api/store.js';
-	import couponListWindow from '@/components/couponListWindow';
+  import * as DeliveryApi from '@/api/trade/delivery.js';
+  import couponListWindow from '@/components/couponListWindow';
 	import addressWindow from '@/components/addressWindow';
 	import orderGoods from '@/components/orderGoods';
 	import home from '@/components/home';
@@ -224,7 +218,6 @@
 				}, //优惠券组件
 
 				couponId: 0, //优惠券id
-				cartId: '', //购物车id
 				userInfo: {}, //用户信息
 				mark: '', //备注信息
 				couponTitle: '请选择', //优惠券
@@ -232,45 +225,37 @@
 				useIntegral: false, //是否使用积分
 				integral_price: 0, //积分抵扣金额
 				integral: 0,
-				ChangePrice: 0, //使用积分抵扣变动后的金额
-				formIds: [], //收集formid
 				status: 0,
 				toPay: false, //修复进入支付时页面隐藏从新刷新页面
-				shippingType: 0,
-				system_store: {},
-				storePostage: 0,
 				contacts: '',
 				contactsTel: '',
-				mydata: {},
-				storeList: [],
-				store_self_mention: 0,
 				cartInfo: [],
 				priceGroup: {},
 				animated: false,
 				totalPrice: 0,
-				integralRatio: "0",
 				pagesUrl: "",
-				orderKey: "",
 				offlinePostage: "",
 				payChannel: '',
-				news: true,
-				again: false,
-				addAgain: false,
-				bargain: false, //是否是砍价
-				combination: false, //是否是拼团
-				secKill: false, //是否是秒杀
+				bargain: false, // 是否是砍价
+				combination: false, // 是否是拼团
+				secKill: false, // 是否是秒杀
 				orderInfoVo: {},
-				addressList: [], //地址列表数据
 				orderProNum: 0,
 				preOrderNo: '', //预下单订单号
 
         // ========== 收货地址 ==========
+        shippingType: 0, // 0 - 快递配送；1 - 门店自提
         addressId: 0, // 页面传递的 param 对应的地址 id
         addressInfo: {}, // 选中的地址信息
         address: { // 地址组件
           address: false, // 是否 addressWindow 展示
           addressId: 0 // 真正选中的 address 编号，优先级大于 addressId
         },
+
+        // ========== 门店自提 ==========
+        store_self_mention: false, // 门店自提是否开启
+        storeList: [], // 门店列表
+        system_store: {}, // 选中的门店
       };
 		},
 		computed: mapGetters(['isLogin', 'systemPlatform', 'productType']),
@@ -334,50 +319,21 @@
 					this.cartArr[1].title = '可用余额:' + orderInfoVo.userBalance;
 					this.cartArr[1].payStatus = parseInt(res.data.yuePayStatus) === 1 ? 1 : 2;
 					this.cartArr[0].payStatus = parseInt(res.data.payWeixinOpen) === 1 ? 1 : 0;
-					this.store_self_mention = res.data.storeSelfMention == 'true'&& this.productType === 'normal' ? true : false;
 
-          // 获得收件地址列表 TODO 芋艿：
+          // 获得收件地址列表
+          this.$nextTick(function() {
+            this.$refs.addressWindow.getAddressList();
+          })
         }).catch(err => {
 					return this.$util.Tips({
 						title: err
 					});
 				})
-        this.$nextTick(function() {
-          this.$refs.addressWindow.getAddressList();
+
+        // 获得门店自提是否开启
+        DeliveryApi.getDeliveryConfig().then(res => {
+          this.store_self_mention = res.data.pickUpEnable && this.productType === 'normal';
         })
-			},
-			/**
-			 * 获取门店列表数据
-			 */
-			getList: function() {
-				let longitude = uni.getStorageSync("user_longitude"); //经度
-				let latitude = uni.getStorageSync("user_latitude"); //纬度
-				let data = {
-					latitude: latitude, //纬度
-					longitude: longitude, //经度
-					page: 1,
-					limit: 10
-				}
-				storeListApi(data).then(res => {
-					let list = res.data.list || [];
-					this.$set(this, 'storeList', list);
-					this.$set(this, 'system_store', list[0]);
-				}).catch(err => {
-					return this.$util.Tips({
-						title: err
-					});
-				})
-			},
-			/*
-			 * 跳转门店列表
-			 */
-			showStoreList: function() {
-				let _this = this
-				if (this.storeList.length > 0) {
-					uni.navigateTo({
-						url: '/pages/users/goods_details_store/index'
-					})
-				}
 			},
 			// 计算订单价格
 			computedPrice: function() {
@@ -406,12 +362,6 @@
 						title: err
 					});
 				});
-			},
-			addressType: function(e) {
-				let index = e;
-				this.shippingType = parseInt(index);
-				this.computedPrice();
-				if (index == 1) this.getList();
 			},
 			bindPickerChange: function(e) {
 				let value = e.detail.value;
@@ -912,6 +862,48 @@
        */
       changeClose: function() {
         this.$set(this.address, 'address', false);
+      },
+
+      // ========== 门店自提 ==========
+
+      /**
+       * 切换物流方式
+       */
+      addressType: function(shippingType) {
+        this.shippingType = shippingType;
+        this.computedPrice();
+        if (shippingType === 1) {
+          this.getList();
+        }
+      },
+      /**
+       * 跳转门店列表
+       */
+      showStoreList: function() {
+        if (this.storeList.length > 0) {
+          uni.navigateTo({
+            url: '/pages/users/goods_details_store/index'
+          })
+        }
+      },
+      /**
+       * 获取门店列表数据
+       */
+      getList: function() {
+        let longitude = uni.getStorageSync("user_longitude"); // 经度
+        let latitude = uni.getStorageSync("user_latitude"); // 纬度
+        DeliveryApi.getDeliveryPickUpStoreList({
+          latitude,
+          longitude
+        }).then(res => {
+          let list = res.data || [];
+          this.$set(this, 'storeList', list);
+          this.$set(this, 'system_store', list[0]);
+        }).catch(err => {
+          return this.$util.Tips({
+            title: err
+          });
+        })
       },
     }
 	}
