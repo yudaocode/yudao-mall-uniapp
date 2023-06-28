@@ -148,7 +148,15 @@
 				<view class='settlement' style='z-index:100' @tap="SubOrder">立即结算</view>
 			</view>
 		</view>
-		<couponListWindow :coupon='coupon' @ChangCouponsClone="ChangCouponsClone" :openType='openType' @ChangCoupons="ChangCoupons" :orderShow="orderShow"></couponListWindow>
+
+    <!-- 优惠劵的弹窗选择 -->
+    <couponListWindow
+      :coupon='coupon'
+      @ChangCouponsClone="ChangCouponsClone"
+      :openType='openType'
+      @ChangCoupons="ChangCoupons"
+      :orderShow="orderShow"
+    />
 
     <!-- 收货地址的弹窗选择 -->
     <addressWindow
@@ -190,7 +198,6 @@
 		},
 		data() {
 			return {
-				orderShow: 'orderShow', //下单页面使用优惠券组件不展示tab切换页
 				textareaStatus: true,
 				//支付方式
 				cartArr: [{
@@ -209,18 +216,10 @@
 					}
 				],
 				payType: 'weixin', //支付方式
-				openType: 1, //优惠券打开方式 1=使用
 				active: 0, //支付方式切换
-				coupon: {
-					coupon: false,
-					list: [],
-					statusTile: '立即使用'
-				}, //优惠券组件
 
-				couponId: 0, //优惠券id
 				userInfo: {}, //用户信息
 				mark: '', //备注信息
-				couponTitle: '请选择', //优惠券
 				coupon_price: 0, //优惠券抵扣金额
 				useIntegral: false, //是否使用积分
 				integral_price: 0, //积分抵扣金额
@@ -234,7 +233,6 @@
 				animated: false,
 				totalPrice: 0,
 				pagesUrl: "",
-				offlinePostage: "",
 				payChannel: '',
 				bargain: false, // 是否是砍价
 				combination: false, // 是否是拼团
@@ -242,6 +240,15 @@
 				orderInfoVo: {},
 				orderProNum: 0,
 				preOrderNo: '', //预下单订单号
+
+        // ========== 优惠劵 ==========
+        couponId: 0, // 选中的优惠券 id
+        couponTitle: '请选择', // 优惠券的标题
+        coupon: { // 优惠券组件
+          coupon: false,
+          list: [],
+          statusTile: '立即使用'
+        },
 
         // ========== 收货地址 ==========
         shippingType: 0, // 0 - 快递配送；1 - 门店自提
@@ -251,6 +258,8 @@
           address: false, // 是否 addressWindow 展示
           addressId: 0 // 真正选中的 address 编号，优先级大于 addressId
         },
+        openType: 1, // 优惠券打开方式 1=使用
+        orderShow: 'orderShow', // 下单页面使用优惠券组件不展示 tab 切换页
 
         // ========== 门店自提 ==========
         store_self_mention: false, // 门店自提是否开启
@@ -288,6 +297,10 @@
       // 处理 address 地址
       this.addressId = options.addressId || 0;
       this.getaddressInfo();
+      // 获得门店自提是否开启
+      DeliveryApi.getDeliveryConfig().then(res => {
+        this.store_self_mention = res.data.pickUpEnable && this.productType === 'normal';
+      })
 		},
 		/**
 		 * 生命周期函数--监听页面显示
@@ -295,10 +308,12 @@
 		onShow: function() {
 			let _this = this
 			this.textareaStatus = true;
+      // 获得默认的收货地址
 			if (this.isLogin && !this.toPay) {
 				this.getaddressInfo();
 			}
 
+      // 来自 goods_details_store/index.vue 的门店选择
 			uni.$on("handClick", res => {
 				if (res) {
 					_this.system_store = res.address
@@ -329,11 +344,6 @@
 						title: err
 					});
 				})
-
-        // 获得门店自提是否开启
-        DeliveryApi.getDeliveryConfig().then(res => {
-          this.store_self_mention = res.data.pickUpEnable && this.productType === 'normal';
-        })
 			},
 			// 计算订单价格
 			computedPrice: function() {
@@ -363,14 +373,7 @@
 					});
 				});
 			},
-			bindPickerChange: function(e) {
-				let value = e.detail.value;
-				this.shippingType = value;
-				this.computedPrice();
-			},
-			ChangCouponsClone: function() {
-				this.$set(this.coupon, 'coupon', false);
-			},
+
 			changeTextareaStatus: function() {
 				for (let i = 0, len = this.coupon.list.length; i < len; i++) {
 					this.coupon.list[i].use_title = '';
@@ -379,39 +382,6 @@
 				this.textareaStatus = true;
 				this.status = 0;
 				this.$set(this.coupon, 'list', this.coupon.list);
-			},
-			/**
-			 * 处理点击优惠券后的事件
-			 */
-			ChangCoupons: function(e) {
-				// this.usableCoupon = e
-				// this.coupon.coupon = false
-				let index = e,
-					list = this.coupon.list,
-					couponTitle = '请选择',
-					couponId = 0;
-				for (let i = 0, len = list.length; i < len; i++) {
-					if (i != index) {
-						list[i].use_title = '';
-						list[i].isUse = 0;
-					}
-				}
-				if (list[index].isUse) {
-					//不使用优惠券
-					list[index].use_title = '';
-					list[index].isUse = 0;
-				} else {
-					//使用优惠券
-					list[index].use_title = '不使用';
-					list[index].isUse = 1;
-					couponTitle = list[index].name;
-					couponId = list[index].id;
-				}
-				this.couponTitle = couponTitle;
-				this.couponId = couponId;
-				this.$set(this.coupon, 'coupon', false);
-				this.$set(this.coupon, 'list', list);
-				this.computedPrice();
 			},
 			/**
 			 * 使用积分抵扣
@@ -423,16 +393,7 @@
 			bindHideKeyboard: function(e) {
 				this.mark = e.detail.value;
 			},
-			/**
-			 * 获取当前金额可用优惠券
-			 *
-			 */
-			getCouponList: function() {
-				getCouponsOrderPrice(this.preOrderNo).then(res => {
-					this.$set(this.coupon, 'list', res.data);
-					this.openType = 1;
-				});
-			},
+
 			payItem: function(e) {
 				let that = this;
 				let active = e;
@@ -814,6 +775,54 @@
 				that.payment(data);
 				// #endif
 			},
+
+      // ========== 优惠劵 ==========
+      /**
+       * 获取当前金额可用优惠券 TODO
+       */
+      getCouponList: function() {
+        getCouponsOrderPrice(this.preOrderNo).then(res => {
+          this.$set(this.coupon, 'list', res.data);
+          this.openType = 1;
+        });
+      },
+      /**
+       * 处理点击优惠券后的事件 TODO
+       */
+      ChangCoupons: function(e) {
+        // this.usableCoupon = e
+        // this.coupon.coupon = false
+        let index = e,
+          list = this.coupon.list,
+          couponTitle = '请选择',
+          couponId = 0;
+        for (let i = 0, len = list.length; i < len; i++) {
+          if (i != index) {
+            list[i].use_title = '';
+            list[i].isUse = 0;
+          }
+        }
+        if (list[index].isUse) {
+          //不使用优惠券
+          list[index].use_title = '';
+          list[index].isUse = 0;
+        } else {
+          //使用优惠券
+          list[index].use_title = '不使用';
+          list[index].isUse = 1;
+          couponTitle = list[index].name;
+          couponId = list[index].id;
+        }
+        this.couponTitle = couponTitle;
+        this.couponId = couponId;
+        this.$set(this.coupon, 'coupon', false);
+        this.$set(this.coupon, 'list', list);
+        this.computedPrice();
+      },
+      // TODO
+      ChangCouponsClone: function() {
+        this.$set(this.coupon, 'coupon', false);
+      },
 
       // ========== 收货地址 ==========
       /**
