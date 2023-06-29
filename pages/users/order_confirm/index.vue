@@ -3,13 +3,13 @@
 		<view class='order-submission'>
 			<view class="allAddress" :style="store_self_mention ? '':'padding-top:10rpx;'">
 				<view class="nav acea-row">
-					<view class="item font-color" :class="shippingType === 0 ? 'on' : 'on2'"
-                @tap="addressType(0)" v-if='store_self_mention' />
 					<view class="item font-color" :class="shippingType === 1 ? 'on' : 'on2'"
+                @tap="addressType(0)" v-if='store_self_mention' />
+					<view class="item font-color" :class="shippingType === 2 ? 'on' : 'on2'"
                 @tap="addressType(1)" v-if='store_self_mention' />
 				</view>
         <!-- 收货地址的选择 -->
-				<view class='address acea-row row-between-wrapper' @tap='onAddress' v-if='shippingType === 0'
+				<view class='address acea-row row-between-wrapper' @tap='onAddress' v-if='shippingType === 1'
               :style="store_self_mention ? '':'border-top-left-radius: 14rpx;border-top-right-radius: 14rpx;'">
 					<view class='addressCon' v-if="addressInfo.name">
 						<view class='name'>{{ addressInfo.name }}
@@ -46,10 +46,10 @@
 				</view>
 			</view>
 			<view class="pad30">
-				<orderGoods :cartInfo="cartInfo" :orderProNum="orderProNum"></orderGoods>
+				<orderGoods :cartInfo="cartInfo" />
 				<view class='wrapper borRadius14'>
 					<view class='item acea-row row-between-wrapper' @tap='couponTap'
-						v-if="!orderInfoVo.bargainId && !orderInfoVo.combinationId && !orderInfoVo.seckillId && productType==='normal'">
+						v-if="orderInfoVo.type === 1 && productType==='normal'">
 						<view>优惠券</view>
 						<view class='discount'>{{couponTitle}}
 							<text class='iconfont icon-jiantou'></text>
@@ -57,7 +57,7 @@
 					</view>
 
 					<view class='item acea-row row-between-wrapper'
-						v-if="!orderInfoVo.bargainId && !orderInfoVo.combinationId && !orderInfoVo.seckillId && productType==='normal'">
+						v-if="orderInfoVo.type === 1 && productType==='normal'">
 						<view>积分抵扣</view>
 					<!-- 	 -->
 						<view class='discount acea-row row-middle'>
@@ -74,7 +74,7 @@
 						<view>会员优惠</view>
 						<view class='discount'>-￥{{priceGroup.vipPrice}}</view>
 					</view> -->
-					<view class='item acea-row row-between-wrapper' v-if='shippingType==0'>
+					<view class='item acea-row row-between-wrapper' v-if='shippingType === 1'>
 						<view>快递费用</view>
 						<view class='discount' v-if='parseFloat(orderInfoVo.freightFee) > 0'>
 							+￥{{orderInfoVo.freightFee}}
@@ -175,10 +175,10 @@
 		postOrderComputed,
 		wechatOrderPay,
 		wechatQueryPayResult,
-		loadPreOrderApi
 	} from '@/api/order.js';
   import * as AddressApi from '@/api/member/address.js';
   import * as CouponApi from '@/api/promotion/coupon.js';
+  import * as OrderApi from '@/api/trade/order.js';
   import {
 		openPaySubscribe
 	} from '@/utils/SubscribeMessage.js';
@@ -189,8 +189,8 @@
 	import home from '@/components/home';
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
-  import coupon from "../../../../admin/src/views/marketing/coupon";
-	export default {
+  import * as Util from '@/utils/util.js';
+  export default {
 		components: {
 			couponListWindow,
 			addressWindow,
@@ -199,6 +199,11 @@
 		},
 		data() {
 			return {
+        items: [], // 前端传递的购物项
+        cartInfo: [], // 后端返回的购物项
+        orderInfoVo: {}, // 订单信息
+
+        // TODO 芋艿：未整理
 				textareaStatus: true,
 				//支付方式
 				cartArr: [{
@@ -229,7 +234,6 @@
 				toPay: false, //修复进入支付时页面隐藏从新刷新页面
 				contacts: '',
 				contactsTel: '',
-				cartInfo: [],
 				priceGroup: {},
 				animated: false,
 				totalPrice: 0,
@@ -238,8 +242,6 @@
 				bargain: false, // 是否是砍价
 				combination: false, // 是否是拼团
 				secKill: false, // 是否是秒杀
-				orderInfoVo: {},
-				orderProNum: 0,
 				preOrderNo: '', //预下单订单号
 
         // ========== 优惠劵 ==========
@@ -252,7 +254,7 @@
         },
 
         // ========== 收货地址 ==========
-        shippingType: 0, // 0 - 快递配送；1 - 门店自提
+        shippingType: 1, // 1 - 快递配送；2 - 门店自提
         addressId: 0, // 页面传递的 param 对应的地址 id
         addressInfo: {}, // 选中的地址信息
         address: { // 地址组件
@@ -286,13 +288,24 @@
         return
       }
 
+      // TODO 芋艿：支付相关，可以移除；
 			// #ifdef H5
 			this.payChannel = this.$wechat.isWeixin() ? 'public' : 'weixinh5';
 			// #endif
 			// #ifdef MP
 			this.payChannel = 'routine';
 			// #endif
-      this.preOrderNo = options.preOrderNo || 0;
+
+      // 获得订单确认信息
+      if (options.cartIds && options.cartIds.length > 0) {
+        const cartIds = options.cartIds.split(',');
+        this.items = cartIds.map(cartId => ({ cartId }));
+      } else if (options.skuId > 0) {
+        this.items = [{
+          skuId: options.skuId,
+          count: options.count | 1
+        }]
+      }
       this.getloadPreOrder();
 
       // 处理 address 地址
@@ -324,14 +337,23 @@
 			})
 		},
 		methods: {
-			// 订单详情
+      /**
+       * 获得订单确认信息
+       */
 			getloadPreOrder: function() {
-				loadPreOrderApi(this.preOrderNo).then(res => {
-					let orderInfoVo = res.data.orderInfoVo
+        OrderApi.settlementOrder({
+          items: this.items,
+          addressId: this.address.addressId > 0 && this.shippingType === 1 ? this.address.addressId : undefined,
+          shippingType: parseInt() + 1,
+          couponId: this.couponId > 0 ? this.couponId : undefined,
+          // TODO 芋艿：秒杀等等
+        }).then(res => {
+					const orderInfoVo = res.data
 					this.orderInfoVo = orderInfoVo;
-					this.cartInfo = orderInfoVo.orderDetailList;
-					this.orderProNum = orderInfoVo.orderProNum;
+					this.cartInfo = orderInfoVo.items;
 					this.address.addressId = this.addressId ? this.addressId :orderInfoVo.addressId;
+
+          // TODO 芋艿：可以搞走
 					this.cartArr[1].title = '可用余额:' + orderInfoVo.userBalance;
 					this.cartArr[1].payStatus = parseInt(res.data.yuePayStatus) === 1 ? 1 : 2;
 					this.cartArr[0].payStatus = parseInt(res.data.payWeixinOpen) === 1 ? 1 : 0;
@@ -340,23 +362,19 @@
           this.$nextTick(function() {
             this.$refs.addressWindow.getAddressList();
           })
+
+          // 获得优惠劵列表
+          this.getCouponList();
         }).catch(err => {
 					return this.$util.Tips({
 						title: err
 					});
 				})
-
-        // TODO 芋艿：获得优惠劵列表
-        this.getCouponList();
 			},
 			// 计算订单价格
 			computedPrice: function() {
-				let shippingType = this.shippingType;
 				postOrderComputed({
-					addressId: this.address.addressId,
 					useIntegral: this.useIntegral,
-					couponId: this.couponId,
-					shippingType: parseInt(shippingType) + 1,
 					preOrderNo: this.preOrderNo
 				}).then(res => {
 					let data = res.data;
@@ -721,10 +739,10 @@
 				if (!that.payType) return that.$util.Tips({
 					title: '请选择支付方式'
 				});
-				if (!that.address.addressId && !that.shippingType) return that.$util.Tips({
+				if (!that.address.addressId && that.shippingType === 1) return that.$util.Tips({
 					title: '请选择收货地址'
 				});
-				if (that.shippingType == 1) {
+				if (that.shippingType == 2) {
 					if (that.contacts == "" || that.contactsTel == "") {
 						return that.$util.Tips({
 							title: '请填写联系人或联系人电话'
@@ -894,7 +912,7 @@
       addressType: function(shippingType) {
         this.shippingType = shippingType;
         this.computedPrice();
-        if (shippingType === 1) {
+        if (shippingType === 2) {
           this.getList();
         }
       },
@@ -926,6 +944,10 @@
             title: err
           });
         })
+      },
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
       },
     }
 	}

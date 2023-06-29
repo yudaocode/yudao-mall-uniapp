@@ -1,7 +1,17 @@
 import request from "@/utils/request.js";
 
 export function settlementOrder(data) {
-  return request.get("app-api/trade/order/settlement", data);
+  const data2 = {
+    ...data,
+  }
+  // 解决 SpringMVC 接受 List<Item> 参数的问题
+  delete data2.items
+  for (let i = 0; i < data.items.length; i++) {
+    data2['items[' + i + '].skuId'] = data.items[i].skuId;
+    data2['items[' + i + '].count'] = data.items[i].count;
+    data2['items[' + i + '].cartId'] = data.items[i].cartId;
+  }
+  return request.get("app-api/trade/order/settlement", data2);
 }
 
 export function createOrder(data) {
