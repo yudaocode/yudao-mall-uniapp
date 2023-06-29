@@ -171,7 +171,6 @@
 </template>
 <script>
 	import {
-		getCouponsOrderPrice,
 		orderCreate,
 		postOrderComputed,
 		wechatOrderPay,
@@ -179,7 +178,8 @@
 		loadPreOrderApi
 	} from '@/api/order.js';
   import * as AddressApi from '@/api/member/address.js';
-	import {
+  import * as CouponApi from '@/api/promotion/coupon.js';
+  import {
 		openPaySubscribe
 	} from '@/utils/SubscribeMessage.js';
   import * as DeliveryApi from '@/api/trade/delivery.js';
@@ -189,6 +189,7 @@
 	import home from '@/components/home';
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
+  import coupon from "../../../../admin/src/views/marketing/coupon";
 	export default {
 		components: {
 			couponListWindow,
@@ -344,13 +345,16 @@
 						title: err
 					});
 				})
+
+        // TODO 芋艿：获得优惠劵列表
+        this.getCouponList();
 			},
 			// 计算订单价格
 			computedPrice: function() {
 				let shippingType = this.shippingType;
 				postOrderComputed({
 					addressId: this.address.addressId,
-					useIntegral: this.useIntegral ? true : false,
+					useIntegral: this.useIntegral,
 					couponId: this.couponId,
 					shippingType: parseInt(shippingType) + 1,
 					preOrderNo: this.preOrderNo
@@ -404,10 +408,6 @@
 				setTimeout(function() {
 					that.car();
 				}, 500);
-			},
-			couponTap: function() {
-				this.coupon.coupon = true;
-				if(!this.coupon.list.length)this.getCouponList();
 			},
 			car: function() {
 				let that = this;
@@ -778,36 +778,41 @@
 
       // ========== 优惠劵 ==========
       /**
-       * 获取当前金额可用优惠券 TODO
+       * 获取当前金额可用优惠券
        */
       getCouponList: function() {
-        getCouponsOrderPrice(this.preOrderNo).then(res => {
+        CouponApi.getMatchCouponList({
+          // TODO 芋艿：这里应该补充下参数
+        }).then(res => {
           this.$set(this.coupon, 'list', res.data);
-          this.openType = 1;
+          // 设置指定优惠劵已选择；用于 couponId 有参数时，默认选中一下
+          const useCoupon = res.data.find(coupon => coupon.id === this.couponId);
+          if (useCoupon) {
+            useCoupon.use_title = '不使用';
+            useCoupon.isUse = 1;
+            this.couponTitle = useCoupon.name;
+          }
         });
       },
       /**
-       * 处理点击优惠券后的事件 TODO
+       * 处理点击优惠券后的事件
        */
-      ChangCoupons: function(e) {
-        // this.usableCoupon = e
-        // this.coupon.coupon = false
-        let index = e,
-          list = this.coupon.list,
-          couponTitle = '请选择',
-          couponId = 0;
-        for (let i = 0, len = list.length; i < len; i++) {
-          if (i != index) {
+      ChangCoupons: function(index) {
+        const  list = this.coupon.list;
+        // 先标记未使用
+        for (let i = 0; i < list.length; i++) {
+          if (i !== index) {
             list[i].use_title = '';
             list[i].isUse = 0;
           }
         }
-        if (list[index].isUse) {
-          //不使用优惠券
+        // 再标记使用中的优惠劵
+        let couponTitle = '请选择';
+        let  couponId = 0;
+        if (list[index].isUse) { // 不使用优惠券（就是又点了下，选中的优惠劵）
           list[index].use_title = '';
           list[index].isUse = 0;
-        } else {
-          //使用优惠券
+        } else { // 使用优惠券
           list[index].use_title = '不使用';
           list[index].isUse = 1;
           couponTitle = list[index].name;
@@ -817,9 +822,17 @@
         this.couponId = couponId;
         this.$set(this.coupon, 'coupon', false);
         this.$set(this.coupon, 'list', list);
-        this.computedPrice();
+        this.getloadPreOrder();
       },
-      // TODO
+      /**
+       * 打开 coupon 优惠劵的选择弹窗
+       */
+      couponTap: function() {
+        this.coupon.coupon = true;
+      },
+      /**
+       * 关闭 coupon 优惠劵的选择弹窗
+       */
       ChangCouponsClone: function() {
         this.$set(this.coupon, 'coupon', false);
       },

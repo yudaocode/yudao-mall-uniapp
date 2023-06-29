@@ -6,6 +6,11 @@ export function takeCoupon(templateId) {
   });
 }
 
+// 获得匹配指定商品的优惠劵列表
+export function getMatchCouponList(data) {
+  return request.get("app-api/promotion/coupon/match-list", data);
+}
+
 export function getCouponPage(data) {
   return request.get("app-api/promotion/coupon/page", data);
 }

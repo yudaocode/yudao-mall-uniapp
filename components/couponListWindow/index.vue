@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<view class='coupon-list-window' :class='coupon.coupon==true?"on":""'>
+		<view class='coupon-list-window' :class='coupon.coupon === true?"on":""'>
 			<view v-if="!orderShow"  class="nav acea-row row-around">
 				<view :class="['acea-row', 'row-middle', type === 1 ? 'on' : '']" @click="setType(1)">通用券</view>
 				<view :class="['acea-row', 'row-middle', type === 2 ? 'on' : '']" @click="setType(2)">商品券</view>
@@ -82,11 +82,14 @@
 				this.type = 1
 				this.$emit('ChangCouponsClone');
 			},
+      /**
+       * 选择优惠劵
+       */
 			getCouponUser: function(index, id) {
         // 领取优惠劵时，如果已经领取，则直接跳过
 				let list = this.coupon.list;
 				if (list[index].takeStatus && this.openType === 0) {
-          return true;
+          return;
         }
 				switch (this.openType) {
 					case 0: // 领取优惠券
@@ -98,6 +101,11 @@
 						})
 						break;
 					case 1: // 使用优惠劵
+            // TODO 芋艿：需要额外把不可用优惠劵的样式做了；
+            if (list[index].match === false) {
+              alert('该优惠劵无法使用，原因：' + list[index].description);
+              return;
+            }
             this.$emit('ChangCoupons', index);
 						break;
 				}
