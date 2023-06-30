@@ -3,13 +3,13 @@
 		<view class='order-submission'>
 			<view class="allAddress" :style="store_self_mention ? '':'padding-top:10rpx;'">
 				<view class="nav acea-row">
-					<view class="item font-color" :class="shippingType === 1 ? 'on' : 'on2'"
-                @tap="addressType(0)" v-if='store_self_mention' />
-					<view class="item font-color" :class="shippingType === 2 ? 'on' : 'on2'"
+					<view class="item font-color" :class="deliveryType === 1 ? 'on' : 'on2'"
                 @tap="addressType(1)" v-if='store_self_mention' />
+					<view class="item font-color" :class="deliveryType === 2 ? 'on' : 'on2'"
+                @tap="addressType(2)" v-if='store_self_mention' />
 				</view>
         <!-- 收货地址的选择 -->
-				<view class='address acea-row row-between-wrapper' @tap='onAddress' v-if='shippingType === 1'
+				<view class='address acea-row row-between-wrapper' @tap='onAddress' v-if='deliveryType === 1'
               :style="store_self_mention ? '':'border-top-left-radius: 14rpx;border-top-right-radius: 14rpx;'">
 					<view class='addressCon' v-if="addressInfo.name">
 						<view class='name'>{{ addressInfo.name }}
@@ -47,6 +47,7 @@
 			</view>
 			<view class="pad30">
 				<orderGoods :cartInfo="cartInfo" />
+        <!-- 优惠劵展示 -->
 				<view class='wrapper borRadius14'>
 					<view class='item acea-row row-between-wrapper' @tap='couponTap'
 						v-if="orderInfoVo.type === 1 && productType==='normal'">
@@ -55,29 +56,31 @@
 							<text class='iconfont icon-jiantou'></text>
 						</view>
 					</view>
-
-					<view class='item acea-row row-between-wrapper'
-						v-if="orderInfoVo.type === 1 && productType==='normal'">
+          <!-- 积分展示 TODO -->
+          <view class='item acea-row row-between-wrapper' v-if="orderInfoVo.type === 1 && productType==='normal'">
 						<view>积分抵扣</view>
-					<!-- 	 -->
 						<view class='discount acea-row row-middle'>
-							<view> {{useIntegral ? "剩余积分":"当前积分"}}
-								<text class='num font-color'>{{useIntegral ? orderInfoVo.surplusIntegral : orderInfoVo.userIntegral || 0}}</text>
+							<view> {{pointStatus ? "剩余积分":"当前积分"}}
+								<text class='num font-color'>
+                  {{pointStatus ? orderInfoVo.totalPoint - orderInfoVo.usedPoint : (orderInfoVo.totalPoint || 0) }}
+                </text>
 							</view>
 							<checkbox-group @change="ChangeIntegral">
-								<checkbox :checked='useIntegral ? true : false' :disabled="orderInfoVo.userIntegral==0 && !useIntegral"/>
+								<checkbox :checked='pointStatus' :disabled="orderInfoVo.totalPoint === 0 && !pointStatus"/>
 							</checkbox-group>
 						</view>
 					</view>
+          <!-- VIP 展示 TODO -->
 					<!-- <view class='item acea-row row-between-wrapper'
 						v-if="priceGroup.vipPrice > 0 && userInfo.vip && !pinkId && !BargainId && !combinationId && !seckillId">
 						<view>会员优惠</view>
 						<view class='discount'>-￥{{priceGroup.vipPrice}}</view>
 					</view> -->
-					<view class='item acea-row row-between-wrapper' v-if='shippingType === 1'>
+          <!-- 配送展示 TODO -->
+					<view class='item acea-row row-between-wrapper' v-if='deliveryType === 1'>
 						<view>快递费用</view>
-						<view class='discount' v-if='parseFloat(orderInfoVo.freightFee) > 0'>
-							+￥{{orderInfoVo.freightFee}}
+						<view class='discount' v-if='orderInfoVo.price.deliveryPrice > 0'>
+							+￥{{ fen2yuan(orderInfoVo.price.deliveryPrice) }}
 						</view>
 						<view class='discount' v-else>免运费</view>
 					</view>
@@ -85,24 +88,26 @@
 						<view class="item acea-row row-between-wrapper">
 							<view>联系人</view>
 							<view class="discount textR">
-								<input type="text" placeholder="请填写您的联系姓名" placeholder-style="color:#ccc;" placeholder-class="placeholder"
-									@blur='realName' />
+								<input type="text" placeholder="请填写您的联系姓名" placeholder-style="color:#ccc;"
+                       placeholder-class="placeholder" @blur='realName' />
 							</view>
 						</view>
 						<view class="item acea-row row-between-wrapper">
 							<view>联系电话</view>
 							<view class="discount textR">
-								<input type="text" placeholder="请填写您的联系电话"  placeholder-style="color:#ccc;" placeholder-class="placeholder"
-									@blur='phone'></input>
+								<input type="text" placeholder="请填写您的联系电话"  placeholder-style="color:#ccc;"
+                       placeholder-class="placeholder" @blur='phone' />
 							</view>
 						</view>
 					</view>
 					<view class='item' v-if="textareaStatus">
 						<view>备注信息</view>
-						<textarea v-if="coupon.coupon===false" placeholder-class='placeholder' @input='bindHideKeyboard'
-							value="" name="mark" placeholder='请添加备注（150字以内）'></textarea>
+						<textarea v-if="coupon.coupon === false" placeholder-class='placeholder'
+                      @input='bindHideKeyboard' value="" name="mark" placeholder='请添加备注（150字以内）' />
 					</view>
 				</view>
+
+        <!-- TODO 芋艿：支付方式 -->
 				<view class='wrapper borRadius14'>
 					<view class='item'>
 						<view>支付方式</view>
@@ -121,29 +126,30 @@
 						</view>
 					</view>
 				</view>
+        <!-- 各种价格 -->
 				<view class='moneyList borRadius14'>
 					<view class='item acea-row row-between-wrapper'>
 						<view>商品总价：</view>
-						<view class='money'>￥{{orderInfoVo.proTotalFee || 0}}</view>
+						<view class='money'>￥{{ fen2yuan(orderInfoVo.price.totalPrice || 0 ) }}</view>
 					</view>
-					<view class='item acea-row row-between-wrapper' v-if="orderInfoVo.couponFee > 0">
+					<view class='item acea-row row-between-wrapper' v-if="orderInfoVo.price.couponPrice > 0">
 						<view>优惠券抵扣：</view>
-						<view class='money'>-￥{{orderInfoVo.couponFee}}</view>
+						<view class='money'>-￥{{ fen2yuan(orderInfoVo.price.couponPrice) }}</view>
 					</view>
-					<view class='item acea-row row-between-wrapper' v-if="orderInfoVo.deductionPrice > 0">
+					<view class='item acea-row row-between-wrapper' v-if="orderInfoVo.price.pointPrice > 0">
 						<view>积分抵扣：</view>
-						<view class='money'>-￥{{orderInfoVo.deductionPrice}}</view>
+						<view class='money'>-￥{{ fen2yuan(orderInfoVo.price.pointPrice) }}</view>
 					</view>
-					<view class='item acea-row row-between-wrapper' v-if="orderInfoVo.freightFee > 0">
+					<view class='item acea-row row-between-wrapper' v-if="orderInfoVo.price.deliveryPrice > 0">
 						<view>运费：</view>
-						<view class='money'>+￥{{orderInfoVo.freightFee}}</view>
+						<view class='money'>+￥{{ fen2yuan(orderInfoVo.price.deliveryPrice) }}</view>
 					</view>
 				</view>
 				<view style='height:120rpx;'></view>
 			</view>
 			<view class='footer acea-row row-between-wrapper'>
 				<view>合计:
-					<text class='font-color'>￥{{orderInfoVo.payFee || 0}}</text>
+					<text class='font-color'>￥{{ fen2yuan(orderInfoVo.price.payPrice || 0) }}</text>
 				</view>
 				<view class='settlement' style='z-index:100' @tap="SubOrder">立即结算</view>
 			</view>
@@ -201,7 +207,10 @@
 			return {
         items: [], // 前端传递的购物项
         cartInfo: [], // 后端返回的购物项
-        orderInfoVo: {}, // 订单信息
+        orderInfoVo: {  // 订单信息
+          type: 1, // 交易类型
+          price: {} // 价格信息
+        },
 
         // TODO 芋艿：未整理
 				textareaStatus: true,
@@ -226,23 +235,22 @@
 
 				userInfo: {}, //用户信息
 				mark: '', //备注信息
-				coupon_price: 0, //优惠券抵扣金额
-				useIntegral: false, //是否使用积分
-				integral_price: 0, //积分抵扣金额
-				integral: 0,
 				status: 0,
 				toPay: false, //修复进入支付时页面隐藏从新刷新页面
-				contacts: '',
-				contactsTel: '',
 				priceGroup: {},
 				animated: false,
-				totalPrice: 0,
 				pagesUrl: "",
 				payChannel: '',
 				bargain: false, // 是否是砍价
 				combination: false, // 是否是拼团
 				secKill: false, // 是否是秒杀
 				preOrderNo: '', //预下单订单号
+
+        // TODO 芋艿：可删除字段
+        totalPrice: 0,
+
+        // ========== 积分 ==========
+        pointStatus: false, //是否使用积分
 
         // ========== 优惠劵 ==========
         couponId: 0, // 选中的优惠券 id
@@ -254,7 +262,7 @@
         },
 
         // ========== 收货地址 ==========
-        shippingType: 1, // 1 - 快递配送；2 - 门店自提
+        deliveryType: 1, // 1 - 快递配送；2 - 门店自提
         addressId: 0, // 页面传递的 param 对应的地址 id
         addressInfo: {}, // 选中的地址信息
         address: { // 地址组件
@@ -268,6 +276,8 @@
         store_self_mention: false, // 门店自提是否开启
         storeList: [], // 门店列表
         system_store: {}, // 选中的门店
+        contacts: '', // 联系人名
+        contactsTel: '', // 联系人手机
       };
 		},
 		computed: mapGetters(['isLogin', 'systemPlatform', 'productType']),
@@ -276,7 +286,6 @@
 				handler: function(newV, oldV) {
 					if (newV) {
 						this.getloadPreOrder();
-						this.getaddressInfo();
 					}
 				},
 				deep: true
@@ -310,7 +319,6 @@
 
       // 处理 address 地址
       this.addressId = options.addressId || 0;
-      this.getaddressInfo();
       // 获得门店自提是否开启
       DeliveryApi.getDeliveryConfig().then(res => {
         this.store_self_mention = res.data.pickUpEnable && this.productType === 'normal';
@@ -322,10 +330,6 @@
 		onShow: function() {
 			let _this = this
 			this.textareaStatus = true;
-      // 获得默认的收货地址
-			if (this.isLogin && !this.toPay) {
-				this.getaddressInfo();
-			}
 
       // 来自 goods_details_store/index.vue 的门店选择
 			uni.$on("handClick", res => {
@@ -343,15 +347,18 @@
 			getloadPreOrder: function() {
         OrderApi.settlementOrder({
           items: this.items,
-          addressId: this.address.addressId > 0 && this.shippingType === 1 ? this.address.addressId : undefined,
-          shippingType: parseInt() + 1,
+          deliveryType: this.deliveryType,
+          addressId: this.address.addressId > 0 && this.deliveryType === 1 ? this.address.addressId : undefined,
+          receiverName: this.deliveryType === 2 ? this.contacts : undefined,
+          receiverMobile: this.deliveryType === 2 ? this.contactsTel : undefined,
           couponId: this.couponId > 0 ? this.couponId : undefined,
+          pointStatus: this.pointStatus,
           // TODO 芋艿：秒杀等等
         }).then(res => {
 					const orderInfoVo = res.data
 					this.orderInfoVo = orderInfoVo;
 					this.cartInfo = orderInfoVo.items;
-					this.address.addressId = this.addressId ? this.addressId :orderInfoVo.addressId;
+          this.changeAddress(orderInfoVo.address);
 
           // TODO 芋艿：可以搞走
 					this.cartArr[1].title = '可用余额:' + orderInfoVo.userBalance;
@@ -374,18 +381,18 @@
 			// 计算订单价格
 			computedPrice: function() {
 				postOrderComputed({
-					useIntegral: this.useIntegral,
+					pointStatus: this.pointStatus,
 					preOrderNo: this.preOrderNo
 				}).then(res => {
 					let data = res.data;
 					this.orderInfoVo.couponFee = data.couponFee;
-					//赋值操作，userIntegral 当前积分，surplusIntegral 剩余积分
+					// 赋值操作，userIntegral 当前积分，surplusIntegral 剩余积分
 					this.orderInfoVo.userIntegral = data.surplusIntegral;
 					this.orderInfoVo.deductionPrice = data.deductionPrice;
 					this.orderInfoVo.freightFee = data.freightFee;
 					this.orderInfoVo.payFee = data.payFee;
 					this.orderInfoVo.proTotalFee = data.proTotalFee;
-					this.orderInfoVo.useIntegral = data.useIntegral;
+					this.orderInfoVo.pointStatus = data.pointStatus;
 					this.orderInfoVo.usedIntegral = data.usedIntegral;
 					this.orderInfoVo.surplusIntegral = data.surplusIntegral;
 					//this.orderInfoVo.userIntegral = data.userIntegral;
@@ -405,13 +412,6 @@
 				this.status = 0;
 				this.$set(this.coupon, 'list', this.coupon.list);
 			},
-			/**
-			 * 使用积分抵扣
-			 */
-			ChangeIntegral: function() {
-				this.useIntegral = !this.useIntegral;
-				this.computedPrice();
-			},
 			bindHideKeyboard: function(e) {
 				this.mark = e.detail.value;
 			},
@@ -430,12 +430,6 @@
 			car: function() {
 				let that = this;
 				that.animated = false;
-			},
-			realName: function(e) {
-				this.contacts = e.detail.value;
-			},
-			phone: function(e) {
-				this.contactsTel = e.detail.value;
 			},
 			payment: function(data) {
 				let that = this;
@@ -732,52 +726,56 @@
 				}
 			},
 			SubOrder: function(e) {
+				let that = this;
 
-				let that = this,
-					data = {};
-
-				if (!that.payType) return that.$util.Tips({
-					title: '请选择支付方式'
-				});
-				if (!that.address.addressId && that.shippingType === 1) return that.$util.Tips({
-					title: '请选择收货地址'
-				});
-				if (that.shippingType == 2) {
-					if (that.contacts == "" || that.contactsTel == "") {
-						return that.$util.Tips({
+				if (!this.payType) {
+          return this.$util.Tips({
+            title: '请选择支付方式'
+          });
+        }
+        // 校验参数
+				if (!this.address.addressId && this.deliveryType === 1) {
+          return this.$util.Tips({
+            title: '请选择收货地址'
+          });
+        }
+				if (this.deliveryType === 2) {
+					if (this.contacts === "" || this.contactsTel === "") {
+						return this.$util.Tips({
 							title: '请填写联系人或联系人电话'
 						});
 					}
-					if (!/^1(3|4|5|7|8|9|6)\d{9}$/.test(that.contactsTel)) {
-						return that.$util.Tips({
+					if (!/^1(3|4|5|7|8|9|6)\d{9}$/.test(this.contactsTel)) {
+						return this.$util.Tips({
 							title: '请填写正确的手机号'
 						});
 					}
-					if (!/^[\u4e00-\u9fa5\w]{2,16}$/.test(that.contacts)) {
-						return that.$util.Tips({
+					if (!/^[\u4e00-\u9fa5\w]{2,16}$/.test(this.contacts)) {
+						return this.$util.Tips({
 							title: '请填写您的真实姓名'
 						});
 					}
-					if (that.storeList.length == 0) return that.$util.Tips({
-						title: '暂无门店,请选择其他方式'
-					});
+					if (this.storeList.length === 0) {
+            return this.$util.Tips({
+              title: '暂无门店,请选择其他方式'
+            });
+          }
 				}
-				data = {
-					realName: that.contacts,
-					phone: that.contactsTel,
-					addressId: that.address.addressId,
-					couponId: that.couponId,
-					payType: that.payType,
-					useIntegral: that.useIntegral,
-					preOrderNo: that.preOrderNo,
-					mark: that.mark,
-					storeId: that.system_store.id || 0,
-					shippingType: that.$util.$h.Add(that.shippingType, 1),
-					payChannel: that.payChannel
-
+				const data = {
+					realName: this.contacts,
+					phone: this.contactsTel,
+					addressId: this.address.addressId,
+					couponId: this.couponId,
+					payType: this.payType,
+					pointStatus: this.pointStatus,
+					preOrderNo: this.preOrderNo,
+					mark: this.mark,
+					storeId: this.system_store.id > 0 ? this.system_store.id : undefined,
+					deliveryType: this.deliveryType,
+					payChannel: this.payChannel
 				};
-				if (data.payType == 'yue' && parseFloat(that.userInfo.nowMoney) < parseFloat(that.totalPrice))
-					return that.$util
+				if (data.payType == 'yue' && parseFloat(this.userInfo.nowMoney) < parseFloat(this.totalPrice))
+					return this.$util
 						.Tips({
 							title: '余额不足！'
 						});
@@ -786,13 +784,22 @@
 				});
 				// #ifdef MP
 				openPaySubscribe().then(() => {
-					that.payment(data);
+					this.payment(data);
 				});
 				// #endif
 				// #ifndef MP
-				that.payment(data);
+				this.payment(data);
 				// #endif
 			},
+
+      // ========== 积分 ==========
+      /**
+       * 使用积分抵扣
+       */
+      ChangeIntegral: function() {
+        this.pointStatus = !this.pointStatus;
+        this.getloadPreOrder();
+      },
 
       // ========== 优惠劵 ==========
       /**
@@ -867,35 +874,21 @@
       /**
        * 选择地址后改变事件
        */
-      OnChangeAddress: function(e) {
-        this.addressInfo = e;
-        this.address.addressId = e.id;
+      OnChangeAddress: function(address) {
+        this.changeAddress(address);
         this.textareaStatus = true;
         this.address.address = false;
-        this.getaddressInfo();
-        this.computedPrice();
+        this.getloadPreOrder();
       },
       /**
-			 * 获取默认收货地址或者获取某条地址信息
-			 */
-      getaddressInfo: function() {
-        if (this.addressId) {
-          AddressApi.getAddress(this.addressId).then(res => {
-            if (res.data) {
-              this.addressInfo = res.data || {};
-              this.addressId = res.data.id || 0;
-              this.address.addressId = res.data.id || 0;
-            }
-          })
-        } else {
-          AddressApi.getDefaultUserAddress().then(res => {
-            if (res.data) {
-              this.addressInfo = res.data || {};
-              this.addressId = res.data.id || 0;
-              this.address.addressId = res.data.id || 0;
-            }
-          })
+       * 选择地址
+       */
+      changeAddress: function (address) {
+        if (!address) {
+          return;
         }
+        this.addressInfo = address;
+        this.address.addressId = address.id;
       },
       /**
        * 关闭地址弹窗
@@ -909,10 +902,10 @@
       /**
        * 切换物流方式
        */
-      addressType: function(shippingType) {
-        this.shippingType = shippingType;
-        this.computedPrice();
-        if (shippingType === 2) {
+      addressType: function(deliveryType) {
+        this.deliveryType = deliveryType;
+        this.getloadPreOrder();
+        if (deliveryType === 2) {
           this.getList();
         }
       },
@@ -944,6 +937,12 @@
             title: err
           });
         })
+      },
+      realName: function(e) {
+        this.contacts = e.detail.value;
+      },
+      phone: function(e) {
+        this.contactsTel = e.detail.value;
       },
 
       fen2yuan(price) {
