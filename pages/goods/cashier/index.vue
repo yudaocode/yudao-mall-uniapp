@@ -81,28 +81,13 @@
 						value: 'yue',
 						title: '可用余额',
 						payStatus: 1,
-					},
-					{
-						"name": '线下支付',
-						"icon": "icon-yuezhifu1",
-						value: 'offline',
-						title: '使用线下付款',
-						payStatus: 2,
-					}, {
-						"name": '好友代付',
-						"icon": "icon-haoyoudaizhifu",
-						value: 'friend',
-						title: '找微信好友支付',
-						payStatus: 1,
-					}
-				],
+					}],
 				orderId: 0,
 				// fromType: '', // TODO 芋艿：没用
 				active: 0,
 				payPrice: 0,
 				payPriceShow: 0,
 				payPostage: 0,
-				offlinePostage: false,
 				invalidTime: 0,
 				initIn: false,
 				jumpData: {
@@ -191,7 +176,6 @@
 					console.log(res)
 					this.payPrice = this.payPriceShow = res.data.price
 					this.payPostage = res.data.pay_postage
-					this.offlinePostage = res.data.offline_postage
 					this.invalidTime = res.data.expireTime
 					// 微信支付是否开启 TODO 芋艿：强制开启
 					// this.cartArr[0].payStatus = res.data.wechat_pay_status || 0
@@ -206,13 +190,6 @@
 					// that.cartArr[2].title = '可用余额:' + res.data.userInfo.now_money;
 					this.cartArr[2].number = res.data.now_money;
 					this.cartArr[2].payStatus = res.data.yue_pay_status
-					if (res.data.offline_pay_status) {
-						this.cartArr[3].payStatus = 1
-					} else {
-						this.cartArr[3].payStatus = 0
-					}
-					//好友代付是否开启
-					this.cartArr[4].payStatus = res.data.friend_pay_status || 0;
 					uni.hideLoading();
 				}).catch(err => {
 					uni.hideLoading();
@@ -226,14 +203,8 @@
 				this.paytype = paytype;
 				this.number = number;
         this.channelCode = channelCode
-				if (this.offlinePostage) {
-					if (paytype === 'offline') {
-						this.payPriceShow = this.$util.$h.Sub(this.payPrice, this.payPostage);
-					} else {
-						this.payPriceShow = this.payPrice;
-					}
-				}
-			},
+        this.payPriceShow = this.payPrice;
+      },
 			formpost(url, postData) {
 				let tempform = document.createElement("form");
 				tempform.action = url;

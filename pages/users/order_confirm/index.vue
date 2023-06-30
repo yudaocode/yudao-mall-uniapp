@@ -337,7 +337,9 @@
           ...this.getSettlementReqVO(),
           mark: this.mark,
         }).then(res => {
-          alert(res);
+          uni.navigateTo({
+            url: `/pages/goods/cashier/index?order_id=${res.data.payOrderId}&from_type=order`
+          });
         }).catch(err => {
           uni.hideLoading();
           return this.$util.Tips({
