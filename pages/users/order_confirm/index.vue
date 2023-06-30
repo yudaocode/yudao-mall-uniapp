@@ -56,7 +56,7 @@
 							<text class='iconfont icon-jiantou'></text>
 						</view>
 					</view>
-          <!-- 积分展示 TODO -->
+          <!-- 积分展示 -->
           <view class='item acea-row row-between-wrapper' v-if="orderInfoVo.type === 1 && productType==='normal'">
 						<view>积分抵扣</view>
 						<view class='discount acea-row row-middle'>
@@ -275,16 +275,7 @@
        * 获得订单确认信息
        */
 			getloadPreOrder: function() {
-        OrderApi.settlementOrder({
-          items: this.items,
-          deliveryType: this.deliveryType,
-          addressId: this.address.addressId > 0 && this.deliveryType === 1 ? this.address.addressId : undefined,
-          receiverName: this.deliveryType === 2 ? this.contacts : undefined,
-          receiverMobile: this.deliveryType === 2 ? this.contactsTel : undefined,
-          couponId: this.couponId > 0 ? this.couponId : undefined,
-          pointStatus: this.pointStatus,
-          // TODO 芋艿：秒杀等等
-        }).then(res => {
+        OrderApi.settlementOrder(this.getSettlementReqVO()).then(res => {
 					const orderInfoVo = res.data
 					this.orderInfoVo = orderInfoVo;
 					this.cartInfo = orderInfoVo.items;
@@ -303,74 +294,79 @@
 					});
 				})
 			},
-
-      /**
-       * 输入
-       */
-			bindHideKeyboard: function(e) {
-				this.mark = e.detail.value;
-			},
-
-			orderCreate: function(data) {
-				let that = this;
-				orderCreate(data).then(res => {
-					that.getOrderPay(res.data.orderNo, '支付成功');
-
-				}).catch(err => {
-					uni.hideLoading();
-					return that.$util.Tips({
-						title: err
-					});
-				});
-			},
-			SubOrder: function(e) {
+      SubOrder: function(e) {
         // 校验参数
-				if (!this.address.addressId && this.deliveryType === 1) {
+        if (!this.address.addressId && this.deliveryType === 1) {
           return this.$util.Tips({
             title: '请选择收货地址'
           });
         }
-				if (this.deliveryType === 2) {
-					if (this.contacts === "" || this.contactsTel === "") {
-						return this.$util.Tips({
-							title: '请填写联系人或联系人电话'
-						});
-					}
-					if (!/^1(3|4|5|7|8|9|6)\d{9}$/.test(this.contactsTel)) {
-						return this.$util.Tips({
-							title: '请填写正确的手机号'
-						});
-					}
-					if (!/^[\u4e00-\u9fa5\w]{2,16}$/.test(this.contacts)) {
-						return this.$util.Tips({
-							title: '请填写您的真实姓名'
-						});
-					}
-					if (this.storeList.length === 0) {
+        if (this.deliveryType === 2) {
+          if (this.contacts === "" || this.contactsTel === "") {
+            return this.$util.Tips({
+              title: '请填写联系人或联系人电话'
+            });
+          }
+          if (!/^1(3|4|5|7|8|9|6)\d{9}$/.test(this.contactsTel)) {
+            return this.$util.Tips({
+              title: '请填写正确的手机号'
+            });
+          }
+          if (!/^[\u4e00-\u9fa5\w]{2,16}$/.test(this.contacts)) {
+            return this.$util.Tips({
+              title: '请填写您的真实姓名'
+            });
+          }
+          if (this.storeList.length === 0) {
             return this.$util.Tips({
               title: '暂无门店,请选择其他方式'
             });
           }
-				}
-				const data = {
-					realName: this.contacts,
-					phone: this.contactsTel,
-					addressId: this.address.addressId,
-					couponId: this.couponId,
-					pointStatus: this.pointStatus,
-					preOrderNo: this.preOrderNo,
-					mark: this.mark,
-					storeId: this.system_store.id > 0 ? this.system_store.id : undefined,
-					deliveryType: this.deliveryType,
-				};
-				// #ifdef MP
-				openPaySubscribe().then(() => {
-					this.orderCreate(data);
-				});
-				// #endif
-				// #ifndef MP
-				this.orderCreate(data);
-				// #endif
+        }
+        // #ifdef MP
+        openPaySubscribe().then(() => {
+          this.orderCreate();
+        });
+        // #endif
+        // #ifndef MP
+        this.orderCreate();
+        // #endif
+      },
+      orderCreate: function() {
+        OrderApi.createOrder({
+          ...this.getSettlementReqVO(),
+          mark: this.mark,
+        }).then(res => {
+          alert(res);
+        }).catch(err => {
+          uni.hideLoading();
+          return this.$util.Tips({
+            title: err
+          });
+        });
+      },
+      /**
+       * 获得结算请求 VO
+       */
+      getSettlementReqVO() {
+        return {
+          items: this.items,
+          deliveryType: this.deliveryType,
+          addressId: this.address.addressId > 0 && this.deliveryType === 1 ? this.address.addressId : undefined,
+          pickUpStoreId: this.system_store.id > 0 && this.deliveryType === 2 ? this.system_store.id : undefined,
+          receiverName: this.deliveryType === 2 ? this.contacts : undefined,
+          receiverMobile: this.deliveryType === 2 ? this.contactsTel : undefined,
+          couponId: this.couponId > 0 ? this.couponId : undefined,
+          pointStatus: this.pointStatus,
+          // TODO 芋艿：秒杀等等
+        }
+      },
+
+      /**
+       * 输入备注
+       */
+			bindHideKeyboard: function(e) {
+				this.mark = e.detail.value;
 			},
 
       // ========== 积分 ==========

@@ -269,7 +269,7 @@
 					"style": {
 						"navigationBarTitleText": "修改密码",
 						"navigationBarBackgroundColor": "#e93323"
-							// #ifdef MP 
+							// #ifdef MP
 							,
 						"navigationBarTextStyle": "#fff"
 							// #endif
@@ -314,7 +314,7 @@
 					"style": {
 						"navigationBarTitleText": "推广人排行",
 						"navigationBarBackgroundColor": "#e93323"
-							// #ifdef MP 
+							// #ifdef MP
 							,
 						"navigationBarTextStyle": "#fff"
 							// #endif
@@ -475,8 +475,24 @@
 					"navigationBarTitleText": "精品推荐"
 				}
 			}]
-		}
-	],
+		}, {
+          "root": "pages/goods",
+          "name": "goods",
+          "pages": [{
+              "path": "cashier/index",
+              "style": {
+                "navigationBarTitleText": "收银台",
+                "app-plus": {
+                    // #ifdef APP-PLUS
+                    "titleNView": {
+                    "type": "default"
+                    }
+                    // #endif
+                }
+            }
+        }]
+      }
+    ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "crmeb",

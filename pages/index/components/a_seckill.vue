@@ -9,7 +9,7 @@
 				<view class="lines"></view>
 				<view class="point">{{point}} 场</view>
 				<countDown :is-day="false" :tip-text="' '" :day-text="' '" :hour-text="' : '" :minute-text="' : '" :second-text="' '"
-				 :datatime="datatime" :is-col="true" :bgColor="bgColor" />
+                   :datatime="datatime" :is-col="true" :bgColor="bgColor" />
 			</view>
 			<navigator url="/pages/activity/goods_seckill/index" hover-class="none" class="more acea-row row-center-wrapper">
         GO<text class="iconfont icon-xiangyou"></text>
