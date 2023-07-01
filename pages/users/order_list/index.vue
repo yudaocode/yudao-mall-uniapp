@@ -106,7 +106,6 @@
 	</view>
 </template>
 <script>
-	import { orderCancel,  orderDel } from '@/api/order.js';
 	import { openOrderSubscribe } from '@/utils/SubscribeMessage.js';
 	import home from '@/components/home';
 	import payment from '@/components/payment';
@@ -251,52 +250,56 @@
 				// #endif
 			},
       /**
-       * 取消订单 TODO 芋艿：未实现；
+       * 取消订单
        */
       cancelOrder: function(index, order_id) {
-        if (!order_id) {
-          return this.$util.Tips({
-            title: '缺少订单号无法取消订单'
-          });
-        }
-        uni.showLoading({
-          title: '正在删除中'
-        });
-        orderCancel(order_id).then(res => {
-          uni.hideLoading();
-          return this.$util.Tips({
-            title: '删除成功',
-            icon: 'success'
-          }, () => {
-            this.orderList.splice(index, 1);
-            this.$set(this, 'orderList', this.orderList);
-            this.$set(this.orderData, 'unpaid_count', this.orderData.unpaid_count - 1);
-            this.getOrderData();
-          });
-        }).catch(err => {
-          return this.$util.Tips({
-            title: err
-          });
+        uni.showModal({
+          title: '提示',
+          content: '确认取消该订单?',
+          success: res => {
+            if (res.confirm) {
+              OrderApi.cancelOrder(order_id).then(() => {
+                this.$util.Tips({
+                  title: '取消成功'
+                }, () => {
+                  this.orderList.splice(index, 1);
+                  this.$set(this, 'orderList', this.orderList);
+                  this.getOrderData();
+                })
+              }).catch((err) => {
+                this.$util.Tips({
+                  title: err
+                })
+              });
+            }
+          }
         });
       },
 			/**
-			 * 删除订单 TODO 芋艿：未实现
+			 * 删除订单
 			 */
 			delOrder: function(order_id, index) {
-				orderDel(order_id).then(res => {
-          this.orderList.splice(index, 1);
-          this.$set(this, 'orderList', this.orderList);
-          this.$set(this.orderData, 'unpaid_count', this.orderData.unpaid_count - 1);
-          this.getOrderData();
-					return this.$util.Tips({
-						title: '删除成功',
-						icon: 'success'
-					});
-				}).catch(err => {
-					return this.$util.Tips({
-						title: err
-					});
-				})
+        uni.showModal({
+          title: '提示',
+          content: '确认删除该订单?',
+          success: res => {
+            if (res.confirm) {
+              OrderApi.deleteOrder(order_id).then(() => {
+                this.$util.Tips({
+                  title: '删除成功'
+                }, () => {
+                  this.orderList.splice(index, 1);
+                  this.$set(this, 'orderList', this.orderList);
+                  this.getOrderData();
+                })
+              }).catch((err) => {
+                this.$util.Tips({
+                  title: err
+                })
+              });
+            }
+          }
+        });
 			},
 
       fen2yuan(price) {

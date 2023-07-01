@@ -32,6 +32,14 @@ export function getOrderPage(data) {
   return request.get("app-api/trade/order/page", data);
 }
 
+export function cancelOrder(id) {
+  return request.delete("app-api/trade/order/cancel?id=" + id, {});
+}
+
+export function deleteOrder(id) {
+  return request.delete("app-api/trade/order/delete?id=" + id, {});
+}
+
 export function getOrderItem(id) {
   return request.get("app-api/trade/order/item/get", {
     id

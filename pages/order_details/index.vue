@@ -327,6 +327,7 @@
   import { mapGetters } from "vuex";
   import dayjs from '@/plugin/dayjs/dayjs.min.js';
   import * as Util from '@/utils/util.js';
+  import {cancelOrder, deleteOrder} from "../../api/trade/order";
   export default {
     components: {
       payment,
@@ -429,6 +430,64 @@
           }, '/pages/users/order_list/index');
         });
       },
+      /**
+       * 打开支付组件
+       */
+      goPay() {
+        uni.navigateTo({
+          url: `/pages/goods/cashier/index?order_id=${this.orderInfo.payOrderId}&from_type=order`
+        })
+      },
+      /**
+       * 取消订单
+       */
+      cancelOrder() {
+        uni.showModal({
+          title: '提示',
+          content: '确认取消该订单?',
+          success: res => {
+            if (res.confirm) {
+              OrderApi.cancelOrder(this.orderInfo.id).then(() => {
+                this.$util.Tips({
+                  title: '取消成功'
+                })
+                this.getOrderInfo();
+              }).catch((err) => {
+                this.$util.Tips({
+                  title: err
+                })
+                this.getOrderInfo();
+              });
+            }
+          }
+        });
+      },
+      /**
+       * 删除订单
+       */
+      delOrder: function() {
+        uni.showModal({
+          title: '提示',
+          content: '确认删除该订单?',
+          success: res => {
+            if (res.confirm) {
+              OrderApi.deleteOrder(this.orderInfo.id).then(() => {
+                this.$util.Tips({
+                  title: '删除成功'
+                }, {
+                  tab: 3,
+                  url: '/pages/users/order_list/index'
+                })
+              }).catch((err) => {
+                this.$util.Tips({
+                  title: err
+                })
+                this.getOrderInfo();
+              });
+            }
+          }
+        });
+      },
 
       // TODO 芋艿：未整理
 
@@ -513,60 +572,6 @@
             }
           }
         })
-      },
-      /**
-       * 打开支付组件
-       */
-      goPay() {
-        uni.navigateTo({
-          url: `/pages/goods/cashier/index?order_id=${this.orderInfo.payOrderId}&from_type=order`
-        })
-      },
-      /**
-       * 删除订单
-       */
-      delOrder: function() {
-        let that = this;
-        orderDel(this.id).then(res => {
-          return that.$util.Tips({
-            title: '删除成功',
-            icon: 'success'
-          }, {
-            tab: 3,
-            url: 1
-          });
-        }).catch(err => {
-          return that.$util.Tips({
-            title: err
-          });
-        });
-      },
-      cancelOrder() {
-        let self = this
-        uni.showModal({
-          title: '提示',
-          content: '确认取消该订单?',
-          success: function(res) {
-            if (res.confirm) {
-              orderCancel(self.orderInfo.id)
-                .then((data) => {
-                  self.$util.Tips({
-                    title: '取消成功'
-                  }, {
-                    tab: 3
-                  })
-                })
-                .catch(() => {
-                  self.$util.Tips({
-                    title: err
-                  })
-                  self.getDetail();
-                });
-            } else if (res.cancel) {
-              console.log('用户点击取消');
-            }
-          }
-        });
       },
 
       // ========== 非关键逻辑 ==========
