@@ -36,7 +36,7 @@
 			</view>
 			<view class='list'>
 				<view class='item' v-for="(order, index) in orderList" :key="index">
-					<view @click='goOrderDetails(order.orderId)'>
+					<view @click='goOrderDetails(order.id)'>
 						<view class='title acea-row row-between-wrapper'>
 							<view class="acea-row row-middle">
 								<text class="sign cart-color acea-row row-center-wrapper" v-if="order.typeName">{{ order.typeName }}</text>

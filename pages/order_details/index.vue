@@ -20,7 +20,7 @@
             <view class='state' v-if="orderInfo.status === 20">商家已发货，请耐心等待</view>
             <view class='state' v-if="orderInfo.status === 30 && !orderInfo.commentStatus">已收货，快去评价一下吧</view>
             <view class='state' v-if="orderInfo.status === 30 && orderInfo.commentStatus">交易完成，感谢您的支持</view>
-            <!-- TODO 芋艿：未来可以优化下，关闭的原因补充。例如说：订单超时/订单取消 -->
+            <!-- TODO 芋艿：未来可以优化下，关闭的原因补充。例如说：订单超时/订单取消；参考淘宝 -->
             <view class='state' v-if="orderInfo.status === 40">交易关闭</view>
             <!-- 下单时间 -->
 						<view>{{ formatDate(orderInfo.createTime) }}</view>
@@ -103,34 +103,50 @@
 						<text class="iconfont icon-weizhi"></text>查看位置
 					</view>
 				</view>
-				<view v-if="orderInfo.shippingType === 1" class='address borRadius14'>
-					<view class='name'>{{orderInfo.realName}}<text class='phone'>{{orderInfo.userPhone}}</text></view>
-					<view>{{orderInfo.userAddress}}</view>
+
+        <!-- 收货人信息 -->
+        <view v-if="orderInfo.deliveryType === 1" class='address borRadius14'>
+					<view class='name'>{{ orderInfo.receiverName }}
+            <text class='phone'>{{ orderInfo.receiverMobile }}</text>
+          </view>
+					<view>{{ orderInfo.receiverAreaName }} {{ orderInfo.receiverDetailAddress}}</view>
 				</view>
-				<view v-else class='address' style="margin-top:15rpx;">
+        <!-- TODO 芋艿：核销的情况 -->
+        <view v-else class='address' style="margin-top:15rpx;">
 					<view class='name' @tap="makePhone">{{orderInfo.systemStore?orderInfo.systemStore.name:''}}<text
 							class='phone'>{{orderInfo.systemStore?orderInfo.systemStore.phone:''}}</text><text
 							class="iconfont icon-tonghua font-color"></text></view>
 					<view>{{orderInfo.systemStore?orderInfo.systemStore.detailedAddress:''}}</view>
 				</view>
 
-				<orderGoods :evaluate='evaluate' :productType="orderInfo.type" :orderId="order_id" :ids="id" :cartInfo="cartInfo"
-					:jump="true"></orderGoods>
-				<!-- #ifndef MP -->
+        <!-- 商品列表 -->
+				<orderGoods
+          :evaluate='evaluate'
+          :productType="orderInfo.type"
+          :orderId="order_id"
+          :cartInfo="cartInfo"
+					:jump="true"
+        />
+
+        <!-- 客服 -->
+        <!-- #ifndef MP -->
 				<div class="goodCall borRadius14" @click="kefuClick">
-					<span class="iconfont icon-kefu"></span><span>联系客服</span>
+					<span class="iconfont icon-kefu" />
+          <span>联系客服</span>
 				</div>
 				<!-- #endif -->
 				<!-- #ifdef MP -->
 				<div class="goodCall borRadius14">
 					<button open-type='contact' hover-class='none'>
-						<span class="iconfont icon-kefu"></span><span>联系客服</span>
+						<span class="iconfont icon-kefu" />
+            <span>联系客服</span>
 					</button>
 				</div>
 				<!-- #endif -->
 			</view>
 
 			<view class="pad30">
+        <!-- TODO 芋艿：退款各种 -->
 				<view class='nav refund' v-if="orderInfo.refundStatus>0">
 					<view class="title">
 						<image src="/static/images/shuoming.png" mode=""></image>
@@ -141,34 +157,35 @@
 				<view class='wrapper borRadius14'>
 					<view class='item acea-row row-between'>
 						<view>订单编号：</view>
-						<view class='conter acea-row row-middle row-right'>{{orderInfo.orderId}}
+						<view class='conter acea-row row-middle row-right'>{{orderInfo.no}}
 							<!-- #ifndef H5 -->
 							<text class='copy' @tap='copy'>复制</text>
 							<!-- #endif -->
 							<!-- #ifdef H5 -->
-							<text class='copy copy-data' :data-clipboard-text="orderInfo.orderId">复制</text>
+							<text class='copy copy-data' :data-clipboard-text="orderInfo.no">复制</text>
 							<!-- #endif -->
 						</view>
 					</view>
 					<view class='item acea-row row-between'>
 						<view>下单时间：</view>
-						<view class='conter'>{{(orderInfo.createTime || 0)}}</view>
+						<view class='conter'>{{( formatDate(orderInfo.createTime) )}}</view>
 					</view>
 					<view class='item acea-row row-between'>
 						<view>支付状态：</view>
-						<view class='conter' v-if="orderInfo.paid">已支付</view>
+						<view class='conter' v-if="orderInfo.payStatus">已支付</view>
 						<view class='conter' v-else>未支付</view>
 					</view>
-					<view class='item acea-row row-between'>
+          <!-- TODO 芋艿：支付方式的翻译 -->
+          <view class='item acea-row row-between'>
 						<view>支付方式：</view>
 						<view class='conter'>{{orderInfo.payTypeStr}}</view>
 					</view>
-					<view class='item acea-row row-between' v-if="orderInfo.mark">
+					<view class='item acea-row row-between' v-if="orderInfo.userRemark">
 						<view>买家留言：</view>
-						<view class='conter'>{{orderInfo.mark}}</view>
+						<view class='conter'>{{orderInfo.userRemark}}</view>
 					</view>
 				</view>
-				<!-- 退款订单详情 "-->
+        <!-- TODO 芋艿：退款订单详情 -->
 				<view v-if="isGoodsReturn" class='wrapper borRadius14' >
 					<view class='item acea-row row-between'>
 						<view>收货人：</view>
@@ -183,8 +200,10 @@
 						<view class='conter'>{{orderInfo.userAddress}}</view>
 					</view>
 				</view>
-				<view v-if="orderInfo.status>0">
-					<view class='wrapper borRadius14' v-if='orderInfo.deliveryType=="express"'>
+
+        <!-- TODO 芋艿：快递相关 -->
+        <view v-if="orderInfo.status !== 0">
+					<view class='wrapper borRadius14' v-if='orderInfo.deliveryType === 1'>
 						<view class='item acea-row row-between'>
 							<view>配送方式：</view>
 							<view class='conter'>发货</view>
@@ -220,31 +239,43 @@
 						</view>
 					</view>
 				</view>
-				<view class='wrapper borRadius14'>
+
+        <!-- 价格相关 -->
+        <view class='wrapper borRadius14'>
 					<view class='item acea-row row-between'>
 						<view>商品总价：</view>
-						<view class='conter'>￥{{orderInfo.proTotalPrice}}</view>
+						<view class='conter'>￥{{ fen2yuan(orderInfo.totalPrice) }}</view>
 					</view>
-					<view class='item acea-row row-between' v-if="orderInfo.payPostage > 0">
+					<view class='item acea-row row-between' v-if="orderInfo.deliveryPrice > 0">
 						<view>运费：</view>
-						<view class='conter'>￥{{orderInfo.payPostage}}</view>
+						<view class='conter'>￥{{ fen2yuan(orderInfo.deliveryPrice) }}</view>
 					</view>
 					<view class='item acea-row row-between' v-if='orderInfo.couponId'>
 						<view>优惠券抵扣：</view>
-						<view class='conter'>-￥{{orderInfo.couponPrice}}</view>
+						<view class='conter'>-￥{{ fen2yuan(orderInfo.couponPrice) }}</view>
 					</view>
-					<view class='item acea-row row-between' v-if="orderInfo.useIntegral > 0">
+          <!-- TODO 芋艿：vip 价格减免 from php -->
+          <!-- TODO 芋艿：vip 价格减免 from php -->
+          <view class='item acea-row row-between' v-if="orderInfo.pointPrice > 0">
 						<view>积分抵扣：</view>
-							<view class='conter'>-￥{{orderInfo.deductionPrice}}</view>
+							<view class='conter'>-￥{{ fen2yuan(orderInfo.deductionPrice) }}</view>
 					</view>
-					<view class='actualPay acea-row row-right'>实付款：<text
-							class='money font-color'>￥{{orderInfo.payPrice}}</text></view>
+					<view class='actualPay acea-row row-right'>
+            实付款：<text class='money font-color'>￥{{ fen2yuan(orderInfo.payPrice) }}</text>
+          </view>
 				</view>
 				<view style='height:120rpx;'></view>
-				<view class='footer acea-row row-right row-middle' v-if="isGoodsReturn==false">
-					<view class="qs-btn" v-if="!orderInfo.paid" @click.stop="cancelOrder">取消订单</view>
-					<view class='bnt bg-color' v-if="!orderInfo.paid" @tap='pay_open(orderInfo.orderId)'>立即付款</view>
-					<!-- #ifdef MP -->
+
+        <!-- 操作区域 -->
+        <view class='footer acea-row row-right row-middle' v-if="isGoodsReturn==false">
+					<view class="qs-btn" v-if="orderInfo.status === 0" @click.stop="cancelOrder">
+            取消订单
+          </view>
+					<view class='bnt bg-color' v-if="orderInfo.status === 0" @tap='goPay'>
+            立即付款
+          </view>
+          <!-- TODO 芋艿：退款各种 -->
+          <!-- #ifdef MP -->
 					<view @tap="openSubcribe('/pages/users/goods_return/index?orderId='+orderInfo.orderId)"
 						class='bnt cancel' v-else-if="orderInfo.paid === true && orderInfo.refundStatus === 0 && orderInfo.type!==1 && type==='normal'">申请退款
 					</view>
@@ -254,13 +285,23 @@
 						class='bnt cancel' v-else-if="orderInfo.paid === true && orderInfo.refundStatus === 0 && orderInfo.type!==1 && type==='normal'">申请退款
 					</navigator>
 					<!-- #endif -->
-					<view class='bnt bg-color' v-if="orderInfo.combinationId > 0" @tap='goJoinPink'>查看拼团</view>
-					<navigator class='bnt cancel' v-if="orderInfo.deliveryType == 'express' && orderInfo.status >0"
-						hover-class='none' :url="'/pages/users/goods_logistics/index?orderId='+ orderInfo.orderId">查看物流
+          <!-- TODO 芋艿：拼团 -->
+          <view class='bnt bg-color' v-if="orderInfo.combinationId > 0" @tap='goJoinPink'>查看拼团</view>
+          <!-- TODO 芋艿：物流 -->
+          <navigator class='bnt cancel' v-if="orderInfo.deliveryType === 2 && orderInfo.status > 0"
+                     hover-class='none' :url="'/pages/users/goods_logistics/index?orderId='+ orderInfo.orderId">
+            查看物流
 					</navigator>
-					<view class='bnt bg-color' v-if="orderInfo.status==1" @tap='confirmOrder'>确认收货</view>
-					<view class='bnt cancel' v-if="orderInfo.status==3" @tap='delOrder'>删除订单</view>
-					<view class='bnt bg-color' v-if="orderInfo.status==3 && orderInfo.type!==1" @tap='goOrderConfirm'>再次购买</view>
+					<view class='bnt bg-color' v-if="orderInfo.status === 20" @tap='confirmOrder'>
+            确认收货
+          </view>
+					<view class='bnt cancel' v-if="orderInfo.status === 40" @tap='delOrder'>
+            删除订单
+          </view>
+          <!-- TODO 芋艿：再次购买 -->
+          <view class='bnt bg-color' v-if="orderInfo.status==3 && orderInfo.type!==1" @tap='goOrderConfirm'>
+            再次购买
+          </view>
 				</view>
 			</view>
 		</view>
@@ -268,293 +309,309 @@
 	</view>
 </template>
 <script>
-import {
-  orderTake,
-  orderDel,
-  orderCancel,
-  qrcodeApi
-} from '@/api/order.js';
-import * as OrderApi from '@/api/trade/order.js';
-import {
-  openOrderRefundSubscribe
-} from '@/utils/SubscribeMessage.js';
-import home from '@/components/home';
-import payment from '@/components/payment';
-import orderGoods from "@/components/orderGoods";
-import ClipboardJS from "@/plugin/clipboard/clipboard.js";
-import { toLogin } from '@/libs/login.js';
-import { mapGetters } from "vuex";
-import dayjs from '@/plugin/dayjs/dayjs.min.js';
-import * as Util from '@/utils/util.js';
-export default {
-  components: {
-    payment,
-    home,
-    orderGoods
-  },
-  data() {
-    return {
-      codeImg: '',
-      qrcodeSize: 100,
-      order_id: '',
-      evaluate: 0,
-      cartInfo: [], //购物车产品
-      orderInfo: {
-        systemStore: {},
-        pstatus: {}
-      }, //订单详情
-      system_store: {},
-      isGoodsReturn: false, //是否为退款订单
-      status: {}, //订单底部按钮状态
-      totalPrice: '0',
-      id: 0, //订单id
-      type: 'normal'
-    };
-  },
-  computed: mapGetters(['isLogin', 'chatUrl', 'userInfo']),
-  onLoad: function(options) {
-    this.type = options.type ? options.type : 'normal';
-    if (!options.order_id) {
-      return this.$util.Tips({
-        title: '缺少参数'
-      }, {
-        tab: 3,
-        url: 1
-      });
-    }
-    this.$set(this, 'order_id', options.order_id);
-  },
-  onShow() {
-    if (!this.isLogin) {
-      toLogin();
-      return
-    }
-    this.getOrderInfo();
-  },
-  onReady: function() {
-    // #ifdef H5
-    this.$nextTick(() => {
-      const clipboard = new ClipboardJS(".copy-data");
-      clipboard.on("success", () => {
-        this.$util.Tips({
-          title: '复制成功'
-        });
-      });
-    });
-    // #endif
-  },
-  methods: {
-    /**
-     * 获取订单详细信息
-     */
-    getOrderInfo: function() {
-      uni.showLoading({
-        title: "正在加载中"
-      });
-      OrderApi.getOrderDetail(this.order_id).then(res => {
-        if (!res.data) {
-          this.$util.Tips({
-            title: '订单信息不存在'
-          }, '/pages/users/order_list/index');
-          return
-        }
+  import {
+    orderTake,
+    orderDel,
+    orderCancel,
+    qrcodeApi
+  } from '@/api/order.js';
+  import * as OrderApi from '@/api/trade/order.js';
+  import {
+    openOrderRefundSubscribe
+  } from '@/utils/SubscribeMessage.js';
+  import home from '@/components/home';
+  import payment from '@/components/payment';
+  import orderGoods from "@/components/orderGoods";
+  import ClipboardJS from "@/plugin/clipboard/clipboard.js";
+  import { toLogin } from '@/libs/login.js';
+  import { mapGetters } from "vuex";
+  import dayjs from '@/plugin/dayjs/dayjs.min.js';
+  import * as Util from '@/utils/util.js';
+  export default {
+    components: {
+      payment,
+      home,
+      orderGoods
+    },
+    data() {
+      return {
+        order_id: '', // 订单编号
+        type: 'normal',
+        orderInfo: { // 订单详情
+          systemStore: {},
+        },
+        cartInfo: [], // 购物车产品
 
-        uni.hideLoading();
-        this.$set(this, 'orderInfo', res.data);
-        this.$set(this, 'cartInfo', res.data.items);
+        codeImg: '',
+        qrcodeSize: 100,
+        evaluate: 0,
 
-        // 如果已完成，且未评论，则设置 evaluate 为 2，开启评论功能
-        this.$set(this, 'evaluate', res.data.status === 30 && !res.data.commentStatus ? 2 : 0);
-        // TODO 芋艿：还在
-        this.$set(this, 'system_store', res.data.systemStore);
-        // TODO 芋艿：还在
-        if (res.data.refundStatus !== 0) {
-          this.isGoodsReturn = true;
-        }
-        this.isGoodsReturn = false; // TODO 芋艿：强制设置
-
-        // TODO 芋艿：还在
-        if (this.orderInfo.shippingType === 2 && this.orderInfo.payStatus) {
-          this.markCode(res.data.verifyCode);
-        }
-        if (this.isGoodsReturn) {
-          uni.setNavigationBarColor({
-            frontColor: '#ffffff',
-            backgroundColor: '#666666'
-          })
-        }
-      }).catch(err => {
-        uni.hideLoading();
-        this.$util.Tips({
-          title: err
-        }, '/pages/users/order_list/index');
-      });
+        system_store: {},
+        isGoodsReturn: false, //是否为退款订单
+      };
     },
-    kefuClick() {
-      location.href = this.chatUrl;
-    },
-    openSubcribe: function(e) {
-      let page = e;
-      uni.showLoading({
-        title: '正在加载',
-      })
-      openOrderRefundSubscribe().then(res => {
-        uni.hideLoading();
-        uni.navigateTo({
-          url: page,
-        });
-      }).catch(() => {
-        uni.hideLoading();
-      });
-    },
-    /**
-     * 拨打电话
-     */
-    makePhone: function() {
-      uni.makePhoneCall({
-        phoneNumber: this.system_store.phone
-      })
-    },
-    /**
-     * 打开地图
-     */
-    showMaoLocation: function() {
-      if (!this.system_store.latitude || !this.system_store.longitude) return this.$util.Tips({
-        title: '缺少经纬度信息无法查看地图！'
-      });
-      uni.openLocation({
-        latitude: parseFloat(this.system_store.latitude),
-        longitude: parseFloat(this.system_store.longitude),
-        scale: 8,
-        name: this.system_store.name,
-        address: this.system_store.address + this.system_store.detailedAddress,
-      });
-    },
-    /**
-     * 生成二维码
-     */
-    markCode(text) {
-      qrcodeApi({
-        height: '145',
-        text: text,
-        width: '145'
-      }).then(res => {
-        this.codeImg = res.data.code
-      });
-    },
-    /**
-     *
-     * 剪切订单号
-     */
-    // #ifndef H5
-    copy: function() {
-      uni.setClipboardData({
-        data: this.orderInfo.orderId
-      });
-    },
-    // #endif
-    /**
-     * 打电话
-     */
-    goTel: function() {
-      uni.makePhoneCall({
-        phoneNumber: this.orderInfo.deliveryId
-      })
-    },
-    /**
-     * 去拼团详情
-     */
-    goJoinPink: function() {
-      uni.navigateTo({
-        url: '/pages/activity/goods_combination_status/index?id=' + this.orderInfo.pinkId,
-      });
-    },
-    /**
-     * 再此购买
-     */
-    goOrderConfirm: function() {
-      this.$Order.getPreOrder("again",[{
-        orderNo: this.order_id
-      }]);
-    },
-    confirmOrder: function() {
-      let that = this;
-      uni.showModal({
-        title: '确认收货',
-        content: '为保障权益，请收到货确认无误后，再确认收货',
-        success: function(res) {
-          if (res.confirm) {
-            orderTake(that.id).then(res => {
-              return that.$util.Tips({
-                title: '操作成功',
-                icon: 'success'
-              }, function() {
-                that.getOrderInfo();
-              });
-            }).catch(err => {
-              return that.$util.Tips({
-                title: err
-              });
-            })
-          }
-        }
-      })
-    },
-    /**
-     * 删除订单
-     */
-    delOrder: function() {
-      let that = this;
-      orderDel(this.id).then(res => {
-        return that.$util.Tips({
-          title: '删除成功',
-          icon: 'success'
+    computed: mapGetters(['isLogin', 'chatUrl', 'userInfo']),
+    onLoad: function(options) {
+      this.type = options.type ? options.type : 'normal';
+      if (!options.order_id) {
+        return this.$util.Tips({
+          title: '缺少参数'
         }, {
           tab: 3,
           url: 1
         });
-      }).catch(err => {
-        return that.$util.Tips({
-          title: err
+      }
+      this.$set(this, 'order_id', options.order_id);
+    },
+    onShow() {
+      if (!this.isLogin) {
+        toLogin();
+        return
+      }
+      this.getOrderInfo();
+    },
+    onReady: function() {
+      // #ifdef H5
+      this.$nextTick(() => {
+        const clipboard = new ClipboardJS(".copy-data");
+        clipboard.on("success", () => {
+          this.$util.Tips({
+            title: '复制成功'
+          });
         });
       });
+      // #endif
     },
-    cancelOrder() {
-      let self = this
-      uni.showModal({
-        title: '提示',
-        content: '确认取消该订单?',
-        success: function(res) {
-          if (res.confirm) {
-            orderCancel(self.orderInfo.id)
-              .then((data) => {
-                self.$util.Tips({
-                  title: '取消成功'
-                }, {
-                  tab: 3
-                })
-              })
-              .catch(() => {
-                self.$util.Tips({
-                  title: err
-                })
-                self.getDetail();
-              });
-          } else if (res.cancel) {
-            console.log('用户点击取消');
+    methods: {
+      /**
+       * 获取订单详细信息
+       */
+      getOrderInfo: function() {
+        uni.showLoading({
+          title: "正在加载中"
+        });
+        OrderApi.getOrderDetail(this.order_id).then(res => {
+          if (!res.data) {
+            this.$util.Tips({
+              title: '订单信息不存在'
+            }, '/pages/users/order_list/index');
+            return
           }
-        }
-      });
-    },
 
-    fen2yuan(price) {
-      return Util.fen2yuan(price)
-    },
-    formatDate: function(date) {
-      return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+          uni.hideLoading();
+          this.$set(this, 'orderInfo', res.data);
+          this.$set(this, 'cartInfo', res.data.items);
+
+          // 如果已完成，且未评论，则设置 evaluate 为 2，开启评论功能
+          this.$set(this, 'evaluate', res.data.status === 30 && !res.data.commentStatus ? 2 : 0);
+          // TODO 芋艿：还在
+          this.$set(this, 'system_store', res.data.systemStore);
+          // TODO 芋艿：还在
+          if (res.data.refundStatus !== 0) {
+            this.isGoodsReturn = true;
+          }
+          this.isGoodsReturn = false; // TODO 芋艿：强制设置
+
+          // TODO 芋艿：还在
+          if (this.orderInfo.shippingType === 2 && this.orderInfo.payStatus) {
+            this.markCode(res.data.verifyCode);
+          }
+          if (this.isGoodsReturn) {
+            uni.setNavigationBarColor({
+              frontColor: '#ffffff',
+              backgroundColor: '#666666'
+            })
+          }
+        }).catch(err => {
+          uni.hideLoading();
+          this.$util.Tips({
+            title: err
+          }, '/pages/users/order_list/index');
+        });
+      },
+
+      // TODO 芋艿：未整理
+
+      /**
+       * 拨打电话
+       */
+      makePhone: function() {
+        uni.makePhoneCall({
+          phoneNumber: this.system_store.phone
+        })
+      },
+      /**
+       * 打开地图
+       */
+      showMaoLocation: function() {
+        if (!this.system_store.latitude || !this.system_store.longitude) return this.$util.Tips({
+          title: '缺少经纬度信息无法查看地图！'
+        });
+        uni.openLocation({
+          latitude: parseFloat(this.system_store.latitude),
+          longitude: parseFloat(this.system_store.longitude),
+          scale: 8,
+          name: this.system_store.name,
+          address: this.system_store.address + this.system_store.detailedAddress,
+        });
+      },
+      /**
+       * 生成二维码
+       */
+      markCode(text) {
+        qrcodeApi({
+          height: '145',
+          text: text,
+          width: '145'
+        }).then(res => {
+          this.codeImg = res.data.code
+        });
+      },
+      /**
+       * 打电话
+       */
+      goTel: function() {
+        uni.makePhoneCall({
+          phoneNumber: this.orderInfo.deliveryId
+        })
+      },
+      /**
+       * 去拼团详情
+       */
+      goJoinPink: function() {
+        uni.navigateTo({
+          url: '/pages/activity/goods_combination_status/index?id=' + this.orderInfo.pinkId,
+        });
+      },
+      /**
+       * 再此购买
+       */
+      goOrderConfirm: function() {
+        this.$Order.getPreOrder("again",[{
+          orderNo: this.order_id
+        }]);
+      },
+      confirmOrder: function() {
+        let that = this;
+        uni.showModal({
+          title: '确认收货',
+          content: '为保障权益，请收到货确认无误后，再确认收货',
+          success: function(res) {
+            if (res.confirm) {
+              orderTake(that.id).then(res => {
+                return that.$util.Tips({
+                  title: '操作成功',
+                  icon: 'success'
+                }, function() {
+                  that.getOrderInfo();
+                });
+              }).catch(err => {
+                return that.$util.Tips({
+                  title: err
+                });
+              })
+            }
+          }
+        })
+      },
+      /**
+       * 打开支付组件
+       */
+      goPay() {
+        uni.navigateTo({
+          url: `/pages/goods/cashier/index?order_id=${this.orderInfo.payOrderId}&from_type=order`
+        })
+      },
+      /**
+       * 删除订单
+       */
+      delOrder: function() {
+        let that = this;
+        orderDel(this.id).then(res => {
+          return that.$util.Tips({
+            title: '删除成功',
+            icon: 'success'
+          }, {
+            tab: 3,
+            url: 1
+          });
+        }).catch(err => {
+          return that.$util.Tips({
+            title: err
+          });
+        });
+      },
+      cancelOrder() {
+        let self = this
+        uni.showModal({
+          title: '提示',
+          content: '确认取消该订单?',
+          success: function(res) {
+            if (res.confirm) {
+              orderCancel(self.orderInfo.id)
+                .then((data) => {
+                  self.$util.Tips({
+                    title: '取消成功'
+                  }, {
+                    tab: 3
+                  })
+                })
+                .catch(() => {
+                  self.$util.Tips({
+                    title: err
+                  })
+                  self.getDetail();
+                });
+            } else if (res.cancel) {
+              console.log('用户点击取消');
+            }
+          }
+        });
+      },
+
+      // ========== 非关键逻辑 ==========
+      /**
+       * 跳转客服
+       */
+      kefuClick() {
+        location.href = this.chatUrl;
+      },
+      /**
+       * 订阅，并前往链接
+       */
+      openSubcribe: function(page) {
+        uni.showLoading({
+          title: '正在加载',
+        })
+        openOrderRefundSubscribe().then(res => {
+          uni.hideLoading();
+          uni.navigateTo({
+            url: page,
+          });
+        }).catch(() => {
+          uni.hideLoading();
+        });
+      },
+      /**
+       *
+       * 剪切订单号
+       */
+      // #ifndef H5
+      copy: function() {
+        uni.setClipboardData({
+          data: this.orderInfo.no
+        });
+      },
+      // #endif
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+      }
     }
   }
-}
 </script>
 <style scoped lang="scss">
 	.shuoming{

@@ -46,10 +46,6 @@
 				type: String,
 				default: '',
 			},
-			ids: {
-				type: Number,
-				default: 0,
-			},
 			jump: {
 				type: Boolean,
 				default: false,
@@ -79,7 +75,7 @@
       // TODO 芋艿：评价
 			evaluateTap(item) {
 				uni.navigateTo({
-					url: "/pages/users/goods_comment_con/index?unique=" + item.attrId + "&orderId=" + this.orderId + '&id=' + this.ids
+					url: "/pages/users/goods_comment_con/index?unique=" + item.attrId + "&orderId=" + this.orderId + '&id=' + item.id
 				})
 			},
 			jumpCon: function(id) {
