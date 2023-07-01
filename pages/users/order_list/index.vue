@@ -40,7 +40,7 @@
 						<view class='title acea-row row-between-wrapper'>
 							<view class="acea-row row-middle">
 								<text class="sign cart-color acea-row row-center-wrapper" v-if="order.typeName">{{ order.typeName }}</text>
-								<view>{{order.createTime}}</view>
+								<view>{{ formatDate(order.createTime) }}</view>
 							</view>
               <!-- 订单状态 -->
               <view class='font-color'>{{order.orderStatus}}</view>
