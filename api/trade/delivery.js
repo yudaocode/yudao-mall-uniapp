@@ -9,3 +9,10 @@ export function getDeliveryConfig() {
 export function getDeliveryPickUpStoreList(data) {
   return request.get("app-api/trade/delivery/pick-up-store/list", data);
 }
+
+// 获得自提门店
+export function getDeliveryPickUpStore(id) {
+  return request.get("app-api/trade/delivery/pick-up-store/get", {
+    id
+  });
+}

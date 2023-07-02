@@ -67,7 +67,7 @@
         </view>
 
         <!-- TODO 芋艿：核销的情况 -->
-        <view v-if="orderInfo.shippingType == 2 && orderInfo.paid" class="writeOff borRadius14">
+        <view v-if="orderInfo.deliveryType === 2 && orderInfo.payStatus" class="writeOff borRadius14">
 					<view class="title">核销信息</view>
 					<view class="grayBg">
 						<view class="pictrue">
@@ -79,11 +79,11 @@
 					<view class="gear">
 						<image src="../../static/images/writeOff.jpg"></image>
 					</view>
-					<view class="num">{{orderInfo.verifyCode}}</view>
-					<view class="rules" v-if='orderInfo.systemStore'>
+					<view class="num">{{ orderInfo.verifyCode }}</view>
+					<view class="rules" v-if='system_store.id'>
 						<view class="item">
 							<view class="rulesTitle acea-row row-middle">
-								<text class="iconfont icon-shijian"></text>核销时间
+								<text class="iconfont icon-shijian" />核销时间
 							</view>
 							<view class="info">
 								每日：<text class="time">{{orderInfo.systemStore.dayTime.replace(',','-')}}</text>
@@ -97,26 +97,26 @@
 						</view>
 					</view>
 				</view>
-				<view v-if="orderInfo.shippingType == 2" class="map acea-row row-between-wrapper borRadius14">
+				<view v-if="orderInfo.deliveryType === 2" class="map acea-row row-between-wrapper borRadius14">
 					<view>自提地址信息</view>
 					<view class="place cart-color acea-row row-center-wrapper" @tap="showMaoLocation">
-						<text class="iconfont icon-weizhi"></text>查看位置
+						<text class="iconfont icon-weizhi" />查看位置
 					</view>
 				</view>
 
         <!-- 收货人信息 -->
-        <view v-if="orderInfo.deliveryType === 1" class='address borRadius14'>
+        <view v-if="orderInfo.pickUpStoreId > 0" class='address' style="margin-top:15rpx;">
+          <view class='name' @tap="makePhone">{{ system_store.name }}
+            <text class='phone'>{{ system_store.phone }}</text>
+            <text class="iconfont icon-tonghua font-color" />
+          </view>
+          <view>{{ system_store.areaName }} {{ system_store.detailAddress }}</view>
+        </view>
+        <view v-else class='address borRadius14'>
 					<view class='name'>{{ orderInfo.receiverName }}
             <text class='phone'>{{ orderInfo.receiverMobile }}</text>
           </view>
 					<view>{{ orderInfo.receiverAreaName }} {{ orderInfo.receiverDetailAddress}}</view>
-				</view>
-        <!-- TODO 芋艿：核销的情况 -->
-        <view v-else class='address' style="margin-top:15rpx;">
-					<view class='name' @tap="makePhone">{{orderInfo.systemStore?orderInfo.systemStore.name:''}}<text
-							class='phone'>{{orderInfo.systemStore?orderInfo.systemStore.phone:''}}</text><text
-							class="iconfont icon-tonghua font-color"></text></view>
-					<view>{{orderInfo.systemStore?orderInfo.systemStore.detailedAddress:''}}</view>
 				</view>
 
         <!-- 商品列表 -->
@@ -201,38 +201,30 @@
 					</view>
 				</view>
 
-        <!-- TODO 芋艿：快递相关 -->
+        <!-- 配送信息 -->
         <view v-if="orderInfo.status !== 0">
 					<view class='wrapper borRadius14' v-if='orderInfo.deliveryType === 1'>
 						<view class='item acea-row row-between'>
 							<view>配送方式：</view>
 							<view class='conter'>发货</view>
 						</view>
+            <!-- TODO 芋艿：这里的字段对应 -->
 						<view class='item acea-row row-between'>
 							<view>快递公司：</view>
-							<view class='conter'>{{orderInfo.deliveryName || ''}}</view>
+							<view class='conter'>{{ orderInfo.deliveryName || ''}}</view>
 						</view>
 						<view class='item acea-row row-between'>
 							<view>快递号：</view>
-							<view class='conter'>{{orderInfo.deliveryId || ''}}</view>
+							<view class='conter'>{{ orderInfo.deliveryId || ''}}</view>
 						</view>
 					</view>
-					<view class='wrapper borRadius14' v-else-if='orderInfo.deliveryType=="send"'>
+					<view class='wrapper borRadius14' v-else-if='orderInfo.deliveryType === 2'>
 						<view class='item acea-row row-between'>
 							<view>配送方式：</view>
-							<view class='conter'>送货</view>
-						</view>
-						<view class='item acea-row row-between'>
-							<view>配送人姓名：</view>
-							<view class='conter'>{{orderInfo.deliveryName || ''}}</view>
-						</view>
-						<view class='item acea-row row-between'>
-							<view>联系电话：</view>
-							<view class='conter acea-row row-middle row-right'>{{orderInfo.deliveryId || ''}}<text
-									class='copy' @tap='goTel'>拨打</text></view>
+							<view class='conter'>门店自提</view>
 						</view>
 					</view>
-					<view class='wrapper borRadius14' v-else-if='orderInfo.deliveryType=="fictitious"'>
+					<view class='wrapper borRadius14' v-else-if='orderInfo.deliveryType === 0'>
 						<view class='item acea-row row-between'>
 							<view>虚拟发货：</view>
 							<view class='conter'>已发货，请注意查收</view>
@@ -309,13 +301,9 @@
 	</view>
 </template>
 <script>
-  import {
-    orderTake,
-    orderDel,
-    orderCancel,
-    qrcodeApi
-  } from '@/api/order.js';
+  import { qrcodeApi } from '@/api/order.js';
   import * as OrderApi from '@/api/trade/order.js';
+  import * as DeliveryApi from '@/api/trade/delivery.js';
   import {
     openOrderRefundSubscribe
   } from '@/utils/SubscribeMessage.js';
@@ -327,7 +315,6 @@
   import { mapGetters } from "vuex";
   import dayjs from '@/plugin/dayjs/dayjs.min.js';
   import * as Util from '@/utils/util.js';
-  import {cancelOrder, deleteOrder} from "../../api/trade/order";
   export default {
     components: {
       payment,
@@ -342,12 +329,15 @@
           systemStore: {},
         },
         cartInfo: [], // 购物车产品
+        evaluate: 0, // 是否开启评论，和订单状态有关
 
+        // ========== 门店自提（核销） ==========
+        system_store: {}, // 门店信息
+
+        // TODO 芋艿：未整理
         codeImg: '',
         qrcodeSize: 100,
-        evaluate: 0,
 
-        system_store: {},
         isGoodsReturn: false, //是否为退款订单
       };
     },
@@ -405,18 +395,22 @@
 
           // 如果已完成，且未评论，则设置 evaluate 为 2，开启评论功能
           this.$set(this, 'evaluate', res.data.status === 30 && !res.data.commentStatus ? 2 : 0);
-          // TODO 芋艿：还在
-          this.$set(this, 'system_store', res.data.systemStore);
+
+          // 配送方式：门店自提
+          if (res.data.pickUpStoreId) {
+            DeliveryApi.getDeliveryPickUpStore(res.data.pickUpStoreId).then(res => {
+              this.system_store = res.data || {};
+            });
+          }
+          if (this.orderInfo.deliveryType === 2 && this.orderInfo.payStatus) {
+            this.markCode(res.data.verifyCode);
+          }
+
           // TODO 芋艿：还在
           if (res.data.refundStatus !== 0) {
             this.isGoodsReturn = true;
           }
           this.isGoodsReturn = false; // TODO 芋艿：强制设置
-
-          // TODO 芋艿：还在
-          if (this.orderInfo.shippingType === 2 && this.orderInfo.payStatus) {
-            this.markCode(res.data.verifyCode);
-          }
           if (this.isGoodsReturn) {
             uni.setNavigationBarColor({
               frontColor: '#ffffff',
@@ -436,6 +430,31 @@
       goPay() {
         uni.navigateTo({
           url: `/pages/goods/cashier/index?order_id=${this.orderInfo.payOrderId}&from_type=order`
+        })
+      },
+      /**
+       * 确认收货
+       */
+      confirmOrder: function() {
+        uni.showModal({
+          title: '确认收货',
+          content: '为保障权益，请收到货确认无误后，再确认收货',
+          success: (res) => {
+            if (res.confirm) {
+              OrderApi.takeOrder(this.orderInfo.id).then(res => {
+                return this.$util.Tips({
+                  title: '收货成功',
+                  icon: 'success'
+                }, () => {
+                  this.getOrderInfo();
+                });
+              }).catch(err => {
+                return this.$util.Tips({
+                  title: err
+                });
+              })
+            }
+          }
         })
       },
       /**
@@ -492,29 +511,6 @@
       // TODO 芋艿：未整理
 
       /**
-       * 拨打电话
-       */
-      makePhone: function() {
-        uni.makePhoneCall({
-          phoneNumber: this.system_store.phone
-        })
-      },
-      /**
-       * 打开地图
-       */
-      showMaoLocation: function() {
-        if (!this.system_store.latitude || !this.system_store.longitude) return this.$util.Tips({
-          title: '缺少经纬度信息无法查看地图！'
-        });
-        uni.openLocation({
-          latitude: parseFloat(this.system_store.latitude),
-          longitude: parseFloat(this.system_store.longitude),
-          scale: 8,
-          name: this.system_store.name,
-          address: this.system_store.address + this.system_store.detailedAddress,
-        });
-      },
-      /**
        * 生成二维码
        */
       markCode(text) {
@@ -525,14 +521,6 @@
         }).then(res => {
           this.codeImg = res.data.code
         });
-      },
-      /**
-       * 打电话
-       */
-      goTel: function() {
-        uni.makePhoneCall({
-          phoneNumber: this.orderInfo.deliveryId
-        })
       },
       /**
        * 去拼团详情
@@ -549,29 +537,6 @@
         this.$Order.getPreOrder("again",[{
           orderNo: this.order_id
         }]);
-      },
-      confirmOrder: function() {
-        let that = this;
-        uni.showModal({
-          title: '确认收货',
-          content: '为保障权益，请收到货确认无误后，再确认收货',
-          success: function(res) {
-            if (res.confirm) {
-              orderTake(that.id).then(res => {
-                return that.$util.Tips({
-                  title: '操作成功',
-                  icon: 'success'
-                }, function() {
-                  that.getOrderInfo();
-                });
-              }).catch(err => {
-                return that.$util.Tips({
-                  title: err
-                });
-              })
-            }
-          }
-        })
       },
 
       // ========== 非关键逻辑 ==========
@@ -608,6 +573,31 @@
         });
       },
       // #endif
+      /**
+       * 拨打电话
+       */
+      makePhone: function() {
+        uni.makePhoneCall({
+          phoneNumber: this.system_store.phone
+        })
+      },
+      /**
+       * 打开地图
+       */
+      showMaoLocation: function() {
+        if (!this.system_store.latitude || !this.system_store.longitude) {
+          return this.$util.Tips({
+            title: '缺少经纬度信息无法查看地图！'
+          });
+        }
+        uni.openLocation({
+          latitude: this.system_store.latitude,
+          longitude: this.system_store.longitude,
+          scale: 8,
+          name: this.system_store.name,
+          address: this.system_store.areaName + this.system_store.detailAddress,
+        });
+      },
 
       fen2yuan(price) {
         return Util.fen2yuan(price)
