@@ -1,97 +1,76 @@
 <template>
 	<view>
 		<view class='payment-status'>
-			<!--失败时： 用icon-iconfontguanbi fail替换icon-duihao2 bg-color-->
-			<view class='iconfont icons icon-duihao2 bg-color' v-if="order_pay_info.paid || order_pay_info.payType == 'offline'"></view>
-			<view class='iconfont icons icon-iconfontguanbi' v-else></view>
-			<!-- 失败时：订单支付失败 -->
-			<view class='status' v-if="order_pay_info.payType != 'offline'">{{order_pay_info.paid ? '订单支付成功':'订单支付失败'}}</view>
-			<view class='status' v-else>订单创建成功</view>
-			<view class='wrapper'>
+      <!-- 支付状态 -->
+			<view class='iconfont icons icon-duihao2 bg-color' v-if="order_pay_info.payStatus" />
+			<view class='iconfont icons icon-iconfontguanbi' v-else />
+			<view class='status'>{{order_pay_info.payStatus ? '订单支付成功':'订单支付失败'}}</view>
+
+      <!-- 基本信息 -->
+      <view class='wrapper'>
 				<view class='item acea-row row-between-wrapper'>
 					<view>订单编号</view>
-					<view class='itemCom'>{{order_pay_info.orderId}}</view>
+					<view class='itemCom'>{{order_pay_info.no}}</view>
 				</view>
 				<view class='item acea-row row-between-wrapper'>
 					<view>下单时间</view>
-					<view class='itemCom'>{{order_pay_info.createTime?order_pay_info.createTime:'-'}}</view>
+					<view class='itemCom'>{{ order_pay_info.createTime ? formatDate(order_pay_info.createTime) : '-' }}</view>
 				</view>
 				<view class='item acea-row row-between-wrapper'>
 					<view>支付方式</view>
-					<view class='itemCom' v-if="order_pay_info.payType=='weixin'">微信支付</view>
-					<view class='itemCom' v-else-if="order_pay_info.payType=='yue'">余额支付</view>
-					<view class='itemCom' v-else-if="order_pay_info.payType=='offline'">线下支付</view>
-					<view class='itemCom' v-else-if="order_pay_info.payType=='alipay'">支付宝支付</view>
+					<view class='itemCom'>{{ order_pay_info.payChannelName }}</view>
 				</view>
 				<view class='item acea-row row-between-wrapper'>
 					<view>支付金额</view>
-					<view class='itemCom'>{{order_pay_info.payPrice}}</view>
+					<view class='itemCom'>{{ fen2yuan(order_pay_info.payPrice) }}</view>
 				</view>
-				<!--失败时加上这个  -->
-				<view class='item acea-row row-between-wrapper' v-if="order_pay_info.paid==0 && order_pay_info.payType != 'offline'">
+				<!-- 失败时加上这个 -->
+				<view class='item acea-row row-between-wrapper' v-if="!order_pay_info.payStatus">
 					<view>失败原因</view>
-					<view class='itemCom'>{{status==2 ? '取消支付':msg}}</view>
+					<view class='itemCom'>{{ msg || '取消支付' }}</view>
 				</view>
 			</view>
-			<!--失败时： 重新购买 -->
+
+      <!-- 操作区 -->
 			<view @tap="goOrderDetails">
-				<button formType="submit" class='returnBnt bg-color' hover-class='none'>查看订单</button>
+				<button formType="submit" class='returnBnt bg-color' hover-class='none'>
+          查看订单
+        </button>
 			</view>
-		<!-- 	<view @tap="goOrderDetails" v-if="order_pay_info.paid==0 && status==1">
-				<button class='returnBnt bg-color' hover-class='none'>重新购买</button>
-			</view>
-			<view @tap="goOrderDetails" v-if="order_pay_info.paid==0 && status==2">
-				<button class='returnBnt bg-color' hover-class='none'>重新支付</button>
-			</view> -->
-			<button @click="goPink(order_pay_info.pinkId)" class='returnBnt cart-color' formType="submit" hover-class='none' v-if="order_pay_info.pinkId && order_pay_info.paid!=0 && status!=2 && status!=1">邀请好友参团</button>
-			<button @click="goIndex" class='returnBnt cart-color' formType="submit" hover-class='none' v-else>返回首页</button>
-			</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
+      <!-- TODO 芋艿：拼团 -->
+			<button @click="goPink(order_pay_info.pinkId)" class='returnBnt cart-color' formType="submit" hover-class='none'
+              v-if="order_pay_info.pinkId && order_pay_info.payStatus">
+        邀请好友参团
+      </button>
+			<button @click="goIndex" class='returnBnt cart-color' formType="submit" hover-class='none' v-else>
+        返回首页
+      </button>
+    </view>
 	</view>
 </template>
-
 <script>
-	import {
-		getOrderDetail
-	} from '@/api/order.js';
-	import {
-		openOrderSubscribe
-	} from '@/utils/SubscribeMessage.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
+  import * as OrderApi from '@/api/trade/order.js';
+	import { openOrderSubscribe } from '@/utils/SubscribeMessage.js';
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
+  import dayjs from '@/plugin/dayjs/dayjs.min.js';
+  import * as Util from '@/utils/util.js';
 	export default {
-		components: {
-			// #ifdef MP
-			authorize
-			// #endif
-		},
 		data() {
 			return {
 				orderId: '',
 				order_pay_info: {
-					paid: 1,
-					_status: {}
+					payStatus: true,
 				},
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false ,//是否隐藏授权
-				status:0,
-				msg:''
+				status: 0,
+				msg: ''
 			};
 		},
 		computed: mapGetters(['isLogin']),
 		watch:{
 			isLogin:{
-				handler:function(newV,oldV){
-					if(newV){
+				handler:function(newV, oldV) {
+					if (newV) {
 						this.getOrderPayInfo();
 					}
 				},
@@ -99,45 +78,64 @@
 			}
 		},
 		onLoad: function(options) {
-			if (!options.order_id) return this.$util.Tips({
-				title: '缺少参数无法查看订单支付状态'
-			}, {
-				tab: 3,
-				url: 1
-			});
-			this.orderId = options.order_id;
-			this.status = options.status || 0;
-			this.msg = options.msg || '';
-			if (this.isLogin) {
-				this.getOrderPayInfo();
-			} else {
-				toLogin();
-			}
+      if (!this.isLogin) {
+        toLogin();
+        return
+      }
+
+      if (!options.order_id) {
+        return this.$util.Tips({
+          title: '缺少参数无法查看订单支付状态'
+        }, {
+          tab: 3,
+          url: 1
+        });
+      }
+      this.orderId = options.order_id;
+      this.msg = options.msg || '';
+      this.getOrderPayInfo();
 		},
 		methods: {
-			onLoadFun: function() {
-				this.getOrderPayInfo();
-			},
 			/**
-			 * 
 			 * 支付完成查询支付状态
-			 * 
 			 */
 			getOrderPayInfo: function() {
-				let that = this;
 				uni.showLoading({
 					title: '正在加载中'
 				});
-				getOrderDetail(that.orderId).then(res => {
+				OrderApi.getOrderDetail(this.orderId).then(res => {
 					uni.hideLoading();
-					that.$set(that, 'order_pay_info', res.data);
+          this.$set(this, 'order_pay_info', res.data);
 					uni.setNavigationBarTitle({
-						title: res.data.paid ? '支付成功' : '支付失败'
+						title: res.data.payStatus ? '支付成功' : '支付失败'
 					});
 				}).catch(err => {
 					uni.hideLoading();
 				});
 			},
+      /**
+       * 去订单详情页面
+       */
+      goOrderDetails: function() {
+        // #ifdef MP
+        uni.showLoading({
+          title: '正在加载',
+        })
+        openOrderSubscribe().then(res => {
+          uni.hideLoading();
+          uni.navigateTo({
+            url: '/pages/order_details/index?order_id=' + this.orderId
+          });
+        }).catch(() => {
+          nui.hideLoading();
+        });
+        // #endif
+        // #ifndef MP
+        uni.navigateTo({
+          url: '/pages/order_details/index?order_id=' + this.orderId
+        })
+        // #endif
+      },
 			/**
 			 * 去首页关闭当前所有页面
 			 */
@@ -146,42 +144,24 @@
 					url: '/pages/index/index'
 				});
 			},
-			// 去参团页面；
-            goPink:function(id){
+      /**
+       * 去参团页面
+       */
+      goPink: function(id) {
 				uni.navigateTo({
-					url: '/pages/activity/goods_combination_status/index?id='+id
+					url: '/pages/activity/goods_combination_status/index?id=' + id
 				});
 			},
-			/**
-			 * 
-			 * 去订单详情页面
-			 */
-			goOrderDetails: function(e) {
-				let that = this;
-				// #ifdef MP
-				uni.showLoading({
-					title: '正在加载',
-				})
-				openOrderSubscribe().then(res => {
-					uni.hideLoading();
-					uni.navigateTo({
-						url: '/pages/order_details/index?order_id=' + that.orderId
-					});
-				}).catch(() => {
-					nui.hideLoading();
-				});
-				// #endif
-				// #ifndef MP
-				uni.navigateTo({
-					url: '/pages/order_details/index?order_id=' + that.orderId
-				})
-				// #endif
-			}
 
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+      }
 		}
 	}
 </script>
-
 <style>
 	.icon-iconfontguanbi{
 		background-color: #999 !important;

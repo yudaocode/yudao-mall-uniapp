@@ -107,6 +107,8 @@
 					title: '加载订单中'
 				});
         PayOrderApi.getOrder(this.orderId).then(res => {
+          // TODO 芋艿：如果已支付，则跳转回
+
 					console.log(res)
 					this.payPrice = res.data.price
 					this.invalidTime = res.data.expireTime

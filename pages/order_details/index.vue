@@ -175,14 +175,13 @@
 						<view class='conter' v-if="orderInfo.payStatus">已支付</view>
 						<view class='conter' v-else>未支付</view>
 					</view>
-          <!-- TODO 芋艿：支付方式的翻译 -->
           <view class='item acea-row row-between'>
 						<view>支付方式：</view>
-						<view class='conter'>{{orderInfo.payTypeStr}}</view>
+						<view class='conter'>{{ orderInfo.payChannelName }}</view>
 					</view>
 					<view class='item acea-row row-between' v-if="orderInfo.userRemark">
 						<view>买家留言：</view>
-						<view class='conter'>{{orderInfo.userRemark}}</view>
+						<view class='conter'>{{ orderInfo.userRemark }}</view>
 					</view>
 				</view>
         <!-- TODO 芋艿：退款订单详情 -->
@@ -304,9 +303,7 @@
   import { qrcodeApi } from '@/api/order.js';
   import * as OrderApi from '@/api/trade/order.js';
   import * as DeliveryApi from '@/api/trade/delivery.js';
-  import {
-    openOrderRefundSubscribe
-  } from '@/utils/SubscribeMessage.js';
+  import { openOrderRefundSubscribe } from '@/utils/SubscribeMessage.js';
   import home from '@/components/home';
   import payment from '@/components/payment';
   import orderGoods from "@/components/orderGoods";
