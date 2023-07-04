@@ -16,7 +16,7 @@
 					<view>下单时间</view>
 					<view class='itemCom'>{{ order_pay_info.createTime ? formatDate(order_pay_info.createTime) : '-' }}</view>
 				</view>
-				<view class='item acea-row row-between-wrapper'>
+				<view class='item acea-row row-between-wrapper' v-if="order_pay_info.payStatus">
 					<view>支付方式</view>
 					<view class='itemCom'>{{ order_pay_info.payChannelName }}</view>
 				</view>
@@ -27,7 +27,10 @@
 				<!-- 失败时加上这个 -->
 				<view class='item acea-row row-between-wrapper' v-if="!order_pay_info.payStatus">
 					<view>失败原因</view>
-					<view class='itemCom'>{{ msg || '取消支付' }}</view>
+					<view class='itemCom' v-if="payResult === 'success'">获取支付结果失败，请稍后刷新</view> <!-- 一般情况下，是支付中心回调更新订单为已支付，存在延迟 -->
+					<view class='itemCom' v-else-if="payResult === 'close'">支付已关闭</view>
+					<view class='itemCom' v-else-if="payResult === 'cancel'">取消支付</view>
+					<view class='itemCom' v-else>未知原因</view>
 				</view>
 			</view>
 
@@ -63,7 +66,7 @@
 					payStatus: true,
 				},
 				status: 0,
-				msg: ''
+				payResult: ''
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -92,7 +95,7 @@
         });
       }
       this.orderId = options.order_id;
-      this.msg = options.msg || '';
+      this.payResult = options.payResult;
       this.getOrderPayInfo();
 		},
 		methods: {

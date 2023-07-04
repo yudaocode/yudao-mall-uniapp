@@ -425,8 +425,9 @@
        * 打开支付组件
        */
       goPay() {
+        const returnUrl = '/pages/order_pay_status/index?order_id=' + this.orderInfo.id;
         uni.navigateTo({
-          url: `/pages/goods/cashier/index?order_id=${this.orderInfo.payOrderId}&from_type=order`
+          url: `/pages/goods/cashier/index?order_id=${this.orderInfo.payOrderId}&returnUrl=${returnUrl}`
         })
       },
       /**

@@ -32,7 +32,7 @@
 		</view>
 		<view class="btn">
 			<view class="button acea-row row-center-wrapper" @click='goPay(channelCode)'>确认支付</view>
-			<view class="wait-pay" @click="goReturnUrl">暂不支付</view>
+			<view class="wait-pay" @click="goReturnUrl('cancel')">暂不支付</view>
 		</view>
 	</view>
 </template>
@@ -108,6 +108,21 @@
 				});
         PayOrderApi.getOrder(this.orderId).then(res => {
           // TODO 芋艿：如果已支付，则跳转回
+          if (res.data.status === 10) {
+            uni.showToast({
+              title: '支付成功'
+            })
+            this.goReturnUrl('success');
+            uni.hideLoading();
+            return;
+          } else if (res.data.status === 20) {
+            uni.showToast({
+              title: '无法支付，原因：订单已关闭'
+            })
+            this.goReturnUrl('close');
+            uni.hideLoading();
+            return;
+          }
 
 					console.log(res)
 					this.payPrice = res.data.price
@@ -374,7 +389,6 @@
 							// #endif
 							break;
 					}
-
 				}).catch(err => {
 					uni.hideLoading();
 					return that.$util.Tips({
@@ -409,21 +423,26 @@
        */
       getPayReturnUrl() {
         // #ifdef H5
-        return location.port
-          ? location.protocol + '//' + location.hostname + ':' + location.port + '/pages/goods/cashier/index?order_id=' + this.orderId
-          : location.protocol + '//' + location.hostname + '/pages/goods/cashier/index?order_id=' + this.orderId;
-          // #endif
+        return location.href
+        // #endif
         // #ifdef APP-PLUS
-        return '/pages/goods/order_details/index?order_id=' + this.orderId;
+        return '/pages/goods/order_details/index?order_id=' + this.orderId + '&returnUrl=' + this.returnUrl;
         // #endif
         return '';
       },
       /**
        * 回到业务的 URL
+       *
+       * @param payResult 支付结果
+       *                  ① success：支付成功
+       *                  ② cancel：取消支付
+       *                  ③ close：支付已关闭
        */
-      goReturnUrl() {
+      goReturnUrl(payResult) {
         uni.reLaunch({
-          url: this.returnUrl
+          url: this.returnUrl.indexOf('?') >= 0
+            ? this.returnUrl + '&payResult=' + payResult
+            : this.returnUrl + '?payResult=' + payResult
         })
       },
     }
