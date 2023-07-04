@@ -1,9 +1,9 @@
 <template>
-	<view class="page" v-if="payPriceShow">
+	<view class="page" v-if="payPrice">
 		<view class="pay-price">
 			<view class="price">
 				<text class="unit">￥</text>
-				<numberScroll :num='(payPriceShow / 100.0).toFixed(2)' color="#E93323" width='30' height='50' fontSize='50' />
+				<numberScroll :num='(payPrice / 100.0).toFixed(2)' color="#E93323" width='30' height='50' fontSize='50' />
 			</view>
 			<view class="count-down">
         支付剩余时间：
@@ -16,28 +16,26 @@
         支付方式
 			</view>
 			<view class="item acea-row row-between-wrapper" v-for="(item,index) in cartArr" :key="index"
-				v-show='item.payStatus' @click="payType(item.number || 0, item.value, index, item.channelCode)">
+				v-show='item.status' @click="payType(item.channelCode)">
 				<view class="left acea-row row-between-wrapper">
 					<view class="iconfont" :class="item.icon"></view>
 					<view class="text">
-						<view class="name">{{item.name}}</view>
+						<view class=name>{{item.name}}</view>
 						<view class="info" v-if="item.value == 'yue'">
 							{{item.title}} <span class="money">￥{{ item.number }}</span>
 						</view>
 						<view class="info" v-else>{{item.title}}</view>
 					</view>
 				</view>
-				<view class="iconfont" :class="active==index?'icon-xuanzhong11 font-num':'icon-weixuan'"></view>
+				<view class="iconfont" :class="item.channelCode === channelCode?'icon-xuanzhong11 font-num':'icon-weixuan'" />
 			</view>
 		</view>
 		<view class="btn">
-			<view class="button acea-row row-center-wrapper" @click='goPay(number, paytype, channelCode)'>确认支付</view>
-			<view class="wait-pay" @click="waitPay">暂不支付</view>
+			<view class="button acea-row row-center-wrapper" @click='goPay(channelCode)'>确认支付</view>
+			<view class="wait-pay" @click="goReturnUrl">暂不支付</view>
 		</view>
-		<view v-show="false" v-html="formContent"></view>
 	</view>
 </template>
-
 <script>
   import CountDown from "@/components/countDown";
 	import numberScroll from '@/components/numberScroll.vue'
@@ -49,6 +47,39 @@
 		},
 		data() {
 			return {
+        orderId: 0, // 支付单号
+        returnUrl: '', // 调回地址
+        payPrice: 0, // 支付金额
+        invalidTime: 0, // 过期时间
+				cartArr: [{ // 支付方式
+          name: '微信支付',
+          icon: "icon-weixin2",
+          title: '使用微信快捷支付',
+          status: 1,
+          channelCode: "wx_pub"  // TODO 芋艿：未来要考虑各种端
+        }, {
+          name: '支付宝支付',
+          icon: "icon-zhifubao",
+          title: '使用支付宝支付',
+          status: 1,
+          channelCode: "alipay_wap"
+        }, {
+          name: '余额支付',
+          icon: "icon-yuezhifu",
+          title: '可用余额',
+          status: 1,
+        },
+
+        // 如下是各种示例接入的示例，默认关闭
+        {
+            name: '支付宝支付（PC）',
+            icon: "icon-zhifubao",
+            value: 'alipay_pc',
+            title: '使用支付宝支付',
+            status: 1,
+            channelCode: "alipay_pc"
+        }],
+        channelCode: '', // 选中的支付渠道
         bgColor: {
           'bgColor': '#fff',
           'Color': '#E93323',
@@ -56,140 +87,44 @@
           'timeTxtwidth': '16rpx',
           'isDay': true
         },
-				checked: false,
-				datatime: 1676344056, // 支付的过期时间
-				// 支付方式
-				cartArr: [{
-						"name": '微信支付',
-						"icon": "icon-weixin2",
-						value: 'weixin',
-						title: '使用微信快捷支付',
-						payStatus: 1,
-            "channelCode": "wx_pub"  // TODO 芋艿：未来要考虑各种端
-					},
-					{
-						"name": '支付宝支付',
-						"icon": "icon-zhifubao",
-						value: 'alipay',
-						title: '使用支付宝支付',
-						payStatus: 1,
-            "channelCode": "alipay_wap"  // TODO 芋艿：未来要考虑各种端
-					},
-					{
-						"name": '余额支付',
-						"icon": "icon-yuezhifu",
-						value: 'yue',
-						title: '可用余额',
-						payStatus: 1,
-					}],
-				orderId: 0,
-				// fromType: '', // TODO 芋艿：没用
-				active: 0,
-				payPrice: 0,
-				payPriceShow: 0,
-				payPostage: 0,
-				invalidTime: 0,
-				initIn: false,
-				jumpData: {
-					orderId: '',
-					msg: ''
-				},
-				formContent: '',
-        channelCode: '', // 选中的支付渠道
 
-        form: { // 展示形式：form
-          html: '',
-        },
-			}
-		},
-		watch: {
-			cartArr: {
-				handler(newV, oldValue) {
-					let newPayList = [];
-					newV.forEach((item, index) => {
-						if (item.payStatus) {
-							item.index = index;
-							newPayList.push(item)
-						}
-					});
-					this.active = newPayList[0].index;
-					this.paytype = newPayList[0].value;
-					this.number = newPayList[0].number || 0;
-          this.channelCode = newPayList[0].channelCode || '';
-				},
-				immediate: true,
-				deep: true
-			}
+        // TODO 芋艿：如下要删除的；
+        formContent: '',
+      }
 		},
 		onLoad(options) {
-			if (options.order_id) this.orderId = options.order_id
-			if (options.from_type) this.fromType = options.from_type
+			if (options.order_id) {
+        this.orderId = options.order_id
+      }
+      if (options.returnUrl) {
+        this.returnUrl = options.returnUrl
+      }
 			this.getCashierOrder()
-		},
-		onShow() {
-			let options = wx.getEnterOptionsSync();
-			console.log(options)
-			if (options.scene == '1038' && options.referrerInfo.appId == 'wxef277996acc166c3' && this.initIn) {
-				// 代表从收银台小程序返回
-				let extraData = options.referrerInfo.extraData;
-				this.initIn = false
-				if (!extraData) {
-					// "当前通过物理按键返回，未接收到返参，建议自行查询交易结果";
-					this.$util.Tips({
-						title: '取消支付'
-					}, {
-						tab: 5,
-						url: `/pages/goods/order_pay_status/index?order_id=${this.orderId}&msg=${this.$t(`取消支付`)}&type=3&totalPrice=${this.payPriceShow}&status=2`
-					});
-				} else {
-					if (extraData.code == 'success') {
-						this.$util.Tips({
-							title: '支付成功',
-							icon: 'success'
-						}, {
-							tab: 5,
-							url: `/pages/goods/order_pay_status/index?order_id=${this.orderId}&msg=${this.jumpData.msg}&type=3&totalPrice=${this.payPriceShow}`
-						});
-					} else if (extraData.code == 'cancel') {
-						// "支付已取消";
-						this.$util.Tips({
-							title: '取消支付'
-						}, {
-							tab: 5,
-							url: `/pages/goods/order_pay_status/index?order_id=${this.orderId}&msg=${this.$t(`取消支付`)}&type=3&totalPrice=${this.payPriceShow}&status=2`
-						});
-					} else {
-						// "支付失败：" + extraData.errmsg;
-						uni.reLaunch({
-							url: `/pages/goods/order_pay_status/index?order_id=${this.orderId}&msg=${this.$t(`支付失败`)}&totalPrice=${this.payPriceShow}`
-						})
-					}
-				}
-			}
 		},
 		methods: {
 			getCashierOrder() {
 				uni.showLoading({
-					title: '创建订单中'
+					title: '加载订单中'
 				});
         PayOrderApi.getOrder(this.orderId).then(res => {
 					console.log(res)
-					this.payPrice = this.payPriceShow = res.data.price
-					this.payPostage = res.data.pay_postage
+					this.payPrice = res.data.price
 					this.invalidTime = res.data.expireTime
 					// 微信支付是否开启 TODO 芋艿：强制开启
-					// this.cartArr[0].payStatus = res.data.wechat_pay_status || 0
-					this.cartArr[0].payStatus = res.data.wechat_pay_status || 1
+					// this.cartArr[0].status = res.data.wechat_pay_status || 0
+					this.cartArr[0].status = res.data.wechat_pay_status || 1
 					// 支付宝是否开启 TODO 芋艿：强制开启
-					// this.cartArr[1].payStatus = res.data.ali_pay_status || 0;
-					this.cartArr[1].payStatus = res.data.ali_pay_status || 1;
+					// this.cartArr[1].status = res.data.ali_pay_status || 0;
+					this.cartArr[1].status = res.data.ali_pay_status || 1;
 					//#ifdef MP
-					this.cartArr[1].payStatus = false;
+					this.cartArr[1].status = false;
 					//#endif
 					// 余额支付是否开启
 					// that.cartArr[2].title = '可用余额:' + res.data.userInfo.now_money;
 					this.cartArr[2].number = res.data.now_money;
-					this.cartArr[2].payStatus = res.data.yue_pay_status
+					this.cartArr[2].status = res.data.yue_pay_status
+
+          this.channelCode = this.cartArr[0].channelCode;
 					uni.hideLoading();
 				}).catch(err => {
 					uni.hideLoading();
@@ -198,83 +133,24 @@
 					})
 				})
 			},
-			payType(number, paytype, index, channelCode) {
-				this.active = index;
-				this.paytype = paytype;
-				this.number = number;
-        this.channelCode = channelCode
-        this.payPriceShow = this.payPrice;
-      },
-			formpost(url, postData) {
-				let tempform = document.createElement("form");
-				tempform.action = url;
-				tempform.method = "post";
-				tempform.target = "_self";
-				tempform.style.display = "none";
-        if (postData) {
-          for (let x in postData) {
-            let opt = document.createElement("input");
-            opt.name = x;
-            opt.value = postData[x];
-            tempform.appendChild(opt);
-          }
-        }
-				document.body.appendChild(tempform);
-				this.$nextTick(e => {
-					tempform.submit();
-				})
-			},
-			waitPay() {
-				uni.reLaunch({
-					url: '/pages/goods/order_pay_status/index?order_id=' + this.orderId + '&msg=取消支付&type=3' +
-						'&status=2&totalPrice=' + this.payPriceShow
-				})
-			},
-			goPay(number, paytype, channelCode) {
+			goPay(channelCode) {
 				let that = this;
 				if (!that.orderId) return that.$util.Tips({
 					title: '请选择要支付的订单'
 				});
-				if (paytype === 'yue' && parseFloat(number) < parseFloat(that.payPriceShow)) return that.$util.Tips({
+				if (channelCode === 'yue' && parseFloat(number) < parseFloat(that.payPrice)) return that.$util.Tips({
 					title: '余额不足'
 				});
 				uni.showLoading({
 					title: '支付中'
 				});
-				if (paytype === 'friend' && that.orderId) {
-					uni.hideLoading();
-					return uni.navigateTo({
-						url: '/pages/users/payment_on_behalf/index?order_id=' + that.orderId + '&spread=' +
-							this.$store.state.app.uid,
-						success: res => {},
-						fail: () => {},
-						complete: () => {}
-					});
-				}
 				PayOrderApi.submitOrder({
           id: that.orderId,
           channelCode: channelCode,
           displayMode: 'url', // TODO 芋艿：后续可以优化
-
-          // TODO 芋艿：下面是他们原始的参数
-					uni: that.orderId,
-					paytype: paytype,
-					type: that.friendPay ? 1 : 0,
-          // TODO 芋艿：不需要传递 quitUrl；因为支付宝 pc 和 wap 如果不传递，则会调回到原前台页面；
-          // TODO 芋艿：returnUrl 的时候，默认跳转到支付结果页；如果支付成功，则展示支付成功的信息；如果支付取消，则跳转到详情页；
-					// #ifdef H5
-					quitUrl: location.port ? location.protocol + '//' + location.hostname + ':' + location
-						.port +
-						'/pages/goods/order_details/index?order_id=' + this.orderId : location.protocol +
-						'//' + location.hostname +
-						'/pages/goods/order_details/index?order_id=' + this.orderId
-					// #endif
-					// #ifdef APP-PLUS
-					quitUrl: '/pages/goods/order_details/index?order_id=' + this.orderId
-					// #endif
+          returnUrl: this.getPayReturnUrl(),
 				}).then(res => {
-          // TODO 芋艿：临时做技术打样的
-          this.formpost(res.data.displayContent)
+          this.handleSubmitOrderResult(res.data);
 
           if (true) {
             return;
@@ -283,94 +159,20 @@
 						orderId = res.data.result.orderId,
 						jsConfig = res.data.result.jsConfig,
 						goPages = '/pages/goods/order_pay_status/index?order_id=' + this.orderId + '&msg=' +
-            res
-						.msg +
-						'&type=3' + '&totalPrice=' + this.payPriceShow,
-						friendPay = '/pages/users/payment_on_behalf/index?order_id=' + this.orderId +
-						'&spread=' +
-						this.$store.state.app.uid
+            res.msg + '&type=3' + '&totalPrice=' + this.payPrice;
 					switch (status) {
-						case 'ORDER_EXIST':
-						case 'EXTEND_ORDER':
-							uni.hideLoading();
-							return that.$util.Tips({
-								title: res.msg
-							}, {
-								tab: 5,
-								url: goPages
-							});
-						case 'ALLINPAY_PAY':
-							uni.hideLoading();
-							// #ifdef MP
-							this.initIn = true
-							wx.openEmbeddedMiniProgram({
-								appId: 'wxef277996acc166c3',
-								extraData: {
-									cusid: jsConfig.cusid,
-									appid: jsConfig.appid,
-									version: jsConfig.version,
-									trxamt: jsConfig.trxamt,
-									reqsn: jsConfig.reqsn,
-									notify_url: jsConfig.notify_url,
-									body: jsConfig.body,
-									remark: jsConfig.remark,
-									validtime: jsConfig.validtime,
-									randomstr: jsConfig.randomstr,
-									paytype: jsConfig.paytype,
-									sign: jsConfig.sign,
-									signtype: jsConfig.signtype
-								}
-							})
-							this.jumpData = {
-								orderId: res.data.result.orderId,
-								msg: res.msg,
-							}
-							// #endif
-							// #ifdef APP-PLUS
-							plus.runtime.openURL(jsConfig.payinfo);
-							setTimeout(e => {
-								uni.reLaunch({
-									url: goPages
-								})
-							}, 1000)
-							// #endif
-							// #ifdef H5
-							this.formpost(res.data.result.pay_url, jsConfig)
-							// #endif
-							break;
-						case 'PAY_ERROR':
-							uni.hideLoading();
-							return that.$util.Tips({
-								title: res.msg
-							}, {
-								tab: 5,
-								url: goPages
-							});
-							break;
 						case 'SUCCESS':
 							uni.hideLoading();
-							if (paytype !== 'friend') {
-								return that.$util.Tips({
-									title: res.msg,
-									icon: 'success'
-								}, {
-									tab: 4,
-									url: goPages
-								});
-							} else {
-								return that.$util.Tips({
-									title: res.msg,
-									icon: 'success'
-								}, {
-									tab: 4,
-									url: friendPay
-								});
-							}
-							break;
+              return that.$util.Tips({
+                title: res.msg,
+                icon: 'success'
+              }, {
+                tab: 4,
+                url: goPages
+              });
 						case 'WECHAT_PAY':
 							that.toPay = true;
 							// #ifdef MP
-							/* that.toPay = true; */
 							let mp_pay_name = ''
 							if (uni.requestOrderPayment) {
 								mp_pay_name = 'requestOrderPayment'
@@ -510,7 +312,6 @@
 								location.href = res.data.result.jsConfig.h5_url;
 							}, 1500);
 							break;
-
 						case 'ALIPAY_PAY':
 							//#ifdef H5
 							uni.hideLoading();
@@ -582,9 +383,48 @@
 						});
 					});
 				})
-			}
-		}
+			},
 
+      handleSubmitOrderResult(data) {
+        const displayMode = data.displayMode;
+        const displayContent = data.displayContent
+        // 2.1 如果返回的是 URL，则直接跳转
+        if (displayMode === 'url') {
+          window.location = displayContent;
+          return;
+        }
+        // 2.2
+      },
+
+      /**
+       * 设置支付方式
+       */
+      payType(channelCode) {
+        this.channelCode = channelCode
+      },
+      /**
+       * 获得支付的 return url
+       */
+      getPayReturnUrl() {
+        // #ifdef H5
+        return location.port
+          ? location.protocol + '//' + location.hostname + ':' + location.port + '/pages/goods/cashier/index?order_id=' + this.orderId
+          : location.protocol + '//' + location.hostname + '/pages/goods/cashier/index?order_id=' + this.orderId;
+          // #endif
+        // #ifdef APP-PLUS
+        return '/pages/goods/order_details/index?order_id=' + this.orderId;
+        // #endif
+        return '';
+      },
+      /**
+       * 回到业务的 URL
+       */
+      goReturnUrl() {
+        uni.reLaunch({
+          url: this.returnUrl
+        })
+      },
+    }
 	}
 </script>
 
