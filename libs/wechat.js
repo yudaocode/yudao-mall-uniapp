@@ -3,9 +3,9 @@ import WechatJSSDK from "@/plugin/jweixin-module/index.js";
 
 
 import {
-	getWechatConfig,
 	wechatAuth
 } from "@/api/public";
+import * as WeiXinApi from '@/api/system/weixin.js';
 import {
 	WX_AUTH,
 	STATE_KEY,
@@ -21,47 +21,33 @@ import Cache from '@/utils/cache';
 class AuthWechat {
 
 	constructor() {
-		//微信实例化对象
-		this.instance = WechatJSSDK;
-		//是否实例化
-		this.status = false;
-
+		this.instance = WechatJSSDK; // 微信实例化对象
+		this.status = false; // 是否实例化
 		this.initConfig = {};
-
 	}
-	
-	isAndroid(){
-		let u = navigator.userAgent;
-		return u.indexOf('Android') > -1 || u.indexOf('Adr') > -1;
-	}
-	
-	signLink() {
-		if (typeof window.entryUrl === 'undefined' || window.entryUrl === '') {
-			  	window.entryUrl = location.href.split('#')[0]
-			}
-		return  /(Android)/i.test(navigator.userAgent) ? location.href.split('#')[0] : window.entryUrl;
-	}
-
 
 	/**
-	 * 初始化wechat(分享配置)
+	 * 初始化 wechat(分享配置)
 	 */
 	wechat() {
 		return new Promise((resolve, reject) => {
-			// if (this.status && !this.isAndroid()) return resolve(this.instance);
-			getWechatConfig()
-				.then(res => {
-					this.instance.config(res.data);
-					this.initConfig = res.data;
-					this.status = true;
-					this.instance.ready(() => {
-						resolve(this.instance);
-					})
-				}).catch(err => {
-					console.log('微信分享配置失败',err);
-					this.status = false;
-					reject(err);
-				});
+			// if (this.status) return resolve(this.instance);
+      WeiXinApi.createJsapiSignature(location.href).then(res => {
+        // debugger
+        const jsapiTicket = res.data;
+        jsapiTicket.jsApiList = ['chooseWXPay']; // TODO  芋艿:这里要设置下
+        jsapiTicket.debug = false;
+        this.instance.config(jsapiTicket);
+        this.initConfig = jsapiTicket;
+        this.status = true;
+        this.instance.ready(() => {
+          resolve(this.instance);
+        })
+      }).catch(err => {
+        console.log('WechatJSSDK 初始化失败 ',err);
+        this.status = false;
+        reject(err);
+      });
 		});
 	}
 
@@ -110,8 +96,8 @@ class AuthWechat {
 				reject(err);
 			})
 		});
-	} 
-	
+	}
+
 	// 使用微信内置地图查看位置接口；
 	seeLocation(config){
 		return new Promise((resolve, reject) => {
@@ -126,7 +112,7 @@ class AuthWechat {
 			})
 		});
 	}
-	
+
 	/**
 	 * 微信支付
 	 * @param {Object} config
@@ -144,7 +130,7 @@ class AuthWechat {
 			});
 		});
 	}
-	
+
 	toPromise(fn, config = {}) {
 		return new Promise((resolve, reject) => {
 			fn({
@@ -169,6 +155,10 @@ class AuthWechat {
 	 * 自动去授权
 	 */
 	oAuth(snsapiBase,url) {
+    // TODO 芋艿：先链式去掉这个逻辑；
+    if (true) {
+      return;
+    }
 		if (uni.getStorageSync(WX_AUTH) && store.state.app.token && snsapiBase == 'snsapi_base') return;
 		const {
 			code
@@ -201,10 +191,6 @@ class AuthWechat {
 		// }
 	}
 
-	clearAuthStatus() {
-
-	}
-
 	/**
 	 * 授权登录获取token
 	 * @param {Object} code
@@ -220,7 +206,7 @@ class AuthWechat {
 					Cache.clear(STATE_KEY);
 					// Cache.clear('spread');
 					loginType && Cache.clear(LOGINTYPE);
-					
+
 				})
 				.catch(reject);
 		});
@@ -259,7 +245,7 @@ class AuthWechat {
 				// 	return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
 				// }
     }
-	
+
 	/**
 	 * 跳转自动登录
 	 */

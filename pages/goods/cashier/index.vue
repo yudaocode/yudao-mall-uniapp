@@ -107,7 +107,6 @@
 					title: '加载订单中'
 				});
         PayOrderApi.getOrder(this.orderId).then(res => {
-          // TODO 芋艿：如果已支付，则跳转回
           if (res.data.status === 10) {
             uni.showToast({
               title: '支付成功'
@@ -166,6 +165,9 @@
           channelCode: channelCode,
           displayMode: 'url', // TODO 芋艿：后续可以优化
           returnUrl: this.getPayReturnUrl(),
+          channelExtras: {
+            openid: "ockUAwIZ-0OeMZl9ogcZ4ILrGba0"
+          }
 				}).then(res => {
           this.handleSubmitOrderResult(res.data);
 
@@ -245,29 +247,7 @@
 							})
 							// #endif
 							// #ifdef H5
-							this.$wechat.pay(res.data.result.jsConfig).then(res => {
-								return that.$util.Tips({
-									title: '支付成功',
-									icon: 'success'
-								}, {
-									tab: 5,
-									url: goPages
-								});
-							}).catch(res => {
-								if (!this.$wechat.isWeixin()) {
-									uni.redirectTo({
-										url: goPages + '&msg=' + that.$t(`支付失败`) +
-											'&status=2'
-										// '&msg=支付失败&status=2'
-									})
-								}
-								if (res.errMsg == 'chooseWXPay:cancel') return that.$util.Tips({
-									title: '取消支付'
-								}, {
-									tab: 5,
-									url: goPages + '&status=2'
-								});
-							})
+							    // 已删除，已经实现；
 							// #endif
 							// #ifdef APP-PLUS
 							uni.requestPayment({
@@ -409,7 +389,52 @@
           window.location = displayContent;
           return;
         }
-        // 2.2
+        // 2.2 如果返回的是 CUSTOM，则自定义处理
+        if (displayMode === 'custom') {
+          if (this.channelCode === 'wx_pub') {
+            this.handleSubmitOrderResultForWxPub(displayContent)
+            return;
+          }
+        }
+      },
+      /**
+       * 发起微信公众号支付
+       */
+      handleSubmitOrderResultForWxPub(displayContent) {
+        const payConfig = JSON.parse(displayContent);
+        this.$wechat.pay({
+          timestamp: payConfig.timeStamp,
+          nonceStr: payConfig.nonceStr,
+          package: payConfig.packageValue,
+          signType: payConfig.signType,
+          paySign: payConfig.paySign,
+        }).then(res => {
+          // 失败的情况
+          if (res.errMsg === 'chooseWXPay:cancel') {
+            return this.$util.Tips({
+              title: '取消微信支付'
+            });
+          }
+          if (res.errMsg) {
+            return this.$util.Tips({
+              title: res.errMsg,
+              icon: 'error'
+            })
+          }
+
+          // 成功的情况
+          return this.$util.Tips({
+            title: '支付成功',
+            icon: 'success'
+          }, () => {
+            this.goReturnUrl('success');
+          });
+        }).catch(res => {
+          return this.$util.Tips({
+            title: '初始化微信支付失败，请重试或者选择其它支付方式',
+            icon: 'error'
+          })
+        })
       },
 
       /**
