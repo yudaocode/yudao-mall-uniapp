@@ -15,8 +15,7 @@
 			<view class="title">
         支付方式
 			</view>
-			<view class="item acea-row row-between-wrapper" v-for="(item,index) in cartArr" :key="index"
-				v-show='item.status' @click="payType(item.channelCode)">
+			<view class="item acea-row row-between-wrapper" v-for="(item,index) in cartArr" :key="index" @click="payType(item.channelCode)">
 				<view class="left acea-row row-between-wrapper">
 					<view class="iconfont" :class="item.icon"></view>
 					<view class="text">
@@ -40,6 +39,7 @@
   import CountDown from "@/components/countDown";
 	import numberScroll from '@/components/numberScroll.vue'
   import * as PayOrderApi from '@/api/pay/order.js';
+  import * as PayChannelApi from '@/api/pay/channel.js';
 	export default {
 		components: {
       CountDown,
@@ -52,31 +52,32 @@
         payPrice: 0, // 支付金额
         invalidTime: 0, // 过期时间
 				cartArr: [{ // 支付方式
-          name: '微信支付',
+          name: '微信支付', // 微信公众号
           icon: "icon-weixin2",
           title: '使用微信快捷支付',
-          status: 1,
-          channelCode: "wx_pub"  // TODO 芋艿：未来要考虑各种端
+          channelCode: "wx_pub"
+        }, {
+          name: '微信支付', // 微信小程序
+          icon: "icon-weixin2",
+          title: '使用微信快捷支付',
+          channelCode: "wx_lite"
         }, {
           name: '支付宝支付',
           icon: "icon-zhifubao",
           title: '使用支付宝支付',
-          status: 1,
           channelCode: "alipay_wap"
         }, {
           name: '余额支付',
           icon: "icon-yuezhifu",
           title: '可用余额',
-          status: 1,
         },
 
         // 如下是各种示例接入的示例，默认关闭
         {
-            name: '支付宝支付（PC）',
+            name: '支付宝支付（PC）', // PC 支付
             icon: "icon-zhifubao",
             value: 'alipay_pc',
             title: '使用支付宝支付',
-            status: 1,
             channelCode: "alipay_pc"
         }],
         channelCode: '', // 选中的支付渠道
@@ -107,6 +108,7 @@
 					title: '加载订单中'
 				});
         PayOrderApi.getOrder(this.orderId).then(res => {
+          // 如果已支付、或者已关闭，则直接跳转
           if (res.data.status === 10) {
             uni.showToast({
               title: '支付成功'
@@ -123,24 +125,13 @@
             return;
           }
 
-					console.log(res)
+          // 设置属性
 					this.payPrice = res.data.price
 					this.invalidTime = res.data.expireTime
-					// 微信支付是否开启 TODO 芋艿：强制开启
-					// this.cartArr[0].status = res.data.wechat_pay_status || 0
-					this.cartArr[0].status = res.data.wechat_pay_status || 1
-					// 支付宝是否开启 TODO 芋艿：强制开启
-					// this.cartArr[1].status = res.data.ali_pay_status || 0;
-					this.cartArr[1].status = res.data.ali_pay_status || 1;
-					//#ifdef MP
-					this.cartArr[1].status = false;
-					//#endif
-					// 余额支付是否开启
-					// that.cartArr[2].title = '可用余额:' + res.data.userInfo.now_money;
-					this.cartArr[2].number = res.data.now_money;
-					this.cartArr[2].status = res.data.yue_pay_status
 
-          this.channelCode = this.cartArr[0].channelCode;
+          // 移除多余的支付渠道；
+          this.removeDisableChannel(res.data.appId);
+
 					uni.hideLoading();
 				}).catch(err => {
 					uni.hideLoading();
@@ -192,59 +183,7 @@
 						case 'WECHAT_PAY':
 							that.toPay = true;
 							// #ifdef MP
-							let mp_pay_name = ''
-							if (uni.requestOrderPayment) {
-								mp_pay_name = 'requestOrderPayment'
-							} else {
-								mp_pay_name = 'requestPayment'
-							}
-							uni[mp_pay_name]({
-								timeStamp: jsConfig.timestamp,
-								nonceStr: jsConfig.nonceStr,
-								package: jsConfig.package,
-								signType: jsConfig.signType,
-								paySign: jsConfig.paySign,
-								success: function(res) {
-									uni.hideLoading();
-									if (that.BargainId || that.combinationId || that.pinkId ||
-										that
-										.seckillId || that.discountId)
-										return that.$util.Tips({
-											title: that.$t(`支付成功`),
-											icon: 'success'
-										}, {
-											tab: 4,
-											url: goPages
-										});
-									return that.$util.Tips({
-										title: '支付成功',
-										icon: 'success'
-									}, {
-										tab: 5,
-										url: goPages
-									});
-								},
-								fail: function(e) {
-									uni.hideLoading();
-									return that.$util.Tips({
-										title: '取消支付'
-									}, {
-										tab: 5,
-										url: goPages + '&status=2'
-									});
-								},
-								complete: function(e) {
-									uni.hideLoading();
-									//关闭当前页面跳转至订单状态
-									if (res.errMsg == 'requestPayment:cancel' || e.errMsg == 'requestOrderPayment:cancel') return that.$util
-										.Tips({
-											title: '取消支付'
-										}, {
-											tab: 5,
-											url: goPages + '&status=2'
-										});
-								},
-							})
+							    // 已删除，已经实现
 							// #endif
 							// #ifdef H5
 							    // 已删除，已经实现；
@@ -395,6 +334,10 @@
             this.handleSubmitOrderResultForWxPub(displayContent)
             return;
           }
+          if (this.channelCode === 'wx_lite') {
+            this.handleSubmitOrderResultForWxLite(displayContent)
+            return;
+          }
         }
       },
       /**
@@ -436,7 +379,76 @@
           })
         })
       },
+      handleSubmitOrderResultForWxLite(displayContent) {
+        const payConfig = JSON.parse(displayContent);
+        const that = this;
+        console.log(payConfig, '=================')
+        console.log(payConfig.timeStamp, '=================')
+        uni.requestPayment({
+          timeStamp: payConfig.timeStamp,
+          nonceStr: payConfig.nonceStr,
+          package: payConfig.packageValue,
+          signType: payConfig.signType,
+          paySign: payConfig.paySign,
+          success: function(res) {
+            uni.hideLoading();
+            return that.$util.Tips({
+              title: '支付成功',
+              icon: 'success'
+            }, {
+              tab: 5,
+              url: goPages
+            });
+          },
+          fail: function(e) {
+            uni.hideLoading();
+            return that.$util.Tips({
+              title: '取消支付'
+            }, {
+              tab: 5,
+              url: goPages + '&status=2'
+            });
+          },
+          complete: function(e) {
+            uni.hideLoading();
+            // 关闭当前页面跳转至订单状态
+            if (e.errMsg === 'requestPayment:cancel'
+              || e.errMsg === 'requestPayment:fail cancel') {
+              return that.$util.Tips({
+                title: '取消支付'
+              });
+            }
+            return that.$util.Tips({
+              title: e.errMsg,
+              icon: 'error'
+            });
+          },
+        })
+      },
 
+      /**
+       * 移除被禁用的支付渠道
+       */
+      removeDisableChannel(appId) {
+        // 1.1 如果不在小程序里，则移除微信小程序支付
+        // #ifndef MP
+        this.cartArr = this.cartArr.filter(item => item.channelCode !== 'wx_lite')
+        // #endif
+        // 1.2 如果不是公众号环境，则移除微信公众号支付
+        if (!this.$wechat.isWeixin()) {
+          this.cartArr = this.cartArr.filter(item => item.channelCode !== 'wx_pub')
+        }
+
+        // 2. 读取配置，移除被禁用的支付渠道
+        PayChannelApi.getEnableChannelCodeList(appId).then(res => {
+          this.cartArr = this.cartArr.filter(item => res.data.includes(item.channelCode));
+
+          // 默认选中第一个
+          if (this.cartArr.length > 0) {
+            this.payType(this.cartArr[0].channelCode)
+          }
+        })
+      },
       /**
        * 设置支付方式
        */

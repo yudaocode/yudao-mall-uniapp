@@ -92,7 +92,7 @@
     "h5" : {
         "devServer" : {
             "https" : false,
-            "disableHostCheck": true
+            "disableHostCheck" : true
         },
         "router" : {
             "mode" : "history",
