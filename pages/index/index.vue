@@ -243,6 +243,14 @@
 			this.setTabList()
 		},
 		onLoad() {
+      // wx.login({
+      //   success (res) {
+      //     if (res.code) {
+      //       console.log(res.code, '======== code 编号 =======')
+      //     }
+      //   }
+      // })
+
 			var that = this;
 			// 获取系统信息
 			uni.getSystemInfo({

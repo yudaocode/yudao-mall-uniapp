@@ -11,7 +11,7 @@
                    :datatime="invalidTime / 1000" :is-col="true" :bgColor="bgColor" />
 			</view>
 		</view>
-		<view class="payment">
+		<view class="payment" v-if="channelCode.length > 0">
 			<view class="title">
         支付方式
 			</view>
@@ -98,8 +98,9 @@
         this.orderId = options.order_id
       }
       if (options.returnUrl) {
-        this.returnUrl = options.returnUrl
+        this.returnUrl = decodeURIComponent(options.returnUrl)
       }
+      debugger
 			this.getCashierOrder()
 		},
 		methods: {
@@ -157,7 +158,8 @@
           displayMode: 'url', // TODO 芋艿：后续可以优化
           returnUrl: this.getPayReturnUrl(),
           channelExtras: {
-            openid: "ockUAwIZ-0OeMZl9ogcZ4ILrGba0"
+            // openid: "ockUAwIZ-0OeMZl9ogcZ4ILrGba0" // wx_pub 微信公众号支付的 openid
+            openid: "oLefc4g5GjKWHJjLjMSXB3wX0fD0" // wx_lite 微信小程序支付的 openid
           }
 				}).then(res => {
           this.handleSubmitOrderResult(res.data);
@@ -379,50 +381,41 @@
           })
         })
       },
+      /**
+       * 发起微信小程序支付
+       */
       handleSubmitOrderResultForWxLite(displayContent) {
         const payConfig = JSON.parse(displayContent);
-        const that = this;
-        console.log(payConfig, '=================')
-        console.log(payConfig.timeStamp, '=================')
         uni.requestPayment({
           timeStamp: payConfig.timeStamp,
           nonceStr: payConfig.nonceStr,
           package: payConfig.packageValue,
           signType: payConfig.signType,
           paySign: payConfig.paySign,
-          success: function(res) {
+          success: res => {
             uni.hideLoading();
-            return that.$util.Tips({
+            debugger
+            return this.$util.Tips({
               title: '支付成功',
               icon: 'success'
-            }, {
-              tab: 5,
-              url: goPages
+            }, () => {
+              this.goReturnUrl('success');
             });
           },
-          fail: function(e) {
+          fail: e => {
             uni.hideLoading();
-            return that.$util.Tips({
-              title: '取消支付'
-            }, {
-              tab: 5,
-              url: goPages + '&status=2'
-            });
-          },
-          complete: function(e) {
-            uni.hideLoading();
-            // 关闭当前页面跳转至订单状态
+            // 关闭支付的情况
             if (e.errMsg === 'requestPayment:cancel'
               || e.errMsg === 'requestPayment:fail cancel') {
-              return that.$util.Tips({
+              return this.$util.Tips({
                 title: '取消支付'
               });
             }
-            return that.$util.Tips({
+            return this.$util.Tips({
               title: e.errMsg,
               icon: 'error'
             });
-          },
+          }
         })
       },
 
@@ -434,10 +427,16 @@
         // #ifndef MP
         this.cartArr = this.cartArr.filter(item => item.channelCode !== 'wx_lite')
         // #endif
+        // #ifdef MP
+        this.cartArr = this.cartArr.filter(item => item.channelCode !== 'wx_pub')
+        // #endif
+
         // 1.2 如果不是公众号环境，则移除微信公众号支付
+        // #ifdef H5
         if (!this.$wechat.isWeixin()) {
           this.cartArr = this.cartArr.filter(item => item.channelCode !== 'wx_pub')
         }
+        // #endif
 
         // 2. 读取配置，移除被禁用的支付渠道
         PayChannelApi.getEnableChannelCodeList(appId).then(res => {

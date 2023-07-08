@@ -217,7 +217,7 @@
 			 * 打开支付组件
 			 */
 			goPay(id, payOrderId) {
-        const returnUrl = '/pages/order_pay_status/index?order_id=' + id;
+        const returnUrl = encodeURIComponent('/pages/order_pay_status/index?order_id=' + id);
         uni.navigateTo({
           url: `/pages/goods/cashier/index?order_id=${payOrderId}&returnUrl=${returnUrl}`
         })

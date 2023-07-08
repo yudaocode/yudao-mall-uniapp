@@ -337,7 +337,7 @@
           ...this.getSettlementReqVO(),
           mark: this.mark,
         }).then(res => {
-          const returnUrl = '/pages/order_pay_status/index?order_id=' + res.data.id;
+          const returnUrl = encodeURIComponent('/pages/order_pay_status/index?order_id=' + res.data.id);
           uni.navigateTo({
             url: `/pages/goods/cashier/index?order_id=${res.data.payOrderId}&returnUrl=${returnUrl}`
           });

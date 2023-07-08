@@ -10,6 +10,18 @@ import {
 } from '../libs/login';
 import store from '../store';
 
+// TODO 芋艿：临时解决 uniapp 在小程序，undefined 会被 tostring 的问题
+function deleteUndefinedProperties(obj) {
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      if (typeof obj[key] === 'object' && obj[key] !== null) {
+        deleteUndefinedProperties(obj[key]); // 递归调用，处理嵌套的对象
+      } else if (obj[key] === undefined) {
+        delete obj[key];
+      }
+    }
+  }
+}
 
 /**
  * 发送请求
@@ -32,6 +44,8 @@ function baseRequest(url, method, data, {
 		}
 	}
 
+  deleteUndefinedProperties(data)
+
   // TODO 补个 header 多租户
   if (url.indexOf('app-api') >= 0) {
     header = {
@@ -44,8 +58,10 @@ function baseRequest(url, method, data, {
 	if (store.state.app.token) header[TOKENNAME] = store.state.app.token;
 	return new Promise((reslove, reject) => {
 		uni.request({
-			url: url.indexOf('app-api') < 0 ? Url + '/api/front/' + url
-        : 'http://127.0.0.1:48080/' + url, // TODO 芋艿：搞个 url 的配置
+			// url: url.indexOf('app-api') < 0 ? Url + '/api/front/' + url
+      //   : 'http://127.0.0.1:48080/' + url, // TODO 芋艿：搞个 url 的配置
+      url: url.indexOf('app-api') < 0 ? Url + '/api/front/' + url
+        : 'http://yunai.natapp1.cc/' + url, // TODO 芋艿：搞个 url 的配置
 			method: method || 'GET',
 			header: header,
 			data: data || {},
