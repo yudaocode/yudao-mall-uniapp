@@ -495,9 +495,9 @@
     });
     chat.showTools = false;
     // scrollBottom();
-    setTimeout(()=>{
+    setTimeout(() => {
       chat.msg = '';
-    },100)
+    }, 100);
   }
 
   // 点击猜你想问
@@ -546,7 +546,7 @@
           let emojiFile = selEmojiFile(item);
           newData = newData.replace(
             item,
-            `<img class="chat-img" style="width:25px;height:25px;margin:0 3px" src="${sheep.$url.cdn(
+            `<img class="chat-img" src="${sheep.$url.cdn(
               '/static/img/chat/emoji/' + emojiFile,
             )}"/>`,
           );
@@ -587,6 +587,7 @@
     background-size: 750rpx 100%;
     z-index: 1;
   }
+
   .chat-wrap {
     // :deep() {
     //   .ui-navbar-box {
@@ -701,10 +702,12 @@
           background: #fff;
           color: #333;
         }
+
         :deep() {
           .imgred {
             width: 100%;
           }
+
           .imgred,
           img {
             width: 100%;
@@ -850,5 +853,18 @@
         }
       }
     }
+  }
+</style>
+<style>
+  .chat-img {
+    width: 25px;
+    height: 25px;
+    margin: 0 3px;
+  }
+  .full-img {
+    object-fit: cover;
+    width: 100px;
+    height: 100px;
+    border-radius: 6px;
   }
 </style>

@@ -494,7 +494,7 @@ export function useChatWebSocket(socketConfig) {
         const img = await readImg(file);
         const blob = await compressImg(img, file.type);
         const { data } = await upload(file.name, blob);
-        let image = `<img src='${data.fullurl}'  style='object-fit: cover;width:100px;height:100px;border-radius:6px'>`;
+        let image = `<img class="full-url" src='${data.fullurl}'>`;
         document.execCommand('insertHTML', false, image);
       } else {
         document.execCommand('insertHTML', false, paste.getData('text'));
@@ -516,7 +516,7 @@ export function useChatWebSocket(socketConfig) {
         const img = await readImg(file);
         const blob = await compressImg(img, file.type);
         const { data } = await upload(file.name, blob);
-        let image = `<img src='${data.fullurl}'   style='object-fit: cover;width:100px;height:100px;border-radius:6px'>`;
+        let image = `<img class="full-url" src='${data.fullurl}' >`;
         document.execCommand('insertHTML', false, image);
       } else {
         ElMessage({

@@ -20,6 +20,7 @@
           height: poster.height + 'px',
           width: poster.width + 'px',
         }"
+		:show-menu-by-longpress="true"
       ></image>
       <canvas
         class="hideCanvas"

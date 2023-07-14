@@ -65,12 +65,7 @@
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src)"></image>
       </view>
-      <image
-        class="md-img-box"
-        :src="sheep.$url.cdn(data.image)"
-        mode="widthFix"
-        @load="calculatePanelHeight"
-      ></image>
+      <image class="md-img-box" :src="sheep.$url.cdn(data.image)" mode="widthFix"></image>
       <view
         class="md-goods-content ss-flex-col ss-row-around ss-p-b-20 ss-p-t-20 ss-p-x-16"
         :id="elId"
@@ -296,7 +291,7 @@
    * @event {Function()} click 										- 点击卡片
    *
    */
-  import { computed, reactive, getCurrentInstance } from 'vue';
+  import { computed, reactive, getCurrentInstance, onMounted, nextTick } from 'vue';
   import sheep from '@/sheep';
   import { formatSales } from '@/sheep/hooks/useGoods';
   import { formatStock } from '@/sheep/hooks/useGoods';
@@ -417,23 +412,32 @@
     emits('click');
   };
 
-  // 获取实时卡片高度
+  // 获取卡片实时高度
   const { proxy } = getCurrentInstance();
   const elId = `sheep_${Math.ceil(Math.random() * 10e5).toString(36)}`;
-  function calculatePanelHeight(e) {
+  function getGoodsPriceCardWH() {
     if (props.size === 'md') {
       const view = uni.createSelectorQuery().in(proxy);
       view.select(`#${elId}`).fields({ size: true, scrollOffset: true });
       view.exec((data) => {
+        let totalHeight = 0;
         const goodsPriceCard = data[0];
-        const card = {
-          width: goodsPriceCard.width,
-          height: (goodsPriceCard.width / e.detail.width) * e.detail.height + goodsPriceCard.height,
-        };
-        emits('getHeight', card.height);
+        if (props.data.image_wh) {
+          totalHeight =
+            (goodsPriceCard.width / props.data.image_wh.w) * props.data.image_wh.h +
+            goodsPriceCard.height;
+        } else {
+          totalHeight = goodsPriceCard.width;
+        }
+        emits('getHeight', totalHeight);
       });
     }
   }
+  onMounted(() => {
+    nextTick(() => {
+      getGoodsPriceCardWH();
+    });
+  });
 </script>
 
 <style lang="scss" scoped>
