@@ -104,7 +104,7 @@
             <template v-if="item.mode === 'text'">
               <view class="message-box" :class="[item.from]">
                 <div
-                  class="message-text ss-flex"
+                  class="message-text ss-flex ss-flex-wrap"
                   @click="onRichtext"
                   v-html="replaceEmoji(item.content.text)"
                 ></div>
@@ -546,7 +546,7 @@
           let emojiFile = selEmojiFile(item);
           newData = newData.replace(
             item,
-            `<img class="chat-img" src="${sheep.$url.cdn(
+            `<img class="chat-img" style="width: 24px;height: 24px;margin: 0 3px;" src="${sheep.$url.cdn(
               '/static/img/chat/emoji/' + emojiFile,
             )}"/>`,
           );
@@ -857,8 +857,8 @@
 </style>
 <style>
   .chat-img {
-    width: 25px;
-    height: 25px;
+    width: 24px;
+    height: 24px;
     margin: 0 3px;
   }
   .full-img {
