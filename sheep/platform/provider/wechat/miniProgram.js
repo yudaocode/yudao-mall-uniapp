@@ -17,8 +17,32 @@ function load() {
   getSubscribeTemplate();
 }
 
-// 微信小程序授权登陆
-const login = async (e) => {
+// 微信小程序静默授权登陆 TODO-ldh: code > 0 问题 改为error
+const login = async () => {
+  return new Promise(async (resolve, reject) => {
+    const { error } = await third.wechat.login({
+      platform: 'miniProgram',
+      shareInfo: uni.getStorageSync('shareLog') || {},
+      payload: encodeURIComponent(
+        JSON.stringify({
+          sessionId: uni.getStorageSync('sessionId'),
+        }),
+      ),
+    });
+
+    if (error === 0) {
+      resolve(true);
+    }
+
+    if (error === -1) {
+      getSessionId(false);
+    }
+    resolve(false);
+  });
+};
+
+// 微信小程序手机号授权登陆
+const mobileLogin = async (e) => {
   return new Promise(async (resolve, reject) => {
     if (e.errMsg !== 'getPhoneNumber:ok') {
       resolve(false);
@@ -43,7 +67,7 @@ const login = async (e) => {
     }
 
     if (error === -1) {
-      getSessionId();
+      getSessionId(false);
     }
     resolve(false);
   });
@@ -62,7 +86,7 @@ const bind = () => {
     });
 
     if (loginRes.error === -1) {
-      getSessionId();
+      getSessionId(false);
     } else if (loginRes.error === 0) {
       resolve(true);
     } else {
@@ -76,27 +100,30 @@ const unbind = async () => {
   const { error } = await third.wechat.unbind({
     platform: 'miniProgram',
   });
-  return Promise.resolve(!error);
+  return !error;
 };
 
 // 获取最新sessionId
-const getSessionId = async () => {
+const getSessionId = async (auto_login = null) => {
   // 获取code
-  let code = '';
+  let codeStr = '';
   const loginResult = await uni.login();
   if (loginResult.errMsg === 'login:ok') {
-    code = loginResult.code;
+    codeStr = loginResult.code;
   } else {
-    getSessionId();
+    getSessionId(auto_login);
     return false;
+  }
+  if(auto_login === null) {
+    auto_login = !!($store('app').platform.auto_login && !$store('user').isLogin);
   }
 
   const { error, data } = await third.wechat.getSessionId({
     platform: 'miniProgram',
     payload: encodeURIComponent(
       JSON.stringify({
-        code,
-        auto_login: !!($store('app').platform.auto_login && !$store('user').isLogin),
+        code: codeStr,
+        auto_login,
       }),
     ),
   });
@@ -170,7 +197,7 @@ const bindUserPhoneNumber = (e) => {
       platform: 'miniProgram',
       payload: encodeURIComponent(
         JSON.stringify({
-          code: e.code,
+          sessionId: uni.getStorageSync('sessionId'),
           iv: e.iv,
           encryptedData: e.encryptedData,
         }),

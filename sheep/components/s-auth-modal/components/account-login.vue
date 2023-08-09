@@ -43,10 +43,6 @@
           </template>
         </uni-easyinput>
       </uni-forms-item>
-
-      <button class="ss-reset-button type-btn" @tap="showAuthModal('smsRegister')">
-        立即注册
-      </button>
     </uni-forms>
   </view>
 </template>
@@ -58,6 +54,8 @@
   import { showAuthModal, closeAuthModal } from '@/sheep/hooks/useModal';
 
   const accountLoginRef = ref(null);
+
+  const emits = defineEmits(['onConfirm']);
 
   const props = defineProps({
     agreeStatus: {
@@ -89,6 +87,7 @@
 
     // 同意协议
     if (!props.agreeStatus) {
+      emits('onConfirm', true)
       sheep.$helper.toast('请勾选同意');
       return;
     }

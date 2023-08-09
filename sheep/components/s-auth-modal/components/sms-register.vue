@@ -80,7 +80,10 @@
   });
 
   const smsRegisterRef = ref(null);
+  
   const isLogin = computed(() => sheep.$store('user').isLogin);
+
+  const emits = defineEmits(['onConfirm']);
 
   // 数据
   const state = reactive({
@@ -107,6 +110,7 @@
     if (!validate) return;
 
     if (!props.agreeStatus) {
+      emits('onConfirm',true);
       sheep.$helper.toast('请勾选同意');
       return;
     }

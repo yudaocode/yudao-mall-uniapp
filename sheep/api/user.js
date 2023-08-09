@@ -102,6 +102,14 @@ export default {
       },
     }),
 
+  // 更新小程序信息
+  updateMpUserInfo: (data) =>
+    request({
+      url: '/user/api/user/updateMpUserInfo',
+      method: 'POST',
+      data,
+    }),
+
   // 第三方授权信息
   thirdOauthInfo: () =>
     request({
