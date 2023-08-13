@@ -11,7 +11,7 @@
                    :datatime="invalidTime / 1000" :is-col="true" :bgColor="bgColor" />
 			</view>
 		</view>
-		<view class="payment" v-if="code.length > 0">
+		<view class="payment" v-if="channelCode.length > 0">
 			<view class="title">
         支付方式
 			</view>
@@ -26,11 +26,11 @@
 						<view class="info" v-else>{{item.title}}</view>
 					</view>
 				</view>
-				<view class="iconfont" :class="item.code === code?'icon-xuanzhong11 font-num':'icon-weixuan'" />
+				<view class="iconfont" :class="item.code === channelCode ? 'icon-xuanzhong11 font-num':'icon-weixuan'" />
 			</view>
 		</view>
 		<view class="btn">
-			<view class="button acea-row row-center-wrapper" @click='goPay(code)'>确认支付</view>
+			<view class="button acea-row row-center-wrapper" @click='goPay(channelCode)'>确认支付</view>
 			<view class="wait-pay" @click="goReturnUrl('cancel')">暂不支付</view>
 		</view>
 	</view>
@@ -52,7 +52,7 @@
         payPrice: 0, // 支付金额
         invalidTime: 0, // 过期时间
 
-        code: '', // 选中的支付渠道
+        channelCode: '', // 选中的支付渠道
         channels: [{ // 支付方式
           name: '微信支付', // 微信公众号
           icon: "icon-weixin2",
@@ -72,6 +72,11 @@
           name: '余额支付',
           icon: "icon-yuezhifu",
           title: '可用余额',
+        }, {
+          name: '模拟支付',
+          icon: "icon-yuezhifu",
+          title: '使用模拟支付',
+          code: "mock"
         },
 
         // 如下是各种示例接入的示例，默认关闭
@@ -107,19 +112,15 @@
 				});
         PayOrderApi.getOrder(this.orderId).then(res => {
           // 如果已支付、或者已关闭，则直接跳转
+          if (!res.data){
+            this.goReturnUrl('close');
+            return;
+          }
           if (res.data.status === 10) {
-            uni.showToast({
-              title: '支付成功'
-            })
             this.goReturnUrl('success');
-            uni.hideLoading();
             return;
           } else if (res.data.status === 20) {
-            uni.showToast({
-              title: '无法支付，原因：订单已关闭'
-            })
             this.goReturnUrl('close');
-            uni.hideLoading();
             return;
           }
 
@@ -138,32 +139,49 @@
 					})
 				})
 			},
-			goPay(code) {
-				let that = this;
-				if (!that.orderId) return that.$util.Tips({
-					title: '请选择要支付的订单'
-				});
-				if (code === 'yue' && parseFloat(number) < parseFloat(that.payPrice)) return that.$util.Tips({
-					title: '余额不足'
-				});
+			goPay(channelCode) {
+				if (!this.orderId) {
+          return this.$util.Tips({
+            title: '请选择要支付的订单'
+          });
+        }
+				if (channelCode === 'yue' && parseFloat(number) < parseFloat(this.payPrice)) {
+          return this.$util.Tips({
+            title: '余额不足'
+          });
+        }
 				uni.showLoading({
 					title: '支付中'
 				});
 				PayOrderApi.submitOrder({
-          id: that.orderId,
-          code: code,
-          displayMode: 'url', // TODO 芋艿：后续可以优化
+          id: this.orderId,
+          channelCode1: channelCode,
           returnUrl: this.getPayReturnUrl(),
-          channelExtras: {
+          channelExtras: { // TODO 芋艿：等登录接入完成，需要改成动态读取
             // openid: "ockUAwIZ-0OeMZl9ogcZ4ILrGba0" // wx_pub 微信公众号支付的 openid
             openid: "oLefc4g5GjKWHJjLjMSXB3wX0fD0" // wx_lite 微信小程序支付的 openid
           }
 				}).then(res => {
           this.handleSubmitOrderResult(res.data);
+        }).catch(err => {
+          uni.hideLoading();
+          this.$util.Tips({
+            title: err
+          })
         })
 			},
 
       handleSubmitOrderResult(data) {
+        // 1. 如果已支付、或者已关闭，则直接跳转
+        if (data.status === 10) {
+          this.goReturnUrl('success');
+          return;
+        } else if (data.status === 20) {
+          this.goReturnUrl('close');
+          return;
+        }
+
+        // 2. 根据 displayMode 模式，进行对应的处理
         const displayMode = data.displayMode;
         const displayContent = data.displayContent
         // 2.1 如果返回的是 URL，则直接跳转
@@ -171,13 +189,13 @@
           window.location = displayContent;
           return;
         }
-        // 2.2 如果返回的是 CUSTOM，则自定义处理
-        if (displayMode === 'custom') {
-          if (this.code === 'wx_pub') {
+        // 2.2 如果返回的是 APP，则自定义处理
+        if (displayMode === 'app') {
+          if (this.channelCode === 'wx_pub') {
             this.handleSubmitOrderResultForWxPub(displayContent)
             return;
           }
-          if (this.code === 'wx_lite') {
+          if (this.channelCode === 'wx_lite') {
             this.handleSubmitOrderResultForWxLite(displayContent)
             return;
           }
@@ -291,8 +309,8 @@
       /**
        * 设置支付方式
        */
-      payType(code) {
-        this.code = code
+      payType(channelCode) {
+        this.channelCode = channelCode
       },
       /**
        * 获得支付的 return url
