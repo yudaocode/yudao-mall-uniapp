@@ -11,26 +11,26 @@
                    :datatime="invalidTime / 1000" :is-col="true" :bgColor="bgColor" />
 			</view>
 		</view>
-		<view class="payment" v-if="channelCode.length > 0">
+		<view class="payment" v-if="code.length > 0">
 			<view class="title">
         支付方式
 			</view>
-			<view class="item acea-row row-between-wrapper" v-for="(item,index) in cartArr" :key="index" @click="payType(item.channelCode)">
+			<view class="item acea-row row-between-wrapper" v-for="(item,index) in channels" :key="index" @click="payType(item.code)">
 				<view class="left acea-row row-between-wrapper">
 					<view class="iconfont" :class="item.icon"></view>
 					<view class="text">
 						<view class=name>{{item.name}}</view>
-						<view class="info" v-if="item.value == 'yue'">
+						<view class="info" v-if="item.value === 'yue'">
 							{{item.title}} <span class="money">￥{{ item.number }}</span>
 						</view>
 						<view class="info" v-else>{{item.title}}</view>
 					</view>
 				</view>
-				<view class="iconfont" :class="item.channelCode === channelCode?'icon-xuanzhong11 font-num':'icon-weixuan'" />
+				<view class="iconfont" :class="item.code === code?'icon-xuanzhong11 font-num':'icon-weixuan'" />
 			</view>
 		</view>
 		<view class="btn">
-			<view class="button acea-row row-center-wrapper" @click='goPay(channelCode)'>确认支付</view>
+			<view class="button acea-row row-center-wrapper" @click='goPay(code)'>确认支付</view>
 			<view class="wait-pay" @click="goReturnUrl('cancel')">暂不支付</view>
 		</view>
 	</view>
@@ -51,21 +51,23 @@
         returnUrl: '', // 调回地址
         payPrice: 0, // 支付金额
         invalidTime: 0, // 过期时间
-				cartArr: [{ // 支付方式
+
+        code: '', // 选中的支付渠道
+        channels: [{ // 支付方式
           name: '微信支付', // 微信公众号
           icon: "icon-weixin2",
           title: '使用微信快捷支付',
-          channelCode: "wx_pub"
+          code: "wx_pub"
         }, {
           name: '微信支付', // 微信小程序
           icon: "icon-weixin2",
           title: '使用微信快捷支付',
-          channelCode: "wx_lite"
+          code: "wx_lite"
         }, {
           name: '支付宝支付',
           icon: "icon-zhifubao",
           title: '使用支付宝支付',
-          channelCode: "alipay_wap"
+          code: "alipay_wap"
         }, {
           name: '余额支付',
           icon: "icon-yuezhifu",
@@ -76,11 +78,10 @@
         {
             name: '支付宝支付（PC）', // PC 支付
             icon: "icon-zhifubao",
-            value: 'alipay_pc',
             title: '使用支付宝支付',
-            channelCode: "alipay_pc"
+            code: "alipay_pc"
         }],
-        channelCode: '', // 选中的支付渠道
+
         bgColor: {
           'bgColor': '#fff',
           'Color': '#E93323',
@@ -88,9 +89,6 @@
           'timeTxtwidth': '16rpx',
           'isDay': true
         },
-
-        // TODO 芋艿：如下要删除的；
-        formContent: '',
       }
 		},
 		onLoad(options) {
@@ -100,7 +98,6 @@
       if (options.returnUrl) {
         this.returnUrl = decodeURIComponent(options.returnUrl)
       }
-      debugger
 			this.getCashierOrder()
 		},
 		methods: {
@@ -141,12 +138,12 @@
 					})
 				})
 			},
-			goPay(channelCode) {
+			goPay(code) {
 				let that = this;
 				if (!that.orderId) return that.$util.Tips({
 					title: '请选择要支付的订单'
 				});
-				if (channelCode === 'yue' && parseFloat(number) < parseFloat(that.payPrice)) return that.$util.Tips({
+				if (code === 'yue' && parseFloat(number) < parseFloat(that.payPrice)) return that.$util.Tips({
 					title: '余额不足'
 				});
 				uni.showLoading({
@@ -154,7 +151,7 @@
 				});
 				PayOrderApi.submitOrder({
           id: that.orderId,
-          channelCode: channelCode,
+          code: code,
           displayMode: 'url', // TODO 芋艿：后续可以优化
           returnUrl: this.getPayReturnUrl(),
           channelExtras: {
@@ -163,163 +160,7 @@
           }
 				}).then(res => {
           this.handleSubmitOrderResult(res.data);
-
-          if (true) {
-            return;
-          }
-					let status = res.data.status,
-						orderId = res.data.result.orderId,
-						jsConfig = res.data.result.jsConfig,
-						goPages = '/pages/goods/order_pay_status/index?order_id=' + this.orderId + '&msg=' +
-            res.msg + '&type=3' + '&totalPrice=' + this.payPrice;
-					switch (status) {
-						case 'SUCCESS':
-							uni.hideLoading();
-              return that.$util.Tips({
-                title: res.msg,
-                icon: 'success'
-              }, {
-                tab: 4,
-                url: goPages
-              });
-						case 'WECHAT_PAY':
-							that.toPay = true;
-							// #ifdef MP
-							    // 已删除，已经实现
-							// #endif
-							// #ifdef H5
-							    // 已删除，已经实现；
-							// #endif
-							// #ifdef APP-PLUS
-							uni.requestPayment({
-								provider: 'wxpay',
-								orderInfo: jsConfig,
-								success: (e) => {
-									let url = goPages;
-									uni.showToast({
-										title: '支付成功'
-									})
-									setTimeout(res => {
-										uni.redirectTo({
-											url: url
-										})
-									}, 2000)
-								},
-								fail: (e) => {
-									let url = '/pages/goods/order_pay_status/index?order_id=' +
-										orderId +
-										'&msg=' + '支付失败';
-									uni.showModal({
-										content: '支付失败',
-										showCancel: false,
-										success: function(res) {
-											if (res.confirm) {
-												uni.redirectTo({
-													url: url
-												})
-											} else if (res.cancel) {}
-										}
-									})
-								},
-								complete: () => {
-									uni.hideLoading();
-								},
-							});
-							// #endif
-							break;
-						case 'PAY_DEFICIENCY':
-							uni.hideLoading();
-							//余额不足
-							return that.$util.Tips({
-								title: res.msg
-							}, {
-								tab: 5,
-								url: goPages + '&status=1'
-							});
-							break;
-
-						case "WECHAT_H5_PAY":
-							uni.hideLoading();
-							that.$util.Tips({
-								title: '等待支付中'
-							}, {
-								tab: 4,
-								url: goPages + '&status=0'
-							});
-							setTimeout(() => {
-								location.href = res.data.result.jsConfig.h5_url;
-							}, 1500);
-							break;
-						case 'ALIPAY_PAY':
-							//#ifdef H5
-							uni.hideLoading();
-							that.$util.Tips({
-								title: '等待支付中'
-							}, {
-								tab: 4,
-								url: goPages + '&status=0'
-							});
-							that.formContent = res.data.result.jsConfig;
-							setTimeout(() => {
-								document.getElementById('alipaysubmit').submit();
-							}, 1500);
-							//#endif
-							// #ifdef MP
-							uni.navigateTo({
-								url: `/pages/users/alipay_invoke/index?id=${orderId}&link=${jsConfig.qrCode}`
-							});
-							// #endif
-							// #ifdef APP-PLUS
-							uni.requestPayment({
-								provider: 'alipay',
-								orderInfo: jsConfig,
-								success: (e) => {
-									uni.showToast({
-										title: '支付成功'
-									})
-									let url = '/pages/goods/order_pay_status/index?order_id=' +
-										orderId +
-										'&msg=' + '支付成功';
-									setTimeout(res => {
-										uni.redirectTo({
-											url: url
-										})
-									}, 2000)
-
-								},
-								fail: (e) => {
-									let url = '/pages/goods/order_pay_status/index?order_id=' +
-										orderId +
-										'&msg=' + '支付失败';
-									uni.showModal({
-										content: '支付失败',
-										showCancel: false,
-										success: function(res) {
-											if (res.confirm) {
-												uni.redirectTo({
-													url: url
-												})
-											} else if (res.cancel) {}
-										}
-									})
-								},
-								complete: () => {
-									uni.hideLoading();
-								},
-							});
-							// #endif
-							break;
-					}
-				}).catch(err => {
-					uni.hideLoading();
-					return that.$util.Tips({
-						title: err
-					}, () => {
-						that.$emit('onChangeFun', {
-							action: 'pay_fail'
-						});
-					});
-				})
+        })
 			},
 
       handleSubmitOrderResult(data) {
@@ -332,11 +173,11 @@
         }
         // 2.2 如果返回的是 CUSTOM，则自定义处理
         if (displayMode === 'custom') {
-          if (this.channelCode === 'wx_pub') {
+          if (this.code === 'wx_pub') {
             this.handleSubmitOrderResultForWxPub(displayContent)
             return;
           }
-          if (this.channelCode === 'wx_lite') {
+          if (this.code === 'wx_lite') {
             this.handleSubmitOrderResultForWxLite(displayContent)
             return;
           }
@@ -394,7 +235,6 @@
           paySign: payConfig.paySign,
           success: res => {
             uni.hideLoading();
-            debugger
             return this.$util.Tips({
               title: '支付成功',
               icon: 'success'
@@ -425,34 +265,34 @@
       removeDisableChannel(appId) {
         // 1.1 如果不在小程序里，则移除微信小程序支付
         // #ifndef MP
-        this.cartArr = this.cartArr.filter(item => item.channelCode !== 'wx_lite')
+        this.channels = this.channels.filter(item => item.code !== 'wx_lite')
         // #endif
         // #ifdef MP
-        this.cartArr = this.cartArr.filter(item => item.channelCode !== 'wx_pub')
+        this.channels = this.channels.filter(item => item.code !== 'wx_pub')
         // #endif
 
         // 1.2 如果不是公众号环境，则移除微信公众号支付
         // #ifdef H5
         if (!this.$wechat.isWeixin()) {
-          this.cartArr = this.cartArr.filter(item => item.channelCode !== 'wx_pub')
+          this.channels = this.channels.filter(item => item.code !== 'wx_pub')
         }
         // #endif
 
         // 2. 读取配置，移除被禁用的支付渠道
         PayChannelApi.getEnableChannelCodeList(appId).then(res => {
-          this.cartArr = this.cartArr.filter(item => res.data.includes(item.channelCode));
+          this.channels = this.channels.filter(item => res.data.includes(item.code));
 
           // 默认选中第一个
-          if (this.cartArr.length > 0) {
-            this.payType(this.cartArr[0].channelCode)
+          if (this.channels.length > 0) {
+            this.payType(this.channels[0].code)
           }
         })
       },
       /**
        * 设置支付方式
        */
-      payType(channelCode) {
-        this.channelCode = channelCode
+      payType(code) {
+        this.code = code
       },
       /**
        * 获得支付的 return url
