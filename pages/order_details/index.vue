@@ -201,26 +201,19 @@
 				</view>
 
         <!-- 配送信息 -->
-        <view v-if="orderInfo.status !== 0">
-					<view class='wrapper borRadius14' v-if='orderInfo.deliveryType === 1'>
+        <view v-if="orderInfo.logisticsId !== undefined">
+					<view class='wrapper borRadius14' v-if='orderInfo.logisticsId > 0'>
 						<view class='item acea-row row-between'>
 							<view>配送方式：</view>
 							<view class='conter'>发货</view>
 						</view>
-            <!-- TODO 芋艿：这里的字段对应 -->
 						<view class='item acea-row row-between'>
 							<view>快递公司：</view>
-							<view class='conter'>{{ orderInfo.deliveryName || ''}}</view>
+							<view class='conter'>{{ orderInfo.logisticsName || ''}}</view>
 						</view>
 						<view class='item acea-row row-between'>
 							<view>快递号：</view>
-							<view class='conter'>{{ orderInfo.deliveryId || ''}}</view>
-						</view>
-					</view>
-					<view class='wrapper borRadius14' v-else-if='orderInfo.deliveryType === 2'>
-						<view class='item acea-row row-between'>
-							<view>配送方式：</view>
-							<view class='conter'>门店自提</view>
+							<view class='conter'>{{ orderInfo.logisticsNo || ''}}</view>
 						</view>
 					</view>
 					<view class='wrapper borRadius14' v-else-if='orderInfo.deliveryType === 0'>
@@ -438,20 +431,21 @@
           title: '确认收货',
           content: '为保障权益，请收到货确认无误后，再确认收货',
           success: (res) => {
-            if (res.confirm) {
-              OrderApi.takeOrder(this.orderInfo.id).then(res => {
-                return this.$util.Tips({
-                  title: '收货成功',
-                  icon: 'success'
-                }, () => {
-                  this.getOrderInfo();
-                });
-              }).catch(err => {
-                return this.$util.Tips({
-                  title: err
-                });
-              })
+            if (!res.confirm) {
+              return
             }
+            OrderApi.takeOrder(this.orderInfo.id).then(res => {
+              return this.$util.Tips({
+                title: '收货成功',
+                icon: 'success'
+              }, () => {
+                this.getOrderInfo();
+              });
+            }).catch(err => {
+              return this.$util.Tips({
+                title: err
+              });
+            })
           }
         })
       },

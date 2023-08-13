@@ -155,7 +155,7 @@
 				});
 				PayOrderApi.submitOrder({
           id: this.orderId,
-          channelCode1: channelCode,
+          channelCode: channelCode,
           returnUrl: this.getPayReturnUrl(),
           channelExtras: { // TODO 芋艿：等登录接入完成，需要改成动态读取
             // openid: "ockUAwIZ-0OeMZl9ogcZ4ILrGba0" // wx_pub 微信公众号支付的 openid
