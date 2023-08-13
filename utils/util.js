@@ -438,8 +438,6 @@ export default {
 		let count = opt.count || 1,
 			sizeType = opt.sizeType || ['compressed'],
 			sourceType = opt.sourceType || ['album', 'camera'],
-			is_load = opt.is_load || true,
-			uploadUrl = opt.url || '',
 			inputName = opt.name || 'pics',
 			pid = opt.pid,
 			model = opt.model;
@@ -468,13 +466,13 @@ export default {
 					},
 					success: function(res) {
 						uni.hideLoading();
-						if (res.statusCode == 403) {
+						if (res.statusCode === 403) {
 							that.Tips({
 								title: res.data
 							});
 						} else {
 							let data = res.data ? JSON.parse(res.data) : {};
-							if (data.code == 200) {
+							if (data.code === 200) {
 								data.data.localPath = localPath;
 								successCallback && successCallback(data)
 							} else {

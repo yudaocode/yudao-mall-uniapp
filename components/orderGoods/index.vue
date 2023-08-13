@@ -19,7 +19,7 @@
           </view>
 					<view class='money font-color'>￥{{ fen2yuan(item.price) }}</view>
           <!-- 评价状态 -->
-					<view class='evaluate' v-if='item.replyStatus === false && evaluate === 2' @click.stop="evaluateTap(item)">
+					<view class='evaluate' v-if='item.commentStatus === false && evaluate === 2' @click.stop="evaluateTap(item)">
             评价
 					</view>
 					<view class='evaluate' v-else-if="item.replyStatus === true">已评价</view>
@@ -72,10 +72,9 @@
 			}
 		},
 		methods: {
-      // TODO 芋艿：评价
 			evaluateTap(item) {
 				uni.navigateTo({
-					url: "/pages/users/goods_comment_con/index?unique=" + item.attrId + "&orderId=" + this.orderId + '&id=' + item.id
+					url: "/pages/users/goods_comment_con/index?orderItemId=" + item.id
 				})
 			},
 			jumpCon: function(id) {

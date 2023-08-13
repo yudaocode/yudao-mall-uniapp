@@ -4,16 +4,20 @@
 			<view class='evaluate-con pad30'>
 				<view class='goodsStyle acea-row row-between borRadius14'>
 					<view class='pictrue'>
-						<image :src='productInfo.image'></image>
+						<image :src='orderItem.picUrl'></image>
 					</view>
 					<view class='text acea-row row-between'>
 						<view>
-							<view class='name line2'>{{productInfo.storeName}}</view>
-							<view class='attr line1' v-if="productInfo.sku">{{productInfo.sku}}</view>
+							<view class='name line2'>{{ orderItem.spuName }}</view>
+							<view class='attr line1'>
+                <text v-for="(property, propertyIndex) in orderItem.properties" :key="propertyIndex" style="padding-right: 10rpx;">
+                  {{ property.valueName }}　
+                </text>
+              </view>
 						</view>
 						<view class='money'>
-							<view>￥{{productInfo.truePrice}}</view>
-							<view class='num'>x{{productInfo.cartNum}}</view>
+							<view>￥{{ fen2yuan(orderItem.price) }}</view>
+							<view class='num'>x{{ orderItem.count }}</view>
 						</view>
 					</view>
 				</view>
@@ -21,7 +25,8 @@
 					<view class='item acea-row row-middle' v-for="(item,indexw) in scoreList" :key="indexw">
 						<view>{{item.name}}</view>
 						<view class='starsList'>
-							<text @click="stars(indexn, indexw)" v-for="(itemn, indexn) in item.stars" :key="indexn" class='iconfont' :class="item.index >= indexn? 'icon-shitixing':'icon-kongxinxing'"></text>
+							<text @click="stars(indexn, indexw)" v-for="(itemn, indexn) in item.stars" :key="indexn"
+                    class='iconfont' :class="item.index >= indexn? 'icon-shitixing':'icon-kongxinxing'" />
 						</view>
 						<text class='evaluate'>{{item.index === -1 ? "" : item.index + 1 + "分"}}</text>
 					</view>
@@ -32,7 +37,7 @@
 								<image :src='item'></image>
 								<text class='iconfont icon-guanbi1' @click='DelPic(index)'></text>
 							</view>
-							<view class='pictrue acea-row row-center-wrapper row-column' @click='uploadpic' v-if="picsPath.length < 8">
+							<view class='pictrue acea-row row-center-wrapper row-column' @click='uploadpic' v-if="picsPath.length <= 8">
 								<text class='iconfont icon-icon25201'></text>
 								<view>上传图片</view>
 							</view>
@@ -42,56 +47,31 @@
 				</view>
 			</view>
 		</form>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 	</view>
 </template>
 
 <script>
-	import {
-		orderProduct,
-		orderComment
-	} from '@/api/order.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	export default {
-		components: {
-			// #ifdef MP
-			authorize
-			// #endif
-		},
+  import * as OrderApi from '@/api/trade/order.js';
+  import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
+  import * as Util from '@/utils/util.js';
+  export default {
 		data() {
 			return {
 				pics: [],
 				picsPath: [],
 				scoreList: [{
-						name: "商品质量",
-						stars: ["", "", "", "", ""],
-						index: -1
-					},
-					{
-						name: "服务态度",
-						stars: ["", "", "", "", ""],
-						index: -1
-					}
-				],
-				orderId: '',
-				productId: 0, //产品id
-				evaluateId: 0, //评价id
-				unique: '',
-				productInfo: {},
-				cart_num: 0,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				id: 0//订单id
+          name: "商品质量",
+          stars: ["", "", "", "", ""],
+          index: -1
+        }, {
+          name: "服务态度",
+          stars: ["", "", "", "", ""],
+          index: -1
+        }],
+
+        orderItemId: 0, // 订单项编号
+				orderItem: {},
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -99,68 +79,51 @@
 			isLogin: {
 				handler: function(newV, oldV) {
 					if (newV) {
-						this.getOrderProduct();
+						this.getOrderItem();
 					}
 				},
 				deep: true
 			}
 		},
 		onLoad(options) {
-			if (!options.unique || !options.orderId ) return this.$util.Tips({
-				title: '缺少参数'
-			}, {
-				tab: 3,
-				url: 1
-			});
-			this.unique =  Number(options.unique) || 0;
-			this.orderId = options.orderId || 0;
-			this.evaluateId = Number(options.id) || 0;
-			if (this.isLogin) {
-				this.getOrderProduct();
-			} else {
-				toLogin();
-			}
+      if (!this.isLogin) {
+        toLogin();
+        return
+      }
+
+      // 解析参数
+			if (!options.orderItemId) {
+        return this.$util.Tips({
+          title: '缺少参数'
+        }, {
+          tab: 3,
+          url: 1
+        });
+      }
+			this.orderItemId = Number(options.orderItemId || 0);
+      this.getOrderItem()
 		},
 		methods: {
-			onLoadFun() {
-				this.getOrderProduct();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
 			/**
-			 * 获取某个产品详情
-			 * 
+			 * 获得订单项
 			 */
-			getOrderProduct: function() {
-				let that = this;
-				orderProduct({
-					orderId: that.evaluateId,
-					uni: that.unique
-				}).then(res => {
-					that.$set(that, 'productInfo', res.data);
-					// that.$set(that, 'cart_num', res.data.cartNum);
-					// that.$set(that, 'productId', res.data.productId);
-				});
+			getOrderItem: function() {
+        OrderApi.getOrderItem(this.orderItemId).then(res => {
+          this.orderItem = res.data;
+        })
 			},
 			stars: function(indexn, indexw) {
 				this.scoreList[indexw].index = indexn;
 			},
 			/**
 			 * 删除图片
-			 * 
 			 */
 			DelPic: function(index) {
-				let that = this,
-					pic = this.picsPath[index];
-				that.picsPath.splice(index, 1);
-				that.pics.splice(index, 1);
+				this.picsPath.splice(index, 1);
+				this.pics.splice(index, 1);
 			},
-
 			/**
 			 * 上传文件
-			 * 
 			 */
 			uploadpic: function() {
 				let that = this;
@@ -181,41 +144,46 @@
 			 * 立即评价
 			 */
 			formSubmit: function(e) {
-				let formId = e.detail.formId,
-					value = e.detail.value,
-					that = this,
-					product_score = that.scoreList[0].index + 1 === 0 ? "" : that.scoreList[0].index + 1,
-					service_score = that.scoreList[1].index + 1 === 0 ? "" : that.scoreList[1].index + 1;
-				if (!value.comment) return that.$util.Tips({
-					title: '请填写你对宝贝的心得！'
-				});
-				value.productScore = product_score;
-				value.serviceScore = service_score;
-				value.pics = that.pics.length>0?JSON.stringify(that.pics):'';
-				value.productId = that.productInfo.productId;
-				value.orderNo = that.orderId;
-				value.unique = that.unique;
-				value.sku = that.productInfo.sku;
+				const value = e.detail.value;
+        const descriptionScores = this.scoreList[0].index + 1 === 0 ? "" : this.scoreList[0].index + 1;
+        const benefitScores = this.scoreList[1].index + 1 === 0 ? "" : this.scoreList[1].index + 1;
+				if (!value.comment) {
+          return this.$util.Tips({
+            title: '请填写你对宝贝的心得！'
+          });
+        }
+
+        // 提交请求
 				uni.showLoading({
 					title: "正在发布评论……"
 				});
-				orderComment(value).then(res => {
+				OrderApi.createOrderItemComment({
+          anonymous: false, // TODO 芋艿：后面加个匿名框框
+          orderItemId: this.orderItemId,
+          descriptionScores: descriptionScores,
+          benefitScores: benefitScores,
+          content: value.comment,
+          picUrls: this.pics
+        }).then(res => {
 					uni.hideLoading();
-					return that.$util.Tips({
+					return this.$util.Tips({
 						title: '感谢您的评价!',
 						icon: 'success'
-					}, '/pages/order_details/index?order_id=' + that.orderId);
+					}, '/pages/order_details/index?order_id=' + this.orderItem.orderId);
 				}).catch(err => {
 					uni.hideLoading();
-					return that.$util.Tips({
+					return this.$util.Tips({
 						title: err
 					});
 				});
-			}
+			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
 		}
 	}
 </script>
-
 <style lang="scss" scoped>
 	.goodsStyle .text .name, .attr{
 		//width: 496rpx;

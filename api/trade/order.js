@@ -49,3 +49,7 @@ export function getOrderItem(id) {
     id
   });
 }
+
+export function createOrderItemComment(data) {
+  return request.post("app-api/trade/order/item/create-comment", data);
+}
