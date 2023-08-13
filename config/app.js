@@ -1,19 +1,19 @@
 
-let domain = 'http://apif.java.crmeb.net'
+// let domain = 'http://apif.java.crmeb.net'
+let domain = 'http://127.0.0.1:48080'
 
 module.exports = {
 	// 请求域名 格式： https://您的域名
 	// #ifdef MP
 		HTTP_REQUEST_URL: domain,
 	// #endif
-	HTTP_ADMIN_URL:'http://apif.java.crmeb.net', //PC后台的API请求地址，上传图片用
 	// #ifdef H5
 		//H5接口是浏览器地址
 		// HTTP_REQUEST_URL: window.location.protocol+"//"+window.location.host,
 		// http://api.java.crmeb.net:20001
-		HTTP_REQUEST_URL:domain,
+		HTTP_REQUEST_URL: domain,
 	// #endif
-	
+
 	HEADER:{
 		'content-type': 'application/json'
 	},

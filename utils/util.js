@@ -1,14 +1,10 @@
-import {
-	TOKENNAME,
-	HTTP_REQUEST_URL
-} from '../config/app.js';
-import {HTTP_ADMIN_URL} from '@/config/app.js';
+import { TOKENNAME } from '../config/app.js';
+import { HTTP_REQUEST_URL } from '@/config/app.js';
 import store from '../store';
-import {
-	pathToBase64
-} from '@/plugin/image-tools/index.js';
+
 export default {
-	/**
+
+  /**
 	 * opt  object | string
 	 * to_url object | string
 	 * 例:
@@ -438,10 +434,7 @@ export default {
 		let count = opt.count || 1,
 			sizeType = opt.sizeType || ['compressed'],
 			sourceType = opt.sourceType || ['album', 'camera'],
-			inputName = opt.name || 'pics',
-			pid = opt.pid,
-			model = opt.model;
-
+			inputName = opt.name || 'file';
 		uni.chooseImage({
 			count: count, //最多可以选择的图片总数
 			sizeType: sizeType, // 可以指定是原图还是压缩图，默认二者都有
@@ -451,7 +444,7 @@ export default {
 				uni.showLoading({
 					title: '图片上传中',
 				});
-				let urlPath = HTTP_ADMIN_URL + '/api/admin/upload/image' + "?model=" + model + "&pid=" + pid
+				const urlPath = HTTP_REQUEST_URL + '/app-api/infra/file/upload'
 				let localPath = res.tempFilePaths[0];
 				uni.uploadFile({
 					url: urlPath,
@@ -462,7 +455,10 @@ export default {
 						// #ifdef MP
 						"Content-Type": "multipart/form-data",
 						// #endif
-						[TOKENNAME]: store.state.app.token
+
+            // TODO 芋艿：后续改成动态读取，不要写死
+            'tenant-id': 1,
+            'Authorization': 'Bearer test247'
 					},
 					success: function(res) {
 						uni.hideLoading();
@@ -472,8 +468,8 @@ export default {
 							});
 						} else {
 							let data = res.data ? JSON.parse(res.data) : {};
-							if (data.code === 200) {
-								data.data.localPath = localPath;
+							if (data.code === 200 || data.code === 0) {
+                // data.data.localPath = localPath;
 								successCallback && successCallback(data)
 							} else {
 								errorCallback && errorCallback(data);
@@ -490,14 +486,6 @@ export default {
 						});
 					}
 				})
-				// pathToBase64(res.tempFilePaths[0])
-				// 	.then(imgBase64 => {
-				// 		console.log(imgBase64);
-
-				// 	})
-				// 	.catch(error => {
-				// 		console.error(error)
-				// 	})
 			}
 		})
 	},

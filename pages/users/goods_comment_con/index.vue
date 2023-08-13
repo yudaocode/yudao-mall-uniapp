@@ -33,11 +33,11 @@
 					<view class='textarea'>
 						<textarea placeholder='商品满足你的期待么？说说你的想法，分享给想买的他们吧~' name="comment" placeholder-class='placeholder'></textarea>
 						<view class='list acea-row row-middle'>
-							<view class='pictrue' v-for="(item,index) in picsPath" :key="index">
-								<image :src='item'></image>
-								<text class='iconfont icon-guanbi1' @click='DelPic(index)'></text>
+							<view class='pictrue' v-for="(item,index) in pics" :key="index">
+								<image :src='item' />
+								<text class='iconfont icon-guanbi1' @click='DelPic(index)' />
 							</view>
-							<view class='pictrue acea-row row-center-wrapper row-column' @click='uploadpic' v-if="picsPath.length <= 8">
+							<view class='pictrue acea-row row-center-wrapper row-column' @click='uploadpic' v-if="pics.length < 9">
 								<text class='iconfont icon-icon25201'></text>
 								<view>上传图片</view>
 							</view>
@@ -59,7 +59,6 @@
 		data() {
 			return {
 				pics: [],
-				picsPath: [],
 				scoreList: [{
           name: "商品质量",
           stars: ["", "", "", "", ""],
@@ -119,24 +118,15 @@
 			 * 删除图片
 			 */
 			DelPic: function(index) {
-				this.picsPath.splice(index, 1);
 				this.pics.splice(index, 1);
 			},
 			/**
 			 * 上传文件
 			 */
 			uploadpic: function() {
-				let that = this;
-				that.$util.uploadImageOne({
-					url: 'user/upload/image',
-					name: 'multipart',
-					model: "product",
-					pid: 1
-				}, function(res) {
-					that.pics.push(res.data.url);
-					that.picsPath.push(res.data.localPath);
-					that.$set(that, 'pics', that.pics);
-					that.$set(that, 'picsPath', that.picsPath);
+				this.$util.uploadImageOne({}, res => {
+					this.pics.push(res.data);
+					this.$set(this, 'pics', this.pics);
 				});
 			},
 
