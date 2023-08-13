@@ -305,6 +305,7 @@
   import { mapGetters } from "vuex";
   import dayjs from '@/plugin/dayjs/dayjs.min.js';
   import * as Util from '@/utils/util.js';
+  import {receiveOrder} from "../../api/trade/order";
   export default {
     components: {
       payment,
@@ -434,7 +435,7 @@
             if (!res.confirm) {
               return
             }
-            OrderApi.takeOrder(this.orderInfo.id).then(res => {
+            OrderApi.receiveOrder(this.orderInfo.id).then(res => {
               return this.$util.Tips({
                 title: '收货成功',
                 icon: 'success'
