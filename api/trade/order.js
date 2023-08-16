@@ -53,3 +53,9 @@ export function getOrderItem(id) {
 export function createOrderItemComment(data) {
   return request.post("app-api/trade/order/item/create-comment", data);
 }
+
+export function getOrderExpressTrackList(id) {
+  return request.get("app-api/trade/order/get-express-track-list", {
+    id
+  });
+}

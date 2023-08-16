@@ -29,6 +29,8 @@
 					<view class='copy copy-data' :data-clipboard-text="orderInfo.deliveryId">复制单号</view>
 					<!-- #endif -->
 				</view>
+
+        <!-- 物流轨迹 -->
 				<view class='item' v-for="(item,index) in expressList" :key="index">
 					<view class='circular' :class='index === 0 ? "on":""'></view>
 					<view class='text' :class='index===0 ? "on-font on":""'>
@@ -37,38 +39,22 @@
 					</view>
 				</view>
 			</view>
-			<recommend :hostProduct='hostProduct' v-if="hostProduct.length"></recommend>
+			<recommend :hostProduct='hostProduct' v-if="hostProduct.length" />
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 	</view>
 </template>
 
 <script>
-	import {
-		express
-	} from '@/api/order.js';
-	import {
-		getProductHot
-	} from '@/api/store.js';
+	import { express } from '@/api/order.js';
+	import { getProductHot } from '@/api/store.js';
 	import ClipboardJS from "@/plugin/clipboard/clipboard.js";
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	import recommend from '@/components/recommend';
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	export default {
+  import * as OrderApi from '@/api/trade/order.js';
+  export default {
 		components: {
 			recommend,
-			// #ifdef MP
-			authorize
-			// #endif
 		},
 		data() {
 			return {
@@ -81,7 +67,7 @@
 				hostProduct: [],
 				loading: false,
 				goodScroll: true,
-				params: { //精品推荐分页
+				params: { // 精品推荐分页
 					page: 1,
 					limit: 10,
 				},
@@ -90,8 +76,8 @@
 		computed: mapGetters(['isLogin']),
 		watch:{
 			isLogin:{
-				handler:function(newV,oldV){
-					if(newV){
+				handler:function(newV, oldV) {
+					if (newV) {
 						this.getExpress();
 						this.get_host_product();
 					}
@@ -100,70 +86,63 @@
 			}
 		},
 		onLoad: function (options) {
-		    if (!options.orderId) return this.$util.Tips({title:'缺少订单号'});
+      if (!this.isLogin) {
+        toLogin();
+        return
+      }
+      // 解析参数
+      if (!options.orderId) {
+        return this.$util.Tips({title:'缺少订单号'});
+      }
 			this.orderId = options.orderId;
-			if (this.isLogin) {
-				this.getExpress();
-				this.get_host_product();
-			} else {
-				toLogin();
-			}
-		  },
-		  onReady: function() {
-		  	// #ifdef H5
-		  	this.$nextTick(function() {
-		  		const clipboard = new ClipboardJS(".copy-data");
-		  		clipboard.on("success", () => {
-		  			this.$util.Tips({
-		  				title: '复制成功'
-		  			});
-		  		});
-		  	});
-		  	// #endif
-		  },
+      this.getExpress();
+      this.get_host_product();
+    },
+    onReady: function() {
+      // #ifdef H5
+      this.$nextTick(function() {
+        const clipboard = new ClipboardJS(".copy-data");
+        clipboard.on("success", () => {
+          this.$util.Tips({
+            title: '复制成功'
+          });
+        });
+      });
+      // #endif
+    },
 		methods: {
-			/**
-			 * 授权回调
-			 */
-			onLoadFun: function() {
-				this.getExpress();
-				this.get_host_product();
-			},
-			copyOrderId:function(){
-			    uni.setClipboardData({ data: this.orderInfo.deliveryId });
-			  },
-			  getExpress:function(){
-			    let that=this;
-			    express(that.orderId).then(function(res){
-			      let result = res.data.express|| {};
-				  that.$set(that,'product',res.data.order.info[0] || {});
-				  that.$set(that,'orderInfo',res.data.order);
-				  that.$set(that,'expressList',result.list || []);
-			    });
-			  },
-			  get_host_product: function () {
-				  	this.loading = true
-				  	if (!this.goodScroll) return
-			    let that = this;
-			    getProductHot(that.params.page,that.params.limit).then(function (res) {
-							//this.iSshowH = false
-							that.loading = false
-							that.goodScroll = res.data.list.length >= that.params.limit
-							that.params.page++
-							that.hostProduct = that.hostProduct.concat(res.data.list)
-			    });
-			  },
+			copyOrderId: function() {
+        uni.setClipboardData({ data: this.orderInfo.deliveryId });
+      },
+      getExpress: function() {
+        OrderApi.express(this.orderId).then(res => {
+          // that.$set(that,'product',res.data.order.info[0] || {});
+          // that.$set(that,'orderInfo',res.data.order);
+          this.$set(this, 'expressList', res.data || []);
+        });
+      },
+      get_host_product: function () {
+        this.loading = true
+        if (!this.goodScroll) {
+          return
+        }
+        let that = this;
+        getProductHot(that.params.page,that.params.limit).then(function (res) {
+            that.loading = false
+            that.goodScroll = res.data.list.length >= that.params.limit
+            that.params.page++
+            that.hostProduct = that.hostProduct.concat(res.data.list)
+        });
+      },
 		},
 		// 滚动到底部
 		onReachBottom() {
-		
-			if (this.params.page != 1) {
+			if (this.params.page !== 1) {
 				this.get_host_product();
 			}
 		},
 	}
 </script>
-
 <style scoped lang="scss">
 	.logistics .header {
 		padding: 23rpx 30rpx;

@@ -31,15 +31,15 @@
 			<!-- 首页展示 -->
 			<view class="page_content" :style="'margin-top:'+(marTop)+'px;'" v-if="navIndex === 0">
 				<view class="mp-bg"></view>
-				<!-- banner -->
-				<view class="swiper" v-if="imgUrls.length">
+				<!-- banner 轮播图 -->
+				<view class="swiper" v-if="slideShows.length">
 					<swiper indicator-dots="true" :autoplay="true" :circular="circular" :interval="interval"
 						:duration="duration" indicator-color="rgba(255,255,255,0.6)" indicator-active-color="#fff">
-						<block v-for="(item,index) in imgUrls" :key="index">
+						<block v-for="(item,index) in slideShows" :key="index">
 							<swiper-item>
 								<navigator :url='item.url' class='slide-navigator acea-row row-between-wrapper'
 									hover-class='none'>
-									<image :src="item.pic" class="slide-image" lazy-load></image>
+									<image :src="item.picUrl" class="slide-image" lazy-load></image>
 								</navigator>
 							</swiper-item>
 						</block>
@@ -47,7 +47,7 @@
 				</view>
 
 				<!-- 新闻简报 -->
-				<view class='notice acea-row row-middle row-between' v-if="roll.length">
+				<view class='notice acea-row row-middle row-between' v-if="scrollingNews.length">
 					<view class="pic">
 						<image src="/static/images/xinjian.png" />
 					</view>
@@ -55,10 +55,10 @@
 					<view class='swipers'>
 						<swiper :indicator-dots="indicatorDots" :autoplay="autoplay" interval="2500" duration="500"
                     vertical="true" circular="true">
-							<block v-for="(item,index) in roll" :key='index'>
+							<block v-for="(item,index) in scrollingNews" :key='index'>
 								<swiper-item>
 									<navigator class='item' :url='item.url' hover-class='none'>
-										<view class='line1'>{{item.info}}</view>
+										<view class='line1'>{{ item.name }}</view>
 									</navigator>
 								</swiper-item>
 							</block>
@@ -67,19 +67,19 @@
 					<view class="iconfont icon-xiangyou" />
 				</view>
 
-				<!-- menu -->
+				<!-- menu 菜单 -->
 				<view class='nav acea-row' v-if="menus.length">
 					<block v-for="(item,index) in menus" :key="index">
 						<navigator class='item' v-if="item.show === '1'" :url='item.url' open-type='switchTab'
                        hover-class='none'>
 							<view class='pictrue'>
-								<image :src='item.pic'></image>
+								<image :src='item.picUrl'></image>
 							</view>
 							<view class="menu-txt">{{item.name}}</view>
 						</navigator>
 						<navigator class='item' v-else :url='item.url' hover-class='none'>
 							<view class='pictrue'>
-								<image :src='item.pic'></image>
+								<image :src='item.picUrl'></image>
 							</view>
 							<view class="menu-txt">{{item.name}}</view>
 						</navigator>
@@ -124,9 +124,9 @@
 						:scroll-left="tabsScrollLeft" @scroll="scroll">
 						<view class="tab nav-bd" id="tab_list">
 							<view id="tab_item" :class="{ 'active': listActive === index}" class="item"
-                    v-for="(item, index) in explosiveMoney" :key="index" @click="ProductNavTab(item,index)">
+                    v-for="(item, index) in productRecommends" :key="index" @click="ProductNavTab(item,index)">
 								<view class="txt">{{item.name}}</view>
-								<view class="label">{{item.info}}</view>
+								<view class="label">{{item.tag}}</view>
 							</view>
 						</view>
 					</scroll-view>
@@ -168,8 +168,6 @@
 	import Cache from '../../utils/cache';
 	const statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
 	let app = getApp();
-	import { getIndexData } from '@/api/api.js';
-	import { getShare } from '@/api/public.js';
 	import a_seckill from './components/a_seckill';
 	import b_combination from './components/b_combination';
 	import c_bargain from './components/c_bargain';
@@ -184,9 +182,9 @@
   import * as ProductSpuApi from '@/api/product/spu.js';
   import * as PromotionActivityApi from '@/api/promotion/activity.js';
   import * as CouponApi from '@/api/promotion/coupon.js';
+  import * as DecorateApi from '@/api/promotion/decorate.js';
   import * as ProductUtil from '@/utils/product.js';
   import * as Util from '@/utils/util.js';
-  const arrTemp = ["beforePay", "afterPay", "refundApply", "beforeRecharge", "createBargain", "pink"];
 	export default {
 		computed: mapGetters(['isLogin', 'uid']),
 		components: {
@@ -204,22 +202,24 @@
 				statusBarHeight: statusBarHeight,
 				navIndex: 0,
 				navTop: [],
-				logoUrl: "",
-				imgUrls: [],
-				menus: [],
-				indicatorDots: false,
-				circular: true,
-				autoplay: true,
-				interval: 3000,
-				duration: 500,
-				couponList: [],
 				marTop: 0,
-				explosiveMoney: [],
-				roll: [], // 新闻简报
-				site_name: '', //首页title
-				configApi: {}, //分享类容配置
-				tabsScrollLeft: 0, // tabs当前偏移量
+				configApi: {}, // 分享类容配置
+				tabsScrollLeft: 0, // tabs 当前偏移量
 				scrollLeft: 0,
+
+        slideShows: [], // 轮播图
+        circular: true,
+        interval: 3000,
+        duration: 500,
+        menus: [], // 菜单
+        scrollingNews: [], // 新闻简报
+        indicatorDots: false,
+        autoplay: true,
+        couponList: [], // 优惠劵列表
+        productRecommends: [], // 商品推荐
+
+        site_name: '首页', // 首页 title
+        logoUrl: "",
 
         // ========== 精品推荐 ===========
         goodScroll: true, // 精品推荐开关
@@ -273,9 +273,8 @@
 			this.getIndexConfig();
 		},
 		onShow() {
-			let self = this
 			uni.setNavigationBarTitle({
-				title: self.site_name
+				title: this.site_name
 			})
 		},
 		methods: {
@@ -310,34 +309,60 @@
 			// 首页数据
 			getIndexConfig: function() {
 				let that = this;
-				getIndexData().then(res => {
+        DecorateApi.getDecorateComponentListByPage(1).then(res => {
+          // TODO 芋艿：暂时写死
 					uni.setNavigationBarTitle({
 						title: '首页'
 					})
-					that.$set(that, "logoUrl", res.data.logoUrl);
-					that.$set(that, "site_name", '首页');
-					that.$set(that, "imgUrls", res.data.banner);
-					that.$set(that, "menus", res.data.menus);
-					that.$set(that, "roll", res.data.roll ? res.data.roll : []);
-					// #ifdef H5
-					that.$store.commit("SET_CHATURL", res.data.yzfUrl);
-					Cache.set('chatUrl', res.data.yzfUrl);
-					// #endif
-					that.$set(that, "explosiveMoney", res.data.explosiveMoney);
-					that.goodType = parseInt(res.data.explosiveMoney[0].type)
-					this.getGroomList();
-					this.shareApi();
-					this.getcouponList();
+					this.$set(this, "logoUrl", 'https://static.iocoder.cn/ruoyi-vue-pro-logo.png');
+					this.$set(this, "site_name", '首页');
+          // #ifdef H5
+          this.$store.commit("SET_CHATURL", 'https://cschat.antcloud.com.cn/index.htm?tntInstId=jm7_c46J&scene=SCE01197657');
+          Cache.set('chatUrl', 'https://cschat.antcloud.com.cn/index.htm?tntInstId=jm7_c46J&scene=SCE01197657');
+          // #endif
+
+          // 轮播图
+          const slideShow = res.data.find(item => item.code === 'slide-show');
+          if (slideShow) {
+            this.$set(this, "slideShows", JSON.parse(slideShow.value));
+          }
+          // 菜单
+          const menu = res.data.find(item => item.code === 'menu');
+          if (menu) {
+            this.$set(this, "menus", JSON.parse(menu.value));
+          }
+          // 滚动新闻
+          const scrollingNews = res.data.find(item => item.code === 'scrolling-news');
+          if (scrollingNews) {
+            this.$set(this, "scrollingNews", JSON.parse(scrollingNews.value));
+          }
+          // 商品推荐
+          const productRecommend = res.data.find(item => item.code === 'product-recommend');
+          if (productRecommend) {
+            this.$set(this, "productRecommends", JSON.parse(productRecommend.value));
+            if (this.productRecommends.length > 0) {
+              this.goodType = this.productRecommends[0].type
+              this.getGroomList();
+            }
+          }
 				})
+        // 获得分享配置
+        this.shareApi();
+        // 获得优惠劵列表
+        this.getcouponList();
 			},
 
 			shareApi: function() {
-				getShare().then(res => {
-					this.$set(this, 'configApi', res.data);
-					// #ifdef H5
-					this.setOpenShare(res.data);
-					// #endif
-				})
+        // TODO 芋艿：写死
+        const configApi = {
+          "title": "芋道商城",
+          "synopsis": "芋道商城，好用！",
+          "img": "https://api.java.crmeb.net/crmebimage/public/operation/2021/09/23/61fc3e4a49844fa69c12812ce5d57641bfkfzjqh1q.png"
+        }
+        this.$set(this, 'configApi', configApi);
+        // #ifdef H5
+        this.setOpenShare(configApi);
+        // #endif
 			},
 			// 微信分享；
 			setOpenShare: function(data) {
@@ -349,8 +374,7 @@
 						link: location.href,
 						imgUrl: data.img
 					};
-					that.$wechat.wechatEvevt(["updateAppMessageShareData", "updateTimelineShareData"],
-						configAppMessage);
+					that.$wechat.wechatEvevt(["updateAppMessageShareData", "updateTimelineShareData"], configAppMessage);
 				}
 			},
 
@@ -389,7 +413,7 @@
        */
       ProductNavTab(item, index) {
         this.listActive = index
-        this.goodType = parseInt(item.type)
+        this.goodType = item.type
         this.listActive = index
         this.tempArr = []
         this.params.page = 1
@@ -407,13 +431,8 @@
 					this.iSshowH = true
 				}
         this.loading = true
-        const type = this.goodType === 1 ? 'best' :
-          this.goodType === 2 ? 'hot' :
-            this.goodType === 3 ? 'new' :
-              this.goodType === 4 ? 'benefit':
-                this.goodType === 5 ? 'good': ''
         ProductSpuApi.getSpuPage({
-          recommendType: type,
+          recommendType: this.goodType,
           pageNo: this.params.page,
           pageSize: this.params.limit
         }).then(res => {

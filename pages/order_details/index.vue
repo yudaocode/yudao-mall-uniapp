@@ -271,8 +271,7 @@
 					<!-- #endif -->
           <!-- TODO 芋艿：拼团 -->
           <view class='bnt bg-color' v-if="orderInfo.combinationId > 0" @tap='goJoinPink'>查看拼团</view>
-          <!-- TODO 芋艿：物流 -->
-          <navigator class='bnt cancel' v-if="orderInfo.deliveryType === 2 && orderInfo.status > 0"
+          <navigator class='bnt cancel' v-if="orderInfo.logisticsId > 0"
                      hover-class='none' :url="'/pages/users/goods_logistics/index?orderId='+ orderInfo.orderId">
             查看物流
 					</navigator>
@@ -305,7 +304,6 @@
   import { mapGetters } from "vuex";
   import dayjs from '@/plugin/dayjs/dayjs.min.js';
   import * as Util from '@/utils/util.js';
-  import {receiveOrder} from "../../api/trade/order";
   export default {
     components: {
       payment,
