@@ -1,41 +1,35 @@
 <template>
 	<view>
+    <orderGoods
+      :productType="orderInfo.type"
+      :orderId="orderId"
+      :cartInfo="orderInfo.items"
+      :jump="false"
+    />
 		<view class='logistics'>
-			<view class='header acea-row row-between row-top'>
-				<view class='pictrue'>
-					<image :src='product.productImg'></image>
-				</view>
-				<view class='text acea-row row-between'>
-					<view class='name line2'>{{product.productName}}</view>
-					<view class='money'>
-						<view>￥{{product.price}}</view>
-						<view>x{{product.payNum}}</view>
-					</view>
-				</view>
-			</view>
 			<view class='logisticsCon'>
 				<view class='company acea-row row-between-wrapper'>
 					<view class='picTxt acea-row row-between-wrapper'>
 						<view class='iconfont icon-wuliu'></view>
 						<view class='text'>
-							<view><text class='name line1'>物流公司：</text> {{orderInfo.deliveryName}}</view>
-							<view class='express line1'><text class='name'>快递单号：</text> {{orderInfo.deliveryId}}</view>
+							<view><text class='name line1'>物流公司：</text> {{ orderInfo.logisticsName }}</view>
+							<view class='express line1'><text class='name'>快递单号：</text> {{ orderInfo.logisticsNo }}</view>
 						</view>
 					</view>
 					<!-- #ifndef H5 -->
 					<view class='copy' @tap='copyOrderId'>复制单号</view>
 					<!-- #endif -->
 					<!-- #ifdef H5 -->
-					<view class='copy copy-data' :data-clipboard-text="orderInfo.deliveryId">复制单号</view>
+					<view class='copy copy-data' :data-clipboard-text="orderInfo.logisticsNo">复制单号</view>
 					<!-- #endif -->
 				</view>
 
         <!-- 物流轨迹 -->
-				<view class='item' v-for="(item,index) in expressList" :key="index">
+				<view class='item' v-for="(item,index) in expressTracks" :key="index">
 					<view class='circular' :class='index === 0 ? "on":""'></view>
 					<view class='text' :class='index===0 ? "on-font on":""'>
-						<view>{{item.status}}</view>
-						<view class='data' :class='index===0 ? "on-font on":""'>{{item.time}}</view>
+						<view>{{item.content}}</view>
+						<view class='data' :class='index===0 ? "on-font on":""'>{{ formatDate(item.time) }}</view>
 					</view>
 				</view>
 			</view>
@@ -45,16 +39,20 @@
 </template>
 
 <script>
-	import { express } from '@/api/order.js';
-	import { getProductHot } from '@/api/store.js';
 	import ClipboardJS from "@/plugin/clipboard/clipboard.js";
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
 	import recommend from '@/components/recommend';
   import * as OrderApi from '@/api/trade/order.js';
+  import dayjs from '@/plugin/dayjs/dayjs.min.js';
+  import orderGoods from "@/components/orderGoods";
+  import * as ProductSpuApi from '@/api/product/spu.js';
+  import * as PromotionActivityApi from '@/api/promotion/activity.js';
+  import * as ProductUtil from '@/utils/product.js'
   export default {
 		components: {
 			recommend,
+      orderGoods
 		},
 		data() {
 			return {
@@ -63,7 +61,8 @@
 					productInfo: {}
 				},
 				orderInfo: {},
-				expressList: [],
+				expressTracks: [],
+
 				hostProduct: [],
 				loading: false,
 				goodScroll: true,
@@ -115,25 +114,41 @@
         uni.setClipboardData({ data: this.orderInfo.deliveryId });
       },
       getExpress: function() {
-        OrderApi.express(this.orderId).then(res => {
-          // that.$set(that,'product',res.data.order.info[0] || {});
-          // that.$set(that,'orderInfo',res.data.order);
-          this.$set(this, 'expressList', res.data || []);
+        OrderApi.getOrderExpressTrackList(this.orderId).then(res => {
+          this.$set(this, 'expressTracks', (res.data || []).reverse());
         });
+        OrderApi.getOrderDetail(this.orderId).then(res => {
+          this.$set(this, 'orderInfo', res.data);
+        })
       },
       get_host_product: function () {
         this.loading = true
         if (!this.goodScroll) {
           return
         }
-        let that = this;
-        getProductHot(that.params.page,that.params.limit).then(function (res) {
-            that.loading = false
-            that.goodScroll = res.data.list.length >= that.params.limit
-            that.params.page++
-            that.hostProduct = that.hostProduct.concat(res.data.list)
+        ProductSpuApi.getSpuPage({
+          recommendType: 'hot',
+          pageNo: this.params.page,
+          pageSize: this.params.limit
+        }).then(res => {
+          this.loading = false
+          const good_list = res.data.list;
+          this.params.page++
+          this.goodScroll = res.data.list.length >= this.params.limit
+
+          // 设置营销活动
+          const spuIds = good_list.map(item => item.id);
+          if (spuIds.length > 0) {
+            PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+              ProductUtil.setActivityList(good_list, res.data);
+              this.hostProduct = this.hostProduct.concat(good_list) // 放在此处，避免 Vue 监控不到数组里的元素变化
+            });
+          }
         });
       },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+      }
 		},
 		// 滚动到底部
 		onReachBottom() {
