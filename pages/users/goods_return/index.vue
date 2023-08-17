@@ -2,96 +2,107 @@
 	<view>
 		<form  @submit="subRefund" report-submit='true'>
 		  <view class='apply-return'>
-		    <view class='goodsStyle acea-row row-between borRadius14' v-for="(item,index) in orderInfo.orderInfoList" :key="index">
-		        <view class='pictrue'><image :src='item.image'></image></view>
-		        <view class='text acea-row row-between'>
-		          <view class='name line2'>{{item.storeName}}</view>
-		          <view class='money'>
-		              <view>￥{{item.price}}</view>
-		              <view class='num'>x{{item.cartNum}}</view>
-		          </view>
-		        </view>
-		    </view>
+		    <view class='goodsStyle acea-row row-between borRadius14'>
+          <view class='pictrue'>
+            <image :src='orderItem.picUrl' />
+          </view>
+          <view class='text acea-row row-between'>
+            <view class='name line2'>{{ orderItem.spuName }}</view>
+            <view class='money'>
+              <view>￥{{(parseFloat(orderItem.price) / 100.0).toFixed(2)}}</view>
+              <view class='num'>x{{ orderItem.count}}</view>
+            </view>
+          </view>
+        </view>
 		    <view class='list borRadius14'>
-		        <view class='item acea-row row-between-wrapper'>
-		          <view>退货件数</view>
-		          <view class='num'>{{orderInfo.totalNum}}</view>
-		        </view>
-		        <view class='item acea-row row-between-wrapper'>
-		          <view>退款金额</view>
-		          <view class='num'>￥{{orderInfo.payPrice}}</view>
-		        </view>
-		        <view class='item acea-row row-between-wrapper' @tap="toggleTab('region')">
-		          <view>退款原因</view>
-		          <picker class='num' @change="bindPickerChange" :value="index" :range="RefundArray">
-		              <view class="picker acea-row row-between-wrapper">
-		                <view class='reason'>{{RefundArray[index]}}</view>
-		                <text class='iconfont icon-jiantou'></text>
-		              </view>
-		          </picker>
-		        </view>
-		        <view class='item textarea acea-row row-between'>
-		          <view>备注说明</view>
-		          <textarea placeholder='填写备注信息，100字以内' class='num' name="refund_reason_wap_explain" placeholder-class='填写备注信息，100字以内'></textarea>
-		        </view>
-		        <view class='item acea-row row-between' style="border: none;">
-		          <view class='title acea-row row-between-wrapper'>
-		              <view>上传凭证</view>
-		              <view class='tip'>( 最多可上传3张 )</view>
-		          </view>
-		          <view class='upload acea-row row-middle'>
-		              <view class='pictrue' v-for="(item,index) in refund_reason_wap_imgPath" :key="index">
-		                <image :src='item'></image>
-		                <view class='iconfont icon-guanbi1 font-color' @tap='DelPic(index)'></view>
-		              </view>
-		              <view class='pictrue acea-row row-center-wrapper row-column' @tap='uploadpic' v-if="refund_reason_wap_imgPath.length < 3">
-		                <text class='iconfont icon-icon25201'></text>
-		                <view>上传凭证</view>
-		              </view>
-		          </view>
-		        </view>
-				<button class='returnBnt bg-color' form-type="submit">申请退款</button>
+          <view class='item acea-row row-between-wrapper'>
+            <view>售后方式</view>
+            <!-- 如果未发货，则只能退款 -->
+            <view class="" v-if="order.status === 20">仅退款</view>
+            <picker v-else class='num' @change="wayChange"
+                    :value="wayIndex" :range="ways">
+              <view class="picker acea-row row-between-wrapper">
+                <view class='reason'>{{ ways[wayIndex] }}</view>
+                <text class='iconfont icon-jiantou'></text>
+              </view>
+            </picker>
+          </view>
+          <!-- TODO 芋艿：按照有赞的做法；未发货，不输入件数；已发货，可调整 -->
+          <view class='item acea-row row-between-wrapper'>
+            <view>退货件数</view>
+            <view class='num'>{{ orderItem.count }}</view>
+          </view>
+          <!-- TODO 芋艿：后端改成可以填写金额 -->
+          <view class='item acea-row row-between-wrapper'>
+            <view>退款金额</view>
+            <view class='num'>￥{{ (parseFloat(orderItem.payPrice) / 100.0).toFixed(2) }}</view>
+          </view>
+          <view class='item acea-row row-between-wrapper'>
+            <view>退款原因</view>
+            <picker class='num' @change="bindPickerChange" :value="reasonIndex" :range="reasons">
+              <view class="picker acea-row row-between-wrapper">
+                <view class='reason'>{{ reasons[reasonIndex] }}</view>
+                <text class='iconfont icon-jiantou'></text>
+              </view>
+            </picker>
+          </view>
+          <view class='item textarea acea-row row-between'>
+            <view>备注说明</view>
+            <textarea placeholder='填写备注信息，100字以内' class='num' name="refund_reason_wap_explain"
+                      placeholder-class='填写备注信息，100字以内' />
+          </view>
+          <view class='item acea-row row-between' style="border: none;">
+            <view class='title acea-row row-between-wrapper'>
+              <view>上传凭证</view>
+              <view class='tip'>( 最多可上传3张 )</view>
+            </view>
+            <view class='upload acea-row row-middle'>
+              <view class='pictrue' v-for="(item,index) in refund_reason_wap_imgPath" :key="index">
+                <image :src='item' />
+                <view class='iconfont icon-guanbi1 font-color' @tap='DelPic(index)' />
+              </view>
+              <view class='pictrue acea-row row-center-wrapper row-column' @tap='uploadpic'
+                    v-if="refund_reason_wap_imgPath.length < 3">
+                <text class='iconfont icon-icon25201' />
+                <view>上传凭证</view>
+              </view>
+            </view>
+          </view>
+				  <button class='returnBnt bg-color' form-type="submit">提交</button>
 		    </view>
 		  </view>
 		</form>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 	</view>
 </template>
 <script>
-	import { ordeRefundReason, orderRefundVerify, applyRefund} from '@/api/order.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	export default {
-		components: {
-			// #ifdef MP
-			authorize
-			// #endif
-		},
+	import { orderRefundVerify } from '@/api/order.js';
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
+  import * as TradeOrderApi from '@/api/trade/order.js';
+  import * as AfterSaleApi from '@/api/trade/afterSale.js';
+  export default {
 		data() {
 			return {
-				refund_reason_wap_img:[],
+        orderId: 0,
+        orderItemId: 0,
+        order: {}, // 订单
+        orderItem: {}, // 订单项
+
+        wayIndex: 0, // 选中 ways 的位置
+        ways: ['仅退款', '退款退货'], // 可选的售后方式
+
+        reasons: [], // 售后原因
+        reasonIndex: 0, // 选中 reasons 的位置
+
+        refund_reason_wap_img:[],
 				refund_reason_wap_imgPath:[],
-				    orderInfo:{},
-				    RefundArray: [],
-				    index: 0,
-				    orderId:0,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
+
 			};
 		},
 		computed: mapGetters(['isLogin']),
 		watch:{
 			isLogin:{
-				handler:function(newV,oldV){
+				handler: function(newV, oldV) {
 					if(newV){
 						this.getOrderInfo();
 						this.getRefundReason();
@@ -101,84 +112,107 @@
 			}
 		},
 		 onLoad: function (options) {
-		    if (!options.orderId) return this.$util.Tips({title:'缺少订单id,无法退款'},{tab:3,url:1});
-			this.orderId = options.orderId;
-			if (this.isLogin) {
-				this.getOrderInfo();
-				this.getRefundReason();
-			} else {
-				toLogin();
-			}
-		  },
+       if (!this.isLogin) {
+         toLogin();
+         return;
+       }
+      if (!options.orderId || !options.orderItemId) {
+        return this.$util.Tips({
+          title:'缺少订单id,无法退款'
+        },{
+          tab: 3,
+          url:1
+        });
+      }
+			this.orderId = parseInt(options.orderId);
+      this.orderItemId = parseInt(options.orderItemId);
+      this.getOrderInfo();
+      this.getRefundReason();
+    },
 		methods: {
-			onLoadFun:function(){
-			    this.getOrderInfo();
-			    this.getRefundReason();
-			  },
-			  /**
-			     * 获取订单详情
-			     * 
-			    */
-			    getOrderInfo:function(){
-			      let that=this;
-			      applyRefund(that.orderId).then(res=>{
-					that.$set(that,'orderInfo',res.data);
-			      });
-			    },
-			    /**
-			     * 获取退款理由
-			    */
-			    getRefundReason:function(){
-			      let that=this;
-			      ordeRefundReason().then(res=>{
-					  that.$set(that,'RefundArray',res.data);
-			      })
-			    },
-			  
-			    /**
-			     * 删除图片
-			     * 
-			    */
-			    DelPic:function(e){
-			      let index = e, that = this;
-			      that.refund_reason_wap_imgPath.splice(index, 1);
-			    },
-			    /**
-			     * 上传文件
-			     * 
-			    */
-			    uploadpic:function(){
-			      let that=this;
-				  that.$util.uploadImageOne({url:'user/upload/image',name:'multipart', model:"product", pid:1}, function(res){
-					  that.refund_reason_wap_imgPath.push(res.data.url);
-				  });
-			    },
-				
-			    /**
-			     * 申请退货
-			    */
-			    subRefund:function(e){
-			      let that = this, value = e.detail.value;
-			      //收集form表单
-			      // if (!value.refund_reason_wap_explain) return this.$util.Tips({title:'请输入退款原因'});
-			      orderRefundVerify({
-			        text: that.RefundArray[that.index] || '',
-			        refund_reason_wap_explain: value.refund_reason_wap_explain,
-			        refund_reason_wap_img: that.refund_reason_wap_imgPath.join(','),
-			        uni: that.orderId
-			      }).then(res=>{
-			        return this.$util.Tips({ title: '申请成功', icon: 'success' }, { tab: 5, url: '/pages/users/user_return_list/index?isT=1' });
-			      }).catch(err=>{
-			        return this.$util.Tips({ title: err });
-			      })
-			    },
-			    bindPickerChange: function (e) {
-					this.$set(this,'index',e.detail.value);
-			    }
+			onLoadFun:function() {
+        this.getOrderInfo();
+        this.getRefundReason();
+      },
+      /**
+       * 获取订单详情
+      */
+      getOrderInfo:function(){
+        TradeOrderApi.getOrderDetail(this.orderId).then(res => {
+          // 设置订单信息
+          const order = res.data;
+          this.order = order;
+          // 查询订单项信息
+          this.orderItem = order.items.find(item => item.id === this.orderItemId) || {};
+        }).catch(err => {
+          return this.$util.Tips({
+            title: err
+          });
+        })
+      },
+      /**
+       * 更改售后方式
+       */
+      wayChange: function(e) {
+        this.$set(this, 'wayIndex', e.detail.value);
+        this.getRefundReason();
+      },
+      /**
+       * 获得售后方式
+       */
+      getWay: function () {
+        return this.wayIndex === 0 ? 10 : 20
+      },
+      /**
+       * 获取退款理由
+       */
+      getRefundReason: function() {
+        const way = this.getWay();
+        AfterSaleApi.getAfterSaleReasonList(way).then(res => {
+          this.reasons = res.data;
+        })
+      },
+      /**
+       * 删除图片
+       */
+      DelPic:function(e) {
+        let index = e, that = this;
+        that.refund_reason_wap_imgPath.splice(index, 1);
+      },
+      /**
+       * 上传文件
+       */
+      uploadpic:function(){
+        let that=this;
+        that.$util.uploadImageOne({url:'user/upload/image',name:'multipart', model:"product", pid:1}, function(res){
+          that.refund_reason_wap_imgPath.push(res.data.url);
+        });
+      },
+
+      /**
+       * 申请退货
+      */
+      subRefund:function(e){
+        let that = this, value = e.detail.value;
+        //收集form表单
+        // if (!value.refund_reason_wap_explain) return this.$util.Tips({title:'请输入退款原因'});
+        orderRefundVerify({
+          text: that.RefundArray[that.index] || '',
+          refund_reason_wap_explain: value.refund_reason_wap_explain,
+          refund_reason_wap_img: that.refund_reason_wap_imgPath.join(','),
+          uni: that.orderId
+        }).then(res=>{
+          return this.$util.Tips({ title: '申请成功', icon: 'success' }, { tab: 5, url: '/pages/users/user_return_list/index?isT=1' });
+        }).catch(err=>{
+          return this.$util.Tips({ title: err });
+        })
+      },
+      bindPickerChange: function (e) {
+      this.$set(this,'index',e.detail.value);
+      }
 		}
 	}
 </script>
-
 <style scoped lang="scss">
 	.apply-return{
 		padding: 20rpx 30rpx 70rpx 30rpx;
