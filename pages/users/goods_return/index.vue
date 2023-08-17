@@ -48,7 +48,7 @@
           </view>
           <view class='item textarea acea-row row-between'>
             <view>备注说明</view>
-            <textarea placeholder='填写备注信息，100字以内' class='num' name="refund_reason_wap_explain"
+            <textarea placeholder='填写备注信息，100字以内' class='num' name="applyDescription"
                       placeholder-class='填写备注信息，100字以内' />
           </view>
           <view class='item acea-row row-between' style="border: none;">
@@ -57,12 +57,12 @@
               <view class='tip'>( 最多可上传3张 )</view>
             </view>
             <view class='upload acea-row row-middle'>
-              <view class='pictrue' v-for="(item,index) in refund_reason_wap_imgPath" :key="index">
+              <view class='pictrue' v-for="(item,index) in applyPicUrls" :key="index">
                 <image :src='item' />
                 <view class='iconfont icon-guanbi1 font-color' @tap='DelPic(index)' />
               </view>
               <view class='pictrue acea-row row-center-wrapper row-column' @tap='uploadpic'
-                    v-if="refund_reason_wap_imgPath.length < 3">
+                    v-if="applyPicUrls.length < 3">
                 <text class='iconfont icon-icon25201' />
                 <view>上传凭证</view>
               </view>
@@ -75,11 +75,11 @@
 	</view>
 </template>
 <script>
-	import { orderRefundVerify } from '@/api/order.js';
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
   import * as TradeOrderApi from '@/api/trade/order.js';
   import * as AfterSaleApi from '@/api/trade/afterSale.js';
+  import {createAfterSale} from "../../../api/trade/afterSale";
   export default {
 		data() {
 			return {
@@ -94,16 +94,14 @@
         reasons: [], // 售后原因
         reasonIndex: 0, // 选中 reasons 的位置
 
-        refund_reason_wap_img:[],
-				refund_reason_wap_imgPath:[],
-
+        applyPicUrls: [], // 补充凭证图片
 			};
 		},
 		computed: mapGetters(['isLogin']),
 		watch:{
 			isLogin:{
 				handler: function(newV, oldV) {
-					if(newV){
+					if (newV) {
 						this.getOrderInfo();
 						this.getRefundReason();
 					}
@@ -173,42 +171,53 @@
         })
       },
       /**
+       * 选择售后原因
+       */
+      bindPickerChange: function(e) {
+        this.$set(this, 'reasonIndex', e.detail.value);
+      },
+      /**
        * 删除图片
        */
-      DelPic:function(e) {
-        let index = e, that = this;
-        that.refund_reason_wap_imgPath.splice(index, 1);
+      DelPic:function(index) {
+        this.applyPicUrls.splice(index, 1);
       },
       /**
        * 上传文件
        */
       uploadpic:function(){
-        let that=this;
-        that.$util.uploadImageOne({url:'user/upload/image',name:'multipart', model:"product", pid:1}, function(res){
-          that.refund_reason_wap_imgPath.push(res.data.url);
+        this.$util.uploadImageOne({}, res => {
+          this.applyPicUrls.push(res.data);
+          this.$set(this, 'applyPicUrls', this.applyPicUrls);
         });
       },
 
       /**
        * 申请退货
       */
-      subRefund:function(e){
-        let that = this, value = e.detail.value;
-        //收集form表单
-        // if (!value.refund_reason_wap_explain) return this.$util.Tips({title:'请输入退款原因'});
-        orderRefundVerify({
-          text: that.RefundArray[that.index] || '',
-          refund_reason_wap_explain: value.refund_reason_wap_explain,
-          refund_reason_wap_img: that.refund_reason_wap_imgPath.join(','),
-          uni: that.orderId
-        }).then(res=>{
-          return this.$util.Tips({ title: '申请成功', icon: 'success' }, { tab: 5, url: '/pages/users/user_return_list/index?isT=1' });
+      subRefund:function(e) {
+        const formData = e.detail.value;
+        AfterSaleApi.createAfterSale({
+          orderItemId: this.orderItemId,
+          way: this.getWay(),
+          refundPrice: this.orderItem.payPrice,
+          applyReason: this.reasons[this.reasonIndex],
+          applyDescription: formData.applyDescription,
+          applyPicUrls: this.applyPicUrls,
+        }).then(res => {
+          // TODO 芋艿：这里要改成跳转到售后详情页
+          this.$util.Tips({
+            title: '申请成功',
+            icon: 'success'
+          }, {
+            tab: 5,
+            url: '/pages/users/user_return_list/index?isT=1'
+          });
         }).catch(err=>{
-          return this.$util.Tips({ title: err });
+          return this.$util.Tips({
+            title: err
+          });
         })
-      },
-      bindPickerChange: function (e) {
-      this.$set(this,'index',e.detail.value);
       }
 		}
 	}

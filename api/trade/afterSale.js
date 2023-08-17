@@ -9,3 +9,7 @@ export function getAfterSaleReasonList(way) {
     way
   });
 }
+
+export function createAfterSale(data) {
+  return request.post("app-api/trade/after-sale/create", data);
+}
