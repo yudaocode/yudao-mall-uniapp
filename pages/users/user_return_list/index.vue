@@ -2,35 +2,41 @@
 	<view>
 		<view class='return-list pad30' v-if="orderList.length">
 			<view class='goodWrapper borRadius14' v-for="(item,index) in orderList" :key="index" @click='goOrderDetails(item.orderId)'>
-				<view class='iconfont icon-tuikuanzhong powder' v-if="item.refundStatus==1 || item.refundStatus==3"></view>
-				<view class='iconfont icon-yituikuan' v-if="item.refundStatus==2"></view>
-				<view class='orderNum'>订单号：{{item.orderId}}</view>
-				<view class='item acea-row row-between-wrapper' v-for="(items,index) in item.orderInfoList" :key="index">
+        <!-- 根据状态，展示 icon -->
+        <!-- TODO 芋艿：需要优化下 icon，目前没展示出来 -->
+        <view class='iconfont icon-shenqingzhong powder' v-if="[10].includes(item.status)" />
+        <view class='iconfont icon-daituihuo1 powder' v-if="[20, 30].includes(item.status)"></view>
+        <view class='iconfont icon-tuikuanzhong powder' v-if="[40].includes(item.status)"></view>
+        <view class='iconfont icon-yituikuan'  v-if="[50].includes(item.status)"></view>
+        <view class='iconfont icon-yijujue' v-if="[61, 62, 63].includes(item.status)"></view>
+        <!-- 展示信息 -->
+        <view class='orderNum'>订单号：{{ item.no }}</view>
+				<view class='item acea-row row-between-wrapper'>
 					<view class='pictrue'>
-						<image :src='items.image'></image>
+						<image :src='item.picUrl'></image>
 					</view>
 					<view class='text'>
 						<view class='acea-row row-between-wrapper'>
-							<view class='name line1'>{{items.storeName}}</view>
-							<view class='num'>x {{items.cartNum}}</view>
+							<view class='name line1'>{{ item.spuName }}</view>
+							<view class='num'>x {{ item.count }}</view>
 						</view>
-						<view class='attr line1' v-if="items.suk">{{items.suk}}</view>
-						<view class='attr line1' v-else>{{items.storeName}}</view>
-						<view class='money'>￥{{items.price}}</view>
+            <view class='attr line1' v-if="item.properties">
+              <text v-for="property in item.properties" style="padding-left: 2px">{{property.valueName}}</text>
+            </view>
+						<view class='money'>
+              ￥ {{ (item.refundPrice / 100.0).toFixed(2) }}
+            </view>
 					</view>
 				</view>
-				<view class='totalSum'>共{{item.totalNum || 0}}件商品，总金额 <text class='font-color price'>￥{{item.payPrice}}</text></view>
 			</view>
 		</view>
+    <!--  底部，加载中 -->
 		<view class='loadingicon acea-row row-center-wrapper' v-if="orderList.length">
-			<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
+			<text class='loading iconfont icon-jiazai' :hidden='!loading' /> {{loadTitle}}
 		</view>
-		<view v-if="orderList.length == 0">
+		<view v-if="orderList.length === 0">
 			<emptyPage title="暂无订单~"></emptyPage>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</view>
 </template>
@@ -38,25 +44,13 @@
 <script>
 	import home from '@/components/home';
 	import emptyPage from '@/components/emptyPage.vue'
-	import {
-		getOrderList
-	} from '@/api/order.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
+  import * as AfterSaleApi from '@/api/trade/afterSale.js';
 	export default {
 		components: {
 			emptyPage,
-			home,
-			// #ifdef MP
-			authorize
-			// #endif
+			home
 		},
 		data() {
 			return {
@@ -64,7 +58,6 @@
 				loadend: false,
 				loadTitle: '加载更多', //提示语
 				orderList: [], //订单数组
-				orderStatus: -3, //订单状态
 				page: 1,
 				limit: 20,
 				isAuto: false, //没有授权的不会自动授权
@@ -73,9 +66,9 @@
 		},
 		computed: mapGetters(['isLogin']),
 		watch:{
-			isLogin:{
-				handler:function(newV,oldV){
-					if(newV){
+			isLogin: {
+				handler: function(newV, oldV) {
+					if ( newV) {
 						this.getOrderList();
 					}
 				},
@@ -83,11 +76,11 @@
 			}
 		},
 		onLoad() {
-			if (this.isLogin) {
-				this.getOrderList();
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return;
 			}
+      this.getOrderList();
 		},
 		/**
 		 * 页面上拉触底事件的处理函数
@@ -99,17 +92,16 @@
 			onLoadFun() {
 				this.getOrderList();
 			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
 			/**
 			 * 去订单详情
 			 */
 			goOrderDetails: function(order_id) {
-				if (!order_id) return that.$util.Tips({
-					title: '缺少订单号无法查看订单详情'
-				});
+				if (!order_id) {
+          return that.$util.Tips({
+            title: '缺少订单号无法查看订单详情'
+          });
+        }
+        // TODO 芋艿：跳转到详情
 				uni.navigateTo({
 					url: '/pages/order_details/index?order_id=' + order_id + '&isReturen=1'
 				})
@@ -119,33 +111,31 @@
 			 * 获取订单列表
 			 */
 			getOrderList: function() {
-				let that = this;
-				if (that.loadend) return;
-				if (that.loading) return;
-				that.loading = true;
-				that.loadTitle = "";
-				getOrderList({
-					type: that.orderStatus,
-					page: that.page,
-					limit: that.limit,
+				if (this.loadend || this.loading) {
+          return;
+        }
+				this.loading = true;
+				this.loadTitle = "";
+        AfterSaleApi.getAfterSalePage({
+					pageNo: this.page,
+          pageSize: this.limit,
 				}).then(res => {
 					let list = res.data.list || [];
-					let loadend = list.length < that.limit;
-					that.orderList = that.$util.SplitArray(list, that.orderList);
-					that.$set(that,'orderList',that.orderList);
-					that.loadend = loadend;
-					that.loading = false;
-					that.loadTitle = loadend ? "我也是有底线的" : '加载更多';
-					that.page = that.page + 1;
+					let loadend = list.length < this.limit;
+          this.orderList = this.$util.SplitArray(list, this.orderList);
+          this.$set(this,'orderList', this.orderList);
+          this.loadend = loadend;
+          this.loading = false;
+          this.loadTitle = loadend ? "我也是有底线的" : '加载更多';
+          this.page = this.page + 1;
 				}).catch(err => {
-					that.loading = false;
-					that.loadTitle = "加载更多";
+          this.loading = false;
+          this.loadTitle = "加载更多";
 				});
 			}
 		}
 	}
 </script>
-
 <style lang="scss" scoped>
 	.return-list .goodWrapper {
 		background-color: #fff;

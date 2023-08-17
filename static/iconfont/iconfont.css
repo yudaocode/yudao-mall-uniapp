@@ -1,5 +1,5 @@
 /* @font-face {
-  font-family: "iconfont"; 
+  font-family: "iconfont";
   src: url('iconfont.woff2?t=1620706240621') format('woff2'),
        url('iconfont.woff?t=1620706240621') format('woff'),
        url('iconfont.ttf?t=1620706240621') format('truetype');
@@ -17,6 +17,14 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-shenqingzhong:before {
+    content: "\e756";
+}
+
+.icon-daituihuo1:before {
+    content: "\e752";
 }
 
 .icon-yijujue:before {
