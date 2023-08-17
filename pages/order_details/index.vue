@@ -1,11 +1,10 @@
 <template>
 	<view>
 		<view class='order-details'>
-			<!-- 给 header 上与 data 上加 on 为退款订单-->
-			<view class='header bg-color' :class='isGoodsReturn ? "on":""'>
+			<view class='header bg-color'>
 				<view class='picTxt acea-row row-middle'>
           <!-- 状态图 -->
-          <view class='pictrue' v-if="isGoodsReturn === false">
+          <view class='pictrue'>
             <image v-if="orderInfo.status === 0" src="@/static/images/order/status_0.gif" />
             <image v-if="orderInfo.status === 10" src="@/static/images/order/status_10.gif" />
             <image v-if="orderInfo.status === 20" src="@/static/images/order/status_20.gif" />
@@ -13,7 +12,7 @@
             <image v-if="orderInfo.status === 30 && orderInfo.commentStatus" src="@/static/images/order/status_30b.gif" />
             <image v-if="orderInfo.status === 40" src="@/static/images/order/status_40.gif" />
           </view>
-					<view class='data' :class='isGoodsReturn ? "on":""'>
+					<view class='data'>
             <!-- 状态提示 -->
             <view class='state' v-if="orderInfo.status === 0">请在 {{ formatDate(orderInfo.payExpireTime)}} 前完成支付</view>
             <view class='state' v-if="orderInfo.status === 10">商家未发货，请耐心等待</view>
@@ -29,7 +28,7 @@
 			</view>
 
       <!-- 状态的过程 -->
-      <view v-if="!isGoodsReturn && orderInfo.status !== 40">
+      <view v-if="orderInfo.status !== 40">
         <view class='nav'>
           <view class='navCon acea-row row-between-wrapper'>
             <view :class="orderInfo.status === 0 ? 'on':''">待付款</view>
@@ -145,15 +144,7 @@
 				<!-- #endif -->
 			</view>
 
-			<view class="pad30">
-        <!-- TODO 芋艿：退款各种 -->
-				<view class='nav refund' v-if="orderInfo.refundStatus>0">
-					<view class="title">
-						<image src="/static/images/shuoming.png" mode=""></image>
-						{{orderInfo.refundStatus==1?'商家审核中':orderInfo.refundStatus==2?'商家已退款':'商家拒绝退款'}}
-					</view>
-					<view class="con pad30">{{orderInfo.refundStatus==1 ? "您已成功发起退款申请，请耐心等待商家处理；退款前请与商家协商一致，有助于更好的处理售后问题": orderInfo.refundStatus==2? "退款已成功受理，如商家已寄出商品请尽快退回；感谢您的支持": "拒绝原因：" + orderInfo.refundReason}}</view>
-				</view>
+			<view>
 				<view class='wrapper borRadius14'>
 					<view class='item acea-row row-between'>
 						<view>订单编号：</view>
@@ -182,21 +173,6 @@
 					<view class='item acea-row row-between' v-if="orderInfo.userRemark">
 						<view>买家留言：</view>
 						<view class='conter'>{{ orderInfo.userRemark }}</view>
-					</view>
-				</view>
-        <!-- TODO 芋艿：退款订单详情 -->
-				<view v-if="isGoodsReturn" class='wrapper borRadius14' >
-					<view class='item acea-row row-between'>
-						<view>收货人：</view>
-						<view class='conter'>{{orderInfo.realName}}</view>
-					</view>
-					<view class='item acea-row row-between'>
-						<view>联系电话：</view>
-						<view class='conter'>{{orderInfo.userPhone}}</view>
-					</view>
-					<view class='item acea-row row-between'>
-						<view>收货地址：</view>
-						<view class='conter'>{{orderInfo.userAddress}}</view>
 					</view>
 				</view>
 
@@ -251,7 +227,7 @@
 				<view style='height:120rpx;'></view>
 
         <!-- 操作区域 -->
-        <view class='footer acea-row row-right row-middle' v-if="isGoodsReturn==false">
+        <view class='footer acea-row row-right row-middle'>
 					<view class="qs-btn" v-if="orderInfo.status === 0" @click.stop="cancelOrder">
             取消订单
           </view>
@@ -325,9 +301,7 @@
 
         // TODO 芋艿：未整理
         codeImg: '',
-        qrcodeSize: 100,
-
-        isGoodsReturn: false, //是否为退款订单
+        qrcodeSize: 100
       };
     },
     computed: mapGetters(['isLogin', 'chatUrl', 'userInfo']),
@@ -393,18 +367,6 @@
           }
           if (this.orderInfo.deliveryType === 2 && this.orderInfo.payStatus) {
             this.markCode(res.data.verifyCode);
-          }
-
-          // TODO 芋艿：还在
-          if (res.data.refundStatus !== 0) {
-            this.isGoodsReturn = true;
-          }
-          this.isGoodsReturn = false; // TODO 芋艿：强制设置
-          if (this.isGoodsReturn) {
-            uni.setNavigationBarColor({
-              frontColor: '#ffffff',
-              backgroundColor: '#666666'
-            })
           }
         }).catch(err => {
           uni.hideLoading();

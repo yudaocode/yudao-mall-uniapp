@@ -349,6 +349,12 @@
 						"navigationBarTitleText": "退货列表"
 					}
 				},
+              {
+                "path": "user_return_detail/index",
+                "style": {
+                  "navigationBarTitleText": "退货详情"
+                }
+              },
 				{
 					"path": "goods_return/index",
 					"style": {
