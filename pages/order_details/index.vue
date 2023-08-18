@@ -1,7 +1,8 @@
 <template>
 	<view>
 		<view class='order-details'>
-			<view class='header bg-color'>
+      <!-- 当前状态 -->
+      <view class='header bg-color'>
 				<view class='picTxt acea-row row-middle'>
           <!-- 状态图 -->
           <view class='pictrue'>

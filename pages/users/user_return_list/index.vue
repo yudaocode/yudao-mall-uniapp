@@ -1,7 +1,7 @@
 <template>
 	<view>
 		<view class='return-list pad30' v-if="orderList.length">
-			<view class='goodWrapper borRadius14' v-for="(item,index) in orderList" :key="index" @click='goOrderDetails(item.orderId)'>
+			<view class='goodWrapper borRadius14' v-for="(item,index) in orderList" :key="index" @click='goOrderDetails(item.id)'>
         <!-- 根据状态，展示 icon -->
         <!-- TODO 芋艿：需要优化下 icon，目前没展示出来 -->
         <view class='iconfont icon-shenqingzhong powder' v-if="[10].includes(item.status)" />
@@ -89,23 +89,19 @@
 			this.getOrderList();
 		},
 		methods: {
-			onLoadFun() {
-				this.getOrderList();
-			},
 			/**
 			 * 去订单详情
 			 */
-			goOrderDetails: function(order_id) {
-				if (!order_id) {
-          return that.$util.Tips({
+			goOrderDetails: function(id) {
+				if (!id) {
+          return this.$util.Tips({
             title: '缺少订单号无法查看订单详情'
           });
         }
-        // TODO 芋艿：跳转到详情
-				uni.navigateTo({
-					url: '/pages/order_details/index?order_id=' + order_id + '&isReturen=1'
+        uni.navigateTo({
+					url: '/pages/users/user_return_detail/index?id=' + id
 				})
-			},
+      },
 
 			/**
 			 * 获取订单列表

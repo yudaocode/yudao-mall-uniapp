@@ -18,7 +18,7 @@
           <view class='item acea-row row-between-wrapper'>
             <view>售后方式</view>
             <!-- 如果未发货，则只能退款 -->
-            <view class="" v-if="order.status === 20">仅退款</view>
+            <view class="" v-if="order.status === 10">仅退款</view>
             <picker v-else class='num' @change="wayChange"
                     :value="wayIndex" :range="ways">
               <view class="picker acea-row row-between-wrapper">
@@ -205,13 +205,12 @@
           applyDescription: formData.applyDescription,
           applyPicUrls: this.applyPicUrls,
         }).then(res => {
-          // TODO 芋艿：这里要改成跳转到售后详情页
           this.$util.Tips({
             title: '申请成功',
             icon: 'success'
           }, {
             tab: 5,
-            url: '/pages/users/user_return_list/index?isT=1'
+            url: '/pages/users/user_return_detail/index?id=' + res.data
           });
         }).catch(err=>{
           return this.$util.Tips({

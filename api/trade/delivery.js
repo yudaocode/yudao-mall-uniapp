@@ -16,3 +16,8 @@ export function getDeliveryPickUpStore(id) {
     id
   });
 }
+
+// 获得快递公司列表
+export function getDeliveryExpressList() {
+  return request.get("app-api/trade/delivery/express/list");
+}

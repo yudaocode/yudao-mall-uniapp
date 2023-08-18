@@ -361,6 +361,12 @@
 						"navigationBarTitleText": "申请退货"
 					}
 				},
+                {
+                  "path": "goods_return_delivery/index",
+                  "style": {
+                    "navigationBarTitleText": "填写退货物流"
+                  }
+                },
 				{
 					"path": "login/index",
 					"style": {

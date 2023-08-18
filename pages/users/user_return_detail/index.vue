@@ -1,34 +1,86 @@
 <template>
 	<view>
     <view class='order-details'>
-      <view class="pad30">
-        <!-- TODO 芋艿：退款各种 -->
-        <view class='nav refund'>
-          <view class="title">
-            <image src="/static/images/shuoming.png" mode="" />
-            {{order.refundStatus==1?'商家审核中':order.refundStatus==2?'商家已退款':'商家拒绝退款'}}
+      <!-- 当前状态 -->
+      <view class='header bg-color'>
+        <view class='picTxt acea-row row-middle'>
+          <!-- 状态图 -->
+          <view class='pictrue'>
+            <image v-if="afterSale.status === 10" src="@/static/images/order/status_0.gif" />
+            <image v-if="afterSale.status === 20" src="@/static/images/order/status_10.gif" />
+            <image v-if="afterSale.status === 30" src="@/static/images/order/status_20.gif" />
+            <image v-if="afterSale.status === 40" src="@/static/images/order/status_30a.gif" />
+            <image v-if="afterSale.status === 50" src="@/static/images/order/status_30b.gif" />
+            <image v-if="afterSale.status === 61" src="@/static/images/order/status_40.gif" />
+            <image v-if="afterSale.status === 62" src="@/static/images/order/status_40.gif" />
+            <image v-if="afterSale.status === 63" src="@/static/images/order/status_40.gif" />
           </view>
-          <view class="con pad30">
-            {{
-               order.refundStatus==1 ? "您已成功发起退款申请，请耐心等待商家处理；退款前请与商家协商一致，有助于更好的处理售后问题":
-               order.refundStatus==2 ? "退款已成功受理，如商家已寄出商品请尽快退回；感谢您的支持" : "拒绝原因：" + order.refundReason
-            }}
+          <view class='data'>
+            <!-- 状态提示 -->
+            <view class='state' v-if="afterSale.status === 10">退款申请待商家处理</view>
+            <view class='state' v-if="afterSale.status === 20">请退货并填写物流信息</view>
+            <view class='state' v-if="afterSale.status === 30">退货退款申请待商家处理</view>
+            <view class='state' v-if="afterSale.status === 40">等待退款</view>
+            <view class='state' v-if="afterSale.status === 50">退款成功</view>
+            <view class='state' v-if="afterSale.status === 61">退款关闭</view>
+            <view class='state' v-if="afterSale.status === 62">商家不同意退款申请，拒绝原因：{{ afterSale.auditReason }}</view>
+            <view class='state' v-if="afterSale.status === 63">商家拒绝收货，不同意退款，拒绝原因：{{ afterSale.auditReason }}</view> <!-- TODO -->
+          </view>
+        </view>
+      </view>
+
+      <view>
+        <view class='goodsStyle acea-row row-between borRadius14'>
+          <view class='pictrue'>
+            <image :src='afterSale.picUrl' />
+          </view>
+          <view class='text acea-row row-between'>
+            <view class='line2'>{{ afterSale.spuName }}</view>
+            <view class='attr line1' v-if="afterSale.properties">
+              <text v-for="property in afterSale.properties" style="padding-right: 2px">{{property.valueName}}</text>
+            </view>
           </view>
         </view>
 
-        <!-- TODO 芋艿：退款订单详情 -->
         <view class='wrapper borRadius14' >
           <view class='item acea-row row-between'>
-            <view>收货人：</view>
-            <view class='conter'>{{order.realName}}</view>
+            <view>退款金额：</view>
+            <view class='conter'>￥ {{ fen2yuan(afterSale.refundPrice) }}</view>
           </view>
           <view class='item acea-row row-between'>
-            <view>联系电话：</view>
-            <view class='conter'>{{order.userPhone}}</view>
+            <view>售后方式：</view>
+            <view class='conter'>{{ afterSale.way === 10 ? '仅退款' : '退款退货' }}</view>
           </view>
           <view class='item acea-row row-between'>
-            <view>收货地址：</view>
-            <view class='conter'>{{order.userAddress}}</view>
+            <view>退款原因：</view>
+            <view class='conter'>{{ afterSale.applyReason }}</view>
+          </view>
+        </view>
+
+        <view class='wrapper borRadius14' >
+          <view class='item acea-row row-between'>
+            <view>售后单号：</view>
+            <view class='conter'>{{ afterSale.no }}</view>
+          </view>
+          <view class='item acea-row row-between'>
+            <view>申请时间：</view>
+            <view class='conter'>{{ formatDate(afterSale.createTime) }}</view>
+          </view>
+          <view class='item acea-row row-between'>
+            <view>数量：</view>
+            <view class='conter'>{{ afterSale.count }}</view>
+          </view>
+        </view>
+      </view>
+
+      <view>
+        <!-- 操作区域 -->
+        <view class='footer acea-row row-right row-middle'>
+          <view class="qs-btn" v-if="[20].includes(afterSale.status)" @click.stop="cancelAfterSale">
+            填写退货信息
+          </view>
+          <view class="qs-btn" v-if="[10, 20, 30].includes(afterSale.status)" @click.stop="cancelAfterSale">
+            撤销申请
           </view>
         </view>
       </view>
@@ -38,23 +90,14 @@
 <script>
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
-  import * as TradeOrderApi from '@/api/trade/order.js';
   import * as AfterSaleApi from '@/api/trade/afterSale.js';
+  import dayjs from '@/plugin/dayjs/dayjs.min.js';
+  import * as Util from '@/utils/util.js';
   export default {
 		data() {
 			return {
-        orderId: 0,
-        orderItemId: 0,
-        order: {}, // 订单
-        orderItem: {}, // 订单项
-
-        wayIndex: 0, // 选中 ways 的位置
-        ways: ['仅退款', '退款退货'], // 可选的售后方式
-
-        reasons: [], // 售后原因
-        reasonIndex: 0, // 选中 reasons 的位置
-
-        applyPicUrls: [], // 补充凭证图片
+        id: 0, // 售后编号
+        afterSale: {}, // 售后信息
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -62,8 +105,7 @@
 			isLogin:{
 				handler: function(newV, oldV) {
 					if (newV) {
-						this.getOrderInfo();
-						this.getRefundReason();
+						this.getAfterSale();
 					}
 				},
 				deep:true
@@ -74,110 +116,62 @@
         toLogin();
         return;
       }
-      // if (!options.orderId || !options.orderItemId) {
-      //   return this.$util.Tips({
-      //     title:'缺少订单id,无法退款'
-      //   },{
-      //     tab: 3,
-      //     url:1
-      //   });
-      // }
-			// this.orderId = parseInt(options.orderId);
-      // this.orderItemId = parseInt(options.orderItemId);
-      // this.getOrderInfo();
-      // this.getRefundReason();
+      if (!options.id) {
+        return this.$util.Tips({
+          title: '缺少退款编号，无法查看'
+        },{
+          tab: 3,
+          url:1
+        });
+      }
+			this.id = parseInt(options.id);
+      this.getAfterSale();
     },
 		methods: {
-			onLoadFun:function() {
-        this.getOrderInfo();
-        this.getRefundReason();
-      },
       /**
-       * 获取订单详情
+       * 获取售后订单
       */
-      getOrderInfo:function(){
-        TradeOrderApi.getOrderDetail(this.orderId).then(res => {
-          // 设置订单信息
-          const order = res.data;
-          this.order = order;
-          // 查询订单项信息
-          this.orderItem = order.items.find(item => item.id === this.orderItemId) || {};
+      getAfterSale: function() {
+        AfterSaleApi.getAfterSale(this.id).then(res => {
+          this.afterSale = res.data || {}
         }).catch(err => {
           return this.$util.Tips({
             title: err
           });
         })
       },
+
       /**
-       * 更改售后方式
+       * 取消售后
        */
-      wayChange: function(e) {
-        this.$set(this, 'wayIndex', e.detail.value);
-        this.getRefundReason();
-      },
-      /**
-       * 获得售后方式
-       */
-      getWay: function () {
-        return this.wayIndex === 0 ? 10 : 20
-      },
-      /**
-       * 获取退款理由
-       */
-      getRefundReason: function() {
-        const way = this.getWay();
-        AfterSaleApi.getAfterSaleReasonList(way).then(res => {
-          this.reasons = res.data;
-        })
-      },
-      /**
-       * 选择售后原因
-       */
-      bindPickerChange: function(e) {
-        this.$set(this, 'reasonIndex', e.detail.value);
-      },
-      /**
-       * 删除图片
-       */
-      DelPic:function(index) {
-        this.applyPicUrls.splice(index, 1);
-      },
-      /**
-       * 上传文件
-       */
-      uploadpic:function(){
-        this.$util.uploadImageOne({}, res => {
-          this.applyPicUrls.push(res.data);
-          this.$set(this, 'applyPicUrls', this.applyPicUrls);
+      cancelAfterSale: function() {
+        uni.showModal({
+          title: '提示',
+          content: '确认取消该售后?',
+          success: res => {
+            if (!res.confirm) {
+              return;
+            }
+            AfterSaleApi.cancelAfterSale(this.id).then(() => {
+              this.$util.Tips({
+                title: '取消成功'
+              })
+              this.getAfterSale();
+            }).catch((err) => {
+              this.$util.Tips({
+                title: err
+              })
+              this.getAfterSale();
+            });
+          }
         });
       },
 
-      /**
-       * 申请退货
-      */
-      subRefund:function(e) {
-        const formData = e.detail.value;
-        AfterSaleApi.createAfterSale({
-          orderItemId: this.orderItemId,
-          way: this.getWay(),
-          refundPrice: this.orderItem.payPrice,
-          applyReason: this.reasons[this.reasonIndex],
-          applyDescription: formData.applyDescription,
-          applyPicUrls: this.applyPicUrls,
-        }).then(res => {
-          // TODO 芋艿：这里要改成跳转到售后详情页
-          this.$util.Tips({
-            title: '申请成功',
-            icon: 'success'
-          }, {
-            tab: 5,
-            url: '/pages/users/user_return_list/index?isT=1'
-          });
-        }).catch(err=>{
-          return this.$util.Tips({
-            title: err
-          });
-        })
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
       }
 		}
 	}
@@ -218,7 +212,7 @@
 }
 
 .order-details .header {
-  height: 250rpx;
+  height: 150rpx;
   padding: 0 30rpx;
 }
 
