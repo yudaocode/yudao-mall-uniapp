@@ -18,10 +18,16 @@
             </text>
           </view>
 					<view class='money font-color'>￥{{ fen2yuan(item.price) }}</view>
+          <!-- 售后状态 -->
+          <!-- TODO 芋艿：这样式不太合理；应该顺着向右对齐 -->
+          <view class="evaluate" style="right: 60px;" v-if="afterSale" @click.stop="afterSaleTap(item)">
+            {{
+              item.afterSaleStatus === 0 ? '申请退款' :
+                item.afterSaleStatus === 10 ? '退款中' : '退款成功'
+            }}
+          </view>
           <!-- 评价状态 -->
-					<view class='evaluate' v-if='item.commentStatus === false && evaluate === 2' @click.stop="evaluateTap(item)">
-            评价
-					</view>
+					<view class='evaluate' v-if='item.commentStatus === false && evaluate === 2' @click.stop="evaluateTap(item)">评价</view>
 					<view class='evaluate' v-else-if="item.replyStatus === true">已评价</view>
 				</view>
 			</view>
@@ -36,6 +42,10 @@
 				type: Number,
 				default: 0, // 是否开启评价功能 0 - 不开启；2 - 开启
 			},
+      afterSale: { // 是否开启售后功能
+        type: Boolean,
+        default: false,
+      },
 			cartInfo: {
 				type: Array,
 				default: function() {
@@ -68,7 +78,7 @@
 				nVal.forEach((item, index) => {
 					num += item.count
 				})
-				this.totalNmu = num
+				this.totalNmu =  num
 			}
 		},
 		methods: {
@@ -77,6 +87,17 @@
 					url: "/pages/users/goods_comment_con/index?orderItemId=" + item.id
 				})
 			},
+      afterSaleTap(item) {
+        if (item.afterSaleStatus === 0) {
+          uni.navigateTo({
+            url: "/pages/users/goods_return/index?orderId=" + item.orderId + '&orderItemId=' + item.id
+          })
+          return;
+        }
+        uni.navigateTo({
+          url: "/pages/users/user_return_detail/index?id=" + item.afterSaleId
+        })
+      },
 			jumpCon: function(id) {
 				let type = this.productType === 0 ?'normal':'video'
 				if (this.jump) {

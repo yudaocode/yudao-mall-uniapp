@@ -122,6 +122,7 @@
         <!-- 商品列表 -->
 				<orderGoods
           :evaluate='evaluate'
+          :afterSale="afterSale"
           :productType="orderInfo.type"
           :orderId="order_id"
           :cartInfo="cartInfo"
@@ -235,17 +236,6 @@
 					<view class='bnt bg-color' v-if="orderInfo.status === 0" @tap='goPay'>
             立即付款
           </view>
-          <!-- TODO 芋艿：退款各种 -->
-          <!-- #ifdef MP -->
-					<view @tap="openSubcribe('/pages/users/goods_return/index?orderId='+orderInfo.orderId)"
-						class='bnt cancel' v-else-if="orderInfo.paid === true && orderInfo.refundStatus === 0 && orderInfo.type!==1 && type==='normal'">申请退款
-					</view>
-					<!-- #endif -->
-					<!-- #ifndef MP -->
-					<navigator hover-class="none" :url="'/pages/users/goods_return/index?orderId='+orderInfo.orderId"
-						class='bnt cancel' v-else-if="orderInfo.paid === true && orderInfo.refundStatus === 0 && orderInfo.type!==1 && type==='normal'">申请退款
-					</navigator>
-					<!-- #endif -->
           <!-- TODO 芋艿：拼团 -->
           <view class='bnt bg-color' v-if="orderInfo.combinationId > 0" @tap='goJoinPink'>查看拼团</view>
           <navigator class='bnt cancel' v-if="orderInfo.logisticsId > 0"
@@ -295,7 +285,9 @@
           systemStore: {},
         },
         cartInfo: [], // 购物车产品
+
         evaluate: 0, // 是否开启评论，和订单状态有关
+        afterSale: false, // 是否开启售后
 
         // ========== 门店自提（核销） ==========
         system_store: {}, // 门店信息
@@ -359,6 +351,10 @@
 
           // 如果已完成，且未评论，则设置 evaluate 为 2，开启评论功能
           this.$set(this, 'evaluate', res.data.status === 30 && !res.data.commentStatus ? 2 : 0);
+          //  如果满足指定状态，则开启售后按钮
+          if ([10, 20, 30].includes(res.data.status)) {
+            this.$set(this, 'afterSale', true);
+          }
 
           // 配送方式：门店自提
           if (res.data.pickUpStoreId) {
