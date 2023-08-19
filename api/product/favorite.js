@@ -7,6 +7,11 @@ export function isFavoriteExists(spuId) {
   });
 }
 
+// 获得商品收藏数量
+export function getFavoriteCount() {
+  return request.get('app-api/product/favorite/get-count');
+}
+
 // 添加商品收藏
 export function createFavorite(spuId) {
   return request.post('app-api/product/favorite/create', {

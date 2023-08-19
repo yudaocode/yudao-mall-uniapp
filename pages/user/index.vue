@@ -6,46 +6,46 @@
 				<view class="head pad30">
 					<view class="user-card">
 						<view class="user-info">
-							<image class="avatar" :src='userInfo.avatar' v-if="userInfo.avatar && uid"
-								@click="goEdit()"></image>
+              <!-- 头像 -->
+							<image class="avatar" :src='userInfo.avatar' v-if="userInfo.avatar" @click="goEdit" />
 							<image v-else class="avatar" src="/static/images/f.png" mode="" @click="goEdit()"></image>
-							<view class="info">
-								<view class="name" v-if="!uid" @tap="openAuto">
-									请点击登录
-								</view>
-								<view class="name" v-if="uid">
-									{{userInfo.nickname}}
+							<!-- 昵称 -->
+              <view class="info">
+								<view class="name" v-if="!isLogin" @tap="openAuto">请点击登录</view>
+								<view class="name" v-else>
+									{{ userInfo.nickname }}
+                  <!-- TODO 芋艿：vip 逻辑 -->
 									<view class="vip" v-if="userInfo.vip">
-										<image :src="userInfo.vipIcon" alt="">
-											<view style="margin-left: 10rpx;" class="vip-txt">{{userInfo.vipName || ''}}
-											</view>
+										<image :src="userInfo.vipIcon" alt="" />
+                    <view style="margin-left: 10rpx;" class="vip-txt">{{userInfo.vipName || ''}}</view>
 									</view>
 								</view>
-								<view class="num" v-if="userInfo.phone && uid" @click="goEdit()">
-									<view class="num-txt">{{userInfo.phone}}</view>
+                <!-- 手机 -->
+								<view class="num" v-if="userInfo.mobile" @click="goEdit">
+									<view class="num-txt">{{userInfo.mobile}}</view>
 									<view class="icon">
-										<image src="/static/images/edit.png" mode=""></image>
+										<image src="/static/images/edit.png" mode="" />
 									</view>
 								</view>
-								<view class="phone" v-if="!userInfo.phone && isLogin" @tap="bindPhone">绑定手机号</view>
+								<view class="phone" v-else-if="isLogin" @tap="bindPhone">绑定手机号</view>
 							</view>
 						</view>
 						<view class="num-wrapper">
+              <!-- TODO 芋艿：钱包 -->
 							<view class="num-item" @click="goMenuPage('/pages/users/user_money/index')">
-								<text
-									class="num">{{userInfo.nowMoney && uid ?Number(userInfo.nowMoney).toFixed(2):0}}</text>
+								<text class="num">{{ userInfo.nowMoney ? Number(userInfo.nowMoney).toFixed(2) : 0 }}</text>
 								<view class="txt">余额</view>
 							</view>
 							<view class="num-item" @click="goMenuPage('/pages/users/user_integral/index')">
-								<text class="num">{{userInfo.integral && uid ? userInfo.integral: 0}}</text>
+								<text class="num">{{ userInfo.point ? userInfo.point: 0 }}</text>
 								<view class="txt">积分</view>
 							</view>
 							<view class="num-item" @click="goMenuPage('/pages/users/user_coupon/index')">
-								<text class="num">{{userInfo.couponCount && uid ? userInfo.couponCount : 0}}</text>
+								<text class="num">{{ couponCount }}</text>
 								<view class="txt">优惠券</view>
 							</view>
 							<view class="num-item" @click="goMenuPage('/pages/users/user_goods_collection/index')">
-								<text class="num">{{userInfo.collectCount && uid ? userInfo.collectCount : 0}}</text>
+								<text class="num">{{ favoriteCount }}</text>
 								<view class="txt">收藏</view>
 							</view>
 						</view>
@@ -95,7 +95,8 @@
 						<view class="list-box">
 							<block v-for="(item,index) in menus" :key="index">
 								<navigator class="item" :url="item.url" hover-class="none"
-									v-if="!(item.url ==='/pages/service/index' || (item.url === '/pages/users/user_spread_user/index' && !userInfo.isPromoter))">
+									v-if="!(item.url ==='/pages/service/index'
+									|| (item.url === '/pages/users/user_spread_user/index' && !userInfo.isPromoter))">
 									<image :src="item.picUrl"></image>
 									<text>{{ item.name }}</text>
 								</navigator>
@@ -131,11 +132,13 @@
   import * as TradeOrderApi from '@/api/trade/order.js';
   import * as AfterSaleApi from '@/api/trade/afterSale.js';
   import * as DecorateApi from '@/api/promotion/decorate.js';
+  import * as ProductFavoriteApi from '@/api/product/favorite.js';
+  import * as CouponApi from '@/api/promotion/coupon.js';
   const app = getApp();
 	export default {
 		components: {
     },
-		computed: mapGetters(['isLogin', 'chatUrl', 'userInfo', 'uid']),
+		computed: mapGetters(['isLogin', 'chatUrl', 'userInfo']),
 		data() {
 			return {
 				orderMenu: [{
@@ -178,6 +181,9 @@
         menus: [], // 用户菜单
 				servicePic: '/static/images/customer.png',
 
+        favoriteCount: 0, // 收藏数量
+        couponCount: 0, // 优惠劵数量
+
 				sysHeight: sysHeight,
 				// #ifdef MP
 				pageHeight: '100%',
@@ -188,13 +194,6 @@
 			}
 		},
 		onLoad() {
-      if (!this.isLogin) {
-        // #ifdef H5
-        toLogin()
-        // #endif
-        return
-      }
-
 			// #ifdef H5
 			this.$set(this, 'pageHeight', app.globalData.windowHeight);
 			// #endif
@@ -209,13 +208,11 @@
 				}
 			});
 			// #endif
-			if (that.isLogin) {
+			if (this.isLogin) {
 				this.getMyMenus();
 				// this.setVisit();
+        this.getUserInfo();
 				this.getOrderData();
-				this.$store.dispatch('USERINFO');
-			} else {
-				toLogin();
 			}
 		},
 		methods: {
@@ -231,6 +228,17 @@
 			kefuClick() {
 				location.href = this.chatUrl;
 			},
+      getUserInfo() {
+        // 刷新用户信息
+        this.$store.dispatch('USERINFO');
+        // 获取各种数量
+        ProductFavoriteApi.getFavoriteCount().then(res => {
+          this.favoriteCount = res.data;
+        })
+        CouponApi.getUnusedCouponCount().then(res => {
+          this.couponCount = res.data;
+        })
+      },
 			getOrderData() {
         TradeOrderApi.getOrderCount().then(res => {
           this.orderMenu.forEach((item) => {
@@ -292,13 +300,13 @@
 			},
 			// 编辑页面
 			goEdit() {
-				if (this.isLogin == false) {
+				if (!this.isLogin) {
 					toLogin();
-				} else {
-					uni.navigateTo({
-						url: '/pages/users/user_info/index'
-					})
+          return;
 				}
+        uni.navigateTo({
+          url: '/pages/users/user_info/index'
+        })
 			},
 			// 签到
 			goSignIn() {

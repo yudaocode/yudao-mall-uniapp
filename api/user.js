@@ -1,17 +1,15 @@
 import request from "@/utils/request.js";
-import Cache from "@/utils/cache.js"
+
 /**
  * 获取用户信息
- *
-*/
+ */
 export function getUserInfo(){
   return request.get('user');
 }
 
 /**
  * 设置用户分享
- *
-*/
+ */
 export function userShare(){
   return request.post('user/share');
 }

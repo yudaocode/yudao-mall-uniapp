@@ -27,3 +27,8 @@ export function getCouponTemplateList(spuId, useType) {
 export function getCouponTemplatePage(data) {
   return request.get("app-api/promotion/coupon-template/page", data);
 }
+
+// 获得未使用的优惠劵数量
+export function getUnusedCouponCount() {
+  return request.get("app-api/promotion/coupon/get-unused-count");
+}

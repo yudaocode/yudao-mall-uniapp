@@ -1,6 +1,4 @@
-import {
-	getUserInfo
-} from "../../api/user.js";
+import * as UserApi from '@/api/member/user.js';
 import {
 	LOGIN_STATUS,
 	UID,
@@ -27,7 +25,7 @@ const mutations = {
 		state.token = opt.token;
 		Cache.set(LOGIN_STATUS, opt.token);
 	},
-	SETUID(state,val){                                                
+	SETUID(state,val){
 		state.uid = val;
 		Cache.set(UID, val);
 	},
@@ -83,12 +81,12 @@ const actions = {
 		commit
 	}, force) {
 		return new Promise(reslove => {
-			getUserInfo().then(res => {
-				commit("UPDATE_USERINFO", res.data);
-				reslove(res.data);
-			});
+      UserApi.getUserInfo().then(res => {
+        commit("UPDATE_USERINFO", res.data);
+        reslove(res.data);
+      })
 		}).catch(() => {
-		
+
 		});
 		// debugger
 		// if (state.userInfo !== null && !force)
