@@ -73,12 +73,6 @@
 			}
 		},
 		mixins: [sendVerifyCode],
-		mounted() {
-			//this.getCode();
-		},
-		onLoad() {
-			
-		},
 		methods: {
 			// 获取验证码
 			async code() {
@@ -201,7 +195,7 @@
 				getUserInfo().then(res => {
 					uni.hideLoading();
 					that.$store.commit("UPDATE_USERINFO", res.data);
-					// #ifdef MP 
+					// #ifdef MP
 					that.$util.Tips({
 						title: '登录成功',
 						icon: 'success'

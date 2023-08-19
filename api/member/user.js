@@ -9,3 +9,8 @@ export function getUserInfo() {
 export function updateUser(data) {
   return request.put('app-api/member/user/update', data);
 }
+
+// 修改用户手机
+export function updateUserMobile(data) {
+  return request.put('app-api/member/user/update-mobile', data);
+}

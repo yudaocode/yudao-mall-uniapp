@@ -3,13 +3,13 @@
 		<view class="ChangePassword">
 			<view class="list">
 				<view class="item" v-if="isNew">
-					<input type='number' disabled='true' placeholder='填写手机号码1' placeholder-class='placeholder' v-model="userInfo.phone"></input>
+					<input type='number' disabled='true' placeholder-class='placeholder' v-model="userInfo.mobile" />
 				</view>
 				<view class="item" v-if="!isNew">
-					<input type='number' placeholder='填写手机号码' placeholder-class='placeholder' v-model="phone"></input>
+					<input type='number' placeholder='填写新的手机号码' placeholder-class='placeholder' v-model="phone" />
 				</view>
 				<view class="item acea-row row-between-wrapper">
-					<input type='number' placeholder='填写验证码' placeholder-class='placeholder' class="codeIput" v-model="captcha"></input>
+					<input type='number' placeholder='填写验证码' placeholder-class='placeholder' class="codeIput" v-model="captcha" />
 					<button class="code font-color" :class="disabled === true ? 'on' : ''" :disabled='disabled' @click="code">
 						{{ text }}
 					</button>
@@ -18,64 +18,35 @@
 			<button form-type="submit" v-if="isNew" class="confirmBnt bg-color" @click="next">下一步</button>
 			<button form-type="submit" v-if="!isNew" class="confirmBnt bg-color"  @click="editPwd">保存</button>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 	</view>
 </template>
-
 <script>
-	import sendVerifyCode from "@/mixins/SendVerifyCode";
-	import {
-		registerVerify,
-		bindingPhone,
-		verifyCode,
-		bindingVerify
-	} from '@/api/api.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	export default {
-		mixins: [sendVerifyCode],
-		components: {
-			// #ifdef MP
-			authorize
-			// #endif
-		},
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
+  import * as AuthUtil from '@/api/member/auth.js';
+  import * as UserApi from '@/api/member/user.js';
+  export default {
 		data() {
 			return {
-				phone:'',
-				captcha:'',
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				key: '',
-				isNew: true,
-				timer: '',
+				phone: '', // 需要更换的手机号
+				captcha: '',
+				isNew: true, // true 是第一步，校验老的手机号验证码；false 是第二步，校验新手机号的验证码；
+        oldCaptcha: '', // 进入第二步时，需要使用它保存老的手机验证码
+
+        timer: '',
 				text: '获取验证码',
-				nums: 60
+				nums: 60,
+        disabled: false
 			};
-		},
-		mounted() {
-		      // this.timer = setInterval(this.getTimes, 1000);
 		},
 		computed: mapGetters(['isLogin','userInfo']),
 		onLoad() {
-			if (this.isLogin) {
-				// verifyCode().then(res=>{
-				// 	this.$set(this, 'key', res.data.key)
-				// });
-			} else {
-				toLogin();
-			}
+			if (!this.isLogin) {
+        toLogin();
+      }
 		},
 		methods: {
-			getTimes(){
+			getTimes() {
 				this.nums = this.nums - 1;
 				this.text = "剩余 " + this.nums + "s";
 				if (this.nums < 0) {
@@ -87,114 +58,115 @@
 				  this.text = "重新获取";
 				}
 			},
-			onLoadFun:function(){},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
 			next() {
-				uni.hideLoading();
-				this.isNew = false;
-				this.captcha = '';
-				clearInterval(this.timer);
-				this.disabled = false;
-				this.text = "获取验证码";
-				uni.showLoading({
-					title: '加载中',
-					mask: true
-				});
-				if (!this.captcha) return this.$util.Tips({
-					title: '请填写验证码'
-				});
-				bindingVerify({
-					phone: this.userInfo.phone,
-					captcha: this.captcha
-				}).then(res => {
+				if (!this.captcha) {
+          return this.$util.Tips({
+            title: '请填写验证码'
+          });
+        }
+        // 校验验证码是否正确
+        uni.showLoading({
+          title: '加载中',
+          mask: true
+        });
+				AuthUtil.validateSmsCode(
+          this.userInfo.mobile,
+          2,
+          this.captcha
+				).then(res => {
 					uni.hideLoading();
 					this.isNew = false;
+          this.oldCaptcha = this.captcha;
 					this.captcha = '';
 					clearInterval(this.timer);
 					this.disabled = false;
 					this.text = "获取验证码";
 				}).catch(err => {
-					return this.$util.Tips({
+          uni.hideLoading();
+          return this.$util.Tips({
 						title: err
 					});
-					uni.hideLoading();
 				})
 			},
 			editPwd: function() {
-				let that = this;
-				if (!that.phone) return that.$util.Tips({
-					title: '请填写手机号码！'
-				});
-				if (!(/^1(3|4|5|7|8|9|6)\d{9}$/i.test(that.phone))) return that.$util.Tips({
-					title: '请输入正确的手机号码！'
-				});
-				if (!that.captcha) return that.$util.Tips({
-					title: '请填写验证码'
-				});
+				if (!this.phone) {
+          return this.$util.Tips({
+            title: '请填写手机号码！'
+          });
+        }
+				if (!(/^1(3|4|5|7|8|9|6)\d{9}$/i.test(this.phone))) {
+          return this.$util.Tips({
+            title: '请输入正确的手机号码！'
+          });
+        }
+				if (!this.captcha) {
+          return this.$util.Tips({
+            title: '请填写验证码'
+          });
+        }
 				uni.showModal({
 					title: '是否更换绑定账号',
 					confirmText: '绑定',
-					success(res) {
-						if (res.confirm) {
-							bindingPhone({
-								phone: that.phone,
-								captcha: that.captcha
-							}).then(res => {
-								return that.$util.Tips({
-									title: res.message,
-									icon: 'success'
-								}, {
-									tab: 5,
-									url: '/pages/users/user_info/index'
-								});
-							}).catch(err => {
-								return that.$util.Tips({
-									title: err
-								});
-							})
-						} else if (res.cancel) {
-							return that.$util.Tips({
-								title: '您已取消更换绑定！'
-							}, {
-								tab: 5,
-								url: '/pages/users/user_info/index'
-							});
-						}
+					success: (res) => {
+						if (!res.confirm) {
+              return this.$util.Tips({
+                title: '您已取消更换绑定！'
+              }, {
+                tab: 5,
+                url: '/pages/users/user_info/index'
+              });
+            }
+            UserApi.updateUserMobile({
+              mobile: this.phone,
+              code: this.captcha,
+              oldCode: this.captcha
+            }).then(res => {
+              return this.$util.Tips({
+                title: res.message,
+                icon: 'success'
+              }, {
+                tab: 5,
+                url: '/pages/users/user_info/index'
+              });
+            }).catch(err => {
+              return this.$util.Tips({
+                title: err
+              });
+            })
 					}
 				});
 			},
 			/**
 			 * 发送验证码
-			 * 
 			 */
 			async code() {
-				this.nums = 60;
-				uni.showLoading({
-					title: '加载中',
-					mask: true
-				});
-				let that = this;
-				if(!that.isNew){
-					if (!that.phone) return that.$util.Tips({
-						title: '请填写手机号码！'
-					});
-					if (!(/^1(3|4|5|7|8|9|6)\d{9}$/i.test(that.phone))) return that.$util.Tips({
-						title: '请输入正确的手机号码！'
-					});
+				if (!this.isNew) {
+					if (!this.phone) {
+            return this.$util.Tips({
+              title: '请填写手机号码！'
+            });
+          }
+					if (!(/^1(3|4|5|7|8|9|6)\d{9}$/i.test(this.phone))) {
+            return this.$util.Tips({
+              title: '请输入正确的手机号码！'
+            });
+          }
 				}
-				await registerVerify(that.isNew?that.userInfo.phone:that.phone).then(res => {
-					that.$util.Tips({
-						title: res.message
+        // 执行验证码的发送
+        this.nums = 60;
+        uni.showLoading({
+          title: '加载中',
+          mask: true
+        });
+				await AuthUtil.sendSmsCode(this.isNew ? this.userInfo.mobile : this.phone, 2).then(res => {
+					this.$util.Tips({
+						title: '验证码已发送'
 					});
-					
-					that.timer = setInterval(that.getTimes, 1000);
-					 that.disabled = true;
-					 uni.hideLoading();
+					this.timer = setInterval(this.getTimes, 1000);
+          this.disabled = true;
+          uni.hideLoading();
 				}).catch(err => {
-					return that.$util.Tips({
+					return this.$util.Tips({
 						title: err
 					});
 					uni.hideLoading();
@@ -210,16 +182,16 @@
 		align-items: center;
 		justify-content: center;
 		width: 100%;
-		
+
 		/* #ifdef APP-VUE */
 		margin-top: 50rpx;
 		/* #endif */
 		/* #ifndef APP-VUE */
-		
+
 		margin-top: 200rpx;
 		/* #endif */
-		
-		
+
+
 		image {
 			width: 180rpx;
 			height: 180rpx;
