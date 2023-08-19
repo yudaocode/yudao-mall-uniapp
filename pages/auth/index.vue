@@ -17,7 +17,6 @@
 
 		},
 		onLoad(option) {
-			let that = this
 			const {
 				code,
 				state

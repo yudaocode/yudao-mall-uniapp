@@ -11,21 +11,12 @@
 <script>
 	const app = getApp();
 	import sendVerifyCode from "@/mixins/SendVerifyCode";
-	import Routine from '@/libs/routine';
 	import {
-		loginMobile,
 		registerVerify,
 		getCodeApi,
 		getUserInfo,
 		phoneSilenceAuth,
-		phoneWxSilenceAuth
 	} from "@/api/user";
-	import {
-		bindingPhone
-	} from '@/api/api.js'
-	import {
-		getUserPhone
-	} from '@/api/public';
 	import mobileLogin from '@/components/login_mobile/index.vue'
 	export default {
 		name: 'login_mobile',
@@ -42,16 +33,12 @@
 				isPos: false,
 				platform: '', // 手机平台
 				appleShow: '' //是否是苹果登录
-				
 			}
 		},
 		components: {
 			mobileLogin
 		},
 		mixins: [sendVerifyCode],
-		mounted() {
-			//this.getCode();
-		},
 		onLoad: function(options) {
 			let that = this;
 			// 获取系统信息
@@ -177,7 +164,6 @@
 		}
 	}
 </script>
-
 <style>
 	page {
 		height: 100%;
@@ -198,9 +184,6 @@
 		align-items: center;
 		justify-content: center;
 		width: 100%;
-
-
-
 
 		image {
 			width: 180rpx;

@@ -42,21 +42,10 @@
 	import mobileLogin from '@/components/login_mobile/index.vue'
 	import routinePhone from '@/components/login_mobile/routine_phone.vue'
 	import {
-		mapGetters
-	} from "vuex";
-	import {
 		getLogo,
 		getUserPhone
 	} from '@/api/public';
-	import {
-		LOGO_URL,
-		EXPIRES_TIME,
-		USER_INFO,
-		STATE_R_KEY
-	} from '@/config/cache';
-	import {
-		getUserInfo
-	} from '@/api/user.js'
+	import { getUserInfo } from '@/api/user.js'
 	import Routine from '@/libs/routine';
 	import wechat from "@/libs/wechat";
 	export default {
@@ -347,7 +336,7 @@
 		background: #fff;
 		height: 100%;
 	}
-    
+
 	.page {
 		background: #fff;
 		height: 100%;

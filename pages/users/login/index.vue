@@ -1,16 +1,14 @@
 <template>
 	<div class="login-wrapper">
 		<div class="shading">
-			<!-- <image :src="logoUrl"/> -->
-			<image :src="logoUrl"/>
-			<!-- <image src="/static/images/logo2.png" v-if="!logoUrl" /> -->
+			 <image src="/static/images/logo2.png" />
 		</div>
-		<div class="whiteBg" v-if="formItem === 1">
+		<div class="whiteBg">
 			<div class="list" v-if="current !== 1">
 				<form @submit.prevent="submit">
 					<div class="item">
 						<div class="acea-row row-middle">
-							<image src="/static/images/phone_1.png"  style="width: 24rpx; height: 34rpx;"></image>
+							<image src="/static/images/phone_1.png"  style="width: 24rpx; height: 34rpx;" />
 							<input type="text" class="texts" placeholder="输入手机号码" v-model="account" required/>
 						</div>
 					</div>
@@ -42,63 +40,34 @@
 					<div class="acea-row row-middle">
 						<image src="/static/images/code_2.png" style="width: 28rpx; height: 32rpx;"></image>
 						<input type="text" placeholder="填写验证码" class="codeIput" v-model="codeVal" />
-						<div class="code" @click="again"><img :src="codeUrl" /></div>
 					</div>
 				</div>
 			</div>
 			<div class="logon" @click="loginMobile" v-if="current !== 0">登录</div>
 			<div class="logon" @click="submit" v-if="current === 0">登录</div>
 			<div class="tips">
-				<div v-if="current==0" @click="current = 1">快速登录</div>
-				<div v-if="current==1" @click="current = 0">账号登录</div>
+				<div v-if="current === 0" @click="current = 1">快速登录</div>
+				<div v-if="current === 1" @click="current = 0">账号登录</div>
 			</div>
 		</div>
 		<div class="bottom"></div>
 	</div>
 </template>
 <script>
-	import dayjs from "@/plugin/dayjs/dayjs.min.js";
 	import sendVerifyCode from "@/mixins/SendVerifyCode";
-	import {
-		loginH5,
-		loginMobile,
-		registerVerify,
-		register,
-		// getCodeApi,
-		getUserInfo
-	} from "@/api/user";
-	import attrs, {
-		required,
-		alpha_num,
-		chs_phone
-	} from "@/utils/validate";
-	import {
-		validatorDefaultCatch
-	} from "@/utils/dialog";
-	import {
-		getLogo, appAuth, appleLogin
-	} from "@/api/public";
-	import {
-		VUE_APP_API_URL
-	} from "@/utils";
-
+	import { loginH5, loginMobile, registerVerify, getUserInfo } from "@/api/user";
+	import { appAuth, appleLogin } from "@/api/public";
 	const BACK_URL = "login_back_url";
-
 	export default {
 		name: "Login",
 		mixins: [sendVerifyCode],
 		data: function() {
 			return {
-				navList: ["快速登录", "账号登录"],
-				current: 1,
+				current: 1, // 1：快速登录；2：账号登录
 				account: "",
 				password: "",
 				captcha: "",
-				formItem: 1,
 				type: "login",
-				logoUrl: "",
-				keyCode: "",
-				codeUrl: "",
 				codeVal: "",
 				isShowCode: false,
 				platform: '',
@@ -109,24 +78,11 @@
 				appleShow: false // 苹果登录版本必须要求ios13以上的
 			};
 		},
-		watch:{
-			formItem:function(nval,oVal){
-				if(nval == 1){
-					this.type = 'login'
-				}else{
-					this.type = 'register'
-				}
-			}
-		},
-		mounted: function() {
-			this.getCode();
-			this.getLogoImage();
-		},
 		onLoad() {
 			let self = this
 			uni.getSystemInfo({
 				success: function(res) {
-					if (res.platform.toLowerCase() == 'ios' && res.system.split(' ')[1] >= 13) {
+					if (res.platform.toLowerCase() === 'ios' && res.system.split(' ')[1] >= 13) {
 						self.appleShow = true
 					}
 				}
@@ -259,28 +215,16 @@
 						});
 				});
 			},
-			again() {
-				this.codeUrl =
-					VUE_APP_API_URL +
-					"/sms_captcha?" +
-					"key=" +
-					this.keyCode +
-					Date.parse(new Date());
-			},
-			getCode() {
-				let that = this
-			},
-			async getLogoImage() {
+      /**
+       * 手机 + 验证码登录
+       */
+      async loginMobile() {
 				let that = this;
-				getLogo().then(res => {
-					that.logoUrl = res.data.logoUrl?res.data.logoUrl:'/static/images/logo2.png';
-				});
-			},
-			async loginMobile() {
-				let that = this;
-				if (!that.account) return that.$util.Tips({
-					title: '请填写手机号码'
-				});
+				if (!this.account) {
+          return that.$util.Tips({
+            title: '请填写手机号码'
+          });
+        }
 				if (!/^1(3|4|5|7|8|9|6)\d{9}$/i.test(that.account)) return that.$util.Tips({
 					title: '请输入正确的手机号码'
 				});
@@ -309,44 +253,6 @@
 						});
 					});
 			},
-			async register() {
-				let that = this;
-				if (!that.account) return that.$util.Tips({
-					title: '请填写手机号码'
-				});
-				if (!/^1(3|4|5|7|8|9|6)\d{9}$/i.test(that.account)) return that.$util.Tips({
-					title: '请输入正确的手机号码'
-				});
-				if (!that.captcha) return that.$util.Tips({
-					title: '请填写验证码'
-				});
-				if (!/^[\w\d]+$/i.test(that.captcha)) return that.$util.Tips({
-					title: '请输入正确的验证码'
-				});
-				if (!that.password) return that.$util.Tips({
-					title: '请填写密码'
-				});
-				if (!/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$/i.test(that.password)) return that.$util.Tips({
-					title: '您输入的密码过于简单'
-				});
-				register({
-						account: that.account,
-						captcha: that.captcha,
-						password: that.password,
-						spread: that.$Cache.get("spread")
-					})
-					.then(res => {
-						that.$util.Tips({
-							title: res
-						});
-						that.formItem = 1;
-					})
-					.catch(res => {
-						that.$util.Tips({
-							title: res
-						});
-					});
-			},
 			async code() {
 				let that = this;
 				if (!that.account) return that.$util.Tips({
@@ -367,9 +273,9 @@
 						});
 					});
 			},
-			navTap: function(index) {
-				this.current = index;
-			},
+      /**
+       * 手机 + 密码登录
+       */
 			async submit() {
 				let that = this;
 				if (!that.account) return that.$util.Tips({
@@ -392,7 +298,7 @@
 						this.$store.commit("LOGIN", {
 							'token': data.token
 						});
-						that.getUserInfo(data);	
+						that.getUserInfo(data);
 					})
 					.catch(e => {
 						that.$util.Tips({
@@ -422,31 +328,31 @@
 	}
 	.appLogin {
 		margin-top: 60rpx;
-	
+
 		.hds {
 			display: flex;
 			justify-content: center;
 			align-items: center;
 			font-size: 24rpx;
 			color: #B4B4B4;
-	
+
 			.line {
 				width: 68rpx;
 				height: 1rpx;
 				background: #CCCCCC;
 			}
-	
+
 			p {
 				margin: 0 20rpx;
 			}
 		}
-	
+
 		.btn-wrapper {
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			margin-top: 30rpx;
-	
+
 			.btn {
 				display: flex;
 				align-items: center;
@@ -455,7 +361,7 @@
 				height: 68rpx;
 				border-radius: 50%;
 			}
-	
+
 			.apple-btn {
 				display: flex;
 				align-items: center;
@@ -464,85 +370,85 @@
 				background: #000;
 				border-radius: 34rpx;
 				font-size: 40rpx;
-	
+
 				.icon-s-pingguo {
 					color: #fff;
 					font-size: 40rpx;
 				}
 			}
-	
+
 			.iconfont {
 				font-size: 40rpx;
 				color: #fff;
 			}
-	
+
 			.wx {
 				margin-right: 30rpx;
 				background-color: #61C64F;
 			}
-	
+
 			.mima {
 				background-color: #28B3E9;
 			}
-	
+
 			.yanzheng {
 				background-color: #F89C23;
 			}
-	
+
 		}
 	}
-	
+
 	.code img {
 		width: 100%;
 		height: 100%;
 	}
-	
+
 	.acea-row.row-middle {
 		input {
 			margin-left: 20rpx;
 			display: block;
 		}
 	}
-	
+
 	.login-wrapper {
 		padding: 30rpx;
-	
+
 		.shading {
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			width: 100%;
-	
+
 			/* #ifdef APP-VUE */
 			margin-top: 50rpx;
 			/* #endif */
 			/* #ifndef APP-VUE */
-	
+
 			margin-top: 200rpx;
 			/* #endif */
-	
-	
+
+
 			image {
 				width: 180rpx;
 				height: 180rpx;
 			}
 		}
-	
+
 		.whiteBg {
 			margin-top: 100rpx;
-	
+
 			.list {
 				border-radius: 16rpx;
 				overflow: hidden;
-	
+
 				.item {
 					border-bottom: 1px solid #F0F0F0;
 					background: #fff;
-	
+
 					.row-middle {
 						position: relative;
 						padding: 16rpx 45rpx;
-						
+
 						.texts{
 							flex: 1;
 							font-size: 28rpx;
@@ -552,7 +458,7 @@
 							justify-content: center;
 							align-items: center;
 						}
-	
+
 						input {
 							flex: 1;
 							font-size: 28rpx;
@@ -562,7 +468,7 @@
 							justify-content: center;
 							align-items: center;
 						}
-	
+
 						.code {
 							position: absolute;
 							right: 30rpx;
@@ -574,7 +480,7 @@
 					}
 				}
 			}
-	
+
 			.logon {
 				display: flex;
 				align-items: center;
@@ -587,7 +493,7 @@
 				color: #FFFFFF;
 				font-size: 30rpx;
 			}
-	
+
 			.tips {
 				margin: 30rpx;
 				text-align: center;
