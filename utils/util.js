@@ -1,6 +1,4 @@
-import { TOKENNAME } from '../config/app.js';
 import { HTTP_REQUEST_URL } from '@/config/app.js';
-import store from '../store';
 
 export default {
 

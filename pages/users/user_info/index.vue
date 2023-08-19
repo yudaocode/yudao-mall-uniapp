@@ -12,36 +12,22 @@
 					</view>
 					<view class='item acea-row row-between-wrapper'>
 						<view>昵称</view>
-						<view class='input'><input type='text' name='nickname' :value='userInfo.nickname'></input>
-						</view>
+						<view class='input'>
+              <input type='text' name='nickname' :value='userInfo.nickname' />
+            </view>
 					</view>
 					<view class='item acea-row row-between-wrapper'>
 						<view>手机号码</view>
 						<navigator url="/pages/users/app_login/index" hover-class="none" class="input"
-							v-if="!userInfo.phone">
-							点击绑定手机号<text class="iconfont icon-xiangyou"></text>
+                       v-if="!userInfo.mobile">
+              点击绑定手机号 <text class="iconfont icon-xiangyou" />
 						</navigator>
 						<navigator url="/pages/users/user_phone/index" hover-class="none" class="input" v-else>
 							<view class='input acea-row row-between-wrapper'>
-								<input type='text' disabled='true' name='phone' :value='userInfo.phone'
-									class='id'></input>
+								<input type='text' disabled='true' name='phone' :value='userInfo.mobile' class='id' />
 								<text class='iconfont icon-xiangyou'></text>
 							</view>
 						</navigator>
-						<!-- <navigator url="/pages/users/user_phone/index" hover-class="none" class="input" v-if="!memberInfo.phone">
-							点击绑定手机号<text class="iconfont icon-xiangyou"></text>
-						</navigator>
-						<view class='input acea-row row-between-wrapper' v-else>
-							<input type='text' disabled='true' name='phone' :value='memberInfo.phone' class='id'></input>
-							<text class='iconfont icon-suozi'></text>
-						</view> -->
-					</view>
-					<view class='item acea-row row-between-wrapper'>
-						<view>ID号</view>
-						<view class='input acea-row row-between-wrapper'>
-							<input type='text' :value='uid' disabled='true' class='id'></input>
-							<text class='iconfont icon-suozi'></text>
-						</view>
 					</view>
 					<!-- #ifdef MP -->
 					<view class='item acea-row row-between-wrapper'>
@@ -51,7 +37,7 @@
 						</view>
 					</view>
 					<!-- #endif -->
-					<view class="item acea-row row-between-wrapper" v-if="userInfo.phone">
+					<view class="item acea-row row-between-wrapper" v-if="userInfo.mobile">
 						<view>密码</view>
 						<navigator url="/pages/users/user_pwd_edit/index" hover-class="none" class="input">
 							点击修改密码<text class="iconfont icon-xiangyou"></text>
@@ -65,57 +51,30 @@
 				<!-- #endif -->
 			</view>
 		</form>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 	</view>
 </template>
 
 <script>
-	import {
-		userEdit,
-		getLogout
-	} from '@/api/user.js';
-	import {
-		switchH5Login
-	} from '@/api/api.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	import dayjs from "@/plugin/dayjs/dayjs.min.js";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	export default {
-		components: {
-			// #ifdef MP
-			authorize
-			// #endif
-		},
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
+  import * as UserApi from '@/api/member/user.js';
+  import * as AuthUtil from '@/api/member/auth.js';
+  export default {
+		components: {},
 		data() {
 			return {
 				memberInfo: {},
 				loginType: 'h5', //app.globalData.loginType
-				userIndex: 0,
 				newAvatar: '',
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
 			};
 		},
-		computed: mapGetters(['isLogin', 'uid', 'userInfo']),
+		computed: mapGetters(['isLogin', 'userInfo']),
 		onLoad() {
 			if (!this.isLogin) {
 				toLogin();
 			}
 		},
 		methods: {
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
 			/**
 			 * 小程序设置
 			 */
@@ -128,85 +87,71 @@
 			},
 			/**
 			 * 退出登录
-			 * 
 			 */
 			outLogin: function() {
-				let that = this;
-				if (that.loginType == 'h5') {
+				if (this.loginType === 'h5') {
 					uni.showModal({
 						title: '提示',
 						content: '确认退出登录?',
-						success: function(res) {
-							if (res.confirm) {
-								getLogout()
-									.then(res => {
-										that.$store.commit("LOGOUT");
-										uni.reLaunch({
-											url: '/pages/index/index'
-										});
-									})
-									.catch(err => {
-										console.log(err);
-									});
-							} else if (res.cancel) {
-								console.log('用户点击取消');
-							}
+						success: res => {
+							if (!res.confirm) {
+                console.log('用户点击取消');
+                return
+              }
+              AuthUtil.logout().then(res => {
+                this.$store.commit("LOGOUT");
+                uni.reLaunch({
+                  url: '/pages/index/index'
+                });
+              }).catch(err => {
+                console.log(err);
+              });
 						}
 					});
 				}
 			},
 			/**
 			 * 上传文件
-			 * 
 			 */
 			uploadpic: function() {
-				let that = this;
-				that.$util.uploadImageOne({
-					url: 'user/upload/image',
-					name: 'multipart',
-					model: "maintain",
-					pid: 0
-				}, function(res) {
-					that.newAvatar = res.data.url;
-				});
+        this.$util.uploadImageOne({}, res => {
+          this.newAvatar = res.data;
+        });
 			},
 
 			/**
 			 * 提交修改
 			 */
 			formSubmit: function(e) {
-				let that = this,
-					value = e.detail.value
-				if (!value.nickname) return that.$util.Tips({
-					title: '用户姓名不能为空'
-				});
-				value.avatar = that.newAvatar?that.newAvatar:that.userInfo.avatar;
-				userEdit(value).then(res => {
-					that.$store.commit("changInfo", {
-						amount1: 'avatar',
-						amount2: that.newAvatar
-					});
-					return that.$util.Tips({
-						title: '更换头像已成功',
+				const formData = e.detail.value
+				if (!formData.nickname) {
+          return this.$util.Tips({
+            title: '用户姓名不能为空'
+          });
+        }
+        UserApi.updateUser({
+          nickname: formData.nickname,
+          avatar: this.newAvatar ? this.newAvatar : this.userInfo.avatar
+        }).then(res => {
+          // 刷新用户信息
+          this.$store.dispatch('USERINFO');
+          // 提示
+					return this.$util.Tips({
+						title: '保存成功',
 						icon: 'success'
 					}, {
 						tab: 3,
 						url: 1
 					});
-
 				}).catch(msg => {
-					return that.$util.Tips({
+					return this.$util.Tips({
 						title: msg || '保存失败，您并没有修改'
-					}, {
-						tab: 3,
-						url: 1
 					});
 				});
 			}
 		}
 	}
 </script>
-
 <style scoped lang="scss">
 	.personal-data .wrapper {
 		margin: 10rpx 0;
