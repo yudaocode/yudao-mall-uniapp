@@ -6,6 +6,10 @@ export function getAfterSale(id) {
   });
 }
 
+export function getApplyingAfterSaleCount() {
+  return request.get("app-api/trade/after-sale/get-applying-count");
+}
+
 export function getAfterSalePage(data) {
   return request.get("app-api/trade/after-sale/page", data);
 }

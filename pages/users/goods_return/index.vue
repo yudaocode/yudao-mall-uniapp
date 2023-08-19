@@ -79,7 +79,6 @@
 	import { mapGetters } from "vuex";
   import * as TradeOrderApi from '@/api/trade/order.js';
   import * as AfterSaleApi from '@/api/trade/afterSale.js';
-  import {createAfterSale} from "../../../api/trade/afterSale";
   export default {
 		data() {
 			return {

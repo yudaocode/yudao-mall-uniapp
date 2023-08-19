@@ -51,6 +51,8 @@
 						</view>
 						 <view class="sign" @click="goSignIn">签到</view>
 					</view>
+
+          <!-- 订单中心 -->
 					<view class="order-wrapper">
 						<view class="order-hd flex">
 							<view class="left">订单中心</view>
@@ -121,13 +123,13 @@
 	</view>
 </template>
 <script>
-	let sysHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
+  let sysHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
 	import Cache from '@/utils/cache';
 	import { BACK_URL } from '@/config/cache';
-	import { orderData } from '@/api/order.js';
 	import { toLogin } from '@/libs/login.js';
-	import { getCity } from '@/api/api.js';
 	import { mapGetters } from "vuex";
+  import * as TradeOrderApi from '@/api/trade/order.js';
+  import * as AfterSaleApi from '@/api/trade/afterSale.js';
   import * as DecorateApi from '@/api/promotion/decorate.js';
   const app = getApp();
 	export default {
@@ -172,10 +174,10 @@
         circular: true,
         interval: 3000,
         duration: 500,
+        autoplay: true,
         menus: [], // 用户菜单
-
-        orderStatusNum: {},
 				servicePic: '/static/images/customer.png',
+
 				sysHeight: sysHeight,
 				// #ifdef MP
 				pageHeight: '100%',
@@ -190,15 +192,13 @@
         // #ifdef H5
         toLogin()
         // #endif
+        return
       }
 
 			// #ifdef H5
 			this.$set(this, 'pageHeight', app.globalData.windowHeight);
 			// #endif
 			this.$set(this, 'menus', app.globalData.MyMenus);
-			if (!this.$Cache.has('cityList')) {
-        this.getCityList();
-      }
 		},
 		onShow: function() {
 			let that = this;
@@ -232,29 +232,32 @@
 				location.href = this.chatUrl;
 			},
 			getOrderData() {
-				let that = this;
-				orderData().then(res => {
-					that.orderMenu.forEach((item, index) => {
-						switch (item.title) {
-							case '待付款':
-								item.num = res.data.unPaidCount
-								break
-							case '待发货':
-								item.num = res.data.unShippedCount
-								break
-							case '待收货':
-								item.num = res.data.receivedCount
-								break
-							case '待评价':
-								item.num = res.data.evaluatedCount
-								break
-							case '售后/退款':
-								item.num = res.data.refundCount
-								break
-						}
-					})
-					that.$set(that, 'orderMenu', that.orderMenu);
-				})
+        TradeOrderApi.getOrderCount().then(res => {
+          this.orderMenu.forEach((item) => {
+            switch (item.title) {
+              case '待付款':
+                item.num = res.data.unpaidCount
+                break
+              case '待发货':
+                item.num = res.data.undeliveredCount
+                break
+              case '待收货':
+                item.num = res.data.deliveredCount
+                break
+              case '待评价':
+                item.num = res.data.uncommentedCount
+                break
+            }
+          })
+          this.$set(this, 'orderMenu', this.orderMenu);
+        })
+        AfterSaleApi.getApplyingAfterSaleCount().then(res => {
+          const afterSaleOrderMenu = this.orderMenu.filter(item => item.title === '售后/退款')
+          if (afterSaleOrderMenu) {
+            afterSaleOrderMenu[0].num = res.data
+            this.$set(this, 'orderMenu', this.orderMenu);
+          }
+        })
 			},
 			// 打开授权
 			openAuto() {
@@ -314,18 +317,6 @@
 					this.openAuto()
 					// #endif
 				}
-			},
-			// 获取地址数据
-			getCityList: function() {
-				let that = this;
-				getCity().then(res => {
-					let oneDay = 24 * 3600 * 1000;
-					this.$Cache.setItem({
-						name: 'cityList',
-						value: res.data,
-						expires: oneDay * 7
-					}); //设置七天过期时间
-				})
 			}
 		}
 	}
