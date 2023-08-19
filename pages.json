@@ -131,12 +131,6 @@
 					}
 				},
 				{
-					"path": "retrievePassword/index",
-					"style": {
-						"navigationBarTitleText": "忘记密码"
-					}
-				},
-				{
 					"path": "user_info/index",
 					"style": {
 						"navigationBarTitleText": "个人资料"

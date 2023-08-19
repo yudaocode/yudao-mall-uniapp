@@ -2,16 +2,18 @@
 	<view>
 		<view class="ChangePassword">
 			<form @submit="editPwd" report-submit='true'>
-				<view class="phone">当前手机号：{{phone}}</view>
+				<view class="phone">当前手机号：{{ userInfo.mobile }}</view>
 				<view class="list">
 					<view class="item">
-						<input type='password' placeholder='以字母开头，长度在6~18之间，只能包含字符、数字和下划线' placeholder-class='placeholder' name="password" :value="password"></input>
+						<input type='password' placeholder='以字母开头，长度在6~18之间，只能包含字符、数字和下划线'
+                   placeholder-class='placeholder' name="password" :value="password" />
 					</view>
 					<view class="item">
-						<input type='password' placeholder='确认新密码' placeholder-class='placeholder' name="qr_password" :value="qr_password"></input>
+						<input type='password' placeholder='确认新密码' placeholder-class='placeholder'
+                   name="qr_password" :value="qr_password" />
 					</view>
 					<view class="item acea-row row-between-wrapper">
-						<input type='number' placeholder='填写验证码' placeholder-class='placeholder' class="codeIput" name="captcha" :value="captcha"></input>
+						<input type='number' placeholder='填写验证码' placeholder-class='placeholder' class="codeIput" name="captcha" :value="captcha" />
 						<button class="code font-color" :class="disabled === true ? 'on' : ''" :disabled='disabled' @click="code">
 							{{ text }}
 						</button>
@@ -20,105 +22,41 @@
 				<button form-type="submit" class="confirmBnt bg-color">确认修改</button>
 			</form>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 	</view>
 </template>
 
 <script>
-	import sendVerifyCode from "@/mixins/SendVerifyCode";
-	import {
-		phoneRegisterReset,
-		registerVerify
-	} from '@/api/api.js';
-	import {
-		getUserInfo
-	} from '@/api/user.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	export default {
-		mixins: [sendVerifyCode],
-		components: {
-			// #ifdef MP
-			authorize
-			// #endif
-		},
+	import { mapGetters } from "vuex";
+  import sendVerifyCode from "@/mixins/SendVerifyCode";
+  import * as AuthUtil from '@/api/member/auth.js';
+  import * as UserApi from '@/api/member/user.js';
+  export default {
 		data() {
 			return {
-				userInfo: {},
-				phone: '',
 				password: '',
-				captcha: '',
-				qr_password: '',
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
+        qr_password: '',
+        captcha: '',
 			};
 		},
-		computed: mapGetters(['isLogin']),
-		watch:{
-			isLogin:{
-				handler:function(newV,oldV){
-					if(newV){
-						this.getUserInfo();
-					}
-				},
-				deep:true
-			}
-		},
-		onLoad() {
-			if (this.isLogin) {
-				this.getUserInfo();
-			} else {
-				toLogin();
-			}
-		},
+    mixins: [sendVerifyCode],
+    computed: mapGetters(['isLogin', 'userInfo']),
 		methods: {
 			/**
-			 * 授权回调
-			 */
-			onLoadFun: function(e) {
-				this.getUserInfo();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
-			/**
-			 * 获取个人用户信息
-			 */
-			getUserInfo: function() {
-				let that = this;
-				getUserInfo().then(res => {
-					let tel = res.data.phone;
-					let phone = tel.substr(0, 3) + "****" + tel.substr(7);
-					that.$set(that, 'userInfo', res.data);
-					that.phone = phone;
-				});
-			},
-			/**
 			 * 发送验证码
-			 * 
 			 */
 			async code() {
-				let that = this;
-				if (!that.userInfo.phone) return that.$util.Tips({
-					title: '手机号码不存在,无法发送验证码！'
-				});
-				await registerVerify(that.userInfo.phone).then(res => {
-					that.$util.Tips({
-						title: res.message
+				if (!this.userInfo.mobile) {
+          return this.$util.Tips({
+            title: '手机号码不存在，无法发送验证码！'
+          });
+        }
+				await AuthUtil.sendSmsCode(this.userInfo.mobile, 3).then(res => {
+					this.$util.Tips({
+            title: '验证码已发送'
 					});
-					that.sendCode();
+					this.sendCode();
 				}).catch(err => {
-					return that.$util.Tips({
+					return this.$util.Tips({
 						title: err
 					});
 				});
@@ -126,38 +64,43 @@
 
 			/**
 			 * H5登录 修改密码
-			 * 
 			 */
 			editPwd: function(e) {
-				let that = this,
-					password = e.detail.value.password,
-					qr_password = e.detail.value.qr_password,
-					captcha = e.detail.value.captcha;
-				if (!password) return that.$util.Tips({
-					title: '请输入新密码'
-				});
-				if (!/^[a-zA-Z]\w{5,17}$/i.test(password)) return that.$util.Tips({
-					title: '以字母开头，长度在6~18之间，只能包含字符、数字和下划线'
-				});
-				if (qr_password != password) return that.$util.Tips({
-					title: '两次输入的密码不一致！'
-				});
-				if (!captcha) return that.$util.Tips({
-					title: '请输入验证码'
-				});
-				phoneRegisterReset({
-					account: that.userInfo.phone,
-					captcha: captcha,
+				const password = e.detail.value.password;
+        const qr_password = e.detail.value.qr_password;
+				const	captcha = e.detail.value.captcha;
+				if (!password) {
+          return this.$util.Tips({
+            title: '请输入新密码'
+          });
+        }
+				if (!/^[a-zA-Z]\w{5,17}$/i.test(password)) {
+          return this.$util.Tips({
+            title: '以字母开头，长度在6~18之间，只能包含字符、数字和下划线'
+          });
+        }
+				if (qr_password !== password) {
+          return this.$util.Tips({
+            title: '两次输入的密码不一致！'
+          });
+        }
+				if (!captcha) {
+          return this.$util.Tips({
+            title: '请输入验证码'
+          });
+        }
+        UserApi.updateUserPassword({
+					code: captcha,
 					password: password
 				}).then(res => {
-					return that.$util.Tips({
-						title: res.message
+					return this.$util.Tips({
+						title: '修改成功'
 					}, {
 						tab: 3,
 						url: 1
 					});
 				}).catch(err => {
-					return that.$util.Tips({
+					return this.$util.Tips({
 						title: err
 					});
 				});
@@ -165,7 +108,6 @@
 		}
 	}
 </script>
-
 <style lang="scss">
 	page {
 		background-color: #fff !important;

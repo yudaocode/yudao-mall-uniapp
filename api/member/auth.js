@@ -5,6 +5,8 @@ export function sendSmsCode(mobile, scene) {
   return request.post('app-api/member/auth/send-sms-code', {
     mobile,
     scene
+  }, {
+    noAuth: true // TODO 芋艿：后续要做调整
   });
 }
 

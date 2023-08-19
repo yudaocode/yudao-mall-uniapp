@@ -122,7 +122,7 @@
               oldCode: this.captcha
             }).then(res => {
               return this.$util.Tips({
-                title: res.message,
+                title: '手机修改成功',
                 icon: 'success'
               }, {
                 tab: 5,

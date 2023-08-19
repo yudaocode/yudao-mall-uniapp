@@ -14,3 +14,15 @@ export function updateUser(data) {
 export function updateUserMobile(data) {
   return request.put('app-api/member/user/update-mobile', data);
 }
+
+// 修改用户密码
+export function updateUserPassword(data) {
+  return request.put('app-api/member/user/update-password', data);
+}
+
+// 重置密码
+export function resetUserPassword(data) {
+  return request.put('app-api/member/user/reset-password', data, {
+    noAuth: true // TODO 芋艿：后续要做调整
+  });
+}
