@@ -49,7 +49,7 @@
 								<view class="txt">收藏</view>
 							</view>
 						</view>
-						<!-- <view class="sign" @click="goSignIn">签到</view> -->
+						 <view class="sign" @click="goSignIn">签到</view>
 					</view>
 					<view class="order-wrapper">
 						<view class="order-hd flex">
@@ -73,14 +73,15 @@
 						</view>
 					</view>
 				</view>
+
 				<view class="contenBox">
 					<!-- 轮播 -->
-					<view class="slider-wrapper" v-if="imgUrls.length>0">
+					<view class="slider-wrapper" v-if="slideShows.length>0">
 						<swiper indicator-dots="true" :autoplay="autoplay" :circular="circular" :interval="interval"
 							:duration="duration" indicator-color="rgba(255,255,255,0.6)" indicator-active-color="#fff">
-							<block v-for="(item,index) in imgUrls" :key="index">
+							<block v-for="(item,index) in slideShows" :key="index">
 								<swiper-item class="borRadius14">
-									<image :src="item.pic" class="slide-image" @click="navito(item.url)"></image>
+									<image :src="item.picUrl" class="slide-image" @click="navito(item.url)"></image>
 								</swiper-item>
 							</block>
 						</swiper>
@@ -90,13 +91,14 @@
 					<view class="user-menus" style="margin-top: 20rpx;">
 						<view class="menu-title">我的服务</view>
 						<view class="list-box">
-							<block v-for="(item,index) in MyMenus" :key="index">
+							<block v-for="(item,index) in menus" :key="index">
 								<navigator class="item" :url="item.url" hover-class="none"
-									v-if="!(item.url =='/pages/service/index' || (item.url =='/pages/users/user_spread_user/index' && !userInfo.isPromoter))">
-									<image :src="item.pic"></image>
-									<text>{{item.name}}</text>
+									v-if="!(item.url ==='/pages/service/index' || (item.url === '/pages/users/user_spread_user/index' && !userInfo.isPromoter))">
+									<image :src="item.picUrl"></image>
+									<text>{{ item.name }}</text>
 								</navigator>
 							</block>
+              <!-- TODO 芋艿：以后联系客服的方式，重新搞下 -->
 							<!-- #ifndef MP -->
 							<view class="item" @click="kefuClick">
 								<image :src="servicePic"></image>
@@ -111,39 +113,26 @@
 							<!-- #endif -->
 						</view>
 					</view>
-					<image src="/static/images/support.png" alt="" class='support'>
+					<image src="/static/images/support.png" alt="" class='support' />
 					<view class="uni-p-b-98"></view>
 				</view>
-
 			</scroll-view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 	</view>
 </template>
 <script>
 	let sysHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
 	import Cache from '@/utils/cache';
-	import {BACK_URL} from '@/config/cache';
-	import {getMenuList} from '@/api/user.js';
-	import {orderData} from '@/api/order.js';
-	import {toLogin} from '@/libs/login.js';
-	import {getCity} from '@/api/api.js';
-	import {mapGetters} from "vuex";
-	// #ifdef H5
-	import Auth from '@/libs/wechat';
-	// #endif
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	const app = getApp();
+	import { BACK_URL } from '@/config/cache';
+	import { orderData } from '@/api/order.js';
+	import { toLogin } from '@/libs/login.js';
+	import { getCity } from '@/api/api.js';
+	import { mapGetters } from "vuex";
+  import * as DecorateApi from '@/api/promotion/decorate.js';
+  const app = getApp();
 	export default {
 		components: {
-			// #ifdef MP
-			authorize
-			// #endif
-		},
+    },
 		computed: mapGetters(['isLogin', 'chatUrl', 'userInfo', 'uid']),
 		data() {
 			return {
@@ -178,17 +167,14 @@
 						num: 0
 					},
 				],
-				imgUrls: [],
-				userMenu: [],
-				autoplay: true,
-				circular: true,
-				interval: 3000,
-				duration: 500,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				orderStatusNum: {},
-				MyMenus: [],
-				wechatUrl: [],
+
+        slideShows: [], // 轮播图
+        circular: true,
+        interval: 3000,
+        duration: 500,
+        menus: [], // 用户菜单
+
+        orderStatusNum: {},
 				servicePic: '/static/images/customer.png',
 				sysHeight: sysHeight,
 				// #ifdef MP
@@ -197,23 +183,22 @@
 				// #ifdef H5
 				pageHeight: app.globalData.windowHeight,
 				// #endif
-				// #ifdef H5
-				isWeixin: Auth.isWeixin()
-				//#endif
 			}
 		},
 		onLoad() {
-			let that = this;
+      if (!this.isLogin) {
+        // #ifdef H5
+        toLogin()
+        // #endif
+      }
+
 			// #ifdef H5
-			that.$set(that, 'pageHeight', app.globalData.windowHeight);
+			this.$set(this, 'pageHeight', app.globalData.windowHeight);
 			// #endif
-			that.$set(that, 'MyMenus', app.globalData.MyMenus);
-			if (!this.$Cache.has('cityList')) this.getCityList();
-			if (that.isLogin == false) {
-				// #ifdef H5
-				toLogin()
-				// #endif
-			}
+			this.$set(this, 'menus', app.globalData.MyMenus);
+			if (!this.$Cache.has('cityList')) {
+        this.getCityList();
+      }
 		},
 		onShow: function() {
 			let that = this;
@@ -276,23 +261,6 @@
 				Cache.set(BACK_URL, '')
 				toLogin();
 			},
-			// 授权回调
-			onLoadFun() {
-				this.getMyMenus();
-				// this.setVisit();
-				this.getOrderData();
-			},
-			Setting: function() {
-				uni.openSetting({
-					success: function(res) {
-						console.log(res.authSetting)
-					}
-				});
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
 			// 绑定手机
 			bindPhone() {
 				uni.navigateTo({
@@ -300,24 +268,24 @@
 				})
 			},
 			/**
-			 * 
 			 * 获取个人中心图标
 			 */
 			getMyMenus: function() {
-				let that = this;
-				if (this.MyMenus.length) return;
-				getMenuList().then(res => {
-					that.$set(that, 'MyMenus', res.data.routine_my_menus);
-					that.wechatUrl = res.data.routine_my_menus.filter((item) => {
-						return item.url.indexOf('service') !== -1
-					})
-					res.data.routine_my_menus.map((item) => {
-						if (item.url.indexOf('service') !== -1) that.servicePic = item.pic
-					})
-					if(res.data.routine_my_banner){
-						that.imgUrls = res.data.routine_my_banner
-					}
-				});
+				if (this.menus.length > 0) {
+          return;
+        }
+        DecorateApi.getDecorateComponentListByPage(2).then(res => {
+          // 轮播图
+          const slideShow = res.data.find(item => item.code === 'slide-show');
+          if (slideShow) {
+            this.$set(this, "slideShows", JSON.parse(slideShow.value));
+          }
+          // 菜单
+          const menu = res.data.find(item => item.code === 'menu');
+          if (menu) {
+            this.$set(this, "menus", JSON.parse(menu.value));
+          }
+        })
 			},
 			// 编辑页面
 			goEdit() {
@@ -362,7 +330,6 @@
 		}
 	}
 </script>
-
 <style lang="scss" scoped>
 	page,
 	body {
@@ -526,7 +493,7 @@
 				padding: 30rpx 16rpx;
 				position: relative;
 				z-index: 11;
-                
+
 				.order-hd {
 					justify-content: space-between;
 					font-size: 30rpx;
