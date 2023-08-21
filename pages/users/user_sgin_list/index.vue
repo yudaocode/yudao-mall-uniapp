@@ -76,11 +76,11 @@
           const list = res.data.list;
           const loadend = list.length < this.limit;
           this.signList = this.$util.SplitArray(list, this.signList);
-          this.$set(this,'signList',this.signList);
+          this.$set(this, 'signList', this.signList);
           this.loadend = loadend;
           this.loading = false;
           this.loadtitle = loadend ? "哼😕~我也是有底线的~" : "加载更多"
-        }).catch(err=>{
+        }).catch(err => {
           this.loading = false;
           this.loadtitle = '加载更多';
         });

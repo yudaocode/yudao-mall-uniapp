@@ -3,19 +3,20 @@
 		<view class='integral-details'>
 			<view class='header'>
 				<view class='currentScore'>当前积分</view>
-				<view class="scoreNum">{{integral.integral||0}}</view>
+				<view class="scoreNum">{{ userInfo.point || 0}}</view>
 				<view class='line'></view>
 				<view class='nav acea-row'>
 					<view class='item'>
-						<view class='num'>{{integral.sumIntegral||0}}</view>
+						<view class='num'>{{ userInfo.totalPoint || 0}}</view>
 						<view>累计积分</view>
 					</view>
+          <!-- TODO 芋艿：后续接入消费统计 -->
 					<view class='item'>
-						<view class='num'>{{integral.deductionIntegral||0}}</view>
+						<view class='num'>{{integral.deductionIntegral || 0}}</view>
 						<view>累计消费</view>
 					</view>
 					<view class='item'>
-						<view class='num'>{{integral.frozenIntegral||0}}</view>
+						<view class='num'>0</view>
 						<view>冻结积分</view>
 					</view>
 				</view>
@@ -23,26 +24,30 @@
 			<view class='wrapper'>
 				<view class='nav acea-row'>
 					<view class='item acea-row row-center-wrapper' :class='current==index?"on":""' v-for="(item,index) in navList" :key='index'
-					 @click='nav(index)'><text class='iconfont' :class="item.icon"></text>{{item.name}}</view>
+                @click='nav(index)'>
+            <text class='iconfont' :class="item.icon" />{{item.name}}
+          </view>
 				</view>
 				<view class='list' :hidden='current!=0'>
-					<view class='tip acea-row row-middle'><text class='iconfont icon-shuoming'></text>提示：积分数值的高低会直接影响您的会员等级</view>
+					<view class='tip acea-row row-middle'>
+            <text class='iconfont icon-shuoming' />提示：积分数值的高低会直接影响您的会员等级
+          </view>
 					<view class='item acea-row row-between-wrapper' v-for="(item,index) in integralList" :key="index">
 						<view>
-							<view class='state'>{{item.title}}</view>
-							<view>{{item.updateTime}}</view>
+							<view class='state'>{{ item.title }}</view>
+							<view>{{ formatDate(item.createTime) }}</view>
 						</view>
-						<view class='num font-color' v-if="item.type===1">+{{item.integral}}</view>
-						<view class='num' v-else>-{{item.integral}}</view>
+						<view class='num font-color' v-if="item.point > 0">+{{ item.point }}</view>
+						<view class='num' v-else>{{ item.point }} </view>
 					</view>
 					<view class='loadingicon acea-row row-center-wrapper' v-if="integralList.length>0">
-						<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
+						<text class='loading iconfont icon-jiazai' :hidden='loading === false' /> {{loadTitle}}
 					</view>
-					<view v-if="integralList.length == 0">
-						<emptyPage title="暂无积分记录哦～"></emptyPage>
+					<view v-if="integralList.length === 0">
+						<emptyPage title="暂无积分记录哦～" />
 					</view>
 				</view>
-				<view class='list2' :hidden='current!=1'>
+				<view class='list2' :hidden='current !== 1'>
 					<navigator class='item acea-row row-between-wrapper' open-type='switchTab' hover-class='none' url='/pages/index/index'>
 						<view class='pictrue'>
 							<image src='../../../static/images/score.png'></image>
@@ -60,31 +65,15 @@
 				</view>
 			</view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 	</view>
 </template>
 
 <script>
-	import { postIntegralUser, getIntegralList } from '@/api/user.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	import emptyPage from '@/components/emptyPage.vue'
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
+  import * as PointApi from '@/api/member/point';
+  import dayjs from "@/plugin/dayjs/dayjs.min.js";
 	export default {
-		components: {
-			// #ifdef MP
-			authorize,
-			// #endif
-			emptyPage
-		},
 		data() {
 			return {
 				navList: [{
@@ -100,20 +89,17 @@
 				page: 1,
 				limit: 10,
 				integralList: [],
-				integral:{},
+				integral: {},
 				loadend: false,
 				loading: false,
 				loadTitle: '加载更多',
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
 			};
 		},
-		computed: mapGetters(['isLogin']),
+    computed: mapGetters(['isLogin', 'userInfo']),
 		watch:{
 			isLogin:{
-				handler:function(newV,oldV){
-					if(newV){
-						this.getUserInfo();
+				handler: function(newV,oldV) {
+					if (newV) {
 						this.getIntegralList();
 					}
 				},
@@ -121,71 +107,53 @@
 			}
 		},
 		onLoad() {
-			if (this.isLogin) {
-				this.getUserInfo();
-				this.getIntegralList();
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return;
 			}
+      this.getIntegralList();
 		},
 		/**
-		   * 页面上拉触底事件的处理函数
-		   */
-		  onReachBottom: function () {
-		    this.getIntegralList();
-		  },
+     * 页面上拉触底事件的处理函数
+     */
+    onReachBottom: function () {
+      this.getIntegralList();
+    },
 		methods: {
-			/**
-			 * 授权回调
-			 */
-			onLoadFun: function() {
-				this.getUserInfo();
-				this.getIntegralList();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
-			getUserInfo: function() {
-				let that = this;
-				postIntegralUser().then(function(res) {
-					that.$set(that,'integral',res.data);
-				});
-			},
-
 			/**
 			 * 获取积分明细
 			 */
 			getIntegralList: function() {
-				let that = this;
-				if (that.loading) return;
-				if (that.loadend) return;
-				that.loading = true;
-				that.loadTitle = '';
-				getIntegralList({
-					page: that.page,
-					limit: that.limit
-				}).then(function(res) {
-					let list = res.data.list,
-						loadend = list.length < that.limit;
-					that.integralList = that.$util.SplitArray(list, that.integralList);
-					that.$set(that,'integralList',that.integralList);
-					that.page = that.page + 1;
-					that.loading = false;
-					that.loadend = loadend;
-					that.loadTitle = loadend ? '哼~😕我也是有底线的~' : "加载更多";
-				}, function(res) {
-					this.loading = false;
-					that.loadTitle = '加载更多';
-				});
+				if (this.loading || this.loadend) {
+          return;
+        }
+				this.loading = true;
+        this.loadTitle = '';
+        PointApi.getPointRecordPage({
+					pageNo: this.page,
+					pageSize: this.limit
+				}).then(res => {
+          const list = res.data.list;
+          const loadend = list.length < this.limit;
+          this.signList = this.$util.SplitArray(list, this.signList);
+          this.$set(this, 'integralList', this.signList);
+          this.loadend = loadend;
+          this.loading = false;
+          this.loadtitle = loadend ? "哼😕~我也是有底线的~" : "加载更多"
+				}).catch(err => {
+          this.loading = false;
+          this.loadtitle = '加载更多';
+        });
 			},
 			nav: function(current) {
 				this.current = current;
-			}
+			},
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+      },
 		}
 	}
 </script>
-
 <style scoped lang="scss">
 	.integral-details .header {
 		background-image: url('data:image/jpeg;base64,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');
@@ -207,11 +175,11 @@
 		text-align: center;
 		margin-bottom: 11rpx;
 	}
-	
+
 	.integral-details .header .scoreNum{
 		font-family: "Guildford Pro";
 	}
-	
+
 	.integral-details .header .line {
 		width: 60rpx;
 		height: 3rpx;
