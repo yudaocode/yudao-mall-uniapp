@@ -3,14 +3,14 @@
 		<view class='sign-record'>
 		   <view class='list pad30' v-for="(item,index) in signList" :key="index">
 		      <view class='item'>
-		         <view class='data'>{{item.month}}</view>
+		         <view class='data'>{{ formatMonth(item.createTime) }}</view>
 		         <view class='listn borRadius14'>
-		            <view class='itemn acea-row row-between-wrapper' v-for="(itemn,indexn) in item.list" :key="indexn">
+		            <view class='itemn acea-row row-between-wrapper'>
 		               <view>
-		                  <view class='name line1'>{{itemn.title}}</view>
-		                  <view>{{itemn.createDay}}</view>
+		                  <view class='name line1'>第 {{item.day}} 天签到积分奖励</view>
+		                  <view>{{ formatDate(item.createTime) }}</view>
 		               </view>
-		               <view class='num font-color'>+{{itemn.number}}</view>
+		               <view class='num font-color'>+{{ item.point }}</view>
 		            </view>
 		         </view>
 		      </view>
@@ -19,41 +19,29 @@
 		        <text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadtitle}}
 		     </view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 	</view>
 </template>
 
 <script>
-	import { getSignMonthList } from '@/api/user.js';
 	import { toLogin } from '@/libs/login.js';
-	 import { mapGetters } from "vuex";
-	 // #ifdef MP
-	 import authorize from '@/components/Authorize';
-	 // #endif
-	export default {
-		components: {
-			// #ifdef MP
-			authorize
-			// #endif
-		},
+  import { mapGetters } from "vuex";
+  import * as SignInApi from '@/api/member/signin';
+  import dayjs from "@/plugin/dayjs/dayjs.min.js";
+  export default {
 		data() {
 			return {
-				loading:false,
-				    loadend:false,
-				    loadtitle:'加载更多',
-				    page:1,
-				    limit:8,
-				    signList:[],
-					isAuto: false, //没有授权的不会自动授权
-					isShowAuth: false //是否隐藏授权
+				loading: false,
+        loadend: false,
+        loadtitle: '加载更多',
+        page:1,
+        limit:8,
+        signList:[],
 			};
 		},
 		computed: mapGetters(['isLogin']),
 		watch:{
-			isLogin:{
-				handler:function(newV,oldV){
+			isLogin: {
+				handler:function(newV,oldV) {
 					if(newV){
 						this.getSignMoneList();
 					}
@@ -62,49 +50,47 @@
 			}
 		},
 		onLoad(){
-			if(this.isLogin){
-				this.getSignMoneList();
-			}else{
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return;
 			}
-		},
+      this.getSignMoneList();
+    },
 		onReachBottom: function () {
-		    this.getSignMoneList();
-		  },
+      this.getSignMoneList();
+    },
 		methods: {
-			  /**
-			   * 
-			   * 授权回调
-			  */
-			  onLoadFun:function(){
-			    this.getSignMoneList();
-			  },
-			  // 授权关闭
-			  authColse:function(e){
-			  	this.isShowAuth = e
-			  },
-			  /**
-			     * 获取签到记录列表
-			    */
-			    getSignMoneList:function(){
-			      let that=this;
-			      if(that.loading) return;
-			      if(that.loadend) return;
-				  that.loading = true;
-				  that.loadtitle = "";
-			      getSignMonthList({ page: that.page, limit: that.limit }).then(res=>{
-			        let list = res.data.list;
-			        let loadend = list.length < that.limit;
-			        that.signList = that.$util.SplitArray(list, that.signList);
-					that.$set(that,'signList',that.signList);
-					that.loadend = loadend;
-					that.loading = false;
-					that.loadtitle = loadend ? "哼😕~我也是有底线的~" : "加载更多"
-			      }).catch(err=>{
-					that.loading = false;
-					that.loadtitle = '加载更多';
-			      });
-			    },
+      /**
+       * 获取签到记录列表
+      */
+      getSignMoneList:function(){
+        if (this.loading || this.loadend) {
+          return;
+        }
+        this.loading = true;
+        this.loadtitle = "";
+        SignInApi.getSignRecordPage({
+          pageNo: this.page,
+          pageSize: this.limit
+        }).then(res=>{
+          const list = res.data.list;
+          const loadend = list.length < this.limit;
+          this.signList = this.$util.SplitArray(list, this.signList);
+          this.$set(this,'signList',this.signList);
+          this.loadend = loadend;
+          this.loading = false;
+          this.loadtitle = loadend ? "哼😕~我也是有底线的~" : "加载更多"
+        }).catch(err=>{
+          this.loading = false;
+          this.loadtitle = '加载更多';
+        });
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD");
+      },
+      formatMonth: function(date) {
+        return dayjs(date).format("YYYY-MM");
+      }
 		}
 	}
 </script>
