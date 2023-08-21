@@ -1,39 +1,43 @@
 <template>
 	<view>
 		<view class='sign'>
-			<view class='header bg-color'>
+      <!-- 基本信息 -->
+      <view class='header bg-color'>
 				<view class='headerCon acea-row row-between-wrapper'>
 					<view class='left acea-row row-between-wrapper'>
 						<view class='pictrue'>
 							<image :src='userInfo.avatar'></image>
 						</view>
 						<view class='text'>
-							<view class='line1'>{{userInfo.nickname}}</view>
-							<view class='integral acea-row'><text>积分: {{userInfo.integral}}</text></view>
+							<view class='line1'>{{ userInfo.nickname }}</view>
+							<view class='integral acea-row'>
+                <text>积分: {{ userInfo.point }}</text>
+              </view>
 						</view>
 					</view>
 					<navigator class='right acea-row row-middle' hover-class='none'
-						url='/pages/users/user_sgin_list/index'>
+                     url='/pages/users/user_sgin_list/index'>
 						<view class='iconfont icon-caidan'></view>
 						<view>明细</view>
 					</navigator>
 				</view>
 			</view>
+
 			<view class='wrapper'>
-				<view class='list acea-row row-between-wrapper'>
-					<view class='item' v-for="(item,index) in signSystemList" :key="index">
-						<view
-							:class="(index + 1 === signSystemList.length ? 'reward' : '') + ' ' +(sign_index >= index + 1 ? 'rewardTxt' : '')">
-							{{item.title}}
+				<!-- 签到规则 -->
+        <view class='list acea-row row-between-wrapper'>
+					<view class='item' v-for="(item,index) in signConfigList" :key="index">
+						<view :class="(index + 1 === signConfigList.length ? 'reward' : '') + ' ' +( signInfo.continuousDay >= item.day ? 'rewardTxt' : '')">
+							第{{item.day}}天
 						</view>
-						<!-- <view :class='(index+1) == signSystemList.length ? "rewardTxt" : ""'>{{item.title}}</view> -->
 						<view class='venus'
-							:class="(index + 1 === signSystemList.length ? 'reward' : '') + ' ' +(sign_index >= index + 1 ? 'venusSelect' : '')">
+                  :class="(index + 1 === signConfigList.length ? 'reward' : '') + ' ' +( signInfo.continuousDay >= item.day ? 'venusSelect' : '')">
 						</view>
-						<view class='num' :class='item.is_sgin ? "on" : ""'>+{{item.integral}}</view>
+						<view class='num' :class='signInfo.continuousDay >= item.day ? "on" : ""'>+{{ item.point }}</view>
 					</view>
 				</view>
-				<button class='but bg-color on' v-if="signInfo.isDaySign">已签到</button>
+        <!-- 签到按钮 -->
+				<button class='but bg-color on' v-if="signInfo.todaySignIn">已签到</button>
 				<form @submit="goSign" report-submit='true' v-else>
 					<button class='but bg-color' formType="submit">立即签到</button>
 				</form>
@@ -48,72 +52,53 @@
 					<view class='item'>{{signCount[3] || 0}}</view>
 					<view class='data'>天</view>
 				</view>
-				<view class='tip2'>据说连续签到第{{day}}天可获得超额积分，一定要坚持签到哦~~~</view>
-				<view class='list3'>
-					<view class='item acea-row' v-for="(item,index) in signList" :key="index">
+				<view class='tip2'>据说连续签到第 {{ maxDay }} 天可获得超额积分，一定要坚持签到哦~~~</view>
+				<!-- 签到记录 -->
+        <view class='list3'>
+					<view class='item acea-row' v-for="(item,index) in signRecordList" :key="index">
 						<view>
-							<view class='name line1'>{{item.title}}</view>
-							<view class='data'>{{item.createDay}}</view>
+							<view class='name line1'>第 {{item.day}} 天签到积分奖励</view>
+							<view class='data'>{{ formatDate(item.createTime) }}</view>
 						</view>
-						<view class='num font-color'>+{{item.number}}</view>
+						<view class='num font-color'>+{{ item.point }}</view>
 					</view>
-					<view class='loading' @click='goSignList' v-if="signList.length >= 3">点击加载更多<text
-							class='iconfont icon-xiangyou'></text></view>
+					<view class='loading' @click='goSignList' v-if="signRecordList.length >= 3">
+            点击加载更多 <text class='iconfont icon-xiangyou' />
+          </view>
 				</view>
 			</view>
-			<view class='signTip acea-row row-center-wrapper' :class='active==true?"on":""'>
+
+      <!-- 签到提示 -->
+			<view class='signTip acea-row row-center-wrapper' :class='active ?"on":""'>
 				<view class='signTipLight loadingpic'></view>
 				<view class='signTipCon'>
 					<view class='state'>签到成功</view>
-					<view class='integral'>获得{{integral}}积分</view>
+					<view class='integral'>获得{{ point }}积分</view>
 					<view class='signTipBnt' @click='close'>好的</view>
 				</view>
 			</view>
-			<view class='mask' @touchmove.stop.prevent="false" :hidden='active==false'></view>
+			<view class='mask' @touchmove.stop.prevent="false" :hidden='!active'></view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 	</view>
 </template>
-
 <script>
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	import {
-		postSignUser,
-		getSignConfig,
-		getSignList,
-		setSignIntegral
-	} from '@/api/user.js';
-	import {
-		setFormId
-	} from '@/api/api.js';
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	export default {
-		components: {
-			// #ifdef MP
-			authorize
-			// #endif
-		},
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
+  import * as SignInApi from '@/api/member/signin';
+  import dayjs from "@/plugin/dayjs/dayjs.min.js";
+  export default {
 		data() {
 			return {
-				active: false,
-				signCount: [],
-				signSystemList: [],
-				signList: [],
-				signInfo: {}, // 签到
-				integral: 0,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				day: 0,
-				sign_index: 0 //连续签到天数
+        signConfigList: [], // 签到配置列表
+        maxDay: 0, // 最大的签到天数
+
+        signInfo: {}, // 签到信息
+        signCount: [], // 签到信息
+
+        signRecordList: [], // 签到记录
+
+        active: false, // 签到提示
+				point: 0, // 刚签到获得的奖励
 			};
 		},
 		computed: mapGetters(['isLogin', 'userInfo']),
@@ -121,8 +106,8 @@
 			isLogin: {
 				handler: function(newV, oldV) {
 					if (newV) {
-						this.getUserInfo();
-						this.getSignSysteam();
+						this.getSignInfo();
+						this.getSignConfigList();
 						this.getSignList();
 					}
 				},
@@ -130,121 +115,73 @@
 			}
 		},
 		onLoad() {
-			if (this.isLogin) {
-				this.getUserInfo();
-				this.getSignSysteam();
-				this.getSignList();
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return
 			}
+      this.getSignInfo();
+      this.getSignConfigList();
+      this.getSignList();
 		},
 		methods: {
 			/**
-			 * 授权回调
-			 */
-			onLoadFun: function() {
-				this.getUserInfo();
-				this.getSignSysteam();
-				this.getSignList();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
-			/**
 			 * 获取签到配置
 			 */
-			getSignSysteam: function() {
-				let that = this;
-				getSignConfig().then(res => {
-					that.$set(that, 'signSystemList', res.data.list);
-					that.day = that.Rp(res.data.list.length);
+			getSignConfigList: function() {
+        SignInApi.getSignInConfigList().then(res => {
+					this.$set(this, 'signConfigList', res.data);
+          if (res.data.length > 0) {
+            this.maxDay = res.data[res.data.length - 1].day;
+          }
 				})
 			},
 
 			/**
 			 * 去签到记录页面
-			 * 
 			 */
 			goSignList: function() {
 				return this.$util.Tips('/pages/users/user_sgin_list/index');
 			},
+
 			/**
 			 * 获取用户信息
 			 */
-			getUserInfo: function() {
-				let that = this;
-				postSignUser({
-					all: 0,
-					integral: 0,
-					sign: 1
-				}).then(res => {
-					res.data.integral = parseInt(res.data.integral);
-					let sum_sgin_day = res.data.sumSignDay; // 连续签到日期
-					that.$set(that, 'signInfo', res.data);
-					that.signCount = that.PrefixInteger(sum_sgin_day, 4);
-					that.sign_index = res.data.signNum;
-				});
+			getSignInfo: function() {
+        SignInApi.getSignInRecordSummary().then(res => {
+          this.$set(this, 'signInfo', res.data);
+          this.signCount = this.PrefixInteger(res.data.totalDay, 4);
+        });
 			},
 
 			/**
 			 * 获取签到列表
-			 * 
 			 */
 			getSignList: function() {
-				let that = this;
-				getSignList({
-					page: 1,
-					limit: 3
-				}).then(res => {
-					that.$set(that, 'signList', res.data.list);
-				})
-			},
-			/**
-			 * 数字转中文
-			 * 
-			 */
-			Rp: function(n) {
-				let cnum = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
-				let s = '';
-				n = '' + n; // 数字转为字符串
-				for (let i = 0; i < n.length; i++) {
-					s += cnum[parseInt(n.charAt(i))];
-				}
-				return s;
-			},
-			/**
-			 * 数字分割为数组
-			 * @param int num 需要分割的数字
-			 * @param int length 需要分割为n位数组
-			 */
-			PrefixInteger: function(num, length) {
-				return (Array(length).join('0') + num).slice(-length).split('');
+        SignInApi.getSignRecordPage({
+          pageNo: 1,
+          pageSize: 10
+        }).then(res => {
+          this.$set(this, 'signRecordList', res.data.list);
+        })
 			},
 
 			/**
 			 * 用户签到
 			 */
 			goSign: function(e) {
-				let that = this,
-					sum_sgin_day = that.signInfo.sumSignDay;
-				if (that.signInfo.isDaySign) return this.$util.Tips({
-					title: '您今日已签到!'
-				});
-				setSignIntegral().then(res => {
-					that.active = true;
-					that.integral = res.data.integral;
-					that.sign_index = (that.sign_index + 1) > that.signSystemList.length ? 1 : that
-						.sign_index + 1;
-					that.signCount = that.PrefixInteger(sum_sgin_day + 1, 4);
-					that.$set(that.signInfo, 'isDaySign', true);
-					// that.$set(that.signInfo, 'integral', that.$util.$h.Add(that.signInfo.integral, res.data
-					// 	.integral));
-					that.$store.commit("changInfo", {
-						amount1: 'integral',
-						amount2: that.$util.$h.Add(that.signInfo.integral, res.data.integral)
-					});
-					that.getSignList();
+				if (this.signInfo.todaySignIn) {
+          return this.$util.Tips({
+            title: '您今日已签到!'
+          });
+        }
+        SignInApi.createSignInRecord().then(res => {
+					this.active = true;
+					this.point = res.data.point;
+          // 重新获得签到信息
+          this.getSignInfo();
+          this.getSignList();
+          // 刷新个人信息
+          this.$store.dispatch('USERINFO');
 				}).catch(err => {
 					return this.$util.Tips({
 						title: err
@@ -256,11 +193,23 @@
 			 */
 			close: function() {
 				this.active = false;
-			}
+			},
+
+      /**
+       * 数字分割为数组
+       *
+       * @param num 需要分割的数字
+       * @param length 需要分割为n位数组
+       */
+      PrefixInteger: function(num, length) {
+        return (Array(length).join('0') + num).slice(-length).split('');
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD");
+      }
 		}
 	}
 </script>
-
 <style scoped lang="scss">
 	.sign .header {
 		width: 100%;
