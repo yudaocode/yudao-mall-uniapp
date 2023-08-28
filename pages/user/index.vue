@@ -14,10 +14,9 @@
 								<view class="name" v-if="!isLogin" @tap="openAuto">请点击登录</view>
 								<view class="name" v-else>
 									{{ userInfo.nickname }}
-                  <!-- TODO 芋艿：vip 逻辑 -->
-									<view class="vip" v-if="userInfo.vip">
-										<image :src="userInfo.vipIcon" alt="" />
-                    <view style="margin-left: 10rpx;" class="vip-txt">{{userInfo.vipName || ''}}</view>
+									<view class="vip" v-if="userInfo.level">
+										<image :src="userInfo.level.icon" alt="" />
+                    <view style="margin-left: 10rpx;" class="vip-txt">{{ userInfo.level.name || ''}}</view>
 									</view>
 								</view>
                 <!-- 手机 -->

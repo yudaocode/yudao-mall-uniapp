@@ -1,22 +1,24 @@
 <template>
 	<view class="memberVip">
+    <!-- 基本信息 -->
 		<view class="bg">
 			<view class="header">
 				<view class="picTxt acea-row row-middle">
 					<view class="pictrue">
-						<image :src="userInfo.avatar"></image>
+						<image :src="userInfo.avatar" />
 					</view>
 					<view class="text acea-row row-middle">
-						<view class="name line1">{{userInfo.nickname}}</view>
-						<view class="vip" v-if='userInfo.vip'>
-							<image :src="userInfo.vipIcon"></image>{{userInfo.vipName}}
+						<view class="name line1">{{ userInfo.nickname }}</view>
+						<view class="vip" v-if='userInfo.level'>
+							<image :src="userInfo.level.icon" /> {{ userInfo.level.name }}
 						</view>
 					</view>
 				</view>
 			</view>
+      <!-- TODO -->
 			<view class="experience">
 				<view class="title">当前经验值</view>
-				<view class="num">{{levelInfo}}</view>
+				<view class="num">{{ userInfo.experience }}</view>
 				<view class="axis">
 					<view class="bar">
 						<view class="barCon">
@@ -25,16 +27,18 @@
 						<view class="acea-row row-around row-middle">
 							<view class="spotw acea-row row-center" v-for="(item,index) in levelList" :key='index'>
 								<view class="spot"
-									:class="current >item.experience?'past':'' + ' ' + current==item.experience?'on':''">
+									:class="current > item.experience?'past':'' + ' ' + current === item.experience?'on':''">
 								</view>
 							</view>
 						</view>
 					</view>
 					<view class="numList acea-row row-around row-middle">
-						<view class="item" :class="current >=item.experience?'past':''"
-							v-for="(item,index) in levelList" :key="index">{{item.experience}}</view>
+						<view class="item" :class="current >= item.experience?'past':''"
+                  v-for="(item,index) in levelList" :key="index">{{item.experience}}
+            </view>
 					</view>
 				</view>
+        <!-- 各种描述，没有逻辑 -->
 				<view class="vipList acea-row">
 					<view class="item">
 						<view class="pictrue">
@@ -68,6 +72,7 @@
 					</view>
 				</view>
 			</view>
+      <!-- 引导：攒经验 -->
 			<view class="module">
 				<view class="public_title acea-row row-middle">
 					<view class="icons"></view>获取经验
@@ -94,36 +99,27 @@
 						<navigator url="/pages/goods_cate/goods_cate" class="button" hover-class="none"
 							open-type='switchTab'>去获取</navigator>
 					</view>
-					<!-- <view class="item acea-row row-between-wrapper">
-						<view class="picTxt acea-row row-middle">
-							<view class="pictrue on2"><text class="iconfont icon-yaoqing"></text></view>
-							<view class="text">
-								<view class="name line1">邀请好友</view>
-								<view class="info line1">邀请好友注册商城可获得经验值</view>
-							</view>
-						</view>
-						<navigator url="/pages/users/user_spread_code/index" class="button" hover-class="none">去获取</navigator>
-					</view> -->
 				</view>
 			</view>
 		</view>
+    <!-- 经验列表 -->
 		<view class="detailed" v-if="expList.length">
 			<view class="public_title acea-row row-middle">
-				<view class="icons"></view>经验值明细
+				<view class="icons" />经验值明细
 			</view>
 			<view class="list">
 				<view class="item acea-row row-between-wrapper" v-for="(item,index) in expList" :key="index">
 					<view class="text">
-						<view class="name">{{item.title}}</view>
-						<view class="data">{{item.add_time}}</view>
+						<view class="name">{{ item.title }}</view>
+						<view class="data">{{ formatDate(item.createTime) }}</view>
 					</view>
-					<view class="num" v-if="item.pm">+{{item.number}}</view>
-					<view class="num on" v-else>-{{item.number}}</view>
+					<view class="num" v-if="item.experience > 0">+{{ item.experience }}</view>
+					<view class="num on" v-else>{{item.experience}}</view>
 				</view>
 			</view>
 		</view>
 		<view class='loadingicon acea-row row-center-wrapper' v-if="expList.length">
-			<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
+			<text class='loading iconfont icon-jiazai' :hidden='!loading' />{{loadTitle}}
 		</view>
 		<home></home>
 	</view>
@@ -131,96 +127,99 @@
 
 <script>
 	import home from '@/components/home';
-	import {
-		mapGetters
-	} from "vuex";
-	import {
-		getlevelInfo,
-		getlevelExpList
-	} from '@/api/user.js';
-	export default {
+	import { mapGetters } from "vuex";
+  import * as LevelApi from '@/api/member/level';
+  import dayjs from '@/plugin/dayjs/dayjs.min.js';
+  export default {
 		components: {
 			home
 		},
 		computed: mapGetters(['userInfo']),
 		data() {
 			return {
-				//userInfo: '',
 				levelInfo: '',
-				levelList: [],
-				current: 0,
+				levelList: [], // 会员等级列表
+				current: 0, // 当前等级的经验
 				widthLen: 0,
+
 				loading: false,
 				loadend: false,
-				loadTitle: '加载更多', //提示语
+				loadTitle: '加载更多', // 提示语
 				page: 1,
 				limit: 20,
 				expList: []
 			};
 		},
 		onLoad() {
-			this.levelInfo = this.userInfo.experience;
 			this.getInfo();
 			this.getlevelList();
 		},
 		methods: {
+      /**
+       * 获得会员等级列表
+       */
 			getInfo: function() {
-				let that = this;
-				getlevelInfo().then(res => {
+        LevelApi.getLevelList().then(res => {
 					let levelList = res.data;
-					let list = []
-					that.levelList = levelList;
+          this.levelList = levelList;
+
+          // 获得当前等级对应的经验
+          let list = []
 					levelList.map((item, index) => {
-						if (item.experience <= that.levelInfo) {
+						if (item.experience <= this.userInfo.experience) {
 							list.push(item.experience)
 						}
 					})
-					let maxn = Math.max.apply(null, list);
-					that.current = maxn;
+					const maxn = Math.max.apply(null, list);
+          this.current = maxn;
+
 					// 解决len取的值没有时；
-					let levelListLen = levelList[list.length] ? levelList[list.length] : levelList[list
-						.length - 1];
+					const levelListLen = levelList[list.length] ? levelList[list.length] : levelList[list.length - 1];
 					// 解决除数不能为0
-					let divisor = levelListLen.experience - maxn ? levelListLen.experience - maxn : 1;
+					const divisor = levelListLen.experience - maxn ? levelListLen.experience - maxn : 1;
 					// 每小格所占的百分比
-					let per = (that.levelInfo - maxn) / divisor / levelList.length;
-
-					that.widthLen = ((list.length - 0.5) / (levelList.length)) * 100 + per * 100
-
-				}).catch(function(res) {
-					return that.$util.Tips({
+					const per = (this.userInfo.experience - maxn) / divisor / levelList.length;
+					this.widthLen = ((list.length - 0.5) / (levelList.length)) * 100 + per * 100
+				}).catch(res => {
+					return this.$util.Tips({
 						title: res
 					});
 				})
 			},
+      /**
+       * 获得经验记录
+       */
 			getlevelList: function() {
-				let that = this
-				if (this.loadend) return false;
-				if (this.loading) return false;
-				getlevelExpList({
-					page: that.page,
-					limit: that.limit
+				if (this.loadend || this.loading) {
+          return false;
+        }
+        LevelApi.getExperienceRecordPage({
+					pageNo: this.page,
+          pageSize: this.limit
 				}).then(res => {
-					let list = res.data.list,
-						loadend = list.length < that.limit;
-					let expList = that.$util.SplitArray(list, that.expList);
-					that.$set(that, 'expList', expList);
-					that.loadend = loadend;
-					that.loadTitle = loadend ? '我也是有底线的' : '加载更多';
-					that.page = that.page + 1;
-					that.loading = false;
+					const list = res.data.list;
+          const loadend = list.length < this.limit;
+					let expList = this.$util.SplitArray(list, this.expList);
+          this.$set(this, 'expList', expList);
+          this.loadend = loadend;
+          this.loadTitle = loadend ? '我也是有底线的' : '加载更多';
+          this.page = this.page + 1;
+          this.loading = false;
 				}).catch(err => {
-					that.loading = false;
-					that.loadTitle = '加载更多';
+          this.loading = false;
+          this.loadTitle = '加载更多';
 				});
-			}
+			},
+
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+      }
 		},
 		onReachBottom: function() {
 			this.getlevelList();
 		}
 	}
 </script>
-
 <style lang="scss">
 	.memberVip {
 		.bg {

@@ -301,7 +301,8 @@
           password: this.password,
           spread: this.$Cache.get("spread") // TODO 芋艿：后续接入
         }).then(({ data }) => {
-          debugger
+          // debugger
+          // TODO 芋艿：refreshToken 机制
           this.$store.commit("LOGIN", {
             'token': data.accessToken
           });
