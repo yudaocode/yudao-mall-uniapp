@@ -23,3 +23,10 @@ export function validateSmsCode(mobile, scene, code) {
 export function logout() {
   return request.post('app-api/member/auth/logout');
 }
+
+// 使用手机 + 密码登录
+export function login(data) {
+  return request.post('app-api/member/auth/login', data, {
+    noAuth: true // TODO 芋艿：后续要做调整
+  });
+}

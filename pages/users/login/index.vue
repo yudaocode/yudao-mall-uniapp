@@ -43,8 +43,10 @@
 					</div>
 				</div>
 			</div>
+      <!-- 登录方式一：验证码登录 -->
 			<div class="logon" @click="loginMobile" v-if="current !== 0">登录</div>
-			<div class="logon" @click="submit" v-if="current === 0">登录</div>
+      <!-- 登录方式二：密码登录 -->
+      <div class="logon" @click="submit" v-if="current === 0">登录</div>
 			<div class="tips">
 				<div v-if="current === 0" @click="current = 1">快速登录</div>
 				<div v-if="current === 1" @click="current = 0">账号登录</div>
@@ -55,7 +57,9 @@
 </template>
 <script>
 	import sendVerifyCode from "@/mixins/SendVerifyCode";
-	import { loginH5, loginMobile, registerVerify, getUserInfo } from "@/api/user";
+	import { loginMobile, registerVerify, getUserInfo } from "@/api/user";
+	import * as AuthApi from "@/api/member/auth";
+	import * as UserApi from "@/api/member/user";
 	import { appAuth, appleLogin } from "@/api/public";
 	const BACK_URL = "login_back_url";
 	export default {
@@ -277,47 +281,64 @@
        * 手机 + 密码登录
        */
 			async submit() {
-				let that = this;
-				if (!that.account) return that.$util.Tips({
-					title: '请填写账号'
-				});
-				if (!/^[\w\d]{5,16}$/i.test(that.account)) return that.$util.Tips({
-					title: '请输入正确的账号'
-				});
-				if (!that.password) return that.$util.Tips({
-					title: '请填写密码'
-				});
-				loginH5({
-						account: that.account,
-						password: that.password,
-						spread: that.$Cache.get("spread")
-					})
-					.then(({
-						data
-					}) => {
-						this.$store.commit("LOGIN", {
-							'token': data.token
-						});
-						that.getUserInfo(data);
-					})
-					.catch(e => {
-						that.$util.Tips({
-							title: e
-						});
-					});
+				if (!this.account) {
+          return this.$util.Tips({
+            title: '请填写账号'
+          });
+        }
+				if (!/^[\w\d]{5,16}$/i.test(this.account)) {
+          return this.$util.Tips({
+            title: '请输入正确的账号'
+          });
+        }
+				if (!this.password) {
+          return this.$util.Tips({
+            title: '请填写密码'
+          });
+        }
+        AuthApi.login({
+          mobile: this.account,
+          password: this.password,
+          spread: this.$Cache.get("spread") // TODO 芋艿：后续接入
+        }).then(({ data }) => {
+          debugger
+          this.$store.commit("LOGIN", {
+            'token': data.accessToken
+          });
+          this.getUserInfo(data);
+        }).catch(e => {
+          this.$util.Tips({
+            title: e
+          });
+        });
 			},
-			getUserInfo(data){
-				this.$store.commit("SETUID", data.uid);
-				getUserInfo().then(res => {
-					this.$store.commit("UPDATE_USERINFO", res.data);
-					let backUrl = this.$Cache.get(BACK_URL) || "/pages/index/index";
-					if (backUrl.indexOf('/pages/users/login/index') !== -1) {
-						backUrl = '/pages/index/index';
-					}
-					uni.reLaunch({
-						url: backUrl
-					});
-				})
+			getUserInfo(data) {
+        this.$store.commit("SETUID", data.userId);
+        // TODO 芋艿：换成自己的先
+        if (true) {
+          UserApi.getUserInfo().then(res => {
+            this.$store.commit("UPDATE_USERINFO", res.data);
+            // 调回登录前页面
+            let backUrl = this.$Cache.get(BACK_URL) || "/pages/index/index";
+            if (backUrl.indexOf('/pages/users/login/index') !== -1) {
+              backUrl = '/pages/index/index';
+            }
+            uni.reLaunch({
+              url: backUrl
+            });
+          })
+        } else {
+          getUserInfo().then(res => {
+            this.$store.commit("UPDATE_USERINFO", res.data);
+            let backUrl = this.$Cache.get(BACK_URL) || "/pages/index/index";
+            if (backUrl.indexOf('/pages/users/login/index') !== -1) {
+              backUrl = '/pages/index/index';
+            }
+            uni.reLaunch({
+              url: backUrl
+            });
+          })
+        }
 			}
 		}
 	};

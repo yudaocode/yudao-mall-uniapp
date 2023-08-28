@@ -58,7 +58,7 @@
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
   import * as UserApi from '@/api/member/user.js';
-  import * as AuthUtil from '@/api/member/auth.js';
+  import * as AuthApi from '@/api/member/auth.js';
   export default {
 		components: {},
 		data() {
@@ -98,7 +98,7 @@
                 console.log('用户点击取消');
                 return
               }
-              AuthUtil.logout().then(res => {
+              AuthApi.logout().then(res => {
                 this.$store.commit("LOGOUT");
                 uni.reLaunch({
                   url: '/pages/index/index'
