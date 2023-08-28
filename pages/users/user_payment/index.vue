@@ -101,7 +101,7 @@
 		computed: mapGetters(['isLogin', 'systemPlatform','userInfo']),
 		watch:{
 			isLogin:{
-				handler:function(newV,oldV){
+				handler: function(newV, oldV) {
 					if(newV){
 						this.getRecharge();
 					}
@@ -113,6 +113,12 @@
 			// #ifdef H5
 			this.from = this.$wechat.isWeixin() ? "public" : "weixinh5";
 			// #endif
+
+      if (true) {
+        alert('充值功能暂未实现！预期 10 月份');
+        return;
+      }
+
 			if (this.isLogin) {
 				this.getRecharge();
 			} else {
@@ -282,7 +288,7 @@
 						})
 					});
 					// #endif
-					// #ifdef H5 
+					// #ifdef H5
 					rechargeWechat({
 						price: money,
 						from: that.from,

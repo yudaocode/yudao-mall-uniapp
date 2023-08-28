@@ -37,23 +37,23 @@
 					</view>
 				</view>
 				<view class='nav acea-row row-middle'>
-					<navigator class='item' hover-class='none' url='/pages/users/user_bill/index?type=all'>
+					<navigator class='item' hover-class='none' url='/pages/users/user_bill/index'>
 						<view class='pictrue'>
 							<image src='../../../static/images/record1.png'></image>
 						</view>
 						<view>账单记录</view>
 					</navigator>
-					<navigator class='item' hover-class='none' url='/pages/users/user_bill/index?type=expenditure'>
+					<navigator class='item' hover-class='none' url='/pages/users/user_bill/index?type=2'>
 						<view class='pictrue'>
 							<image src='../../../static/images/record2.png'></image>
 						</view>
-						<view>消费记录</view>
+						<view>支出记录</view>
 					</navigator>
-					<navigator class='item' hover-class='none' url='/pages/users/user_bill/index?type=income' v-if="userInfo.rechargeSwitch">
+					<navigator class='item' hover-class='none' url='/pages/users/user_bill/index?type=1'>
 						<view class='pictrue'>
 							<image src='../../../static/images/record3.png'></image>
 						</view>
-						<view>充值记录</view>
+						<view>收入记录</view>
 					</navigator>
 					<navigator class='item' hover-class='none' url='/pages/users/user_integral/index'>
 						<view class='pictrue'>
@@ -83,7 +83,7 @@
 					</navigator>
 				</view>
 			</view>
-			<recommend :hostProduct="hostProduct" v-if="hostProduct.length"></recommend>
+			<recommend :hostProduct="hostProduct" v-if="hostProduct.length" />
 		</view>
 		<home></home>
 	</view>

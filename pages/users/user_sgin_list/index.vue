@@ -1,9 +1,8 @@
 <template>
 	<view>
 		<view class='sign-record'>
-		   <view class='list pad30' v-for="(item,index) in signList" :key="index">
+		   <view class='list' v-for="(item,index) in signList" :key="index">
 		      <view class='item'>
-		         <view class='data'>{{ formatMonth(item.createTime) }}</view>
 		         <view class='listn borRadius14'>
 		            <view class='itemn acea-row row-between-wrapper'>
 		               <view>
@@ -88,9 +87,6 @@
       formatDate: function(date) {
         return dayjs(date).format("YYYY-MM-DD");
       },
-      formatMonth: function(date) {
-        return dayjs(date).format("YYYY-MM");
-      }
 		}
 	}
 </script>

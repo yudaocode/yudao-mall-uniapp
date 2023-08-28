@@ -2,61 +2,47 @@
 	<view>
 		<view class='bill-details'>
 			<view class='nav acea-row'>
-				<view class='item' :class='type==="all" ? "on":""' @click='changeType("all")'>全部</view>
-				<view class='item' :class='type==="expenditure" ? "on":""' @click='changeType("expenditure")'>消费</view>
-				<view class='item' :class='type==="income" ? "on":""' @click='changeType("income")'>充值</view>
+				<view class='item' :class='type === undefined ? "on":""' @click='changeType(undefined)'>全部</view>
+				<view class='item' :class='type === "1" ? "on":""' @click='changeType("1")'>收入</view>
+				<view class='item' :class='type === "2" ? "on":""' @click='changeType("2")'>支出</view>
 			</view>
 			<view class='sign-record'>
-				<view class='list pad30' v-for="(item,index) in userBillList" :key="index">
+				<view class='list' v-for="(item,index) in userBillList" :key="index">
 					<view class='item'>
-						<view class='data'>{{item.date}}</view>
 						<view class='listn borRadius14'>
-							<view class='itemn acea-row row-between-wrapper' v-for="(vo,indexn) in item.list" :key="indexn">
+							<view class='itemn acea-row row-between-wrapper'>
 								<view>
-									<view class='name line1'>{{vo.title}}</view>
-									<view>{{vo.add_time}}</view>
+									<view class='name line1'>{{ item.title }}</view>
+									<view>{{ formatDate(item.createTime) }}</view>
 								</view>
-								<view class='num' v-if="vo.pm">+{{vo.number}}</view>
-								<view class='num font-color' v-else>-{{vo.number}}</view>
+								<view class='num' v-if="item.price > 0">+{{ fen2yuan(item.price) }}</view>
+								<view class='num font-color' v-else>{{ fen2yuan(item.price) }}</view>
 							</view>
 						</view>
 					</view>
 				</view>
-				<view class='loadingicon acea-row row-center-wrapper' v-if="userBillList.length>0">
-					<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
+				<view class='loadingicon acea-row row-center-wrapper' v-if="userBillList.length > 0">
+					<text class='loading iconfont icon-jiazai' :hidden='loading === false'></text>{{loadTitle}}
 				</view>
-				<view v-if="userBillList.length == 0">
+				<view v-if="userBillList.length === 0">
 					<emptyPage title="暂无账单的记录哦～"></emptyPage>
 				</view>
 			</view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</view>
 </template>
 
 <script>
-	import {
-		getBillList
-	} from '@/api/user.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	import emptyPage from '@/components/emptyPage.vue';
 	import home from '@/components/home';
-	export default {
+  import * as WalletApi from '@/api/pay/wallet.js';
+  import dayjs from '@/plugin/dayjs/dayjs.min.js';
+  import * as Util from '@/utils/util.js';
+  export default {
 		components: {
-			// #ifdef MP
-			authorize,
-			// #endif
 			emptyPage,
 			home
 		},
@@ -67,20 +53,18 @@
 				loadend: false,
 				page: 1,
 				limit: 10,
-				type: 'all',
+				type: undefined,
 				userBillList: [],
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
 			};
 		},
 		computed: mapGetters(['isLogin']),
 		onShow() {
-			if (this.isLogin) {
-				this.getUserBillList();
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return;
 			}
-		},
+      this.getUserBillList();
+    },
 		/**
 		 * 生命周期函数--监听页面加载
 		 */
@@ -95,43 +79,31 @@
 		},
 		methods: {
 			/**
-			 * 授权回调
-			 */
-			onLoadFun: function() {
-				this.getUserBillList();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
-			/**
 			 * 获取账户明细
 			 */
 			getUserBillList: function() {
-				let that = this;
-				if (that.loadend) return;
-				
-				if (that.loading) return;
-				that.loading = true;
-				that.loadTitle = "";
-				let data = {
-					page: that.page,
-					limit: that.limit,
-					type: that.type
-				}
-				getBillList(data).then(function(res) {
-					let list = res.data.list?res.data.list:[],
-						loadend = res.data.list < res.data.limit;
-					that.userBillList = that.$util.SplitArray(list, that.userBillList);
-					that.$set(that, 'userBillList', that.userBillList);
-					that.loadend = loadend;
-					that.loading = false;
-					that.loadTitle = loadend ? "哼😕~我也是有底线的~" : "加载更多";
-					that.page = that.page + 1;
-				}, function(res) {
-					that.loading = false;
-					that.loadTitle = '加载更多';
-				});
+				if (this.loadend || this.loading) {
+          return;
+        }
+				this.loading = true;
+				this.loadTitle = "";
+        WalletApi.getWalletTransactionPage({
+          pageNo: this.page,
+          pageSize: this.limit,
+          type: this.type
+        }).then(res => {
+					const list = res.data.list ? res.data.list : [];
+					const	loadend = res.data.list < res.data.limit;
+					this.userBillList = this.$util.SplitArray(list, this.userBillList);
+					this.$set(this, 'userBillList', this.userBillList);
+          this.loadend = loadend;
+          this.loading = false;
+          this.loadTitle = loadend ? "哼😕~我也是有底线的~" : "加载更多";
+          this.page = this.page + 1;
+				}).catch(err => {
+          this.loading = false;
+          this.loadTitle = '加载更多';
+        });
 			},
 			/**
 			 * 切换导航
@@ -143,13 +115,19 @@
 				this.$set(this, 'userBillList', []);
 				this.getUserBillList();
 			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+      }
 		}
 	}
 </script>
-
 <style scoped lang='scss'>
 	.sign-record{
-		
+
 	}
 	.bill-details .nav {
 		background-color: #fff;
