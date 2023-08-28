@@ -7,7 +7,7 @@
 						<view class='account acea-row row-top row-between'>
 							<view class='assets'>
 								<view>总资产(元)</view>
-								<view class='money'>{{statistics.nowMoney || 0}}</view>
+								<view class='money'>{{ fen2yuan(wallet.balance || 0) }}</view>
 							</view>
 							<!-- #ifdef H5 -->
 							<navigator url="/pages/users/user_payment/index" hover-class="none" class='recharge font-color'>充值</navigator>
@@ -20,18 +20,18 @@
 							<!-- #ifdef H5 -->
 							<view class='item'>
 								<view>累计充值(元)</view>
-								<view class='money'>{{statistics.recharge || 0}}</view>
+								<view class='money'>{{ fen2yuan(wallet.totalRecharge || 0) }}</view>
 							</view>
 							<!-- #endif -->
 							<!-- #ifdef MP -->
 							<view class='item' v-if="userInfo.rechargeSwitch">
 								<view>累计充值(元)</view>
-								<view class='money'>{{statistics.recharge || 0}}</view>
+								<view class='money'>{{ fen2yuan(wallet.totalRecharge || 0) }}</view>
 							</view>
 							<!-- #endif -->
 							<view class='item'>
 								<view>累计消费(元)</view>
-								<view class='money'>{{statistics.orderStatusSum || 0}}</view>
+								<view class='money'>{{ fen2yuan(wallet.totalExpense || 0) }}</view>
 							</view>
 						</view>
 					</view>
@@ -82,130 +82,64 @@
 						</view>
 					</navigator>
 				</view>
-				<!-- <view class='list'>
-					<view class='item acea-row row-between-wrapper'>
-						<view class='picTxt acea-row row-between-wrapper'>
-							<view class='iconfont icon-hebingxingzhuang'></view>
-							<view class='text'>
-								<view class='line1'>最新拼团活动</view>
-								<view class='infor line1'>最新的优惠商品上架拼团</view>
-							</view>
-						</view>
-						<navigator hover-class='none' url='/pages/activity/goods_combination/index' class='bnt' v-if="activity.is_pink">立即参与</navigator>
-						<view class='bnt end' v-else>已结束</view>
-					</view>
-					<view class='item acea-row row-between-wrapper'>
-						<view class='picTxt acea-row row-between-wrapper'>
-							<view class='iconfont icon-miaosha yellow'></view>
-							<view class='text'>
-								<view class='line1'>当前限时秒杀</view>
-								<view class='infor line1'>最新商品秒杀进行中</view>
-							</view>
-						</view>
-						<navigator hover-class='none' url='/pages/activity/goods_seckill/index' class='bnt' v-if="activity.is_seckill">立即参与</navigator>
-						<view class='bnt end' v-else>已结束</view>
-					</view>
-					<view class='item acea-row row-between-wrapper'>
-						<view class='picTxt acea-row row-between-wrapper'>
-							<view class='iconfont icon-kanjia1 green'></view>
-							<view class='text'>
-								<view class='line1'>砍价活动</view>
-								<view class='infor line1'>呼朋唤友来砍价</view>
-							</view>
-						</view>
-						<navigator hover-class='none' url='/pages/activity/goods_bargain/index' class='bnt' v-if="activity.is_bargin">立即参与</navigator>
-						<view class='bnt end' v-else>已结束</view>
-					</view>
-				</view> -->
 			</view>
 			<recommend :hostProduct="hostProduct" v-if="hostProduct.length"></recommend>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</view>
 </template>
 
 <script>
-	import {
-		getProductHot
-	} from '@/api/store.js';
-	import {
-		openRechargeSubscribe
-	} from '@/utils/SubscribeMessage.js';
-	import {
-		userActivity,
-		getuserDalance
-	} from '@/api/user.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
+	import { openRechargeSubscribe } from '@/utils/SubscribeMessage.js';
+  import * as Util from '@/utils/util.js';
+  import * as WalletApi from '@/api/pay/wallet.js';
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	import recommend from '@/components/recommend/index';
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
 	import home from '@/components/home';
+  import * as ProductSpuApi from '@/api/product/spu.js';
+  import * as PromotionActivityApi from '@/api/promotion/activity.js';
+  import * as ProductUtil from '@/utils/product.js';
 	export default {
 		components: {
 			recommend,
-			// #ifdef MP
-			authorize,
-			// #endif
 			home
 		},
 		data() {
 			return {
-				hostProduct: [],
-				isClose: false,
-				activity: {},
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false ,//是否隐藏授权
-				hotScroll:false,
-				statistics:{},
-				hotPage:1,
-				hotLimit:10
+        wallet: {},
+
+        hostProduct: [],
+				hotScroll: false,
+				hotPage: 1,
+				hotLimit: 10
 			};
 		},
 		computed: mapGetters(['isLogin', 'userInfo']),
 		watch:{
 			isLogin:{
-				handler:function(newV,oldV){
-					if(newV){
+				handler: function(newV,oldV) {
+					if (newV) {
 						this.get_host_product();
-						this.get_activity();
-						this.userDalance();
+						this.userWallet();
 					}
 				},
 				deep:true
 			}
 		},
 		onLoad() {
-			if (this.isLogin) {
-				this.get_host_product();
-				this.get_activity();
-				this.userDalance();
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return
 			}
+      this.get_host_product();
+      this.userWallet();
 		},
 		methods: {
-			onLoadFun: function() {
-				this.get_host_product();
-				this.get_activity();
-				this.userDalance();
-			},
-			userDalance(){
-				getuserDalance().then(res=>{
-					this.statistics = res.data;
+			userWallet(){
+        WalletApi.getPayWallet().then(res=>{
+					this.wallet = res.data;
 				})
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
 			},
 			// #ifdef MP
 			openSubscribe: function(page) {
@@ -223,36 +157,38 @@
 			},
 			// #endif
 			/**
-			 * 获取活动可参与否
-			 */
-			get_activity: function() {
-				// let that = this;
-				// userActivity().then(res => {
-				// 	that.$set(that, "activity", res.data);
-				// })
-			},
-			/**
 			 * 获取我的推荐
 			 */
 			get_host_product: function() {
-				let that = this;
-				if(that.hotScroll) return
-				getProductHot(
-					that.hotPage,
-					that.hotLimit,
-				).then(res => {
-					that.hotPage++
-					that.hotScroll = res.data.list.length<that.hotLimit
-					that.hostProduct = that.hostProduct.concat(res.data.list)
-				});
-			}
+        ProductSpuApi.getSpuPage({
+          recommendType: 'hot',
+          pageNo: this.hotPage,
+          pageSize: this.hotLimit
+        }).then(res => {
+          const good_list = res.data.list;
+          this.hotPage++
+          this.hotScroll = good_list.length < this.hotLimit
+
+          // 设置营销活动
+          const spuIds = good_list.map(item => item.id);
+          if (spuIds.length > 0) {
+            PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+              ProductUtil.setActivityList(good_list, res.data);
+              this.hostProduct = this.hostProduct.concat(good_list) // 放在此处，避免 Vue 监控不到数组里的元素变化
+            });
+          }
+        });
+			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		},
 		onReachBottom() {
 			this.get_host_product();
 		}
 	}
 </script>
-
 <style scoped lang="scss">
 	.my-account .wrapper {
 		background-color: #fff;
