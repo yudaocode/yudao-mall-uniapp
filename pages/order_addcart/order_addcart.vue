@@ -16,59 +16,62 @@
 					</view>
 				</view>
 				<view v-if="cartList.valid.length > 0 || cartList.invalid.length > 0" class="pad30">
-					<view class='list'>
+          <!-- 有效的购物车 -->
+          <view class='list'>
 						<checkbox-group @change="checkboxChange">
 							<block v-for="(item,index) in cartList.valid" :key="index">
 								<view class='item acea-row row-between-wrapper'>
 									<!-- #ifndef MP -->
-									<checkbox :value="(item.id).toString()" :checked="item.checked"
-										:disabled="!item.attrStatus && footerswitch" style="margin-right: 10rpx;" />
+									<checkbox :value="(item.id).toString()" :checked="item.selected"
+                            :disabled="!item.canChecked && footerswitch" style="margin-right: 10rpx;" />
 									<!-- #endif -->
 									<!-- #ifdef MP -->
-									<checkbox :value="item.id" :checked="item.checked"
-										:disabled="!item.attrStatus && footerswitch" />
+									<checkbox :value="item.id" :checked="item.selected"
+                            :disabled="!item.canChecked && footerswitch" />
 									<!-- #endif -->
-									<navigator :url='"/pages/goods_details/index?id="+item.productId' hover-class='none'
-										class='picTxt acea-row row-between-wrapper'>
+									<navigator :url='"/pages/goods_details/index?id=" + item.spu.id' hover-class='none'
+                             class='picTxt acea-row row-between-wrapper'>
 										<view class='pictrue'>
-											<image :src='item.image'></image>
+                      <image v-if="item.sku" :src='item.sku.picUrl' />
+                      <image v-else :src='item.spu.picUrl' />
 										</view>
 										<view class='text'>
-											<view class='line1' :class="item.attrStatus?'':'reColor'">{{item.storeName}}
+											<view class='line1' :class="item.canChecked?'':'reColor'">
+                        {{ item.spu.name }}
 											</view>
-											<view class='infor line1' v-if="item.suk">属性：{{item.suk}}</view>
-											<view class='money' v-if="item.attrStatus">￥{{item.price}}</view>
-											<!-- <view class='money' v-if="item.attrStatus">￥{{item.truePrice}}</view> -->
-											<view class="reElection acea-row row-between-wrapper" v-else>
+											<view class='infor line1' v-if="item.sku.properties">属性：
+                        <text v-for="property in item.sku.properties" style="padding-left: 2px">{{property.valueName}}</text>
+                      </view>
+											<view class='money' v-if="item.canChecked">￥{{ fen2yuan(item.sku.price) }}</view>
+											<!-- TODO 芋艿：重选 -->
+                      <view class="reElection acea-row row-between-wrapper" v-else>
 												<view class="title">请重新选择商品规格</view>
-												<view class="reBnt cart-color acea-row row-center-wrapper"
-													@click.stop="reElection(item)">重选</view>
+												<view class="reBnt cart-color acea-row row-center-wrapper" @click.stop="reElection(item)">重选</view>
 											</view>
 										</view>
-										<view class='carnum acea-row row-center-wrapper' v-if="item.attrStatus">
-											<view class="reduce" :class="item.numSub ? 'on' : ''"
-												@click.stop='subCart(index)'>-</view>
-											<view class='num'>{{item.cartNum}}</view>
-											<view class="plus" :class="item.numAdd ? 'on' : ''"
-												@click.stop='addCart(index)'>+</view>
+										<view class='carnum acea-row row-center-wrapper' v-if="item.canChecked">
+											<view class="reduce" :class="item.numSub ? 'on' : ''" @click.stop='subCart(index)'>-</view>
+											<view class='num'>{{ item.count }}</view>
+											<view class="plus" :class="item.numAdd ? 'on' : ''" @click.stop='addCart(index)'>+</view>
 										</view>
 									</navigator>
 								</view>
 							</block>
 						</checkbox-group>
 					</view>
-					<!-- cartList.valid.length===0 && cartList.invalid.length > 0 -->
-					<view v-if="cartList.invalid.length > 0" class='invalidGoods borRadius14'
-						:style="cartList.valid.length===0 && cartList.invalid.length > 0 ? 'position: relative;z-index: 111;top: -120rpx;':'position: static;'">
+          <!-- 无效的购物车 -->
+          <view v-if="cartList.invalid.length > 0" class='invalidGoods borRadius14'
+                :style="cartList.valid.length === 0 && cartList.invalid.length > 0
+                  ? 'position: relative;z-index: 111;top: -120rpx;'
+                  :'position: static;'">
 						<view class='goodsNav acea-row row-between-wrapper'>
 							<view v-if="cartList.invalid.length > 1 || cartList.valid.length > 0" @click='goodsOpen'>
-								<text class='iconfont'
-									:class='goodsHidden===true?"icon-xiangxia":"icon-xiangshang"'></text>失效商品
+								<text class='iconfont' :class='goodsHidden ? "icon-xiangxia":"icon-xiangshang"' /> 失效商品
 							</view>
-							<view v-else>
-								失效商品
-							</view>
-							<view class='del' @click='unsetCart'><text class='iconfont icon-shanchu1'></text>清空</view>
+							<view v-else>失效商品</view>
+							<view class='del' @click='unsetCart'>
+                <text class='iconfont icon-shanchu1' />清空
+              </view>
 						</view>
 						<view class='goodsList' :hidden='goodsHidden'>
 							<block v-for="(item,index) in cartList.invalid" :key='index'>
@@ -76,11 +79,14 @@
 									<view class='invalid'>失效</view>
 									<view class='picTxt acea-row row-between-wrapper'>
 										<view class='pictrue'>
-											<image :src='item.image'></image>
+                      <image v-if="item.sku" :src='item.sku.picUrl' />
+                      <image v-else :src='item.spu.picUrl' />
 										</view>
 										<view class='text acea-row row-column-between'>
-											<view class='line1 name'>{{item.storeName}}</view>
-											<view class='infor line1' v-if="item.suk">属性：{{item.suk}}</view>
+											<view class='line1 name'>{{ item.spu.name }}</view>
+											<view class='infor line1' v-if="item.sku.properties">属性：
+                        <text v-for="property in item.sku.properties" style="padding-left: 2px">{{property.valueName}}</text>
+                      </view>
 											<view class='acea-row row-between-wrapper'>
 												<view class='end'>该商品已失效</view>
 											</view>
@@ -90,14 +96,8 @@
 							</block>
 						</view>
 					</view>
-					<!-- <view class='loadingicon acea-row row-center-wrapper' v-if="cartList.valid.length&&!loadend">
-						<text class='loading iconfont icon-jiazai' :hidden='loading==false'></text>{{loadTitle}}
-					</view> -->
-					<view class='loadingicon acea-row row-center-wrapper' v-if="cartList.invalid.length&&loadend">
-						<text class='loading iconfont icon-jiazai'
-							:hidden='loadingInvalid===false'></text>{{loadTitleInvalid}}
-					</view>
 				</view>
+        <!-- TODO -->
 				<view class='noCart' v-if="cartList.valid.length === 0 && cartList.invalid.length === 0 && canShow">
 					<view class='pictrue'>
 						<image src='../../static/images/noCart.png'></image>
@@ -106,7 +106,8 @@
 				</view>
 			</view>
 		</view>
-		<view class='footer acea-row row-between-wrapper' v-if="cartList.valid.length > 0">
+    <!-- TODO -->
+    <view class='footer acea-row row-between-wrapper' v-if="cartList.valid.length > 0">
 			<view>
 				<checkbox-group @change="checkboxAllChange">
 					<checkbox value="all" :checked="!!isAllSelect" />
@@ -128,49 +129,29 @@
 				</form>
 			</view>
 		</view>
-		<productWindow :attr="attr" :isShow='1' :iSplus='1' :iScart='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
+    <!-- SKU 不可用的商品，重新选择 SKU TODO -->
+    <productWindow :attr="attr" :isShow='1' :iSplus='1' :iScart='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
 			@ChangeCartNum="ChangeCartNum" @attrVal="attrVal" @iptCartNum="iptCartNum" @goCat="reGoCat"
 			id='product-window'></productWindow>
-		<view class="uni-p-b-96"></view>
-		<view class="uni-p-b-98"></view>
-		<!-- #ifdef MP -->
-		<!-- <authorize :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
+		<view class="uni-p-b-96" />
+		<view class="uni-p-b-98" />
 	</view>
 </template>
 
 <script>
 	let sysHeight = 0
-	import {
-		getCartList,
-		getCartCounts,
-		changeCartNum,
-		cartDel,
-		getResetCart
-	} from '@/api/order.js';
-	import {
-		getProductHot,
-		collectAll,
-		getProductDetail
-	} from '@/api/store.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
+	import { getCartCounts, changeCartNum, cartDel, getResetCart} from '@/api/order.js';
+	import { getProductHot, collectAll, getProductDetail } from '@/api/store.js';
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	import recommend from '@/components/recommend';
 	import productWindow from '@/components/productWindow';
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	export default {
+  import * as TradeCartApi from '@/api/trade/cart.js';
+  import * as Util from '@/utils/util.js';
+  export default {
 		components: {
 			recommend,
 			productWindow,
-			// #ifdef MP
-			authorize
-			// #endif
 		},
 		data() {
 			return {
@@ -178,28 +159,20 @@
 				goodsHidden: false,
 				footerswitch: true,
 				hostProduct: [],
+        hotPage: 1,
+        hotLimit: 10,
+        hotScroll: false,
+
 				cartList: {
 					valid: [],
 					invalid: []
 				},
-				isAllSelect: false, //全选
-				selectValue: [], //选中的数据
+				isAllSelect: false, // 是否全选
+				selectValue: [], // 选中的数据
 				selectCountPrice: 0.00,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				hotScroll: false,
-				hotPage: 1,
-				hotLimit: 10,
+
 				loading: false,
-				loadend: false,
 				loadTitle: '加载更多', //提示语
-				page: 1,
-				limit: 20,
-				loadingInvalid: false,
-				loadendInvalid: false,
-				loadTitleInvalid: '加载更多', //提示语
-				pageInvalid: 1,
-				limitInvalid: 20,
 				attr: {
 					cartAttr: false,
 					productAttr: [],
@@ -217,46 +190,37 @@
 		},
 		computed: mapGetters(['isLogin']),
 		onLoad: function(options) {
-			let that = this;
-			if (that.isLogin === false) {
+			if (!this.isLogin) {
 				toLogin();
 			}
 		},
 		onShow: function() {
 			this.canShow = false
 			if (this.isLogin === true) {
+        // 加载热门商品
 				this.hotPage = 1;
-				this.hostProduct = [],
-					this.hotScroll = false,
-					this.loadend = false;
-				this.page = 1;
-				this.cartList.valid = [];
-				this.getCartList();
-				this.loadendInvalid = false;
-				this.pageInvalid = 1;
-				this.cartList.invalid = [];
-				this.getInvalidList();
-				//this.getCartNum();
-				this.footerswitch = true;
+        this.hotLimit = 10;
+        this.hostProduct = [];
+        this.hotScroll = false;
+        this.loadend = false;
+
+        // 加载购物车列表
+        this.footerswitch = true;
 				this.hotScroll = false;
-				this.hotPage = 1;
-				this.hotLimit = 10;
 				this.cartList = {
           valid: [],
           invalid: []
         };
+        this.getCartList();
         this.isAllSelect = false; //全选
 				this.selectValue = []; //选中的数据
 				this.selectCountPrice = 0.00;
+
+        // TODO 芋艿：
 				this.cartCount = 0;
-				this.isShowAuth = false;
 			}
 		},
 		methods: {
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e;
-			},
 			// 修改购物车
 			reGoCat: function() {
 				let that = this,
@@ -284,7 +248,6 @@
 							title: "添加购物车成功",
 							success: () => {
 								that.loadend = false;
-								that.page = 1;
 								that.cartList.valid = [];
 								that.getCartList();
 								that.getCartNum();
@@ -460,7 +423,6 @@
 				if (selectValue.length > 0)
 					cartDel(selectValue).then(res => {
 						that.loadend = false;
-						that.page = 1;
 						that.cartList.valid = [];
 						that.getCartList();
 						that.getCartNum();
@@ -545,19 +507,19 @@
 					let newValid = valid.map(item => {
 						if (status) {
 							if (that.footerswitch) {
-								if (item.attrStatus) {
-									item.checked = true;
+								if (item.canChecked) {
+									item.selected = true;
 									selectValue.push(item.id);
 								} else {
-									item.checked = false;
+									item.selected = false;
 								}
 							} else {
-								item.checked = true;
+								item.selected = true;
 								selectValue.push(item.id);
 							}
 							that.isAllSelect = true;
 						} else {
-							item.checked = false;
+							item.selected = false;
 							that.isAllSelect = false;
 						}
 						return item;
@@ -577,27 +539,26 @@
 				let newValid = valid.map(item => {
 					if (that.inArray(item.id, value)) {
 						if (that.footerswitch) {
-							if (item.attrStatus) {
-								item.checked = true;
+							if (item.canChecked) {
+								item.selected = true;
 								arr1.push(item);
 							} else {
-								item.checked = false;
+								item.selected = false;
 							}
 						} else {
-							item.checked = true;
+							item.selected = true;
 							arr1.push(item);
 						}
 					} else {
-						item.checked = false;
+						item.selected = false;
 						arr2.push(item);
 					}
 					return item;
 				});
 				if (that.footerswitch) {
-					arr3 = arr2.filter(item => !item.attrStatus);
+					arr3 = arr2.filter(item => !item.canChecked);
 				}
 				that.$set(that.cartList, 'valid', newValid);
-				// let newArr = that.cartList.valid.filter(item => item.attrStatus);
 				that.isAllSelect = newValid.length === arr1.length + arr3.length;
 				that.selectValue = value;
 				that.switchSelect();
@@ -630,7 +591,6 @@
 			},
 			/**
 			 * 购物车手动填写
-			 *
 			 */
 			iptCartNum: function(index) {
 				let item = this.cartList.valid[index];
@@ -671,7 +631,6 @@
 				let that = this;
 				let item = that.cartList.valid[index];
 				item.cartNum = Number(item.cartNum) + 1;
-				let productInfo = item;
 				if (item.cartNum >= item.stock) {
 					item.cartNum = item.stock;
 					item.numAdd = true;
@@ -698,9 +657,9 @@
 					that.cartCount = res.data.count;
 				});
 			},
-			getCartData(data) {
+			getCartData() {
 				return new Promise((resolve, reject) => {
-					getCartList(data).then((res) => {
+          TradeCartApi.getCartList().then((res) => {
 						resolve(res.data);
 					}).catch(function(err) {
 						this.loading = false;
@@ -716,91 +675,43 @@
 					title: '加载中',
 					mask: true
 				});
-				let that = this;
-				let data = {
-					page: that.page,
-					limit: that.limit,
-					isValid: true
-				}
-				getCartCounts(true, 'sum').then(async c => {
-					that.cartCount = c.data.count;
-					if (c.data.count === 0) that.getHostProduct();
-					for (let i = 0; i < Math.ceil(that.cartCount / that.limit); i++) {
-						let cartList = await this.getCartData(data);
-						let valid = cartList.list;
-						let validList = that.$util.SplitArray(valid, that.cartList.valid);
-						let numSub = [{
-							numSub: true
-						}, {
-							numSub: false
-						}];
-						let numAdd = [{
-								numAdd: true
-							}, {
-								numAdd: false
-							}],
-							selectValue = [];
-						if (validList.length > 0) {
-							for (let index in validList) {
-								if (validList[index].cartNum === 1) {
-									validList[index].numSub = true;
-								} else {
-									validList[index].numSub = false;
-								}
-								let productInfo = validList[index];
-								let stock = validList[index].stock ? validList[index].stock : 0;
-								if (validList[index].cartNum == stock) {
-									validList[index].numAdd = true;
-								} else if (validList[index].cartNum == validList[index].stock) {
-									validList[index].numAdd = true;
-								} else {
-									validList[index].numAdd = false;
-								}
-								if (validList[index].attrStatus) {
-									validList[index].checked = true;
-									selectValue.push(validList[index].id);
-								} else {
-									validList[index].checked = false;
-								}
-							}
-						}
-						that.$set(that.cartList, 'valid', validList);
-						data.page += 1;
-						that.selectValue = selectValue;
-						let newArr = validList.filter(item => item.attrStatus);
-						that.isAllSelect = newArr.length === selectValue.length && newArr.length;
-						that.switchSelect();
-					}
+        // 加载购物车
+        const cartList = await this.getCartData();
+        const validList = cartList.validList;
+        const invalidList = cartList.invalidList;
 
-					that.loading = false;
-					that.canShow = true;
-					uni.hideLoading();
-				});
-			},
-			getInvalidList: function() {
-				let that = this;
-				if (this.loadendInvalid) return false;
-				if (this.loadingInvalid) return false;
-				let data = {
-					page: that.pageInvalid,
-					limit: that.limitInvalid,
-					isValid: false
-				}
-				getCartList(data).then(res => {
-					let invalid = res.data.list,
-						loadendInvalid = invalid.length < that.limitInvalid;
-					let invalidList = that.$util.SplitArray(invalid, that.cartList.invalid);
-					that.$set(that.cartList, 'invalid', invalidList);
-					that.loadendInvalid = loadendInvalid;
-					that.loadTitleInvalid = loadendInvalid ? '我也是有底线的' : '加载更多';
-					that.pageInvalid = that.pageInvalid + 1;
-					that.loadingInvalid = false;
-					//if(invalid.length===0) that.getHostProduct();
-				}).catch(res => {
-					that.loadingInvalid = false;
-					that.loadTitleInvalid = '加载更多';
-				})
+        // 有效的购物车
+        const selectValue = [];
+        if (validList.length > 0) {
+          for (let index in validList) {
+            // 设置是否可减少（到底，不可减少）
+            validList[index].numSub = validList[index].cartNum === 1;
+            // 设置是否可添加（到顶，不可添加）
+            const sku = validList[index].sku;
+            validList[index].numAdd = !!(sku && validList[index].count === sku.stock);
+            // 设置为选中，并添加到 selectValue 数组中
+            // why？库存不足时，可以引导选择该 SPU 对应的其它 SKU。而 invalidList 是 SPU 不存在或者库存彻底不足
+            if (sku && sku.stock > 0) {
+              validList[index].canChecked = true; // 是否可选中：是
+              selectValue.push(validList[index].id);
+            } else {
+              validList[index].canChecked = false; // 是否可选中：否
+            }
+          }
+        }
+        this.$set(this.cartList, 'valid', validList);
+        this.selectValue = selectValue;
+        let newArr = validList.filter(item => item.canChecked);
+        this.isAllSelect = newArr.length === selectValue.length && newArr.length;
+        this.switchSelect();
 
+        // 无效的购物车
+        this.$set(this.cartList, 'invalid', invalidList);
+
+        // 标记加载结束
+        this.loading = false;
+        this.canShow = true;
+        uni.hideLoading();
 			},
 			getHostProduct: function() {
 				let that = this;
@@ -825,16 +736,16 @@
 				let arr2 = [];
 				let newValid = that.cartList.valid.map(item => {
 					if (that.footerswitch) {
-						if (item.attrStatus) {
-							if (item.checked) {
+						if (item.canChecked) {
+							if (item.selected) {
 								arr1.push(item.id);
 							}
 						} else {
-							item.checked = false;
+							item.selected = false;
 							arr2.push(item);
 						}
 					} else {
-						if (item.checked) {
+						if (item.selected) {
 							arr1.push(item.id);
 						}
 					}
@@ -864,13 +775,18 @@
 				}).catch(res => {
 
 				});
-			}
+			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		},
 		onReachBottom() {
+      // TODO 芋艿：临时禁用
+      if (true) {
+        return;
+      }
 			let that = this;
-			if (that.loadend) {
-				that.getInvalidList();
-			}
 			if (that.cartList.valid.length == 0 && that.cartList.invalid.length == 0 && this.hotPage != 1) {
 				that.getHostProduct();
 			}
