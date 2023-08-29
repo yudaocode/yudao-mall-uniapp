@@ -114,8 +114,8 @@
 					<text class='checkAll'>全选({{selectValue.length}})</text>
 				</checkbox-group>
 			</view>
-			<view class='money acea-row row-middle' v-if="footerswitch==true">
-				<text class='font-color'>￥{{selectCountPrice}}</text>
+			<view class='money acea-row row-middle' v-if="footerswitch">
+				<text class='font-color'>￥{{ fen2yuan(selectCountPrice) }}</text>
 				<form @submit="subOrder" report-submit='true'>
 					<button class='placeOrder bg-color' formType="submit">立即下单</button>
 				</form>
@@ -140,7 +140,7 @@
 
 <script>
 	let sysHeight = 0
-	import { getCartCounts, changeCartNum, cartDel, getResetCart} from '@/api/order.js';
+	import { cartDel, getResetCart } from '@/api/order.js';
 	import { getProductHot, collectAll, getProductDetail } from '@/api/store.js';
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
@@ -155,7 +155,6 @@
 		},
 		data() {
 			return {
-				cartCount: 0,
 				goodsHidden: false,
 				footerswitch: true,
 				hostProduct: [],
@@ -163,13 +162,14 @@
         hotLimit: 10,
         hotScroll: false,
 
-				cartList: {
-					valid: [],
-					invalid: []
+				cartList: { // 购物车列表
+					valid: [], // 有效
+					invalid: [] // 无效
 				},
 				isAllSelect: false, // 是否全选
 				selectValue: [], // 选中的数据
-				selectCountPrice: 0.00,
+				selectCountPrice: 0.00, // 选中的金额
+        cartCount: 0, // 选中的商品数量
 
 				loading: false,
 				loadTitle: '加载更多', //提示语
@@ -211,13 +211,11 @@
           valid: [],
           invalid: []
         };
+        this.isAllSelect = false; // 全选
+        this.selectValue = []; // 选中的数据
+        this.selectCountPrice = 0.00;
+        this.cartCount = 0;
         this.getCartList();
-        this.isAllSelect = false; //全选
-				this.selectValue = []; //选中的数据
-				this.selectCountPrice = 0.00;
-
-        // TODO 芋艿：
-				this.cartCount = 0;
 			}
 		},
 		methods: {
@@ -250,7 +248,6 @@
 								that.loadend = false;
 								that.cartList.valid = [];
 								that.getCartList();
-								that.getCartNum();
 							}
 						});
 					})
@@ -425,7 +422,6 @@
 						that.loadend = false;
 						that.cartList.valid = [];
 						that.getCartList();
-						that.getCartNum();
 					});
 				else
 					return that.$util.Tips({
@@ -443,7 +439,7 @@
 							productId.push(validList[index].productId);
 						}
 					}
-				};
+				}
 				return productId;
 			},
 			subCollect: function(event) {
@@ -563,31 +559,27 @@
 				that.selectValue = value;
 				that.switchSelect();
 			},
-			inArray: function(search, array) {
-				for (let i in array) {
-					if (array[i] == search) {
-						return true;
-					}
-				}
-				return false;
-			},
+      /**
+       * 合计金额、数量
+       */
 			switchSelect: function() {
-				let that = this;
-				let validList = that.cartList.valid;
-				let selectValue = that.selectValue;
-				let selectCountPrice = 0.00;
+				const validList = this.cartList.valid;
+        const selectValue = this.selectValue;
 				if (selectValue.length < 1) {
-					that.selectCountPrice = selectCountPrice;
-				} else {
-					for (let index in validList) {
-						if (that.inArray(validList[index].id, selectValue)) {
-							selectCountPrice = that.$util.$h.Add(selectCountPrice, that.$util.$h.Mul(validList[index]
-								.cartNum, validList[
-									index].price))
-						}
-					}
-					that.selectCountPrice = selectCountPrice;
+					this.selectCountPrice = 0.00;
+          return;
 				}
+        // 合计金额
+        let selectCountPrice = 0.00;
+        let cartCount = 0
+        for (let index in validList) {
+          if (this.inArray(validList[index].id, selectValue)) {
+            selectCountPrice = this.$util.$h.Add(selectCountPrice, this.$util.$h.Mul(validList[index].count, validList[index].sku.price))
+            cartCount += validList[index].count
+          }
+        }
+        this.selectCountPrice = selectCountPrice;
+        this.cartCount = cartCount;
 			},
 			/**
 			 * 购物车手动填写
@@ -606,55 +598,57 @@
 					this.$set(this.cartList, 'valid', this.cartList.valid)
 				}
 			},
+      /**
+       * 减少购买数量
+       */
 			subCart: function(index) {
-				let that = this;
-				let status = false;
-				let item = that.cartList.valid[index];
-				item.cartNum = Number(item.cartNum) - 1;
-				if (item.cartNum < 1) status = true;
-				if (item.cartNum <= 1) {
-					item.cartNum = 1;
+				let item = this.cartList.valid[index];
+        if (item.count < 1) {
+          this.$util.Tips({
+            title: '商品数量不能减少！'
+          });
+          return;
+        }
+        // 本地先修改状态
+        item.count = Number(item.count) - 1;
+				if (item.count <= 1) {
+					item.count = 1;
 					item.numSub = true;
 				} else {
 					item.numSub = false;
 					item.numAdd = false;
 				}
-				if (false == status) {
-					that.setCartNum(item.id, item.cartNum, function(data) {
-						that.cartList.valid[index] = item;
-						that.switchSelect();
-						that.getCartNum();
-					});
-				}
+        // 提交修改
+        this.setCartNum(item.id, item.count);
 			},
+      /**
+       * 增加购买数量
+       */
 			addCart: function(index) {
-				let that = this;
-				let item = that.cartList.valid[index];
-				item.cartNum = Number(item.cartNum) + 1;
-				if (item.cartNum >= item.stock) {
-					item.cartNum = item.stock;
+        // 本地先修改状态
+				let item = this.cartList.valid[index];
+        item.count = Number(item.count) + 1
+				if (item.count >= item.sku.stock) {
+					item.count = item.sku.stock;
 					item.numAdd = true;
 					item.numSub = false;
 				} else {
 					item.numAdd = false;
 					item.numSub = false;
 				}
-				that.setCartNum(item.id, item.cartNum, function(data) {
-					that.cartList.valid[index] = item;
-					that.switchSelect();
-					that.getCartNum();
-				});
+        // 提交修改
+				this.setCartNum(item.id, item.count);
 			},
-			setCartNum(cartId, cartNum, successCallback) {
-				let that = this;
-				changeCartNum(cartId, cartNum).then(res => {
-					successCallback && successCallback(res.data);
-				});
-			},
-			getCartNum: function() {
-				let that = this;
-				getCartCounts(true, 'sum').then(res => {
-					that.cartCount = res.data.count;
+      /**
+       * 修改购物项为指定数量
+       */
+			setCartNum(cartId, cartNum) {
+        TradeCartApi.updateCart({
+          id: cartId,
+          count: cartNum
+        }).then(res => {
+          // 加载最新状态
+          this.getCartList()
 				});
 			},
 			getCartData() {
@@ -688,7 +682,7 @@
             validList[index].numSub = validList[index].cartNum === 1;
             // 设置是否可添加（到顶，不可添加）
             const sku = validList[index].sku;
-            validList[index].numAdd = !!(sku && validList[index].count === sku.stock);
+            validList[index].numAdd = sku && validList[index].count < sku.stock;
             // 设置为选中，并添加到 selectValue 数组中
             // why？库存不足时，可以引导选择该 SPU 对应的其它 SKU。而 invalidList 是 SPU 不存在或者库存彻底不足
             if (sku && sku.stock > 0) {
@@ -779,7 +773,15 @@
 
       fen2yuan(price) {
         return Util.fen2yuan(price)
-      }
+      },
+      inArray: function(search, array) {
+        for (let i in array) {
+          if (array[i] === search) {
+            return true;
+          }
+        }
+        return false;
+      },
 		},
 		onReachBottom() {
       // TODO 芋艿：临时禁用
