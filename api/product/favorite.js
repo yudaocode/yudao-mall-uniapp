@@ -19,6 +19,13 @@ export function createFavorite(spuId) {
   });
 }
 
+// 添加多个商品收藏
+export function createFavoriteList(spuIds) {
+  return request.post('app-api/product/favorite/create-list', {
+    spuIds
+  });
+}
+
 // 取消商品收藏
 export function deleteFavorite(spuId) {
   return request.delete('app-api/product/favorite/delete', {

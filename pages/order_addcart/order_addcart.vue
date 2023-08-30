@@ -43,7 +43,6 @@
                         <text v-for="property in item.sku.properties" style="padding-left: 2px">{{property.valueName}}</text>
                       </view>
 											<view class='money' v-if="item.canChecked">￥{{ fen2yuan(item.sku.price) }}</view>
-											<!-- TODO 芋艿：重选 -->
                       <view class="reElection acea-row row-between-wrapper" v-else>
 												<view class="title">请重新选择商品规格</view>
 												<view class="reBnt cart-color acea-row row-center-wrapper" @click.stop="reElection(item)">重选</view>
@@ -97,16 +96,16 @@
 						</view>
 					</view>
 				</view>
-        <!-- TODO -->
+        <!-- 热门推荐 -->
 				<view class='noCart' v-if="cartList.valid.length === 0 && cartList.invalid.length === 0 && canShow">
 					<view class='pictrue'>
-						<image src='../../static/images/noCart.png'></image>
+						<image src='../../static/images/noCart.png' />
 					</view>
 					<recommend :hostProduct='hostProduct'></recommend>
 				</view>
 			</view>
 		</view>
-    <!-- TODO -->
+    <!-- 管理操作 -->
     <view class='footer acea-row row-between-wrapper' v-if="cartList.valid.length > 0">
 			<view>
 				<checkbox-group @change="checkboxAllChange">
@@ -129,10 +128,18 @@
 				</form>
 			</view>
 		</view>
-    <!-- SKU 不可用的商品，重新选择 SKU TODO -->
-    <productWindow :attr="attr" :isShow='1' :iSplus='1' :iScart='1' @myevent="onMyEvent" @ChangeAttr="ChangeAttr"
-			@ChangeCartNum="ChangeCartNum" @attrVal="attrVal" @iptCartNum="iptCartNum" @goCat="reGoCat"
-			id='product-window'></productWindow>
+    <!-- SKU 不可用的商品，重新选择 SKU -->
+    <productWindow
+      :attr="attr"
+      :isShow='1'
+      :iSplus='1'
+      :iScart='1'
+      @ChangeAttr="ChangeAttr"
+			@ChangeCartNum="ChangeCartNum"
+      @iptCartNum="iptCartNum"
+      @close="closeAttr"
+      @goCat="reGoCat"
+    />
 		<view class="uni-p-b-96" />
 		<view class="uni-p-b-98" />
 	</view>
@@ -140,14 +147,16 @@
 
 <script>
   let sysHeight = 0
-	import { cartDel, getResetCart } from '@/api/order.js';
-	import { getProductHot, collectAll, getProductDetail } from '@/api/store.js';
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
 	import recommend from '@/components/recommend';
 	import productWindow from '@/components/productWindow';
   import * as TradeCartApi from '@/api/trade/cart.js';
+  import * as ProductSpuApi from '@/api/product/spu.js'
+  import * as ProductFavoriteApi from '@/api/product/favorite.js';
   import * as Util from '@/utils/util.js';
+  import * as ProductUtil from '@/utils/product.js';
+  import * as PromotionActivityApi from '@/api/promotion/activity.js';
   export default {
 		components: {
 			recommend,
@@ -155,13 +164,15 @@
 		},
 		data() {
 			return {
-				goodsHidden: false,
+        sysHeight: sysHeight,
+        goodsHidden: false,
 				footerswitch: true,
 				hostProduct: [],
         hotPage: 1,
         hotLimit: 10,
         hotScroll: false,
 
+        // 购物车列表
 				cartList: { // 购物车列表
 					valid: [], // 有效
 					invalid: [] // 无效
@@ -170,22 +181,20 @@
 				selectValue: [], // 选中的数据
 				selectCountPrice: 0.00, // 选中的金额
         cartCount: 0, // 选中的商品数量
+        canShow: false, // 是否可展示
 
-				loading: false,
-				loadTitle: '加载更多', //提示语
-				attr: {
-					cartAttr: false,
-					productAttr: [],
-					productSelect: {}
+        // 重选
+        cartId: 0, // 重选的 cart id
+        product_id: 0, // 重选的 SPU 编号
+        attr: {  // productWindow 组件，使用该属性
+					cartAttr: false,  // 是否打开属性的选择弹出
+          // ↓↓↓ 属性数组，结构为：id = 属性编号；name = 属性编号的名字；values[].id = 属性值的编号，values[].name = 属性值的名字；index = 选中的属性值的名字
+					properties: [],
+					productSelect: {} // 选中的 SKU
 				},
-				productValue: [], //系统属性
-				productInfo: {},
-				attrValue: '', //已选属性
-				attrTxt: '请选择', //属性页面提示
-				cartId: 0,
-				product_id: 0,
-				sysHeight: sysHeight,
-				canShow: false
+        spu: {}, // 商品 SPU 详情
+        skuMap: [], // 商品 SKU Map
+        attrValue: '', // 已选属性名的拼接，例如说 红色,大 这样的格式
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -203,6 +212,7 @@
         this.hostProduct = [];
         this.hotScroll = false;
         this.loadend = false;
+        this.getHostProduct()
 
         // 加载购物车列表
         this.footerswitch = true;
@@ -219,262 +229,225 @@
 			}
 		},
 		methods: {
-			// 修改购物车
+      /**
+       * 修改购物车
+       */
 			reGoCat: function() {
-				let that = this,
-					productSelect = that.productValue[this.attrValue];
-				//如果有属性,没有选择,提示用户选择
-				if (
-					that.attr.productAttr.length &&
-					productSelect === undefined
-				)
-					return that.$util.Tips({
+				const productSelect = this.skuMap[this.attrValue];
+				// 如果有属性,没有选择,提示用户选择
+				if (this.attr.properties.length &&
+          productSelect === undefined) {
+					return this.$util.Tips({
 						title: "产品库存不足，请选择其它"
 					});
+        }
 
-				let q = {
-					id: that.cartId,
-					productId: that.product_id,
-					num: that.attr.productSelect.cart_num,
-					unique: that.attr.productSelect !== undefined ?
-						that.attr.productSelect.unique : that.productInfo.id
-				};
-				getResetCart(q)
-					.then(function(res) {
-						that.attr.cartAttr = false;
-						that.$util.Tips({
-							title: "添加购物车成功",
-							success: () => {
-								that.loadend = false;
-								that.cartList.valid = [];
-								that.getCartList();
-							}
-						});
-					})
-					.catch(res => {
-						return that.$util.Tips({
-							title: res
-						});
-					});
+        TradeCartApi.resetCart({
+          id: this.cartId,
+          skuId: this.attr.productSelect.id,
+          count: this.attr.productSelect.cart_num
+        }).then(res => {
+          this.attr.cartAttr = false;
+          this.$util.Tips({
+            title: this.$t(`添加购物车成功`)
+          });
+          this.cartList.valid = [];
+          this.getCartList();
+        }).catch(res => {
+          return this.$util.Tips({
+            title: res
+          });
+        });
 			},
-			onMyEvent: function() {
-				this.$set(this.attr, 'cartAttr', false);
-			},
+      /**
+       * 重选 SKU
+       */
 			reElection: function(item) {
 				this.getGoodsDetails(item)
 			},
 			/**
 			 * 获取产品详情
-			 *
 			 */
 			getGoodsDetails: function(item) {
 				uni.showLoading({
 					title: '加载中',
 					mask: true
 				});
-				let that = this;
-				that.cartId = item.id;
-				that.product_id = item.productId;
-				getProductDetail(item.productId).then(res => {
-					uni.hideLoading();
-					that.attr.cartAttr = true;
-					let productInfo = res.data.productInfo;
-					that.$set(that, 'productInfo', productInfo);
-					that.$set(that.attr, 'productAttr', res.data.productAttr);
-					that.$set(that, 'productValue', res.data.productValue);
-					that.DefaultSelect();
-				}).catch(err => {
-					uni.hideLoading();
-				})
+        this.cartId = item.id;
+        this.product_id = item.spu.id;
+        ProductSpuApi.getSpuDetail(item.spu.id).then(res => {
+          uni.hideLoading();
+          this.attr.cartAttr = true;
+          let spu = res.data;
+          let properties = ProductUtil.convertProductPropertyList(res.data.skus);
+          let skuMap = ProductUtil.convertProductSkuMap(res.data.skus);
+          // 设置变量
+          this.$set(this, 'spu', spu);
+          this.$set(this.attr, 'properties', properties);
+          this.$set(this, 'skuMap', skuMap);
+          this.selectDefaultSku();
+        }).catch(err => {
+          uni.hideLoading();
+        })
 			},
+      /**
+       * 关闭 productWindow 弹窗
+       */
+      closeAttr: function () {
+        this.$set(this.attr, "cartAttr", false);
+      },
 			/**
-			 * 属性变动赋值
-			 *
+       * 属性变动赋值
+       *
+       * @param newSkuKey 新的 skuKey
+       * @param propertyIndex properties 的下标
+       * @param valueIndex values 的下标
 			 */
-			ChangeAttr: function(res) {
-				let productSelect = this.productValue[res];
-				if (productSelect && productSelect.stock > 0) {
-					this.$set(this.attr.productSelect, "image", productSelect.image);
-					this.$set(this.attr.productSelect, "price", productSelect.price);
-					this.$set(this.attr.productSelect, "stock", productSelect.stock);
-					this.$set(this.attr.productSelect, "unique", productSelect.id);
-					this.$set(this.attr.productSelect, "cart_num", 1);
-					this.$set(this, "attrValue", res);
-					this.$set(this, "attrTxt", "已选择");
-				} else {
-					this.$set(this.attr.productSelect, "image", this.productInfo.image);
-					this.$set(this.attr.productSelect, "price", this.productInfo.price);
-					this.$set(this.attr.productSelect, "stock", 0);
-					this.$set(this.attr.productSelect, "unique", this.productInfo.id);
-					this.$set(this.attr.productSelect, "cart_num", 0);
-					this.$set(this, "attrValue", "");
-					this.$set(this, "attrTxt", "请选择");
-				}
+			ChangeAttr: function(newSkuKey, propertyIndex, valueIndex) {
+        // SKU
+        let sku = this.skuMap[newSkuKey];
+        if (!sku) {
+          return;
+        }
+        this.$set(this.attr.productSelect, "id", sku.id);
+        this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
+        this.$set(this.attr.productSelect, "price", sku.price);
+        this.$set(this.attr.productSelect, "stock", sku.stock);
+        this.$set(this.attr.productSelect, "cart_num", 1);
+        // SKU 关联属性
+        this.$set(this.attr.properties[propertyIndex], 'index',
+          this.attr.properties[propertyIndex].values[valueIndex].name);
+        this.$set(this, "attrValue", newSkuKey);
 			},
-			/**
-			 * 默认选中属性
-			 *
-			 */
-			DefaultSelect: function() {
-				let productAttr = this.attr.productAttr;
-				let value = [];
-				for (let key in this.productValue) {
-					if (this.productValue[key].stock > 0) {
-						value = this.attr.productAttr.length ? key.split(",") : [];
-						break;
-					}
-				}
-				for (let i = 0; i < productAttr.length; i++) {
-					this.$set(productAttr[i], "index", value[i]);
-				}
-				//sort();排序函数:数字-英文-汉字；
-				let productSelect = this.productValue[value.sort().join(",")];
-				if (productSelect && productAttr.length) {
-					this.$set(
-						this.attr.productSelect,
-						"storeName",
-						this.productInfo.storeName
-					);
-					this.$set(this.attr.productSelect, "image", productSelect.image);
-					this.$set(this.attr.productSelect, "price", productSelect.price);
-					this.$set(this.attr.productSelect, "stock", productSelect.stock);
-					this.$set(this.attr.productSelect, "unique", productSelect.id);
-					this.$set(this.attr.productSelect, "cart_num", 1);
-					this.$set(this, "attrValue", value.sort().join(","));
-					this.$set(this, "attrTxt", "已选择");
-				} else if (!productSelect && productAttr.length) {
-					this.$set(
-						this.attr.productSelect,
-						"storeName",
-						this.productInfo.storeName
-					);
-					this.$set(this.attr.productSelect, "image", this.productInfo.image);
-					this.$set(this.attr.productSelect, "price", this.productInfo.price);
-					this.$set(this.attr.productSelect, "stock", 0);
-					this.$set(this.attr.productSelect, "unique", this.productInfo.id);
-					this.$set(this.attr.productSelect, "cart_num", 0);
-					this.$set(this, "attrValue", "");
-					this.$set(this, "attrTxt", "请选择");
-				} else if (!productSelect && !productAttr.length) {
-					this.$set(
-						this.attr.productSelect,
-						"storeName",
-						this.productInfo.storeName
-					);
-					this.$set(this.attr.productSelect, "image", this.productInfo.image);
-					this.$set(this.attr.productSelect, "price", this.productInfo.price);
-					this.$set(this.attr.productSelect, "stock", this.productInfo.stock);
-					this.$set(
-						this.attr.productSelect,
-						"unique",
-						this.productInfo.id || ""
-					);
-					this.$set(this.attr.productSelect, "cart_num", 1);
-					this.$set(this, "attrValue", "");
-					this.$set(this, "attrTxt", "请选择");
-				}
-			},
-			attrVal(val) {
-				this.$set(this.attr.productAttr[val.indexw], 'index', this.attr.productAttr[val.indexw].attrValues[val
-					.indexn]);
+      /**
+       * 查找默认选中的 sku，设置到 attr.productSelect 中
+       *
+       * 先找有库存的 SKU，否则找第一个 SKU
+       */
+			selectDefaultSku: function() {
+        const properties = this.attr.properties;
+        // 获得选中的属性值的名字，例如说 "黑色,大"，则 skuKey = ["黑色", "大"]
+        let skuKey = undefined;
+        for (let key in this.skuMap) {
+          if (this.skuMap[key].stock > 0) {
+            skuKey = key.split(",");
+            break;
+          }
+        }
+        if (!skuKey) { // 如果找不到，则选中第一个
+          skuKey = Object.keys(this.skuMap)[0].split(",");
+        }
+        // 使用 index 属性表示当前选中的，值为属性值的名字
+        for (let i = 0; i < properties.length; i++) {
+          this.$set(properties[i], "index", skuKey[i]);
+        }
+
+        let sku = this.skuMap[skuKey.join(",")];
+        if (!sku) {
+          return
+        }
+        this.$set(this.attr.productSelect, "spuName", this.spu.name);
+        this.$set(this.attr.productSelect, "id", sku.id);
+        this.$set(this.attr.productSelect, "picUrl", sku.picUrl);
+        this.$set(this.attr.productSelect, "price", sku.price);
+        this.$set(this.attr.productSelect, "stock", sku.stock);
+        this.$set(this.attr.productSelect, "cart_num", 1);
+        this.$set(this, "attrValue", skuKey.join(","));
 			},
 			/**
 			 * 购物车数量加和数量减
-			 *
+       *
+       * @param changeValue true 增加；false 减少
 			 */
 			ChangeCartNum: function(changeValue) {
-				//changeValue:是否 加|减
-				//获取当前变动属性
-				let productSelect = this.productValue[this.attrValue];
-				//如果没有属性,赋值给商品默认库存
-				if (productSelect === undefined && !this.attr.productAttr.length)
-					productSelect = this.attr.productSelect;
-				//无属性值即库存为0；不存在加减；
-				if (productSelect === undefined) return;
-				let stock = productSelect.stock || 0;
-				let num = this.attr.productSelect;
-				if (changeValue) {
-					num.cart_num++;
-					if (num.cart_num > stock) {
-						this.$set(this.attr.productSelect, "cart_num", stock ? stock : 1);
-						this.$set(this, "cart_num", stock ? stock : 1);
-					}
-				} else {
-					num.cart_num--;
-					if (num.cart_num < 1) {
-						this.$set(this.attr.productSelect, "cart_num", 1);
-						this.$set(this, "cart_num", 1);
-					}
-				}
+				/// 获取当前 sku
+        let sku = this.attr.productSelect;
+        if (!sku) {
+          return;
+        }
+
+        // 设置数量
+        let stock = sku.stock || 0;
+        if (changeValue) {
+          sku.cart_num++;
+          if (sku.cart_num > stock) {
+            this.$set(this.attr.productSelect, "cart_num", stock);
+          }
+        } else {
+          sku.cart_num--;
+          if (sku.cart_num < 1) {
+            this.$set(this.attr.productSelect, "cart_num", 1);
+          }
+        }
 			},
 			/**
 			 * 购物车手动填写
-			 *
 			 */
-			iptCartNum: function(e) {
-				this.$set(this.attr.productSelect, 'cart_num', e);
+			iptCartNum: function(number) {
+        this.$set(this.attr.productSelect, 'cart_num', number ? number : 1);
 			},
+      /**
+       * 删除选中的商品
+       */
 			subDel: function(event) {
-				let that = this,
-					selectValue = that.selectValue;
-				if (selectValue.length > 0)
-					cartDel(selectValue).then(res => {
-						that.loadend = false;
-						that.cartList.valid = [];
-						that.getCartList();
-					});
-				else
-					return that.$util.Tips({
-						title: '请选择产品'
-					});
+        const selectValue = this.selectValue;
+        if (selectValue.length === 0) {
+          return this.$util.Tips({
+            title: '请选择产品'
+          });
+        }
+        TradeCartApi.deleteCart(selectValue).then(res => {
+          this.getCartList();
+        });
 			},
 			getSelectValueProductId: function() {
-				let that = this;
-				let validList = that.cartList.valid;
-				let selectValue = that.selectValue;
+				const validList = this.cartList.valid;
+				const selectValue = this.selectValue;
 				let productId = [];
 				if (selectValue.length > 0) {
 					for (let index in validList) {
-						if (that.inArray(validList[index].id, selectValue)) {
-							productId.push(validList[index].productId);
+						if (this.inArray(validList[index].id, selectValue)) {
+							productId.push(validList[index].spu.id);
 						}
 					}
 				}
 				return productId;
 			},
+      /**
+       * 收藏选中的商品
+       */
 			subCollect: function(event) {
-				let that = this,
-					selectValue = that.selectValue;
-				if (selectValue.length > 0) {
-					let selectValueProductId = that.getSelectValueProductId();
-					collectAll(that.getSelectValueProductId()).then(res => {
-						return that.$util.Tips({
-							title: '收藏成功',
-							icon: 'success'
-						});
-					}).catch(err => {
-						return that.$util.Tips({
-							title: err
-						});
-					});
-				} else {
-					return that.$util.Tips({
-						title: '请选择产品'
-					});
-				}
-			},
-			// 立即下单
-			subOrder: function(event) {
+				const spuIds = this.getSelectValueProductId();
+        if (spuIds.length === 0) {
+          return this.$util.Tips({
+            title: '请选择产品'
+          });
+        }
 
-				let that = this,
-					selectValue = that.selectValue;
-				if (selectValue.length > 0) {
-					that.getPreOrder();
-				} else {
-					return that.$util.Tips({
-						title: '请选择产品'
-					});
-				}
+        ProductFavoriteApi.createFavoriteList(spuIds).then(res => {
+          return this.$util.Tips({
+            title: '收藏成功',
+            icon: 'success'
+          });
+        }).catch(err => {
+          return that.$util.Tips({
+            title: err
+          });
+        });
+			},
+      /**
+       * 立即下单
+       */
+			subOrder: function(event) {
+        const selectValue = this.selectValue;
+        if (selectValue.length === 0) {
+          return this.$util.Tips({
+            title: '请选择产品'
+          });
+        }
+        uni.navigateTo({
+          url: '/pages/users/order_confirm/index?cartIds=' + selectValue.join(',')
+        });
 			},
 			/**
 			 * 预下单
@@ -487,6 +460,9 @@
 				})
 				this.$Order.getPreOrder("shoppingCart", shoppingCartId);
 			},
+      /**
+       * 全选 / 全不选
+       */
 			checkboxAllChange: function(event) {
 				let value = event.detail.value;
 				if (value.length > 0) {
@@ -565,7 +541,6 @@
               } else {
                 isAllSelect = false;
               }
-              continue;
             } else {
               if (!this.footerswitch && item.selected) {
                 selectValue.push(item.id);
@@ -591,23 +566,6 @@
         }
         this.selectCountPrice = selectCountPrice;
         this.cartCount = cartCount;
-			},
-			/**
-			 * 购物车手动填写
-			 */
-			iptCartNum: function(index) {
-				let item = this.cartList.valid[index];
-				if (item.cartNum) {
-					this.setCartNum(item.id, item.cartNum);
-				}
-				this.switchSelect();
-			},
-			blurInput: function(index) {
-				let item = this.cartList.valid[index];
-				if (!item.cartNum) {
-					item.cartNum = 1;
-					this.$set(this.cartList, 'valid', this.cartList.valid)
-				}
 			},
       /**
        * 减少购买数量
@@ -654,7 +612,7 @@
        * 修改购物项为指定数量
        */
 			setCartNum(cartId, cartNum) {
-        TradeCartApi.updateCart({
+        TradeCartApi.updateCartCount({
           id: cartId,
           count: cartNum
         }).then(res => {
@@ -667,7 +625,6 @@
           TradeCartApi.getCartList().then((res) => {
 						resolve(res.data);
 					}).catch(function(err) {
-						this.loading = false;
 						this.canShow = true;
 						this.$util.Tips({
 							title: err
@@ -709,25 +666,35 @@
         this.$set(this.cartList, 'invalid', invalidList);
 
         // 标记加载结束
-        this.loading = false;
         this.canShow = true;
         uni.hideLoading();
 			},
+
+      /**
+       * 获得“热门推荐”
+       */
 			getHostProduct: function() {
-				let that = this;
-				if (that.hotScroll) return
-				getProductHot(
-					that.hotPage,
-					that.hotLimit,
-				).then(res => {
-					that.hotPage++
-					that.hotScroll = res.data.list.length < that.hotLimit
-					that.hostProduct = that.hostProduct.concat(res.data.list)
-				});
+        ProductSpuApi.getSpuPage({
+          recommendType: 'hot',
+          pageNo: this.hotPage,
+          pageSize: this.hotLimit
+        }).then(res => {
+          const good_list = res.data.list;
+          this.hotPage++
+          this.hotScroll = good_list.length < this.hotLimit
+
+          // 设置营销活动
+          const spuIds = good_list.map(item => item.id);
+          if (spuIds.length > 0) {
+            PromotionActivityApi.getActivityListBySpuIds(spuIds).then(res => {
+              ProductUtil.setActivityList(good_list, res.data);
+              this.hostProduct = this.hostProduct.concat(good_list) // 放在此处，避免 Vue 监控不到数组里的元素变化
+            });
+          }
+        });
 			},
 			goodsOpen: function() {
-				let that = this;
-				that.goodsHidden = !that.goodsHidden;
+				this.goodsHidden = !this.goodsHidden;
 			},
       /**
        * 切换到管理
@@ -736,21 +703,21 @@
 				this.footerswitch = !this.footerswitch;
 				this.switchSelect();
 			},
+      /**
+       * 清空
+       */
 			unsetCart: function() {
-				let that = this,
-					ids = [];
-				for (let i = 0, len = that.cartList.invalid.length; i < len; i++) {
-					ids.push(that.cartList.invalid[i].id);
-				}
-				cartDel(ids).then(res => {
-					that.$util.Tips({
-						title: '清除成功'
-					});
-					that.$set(that.cartList, 'invalid', []);
-					that.getHostProduct();
-				}).catch(res => {
-
-				});
+        const ids = [];
+        for (let i = 0, len = this.cartList.invalid.length; i < len; i++) {
+          ids.push(this.cartList.invalid[i].id);
+        }
+        TradeCartApi.deleteCart(ids).then(res => {
+          this.$util.Tips({
+            title: '清除成功'
+          });
+          this.getCartList()
+        }).catch(res => {
+        });
 			},
 
       fen2yuan(price) {
@@ -766,13 +733,10 @@
       },
 		},
 		onReachBottom() {
-      // TODO 芋艿：临时禁用
-      if (true) {
-        return;
-      }
-			let that = this;
-			if (that.cartList.valid.length == 0 && that.cartList.invalid.length == 0 && this.hotPage != 1) {
-				that.getHostProduct();
+			if (this.cartList.valid.length === 0
+        && this.cartList.invalid.length === 0
+        && this.hotPage != 1) {
+				this.getHostProduct();
 			}
 		}
 	}
