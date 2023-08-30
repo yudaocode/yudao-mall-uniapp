@@ -4,8 +4,12 @@ export function addCart(data) {
   return request.post("app-api/trade/cart/add", data);
 }
 
-export function updateCart(data) {
-  return request.put("app-api/trade/cart/update", data);
+export function updateCartCount(data) {
+  return request.put("app-api/trade/cart/update-count", data);
+}
+
+export function updateCartSelected(data) {
+  return request.put("app-api/trade/cart/update-selected", data);
 }
 
 export function resetCart(data) {

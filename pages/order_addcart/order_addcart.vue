@@ -22,11 +22,11 @@
 							<block v-for="(item,index) in cartList.valid" :key="index">
 								<view class='item acea-row row-between-wrapper'>
 									<!-- #ifndef MP -->
-									<checkbox :value="(item.id).toString()" :checked="item.selected"
+									<checkbox :value="item.id.toString()" :checked="item.selected"
                             :disabled="!item.canChecked && footerswitch" style="margin-right: 10rpx;" />
 									<!-- #endif -->
 									<!-- #ifdef MP -->
-									<checkbox :value="item.id" :checked="item.selected"
+									<checkbox :value="item.id.toString()" :checked="item.selected"
                             :disabled="!item.canChecked && footerswitch" />
 									<!-- #endif -->
 									<navigator :url='"/pages/goods_details/index?id=" + item.spu.id' hover-class='none'
@@ -39,7 +39,7 @@
 											<view class='line1' :class="item.canChecked?'':'reColor'">
                         {{ item.spu.name }}
 											</view>
-											<view class='infor line1' v-if="item.sku.properties">属性：
+											<view class='infor line1' v-if="item.sku">属性：
                         <text v-for="property in item.sku.properties" style="padding-left: 2px">{{property.valueName}}</text>
                       </view>
 											<view class='money' v-if="item.canChecked">￥{{ fen2yuan(item.sku.price) }}</view>
@@ -139,7 +139,7 @@
 </template>
 
 <script>
-	let sysHeight = 0
+  let sysHeight = 0
 	import { cartDel, getResetCart } from '@/api/order.js';
 	import { getProductHot, collectAll, getProductDetail } from '@/api/store.js';
 	import { toLogin } from '@/libs/login.js';
@@ -490,90 +490,101 @@
 			checkboxAllChange: function(event) {
 				let value = event.detail.value;
 				if (value.length > 0) {
-					this.setAllSelectValue(1)
+					this.setAllSelectValue(true)
 				} else {
-					this.setAllSelectValue(0)
+					this.setAllSelectValue(false)
 				}
 			},
-			setAllSelectValue: function(status) {
-				let that = this;
-				let selectValue = [];
-				let valid = that.cartList.valid;
-				if (valid.length > 0) {
-					let newValid = valid.map(item => {
-						if (status) {
-							if (that.footerswitch) {
-								if (item.canChecked) {
-									item.selected = true;
-									selectValue.push(item.id);
-								} else {
-									item.selected = false;
-								}
-							} else {
-								item.selected = true;
-								selectValue.push(item.id);
-							}
-							that.isAllSelect = true;
-						} else {
-							item.selected = false;
-							that.isAllSelect = false;
-						}
-						return item;
-					});
-					that.$set(that.cartList, 'valid', newValid);
-					that.selectValue = selectValue;
-					that.switchSelect();
-				}
+      /**
+       * 全选 / 全不选
+       */
+			setAllSelectValue: function(selected) {
+        const valid = this.cartList.valid;
+        const values = [];
+        for (const item of valid) {
+          values.push(item.id.toString());
+        }
+        TradeCartApi.updateCartSelected({
+          ids: values,
+          selected: selected
+        }).then(res => {
+          this.getCartList()
+        })
 			},
+      /**
+       * 更新是否选中
+       */
 			checkboxChange: function(event) {
-				let that = this;
-				let value = event.detail.value;
-				let valid = that.cartList.valid;
-				let arr1 = [];
-				let arr2 = [];
-				let arr3 = [];
-				let newValid = valid.map(item => {
-					if (that.inArray(item.id, value)) {
-						if (that.footerswitch) {
-							if (item.canChecked) {
-								item.selected = true;
-								arr1.push(item);
-							} else {
-								item.selected = false;
-							}
-						} else {
-							item.selected = true;
-							arr1.push(item);
-						}
-					} else {
-						item.selected = false;
-						arr2.push(item);
-					}
-					return item;
-				});
-				if (that.footerswitch) {
-					arr3 = arr2.filter(item => !item.canChecked);
-				}
-				that.$set(that.cartList, 'valid', newValid);
-				that.isAllSelect = newValid.length === arr1.length + arr3.length;
-				that.selectValue = value;
-				that.switchSelect();
+        // 由于 uniapp 不支持直接通过 event 获取到变更的值，所以只能通过比对
+        const valid = this.cartList.valid;
+        const oldValues = [];
+        for (const item of valid) {
+          if (item.canChecked && item.selected) {
+            oldValues.push(item.id.toString());
+          } else if (!this.footerswitch && item.selected) {
+            oldValues.push(item.id.toString());
+          }
+        }
+        const newValues = event.detail.value;
+
+        // 情况一：选中
+        const selectedItem = newValues.find(item => !oldValues.includes(item));
+        if (selectedItem) {
+          TradeCartApi.updateCartSelected({
+            ids: [selectedItem],
+            selected: true
+          }).then(res => {
+            this.getCartList()
+          })
+          return;
+        }
+        // 情况二：取消选中
+        const cancelSelectedItem = oldValues.find(item => !newValues.includes(item));
+        if (cancelSelectedItem) {
+          TradeCartApi.updateCartSelected({
+            ids: [cancelSelectedItem],
+            selected: false
+          }).then(res => {
+            this.getCartList()
+          })
+        }
 			},
       /**
        * 合计金额、数量
        */
 			switchSelect: function() {
-				const validList = this.cartList.valid;
-        const selectValue = this.selectValue;
-				if (selectValue.length < 1) {
-					this.selectCountPrice = 0.00;
-          return;
-				}
+        // 是否全选
+        const validList = this.cartList.valid;
+        const selectValue = [];
+        let isAllSelect = true;
+        if (validList && validList.length > 0) {
+          for (const item of validList) {
+            if (item.canChecked) {
+              if (item.selected) {
+                selectValue.push(item.id);
+              } else {
+                isAllSelect = false;
+              }
+              continue;
+            } else {
+              if (!this.footerswitch && item.selected) {
+                selectValue.push(item.id);
+              }
+              if (!this.footerswitch && !item.selected) {
+                isAllSelect = false;
+              }
+            }
+          }
+        }
+        this.selectValue = selectValue;
+        this.isAllSelect = isAllSelect;
+
         // 合计金额
         let selectCountPrice = 0.00;
         let cartCount = 0
         for (let index in validList) {
-          if (this.inArray(validList[index].id, selectValue)) {
+          if (this.inArray(validList[index].id, selectValue)
+            && validList[index].sku) {
             selectCountPrice = this.$util.$h.Add(selectCountPrice, this.$util.$h.Mul(validList[index].count, validList[index].sku.price))
             cartCount += validList[index].count
           }
@@ -675,7 +686,6 @@
         const invalidList = cartList.invalidList;
 
         // 有效的购物车
-        const selectValue = [];
         if (validList.length > 0) {
           for (let index in validList) {
             // 设置是否可减少（到底，不可减少）
@@ -687,16 +697,12 @@
             // why？库存不足时，可以引导选择该 SPU 对应的其它 SKU。而 invalidList 是 SPU 不存在或者库存彻底不足
             if (sku && sku.stock > 0) {
               validList[index].canChecked = true; // 是否可选中：是
-              selectValue.push(validList[index].id);
             } else {
               validList[index].canChecked = false; // 是否可选中：否
             }
           }
         }
         this.$set(this.cartList, 'valid', validList);
-        this.selectValue = selectValue;
-        let newArr = validList.filter(item => item.canChecked);
-        this.isAllSelect = newArr.length === selectValue.length && newArr.length;
         this.switchSelect();
 
         // 无效的购物车
@@ -723,36 +729,12 @@
 				let that = this;
 				that.goodsHidden = !that.goodsHidden;
 			},
+      /**
+       * 切换到管理
+       */
 			manage: function() {
-				let that = this;
-				that.footerswitch = !that.footerswitch;
-				let arr1 = [];
-				let arr2 = [];
-				let newValid = that.cartList.valid.map(item => {
-					if (that.footerswitch) {
-						if (item.canChecked) {
-							if (item.selected) {
-								arr1.push(item.id);
-							}
-						} else {
-							item.selected = false;
-							arr2.push(item);
-						}
-					} else {
-						if (item.selected) {
-							arr1.push(item.id);
-						}
-					}
-					return item;
-				});
-				that.cartList.valid = newValid;
-				if (that.footerswitch) {
-					that.isAllSelect = newValid.length === arr1.length + arr2.length;
-				} else {
-					that.isAllSelect = newValid.length === arr1.length;
-				}
-				that.selectValue = arr1;
-				that.switchSelect();
+				this.footerswitch = !this.footerswitch;
+				this.switchSelect();
 			},
 			unsetCart: function() {
 				let that = this,
