@@ -1,7 +1,7 @@
 {
-    "name" : "crmeb",
-    "appid" : "__UNI__E8BDBA5",
-    "description" : "crmeb商城",
+    "name" : "yudao",
+    "appid" : "__UNI__E2B3EDC",
+    "description" : "芋道商城",
     "versionName" : "1.0.0",
     "versionCode" : 1001,
     "transformPx" : false,
@@ -110,7 +110,7 @@
         "async" : {
             "timeout" : 200000
         },
-        "title" : "CRMEB"
+        "title" : "芋道商城"
     },
     "plus" : {
         "statusbar" : {

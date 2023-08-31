@@ -357,7 +357,7 @@
         const configApi = {
           "title": "芋道商城",
           "synopsis": "芋道商城，好用！",
-          "img": "https://api.java.crmeb.net/crmebimage/public/operation/2021/09/23/61fc3e4a49844fa69c12812ce5d57641bfkfzjqh1q.png"
+          "img": "https://static.iocoder.cn/ruoyi-vue-pro-logo.png"
         }
         this.$set(this, 'configApi', configApi);
         // #ifdef H5
