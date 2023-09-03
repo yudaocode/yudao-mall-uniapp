@@ -62,6 +62,7 @@ function baseRequest(url, method, data, {
       url: url.indexOf('app-api') < 0 ? Url + '/api/front/' + url
         // : 'http://yunai.natapp1.cc/' + url, // TODO 芋艿：搞个 url 的配置
         : 'http://127.0.0.1:48080/' + url, // TODO 芋艿：搞个 url 的配置
+        // : 'http://api-dashboard.yudao.iocoder.cn/' + url, // TODO 芋艿：搞个 url 的配置
       method: method || 'GET',
 			header: header,
 			data: data || {},

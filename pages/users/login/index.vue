@@ -316,7 +316,7 @@
 			getUserInfo(data) {
         this.$store.commit("SETUID", data.userId);
         // TODO 芋艿：换成自己的先
-        if (true) {
+        if (false) {
           UserApi.getUserInfo().then(res => {
             this.$store.commit("UPDATE_USERINFO", res.data);
             // 调回登录前页面

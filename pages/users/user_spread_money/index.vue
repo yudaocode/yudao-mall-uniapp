@@ -72,34 +72,22 @@
 				</view>
 			</view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</view>
 </template>
 
 <script>
-	import {
-		getCommissionInfo,
-		getRecordApi,
-	} from '@/api/user.js';
+	import { getCommissionInfo, getRecordApi } from '@/api/user.js';
 	import {
 		toLogin
 	} from '@/libs/login.js';
 	import {
 		mapGetters
 	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
 	import emptyPage from '@/components/emptyPage.vue'
 	import home from '@/components/home';
 	export default {
 		components: {
-			// #ifdef MP
-			authorize,
-			// #endif
 			emptyPage,
 			home
 		},
@@ -177,13 +165,6 @@
 
 		},
 		methods: {
-			onLoadFun() {
-				this.getRecordList();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
 			getList: function() {
 				let that = this;
 				let recordList = that.recordList;
@@ -206,7 +187,6 @@
 				let page = that.page;
 				let limit = that.limit;
 				let statuss = that.statuss;
-				let recordType = that.recordType;
 				let recordList = that.recordList;
 				let recordListNew = [];
 				if (statuss == true) return;
@@ -230,7 +210,6 @@
 		}
 	}
 </script>
-
 <style scoped lang="scss">
 	.commission-details .promoterHeader .headerCon .money {
 		font-size: 36rpx;
