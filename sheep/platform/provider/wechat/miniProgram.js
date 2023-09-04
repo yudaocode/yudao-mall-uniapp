@@ -200,6 +200,7 @@ const bindUserPhoneNumber = (e) => {
           sessionId: uni.getStorageSync('sessionId'),
           iv: e.iv,
           encryptedData: e.encryptedData,
+          code: e.code,
         }),
       ),
     });

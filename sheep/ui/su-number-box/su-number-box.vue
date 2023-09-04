@@ -185,71 +185,6 @@
   };
 </script>
 <style lang="scss" scoped>
-  // $box-height: 26px;
-  // $bg: #f5f5f5;
-  // $br: 2px;
-  // $color: #333;
-
-  // .uni-numbox {
-  // 	/* #ifndef APP-NVUE */
-  // 	display: flex;
-  // 	/* #endif */
-  // 	flex-direction: row;
-  // 	align-items: center;
-  // }
-
-  // .uni-numbox-btns {
-  // 	/* #ifndef APP-NVUE */
-  // 	display: flex;
-  // 	/* #endif */
-  // 	flex-direction: row;
-  // 	align-items: center;
-  // 	justify-content: center;
-  // 	// padding: 0 8rpx;
-  // 	width: 40rpx;
-  // 	height: 40rpx;
-  // 	background-color: $bg;
-  // 	/* #ifdef H5 */
-  // 	cursor: pointer;
-  // 	/* #endif */
-  // 	border-radius: 50%;
-  // }
-
-  // .uni-numbox__value {
-  // 	// margin: 0 2px;
-  // 	// background-color: $bg;
-  // 	width: 70rpx;
-  // 	height: $box-height;
-  // 	text-align: center;
-  // 	font-size: 26rpx;
-  // 	border-left-width: 0;
-  // 	border-right-width: 0;
-  // 	color: $color;
-  // }
-
-  // // .uni-numbox__minus {
-  // // 	border-top-left-radius: $br;
-  // // 	border-bottom-left-radius: $br;
-  // // }
-
-  // .uni-numbox__plus {
-  // 	// border-top-right-radius: $br;
-  // 	// border-bottom-right-radius: $br;
-  // 	background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
-
-  // 	.uni-numbox--text {
-  // 		color: $white;
-  // 	}
-  // }
-
-  // .uni-numbox--text {
-  // 	// fix nvue
-  // 	line-height: normal;
-  // 	font-size: 40rpx;
-  // 	font-weight: 300;
-  // 	color: $color;
-  // }
-
   .uni-numbox .uni-numbox--disabled {
     color: #c0c0c0 !important;
     /* #ifdef H5 */
@@ -265,18 +200,18 @@
   }
 
   .uni-numbox__value {
-    width: 70rpx;
+    width: 74rpx;
     text-align: center;
-    font-size: 26rpx;
+    font-size: 30rpx;
   }
 
   .cicon-move-round {
-    font-size: 36rpx;
+    font-size: 44rpx;
     color: var(--ui-BG-Main);
   }
 
   .cicon-add-round {
-    font-size: 36rpx;
+    font-size: 44rpx;
     color: var(--ui-BG-Main);
   }
 
