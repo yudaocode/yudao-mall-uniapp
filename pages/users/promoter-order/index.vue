@@ -10,30 +10,20 @@
 					<view class='iconfont icon-2'></view>
 				</view>
 			</view>
-			<view class='list pad30' v-if="recordList.length>0">
-				<block v-for="(item,index) in recordList" :key="index">
+			<view class='list' v-if="recordList.length>0">
+				<block v-for="(item, index) in recordList" :key="index">
 					<view class='item'>
-						<view class='title acea-row row-column row-center'>
-							<view class='data'>{{item.time}}</view>
-							<view>本月累计推广订单：{{item.count || 0}}单</view>
-						</view>
 						<view class='listn'>
-							<block v-for="(child,indexn) in item.child" :key="indexn">
+							<block :key="index">
 								<view class='itenm borRadius14'>
 									<view class='top acea-row row-between-wrapper'>
 										<view class='pictxt acea-row row-between-wrapper'>
-											<view class='pictrue'>
-												<image :src='child.avatar'></image>
-											</view>
-											<view class='text line1'>{{child.nickname}}</view>
+											<view class='text line1'>{{item.title}}</view>
 										</view>
-										<view class='money'>返佣：<text class='font-color'>￥{{child.number}}</text></view>
-									<!-- 	<view class='money' v-if="child.type == 'brokerage'">返佣：<text class='font-color'>￥{{child.number}}</text></view>
-										<view class='money' v-else>暂未返佣：<text class='font-color'>￥{{child.number}}</text></view> -->
+										<view class='money'>返佣：<text class='font-color'>￥{{ fen2yuan(item.price) }}</text></view>
 									</view>
 									<view class='bottom'>
-										<view><text class='name'>订单编号：</text>{{child.orderId}}</view>
-										<view><text class='name'>下单时间：</text>{{child.time}}</view>
+										<view><text class='name'>生效时间：</text>{{ formatDate(item.finishTime) }}</view>
 									</view>
 								</view>
 							</block>
@@ -41,37 +31,23 @@
 					</view>
 				</block>
 			</view>
-			<view v-if="recordList.length == 0">
+			<view v-if="recordList.length === 0">
 				<emptyPage title="暂无推广订单～"></emptyPage>
 			</view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</view>
 </template>
-
 <script>
-	import {
-		spreadOrder
-	} from '@/api/user.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	import emptyPage from '@/components/emptyPage.vue'
 	import home from '@/components/home';
-	export default {
+  import * as BrokerageAPI from '@/api/member/brokerage.js'
+  import * as Util from '@/utils/util.js';
+  import dayjs from "@/plugin/dayjs/dayjs.min.js";
+  export default {
 		components: {
-			// #ifdef MP
-			authorize,
-			// #endif
 			emptyPage,
 			home
 		},
@@ -82,68 +58,45 @@
 				status: false,
 				recordList: [],
 				recordCount: 0,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false,//是否隐藏授权
-				time: 0
 			};
 		},
 		computed: mapGetters(['isLogin']),
 		onLoad() {
-			if (this.isLogin) {
-				this.getRecordOrderList();
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return;
 			}
-		},
+      this.getRecordOrderList();
+    },
 		methods: {
-			stringToDate : function(data){
-				let str = data.replace(/-/g,'/');
-				let date = new Date(str);
-				return data;
-			 },
-			onLoadFun() {
-				this.getRecordOrderList();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
 			getRecordOrderList: function() {
-				let that = this;
-				let page = that.page;
-				let limit = that.limit;
-				let status = that.status;
-				let recordList = that.recordList;
-				let newList = [];
-				if (status == true) return;
-				spreadOrder({
-					page: page,
-					limit: limit
+				if (this.status) {
+          return;
+        }
+        const page = this.page;
+        const limit = this.limit;
+        const recordList = this.recordList;
+        BrokerageAPI.getBrokerageRecordPage({
+					pageNo: page,
+					pageSize: limit,
+          bizType: 1, // 订单
+          status: 1, // 已结算
 				}).then(res => {
 					let recordListData = res.data.list ? res.data.list : [];
-					// 每页返回的总条数；
-					let len = 0;
-					for(let i = 0;i<recordListData.length;i++) {
-						len = len + recordListData[i].child.length;
-						let str = recordListData[i].time.replace(/-/g,'/');
-						let date = new Date(str).getTime();
-						if(that.time === date){
-							that.$set(that.recordList[i],'child',that.recordList[i].child.concat(recordListData[i].child));
-						}else{
-							recordListData.forEach((item,index)=>{
-								if(recordListData[i]==item){
-									newList.push(item);
-								}
-							})
-							that.$set(that, 'recordList', recordList.concat(newList));
-						}
-						that.time = date;
-					};
-					that.recordCount = res.data.count || 0;
-					that.status = limit > len;
-					that.page = page + 1;
+          const len = res.data.list ? res.data.list.length : 0;
+          const recordListNew = recordList.concat(recordListData);
+          this.recordCount = res.data.total || 0;
+					this.status = limit > len;
+					this.page = page + 1;
+          this.$set(this, 'recordList', recordListNew);
 				});
-			}
+			},
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+      },
 		},
 		onReachBottom() {
 			this.getRecordOrderList()
