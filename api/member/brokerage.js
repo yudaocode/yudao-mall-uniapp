@@ -5,6 +5,11 @@ export function getBrokerageUserSummary() {
   return request.get('app-api/member/brokerage-user/get-summary');
 }
 
+// 获得分销用户排行分页
+export function getBrokerageUserRankPage(data) {
+  return request.get('app-api/member/brokerage-user/rank-page', data);
+}
+
 // 获得分销提现分页记录
 export function getBrokerageWithdrawPage(data) {
   return request.get('app-api/member/brokerage-withdraw/page', data);

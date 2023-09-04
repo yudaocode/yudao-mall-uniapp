@@ -4,75 +4,63 @@
 			<view class="redBg bg-color">
 				<view class="header">
 					<view class="nav acea-row row-center-wrapper">
-						<view class="item" :class="active == index ? 'font-color' : ''" v-for="(item,index) in navList" :key="index"
-						 @click="switchTap(index)">
+						<view class="item" :class="active === index ? 'font-color' : ''" v-for="(item, index) in navList"
+                  :key="index" @click="switchTap(index)">
 							{{ item }}
 						</view>
 					</view>
+          <!-- top3 排名 -->
 					<view class="rank acea-row row-bottom row-around">
-						<view class="item" v-show="Two.uid">
+						<view class="item" v-show="Two.userId">
 							<view class="pictrue">
 								<image :src="Two.avatar"></image>
 							</view>
 							<view class="name line1">{{Two.nickname}}</view>
-							<view class="num">{{Two.spreadCount}}人</view>
+							<view class="num">{{ Two.brokerageUserCount }}人</view>
 						</view>
-						<view class="item" v-show="One.uid">
+						<view class="item" v-show="One.userId">
 							<view class="pictrue">
 								<image :src="One.avatar"></image>
 							</view>
 							<view class="name line1">{{One.nickname}}</view>
-							<view class="num">{{One.spreadCount}}人</view>
+							<view class="num">{{ One.brokerageUserCount }}人</view>
 						</view>
-						<view class="item" v-show="Three.uid">
+						<view class="item" v-show="Three.userId">
 							<view class="pictrue">
 								<image :src="Three.avatar"></image>
 							</view>
 							<view class="name line1">{{Three.nickname}}</view>
-							<view class="num">{{Three.spreadCount}}人</view>
+							<view class="num">{{ Three.brokerageUserCount }}人</view>
 						</view>
 					</view>
 				</view>
 			</view>
+      <!-- 其它排名 -->
 			<view class="list" v-if="rankList.length">
 				<view class="item acea-row row-between-wrapper" v-for="(item,index) in rankList" :key="index">
-					<view class="num">{{index+4}}</view>
+					<view class="num">{{ index + 4 }}</view>
 					<view class="picTxt acea-row row-between-wrapper">
 						<view class="pictrue">
 							<image :src="item.avatar"></image>
 						</view>
 						<view class="text line1">{{item.nickname}}</view>
 					</view>
-					<view class="people font-color">{{item.spreadCount}}人</view>
+					<view class="people font-color">{{ item.brokerageUserCount }}人</view>
 				</view>
 			</view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</view>
 </template>
 
 <script>
-	import {
-		getRankList
-	} from '@/api/user.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	import home from '@/components/home';
-	export default {
+  import * as BrokerageAPI from '@/api/member/brokerage.js'
+  import dayjs from "@/plugin/dayjs/dayjs.min.js";
+  export default {
 		components: {
-			// #ifdef MP
-			authorize,
-			// #endif
 			home
 		},
 		data() {
@@ -85,77 +73,65 @@
 				loading: false,
 				loadend: false,
 				rankList: [],
-				Two: {},
-				One: {},
-				Three: {},
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
+        times: [],
+
+        One: {}, // 排名第一
+        Two: {}, // 排名第二
+				Three: {}, // 排名第三
 			};
 		},
 		computed: mapGetters(['isLogin']),
 		watch:{
 			isLogin:{
-				handler:function(newV,oldV){
-					if(newV){
+				handler:function(newV, oldV) {
+					if (newV) {
 						this.getRanklist();
 					}
 				},
-				deep:true
+				deep: true
 			}
 		},
 		onLoad() {
-			if (this.isLogin) {
-				this.getRanklist();
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return;
 			}
-		},
-		// onShow: function () {
-		//    if(this.isClone && app.globalData.isLog){
-		//      this.setData({ loadend: false, page: 1, rankList:[]});
-		//      this.getRanklist();
-		//    }
-		//  },
+      this.calculateTimes();
+      this.getRanklist();
+    },
 		methods: {
-			onLoadFun() {
-				this.getRanklist();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
 			getRanklist: function() {
-				let that = this;
-				if (that.loadend) return;
-				if (that.loading) return;
-				that.loading = true;
-				getRankList({
-					page: that.page,
-					limit: that.limit,
-					type: that.type
+				if (this.loadend || this.loading) {
+          return;
+        }
+				this.loading = true;
+        BrokerageAPI.getBrokerageUserRankPage({
+					pageNo: this.page,
+					pageSize: this.limit,
+					'times[0]': this.times[0],
+					'times[1]': this.times[1],
 				}).then(res => {
-					let list = res.data;
-					that.rankList.push.apply(that.rankList, list);
-					if (that.page == 1) {
-						that.One = that.rankList.shift() || {};
-						that.Two = that.rankList.shift() || {};
-						that.Three = that.rankList.shift() || {};
+					let list = res.data.list;
+					this.rankList.push.apply(this.rankList, list);
+					if (this.page === 1) {
+						this.One = this.rankList.shift() || {};
+						this.Two = this.rankList.shift() || {};
+						this.Three = this.rankList.shift() || {};
 					}
-					that.loadend = list.length < that.limit;
-					that.loading = false;
-					that.$set(that, 'rankList', that.rankList);
-					that.One = that.One;
-					that.Two = that.Two;
-					that.Three = that.Three;
+					this.loadend = list.length < this.limit;
+					this.loading = false;
+					this.$set(this, 'rankList', this.rankList);
 				}).catch(err => {
-					that.loading = false;
+					this.loading = false;
 				})
 			},
 
 			switchTap: function(index) {
-				if (this.active === index) return;
+				if (this.active === index) {
+          return;
+        }
 				this.active = index;
-				// week  
+				// week
 				this.type = index ? 'month' : 'week';
 				this.page = 1;
 				this.loadend = false;
@@ -163,15 +139,36 @@
 				this.Two = {};
 				this.One = {};
 				this.Three = {};
-				this.getRanklist();
+        this.calculateTimes();
+        this.getRanklist();
 			},
+      calculateTimes: function() {
+        // TODO @芋艿：优化代码
+        let startDate;
+        let endDate;
+        const today = new Date();
+        if (this.type === 'week') {
+          const dayOfWeek = today.getDay();
+          startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dayOfWeek, 0, 0, 0);
+          endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + (6 - dayOfWeek), 23, 59, 59);
+        } else {
+          const year = today.getFullYear();
+          const month = today.getMonth();
+          startDate = new Date(year, month, 1, 0, 0, 0);
+          const nextMonth = new Date(year, month + 1, 1);
+          endDate = new Date(nextMonth.getTime() - 1);
+        }
+        this.times = [ this.formatDate(startDate), this.formatDate(endDate) ]
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+      },
 		},
 		onReachBottom: function() {
 			this.getRanklist();
 		}
 	}
 </script>
-
 <style scoped lang="scss">
 	.PromoterRank .redBg {
 		padding: 45rpx 0 30rpx 0;
