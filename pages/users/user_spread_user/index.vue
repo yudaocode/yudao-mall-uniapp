@@ -4,7 +4,7 @@
 			<view class="header">
 				<view class='name acea-row row-center-wrapper'>
 					<view>当前佣金</view>
-					<navigator :url="'/pages/users/user_spread_money/index?type=1&extractCount='+spreadInfo.extractCount"  hover-class="none" class='record'>
+					<navigator url='/pages/users/user_spread_money/index?type=1'  hover-class="none" class='record'>
             提现记录<text class='iconfont icon-xiangyou'></text>
           </navigator>
 				</view>
@@ -35,7 +35,7 @@
 					<text class='iconfont icon-tongji'></text>
 					<view>推广人统计</view>
 				</navigator>
-				<navigator :url="'/pages/users/user_spread_money/index?type=2&commissionCount='+spreadInfo.commissionCount" hover-class="none" class='item acea-row row-center-wrapper row-column'>
+				<navigator url="/pages/users/user_spread_money/index?type=2" hover-class="none" class='item acea-row row-center-wrapper row-column'>
 					<text class='iconfont icon-qiandai'></text>
 					<view>佣金明细</view>
 				</navigator>

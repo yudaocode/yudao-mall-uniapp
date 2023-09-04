@@ -5,69 +5,57 @@
 				<view class='headerCon acea-row row-between-wrapper'>
 					<view>
 						<view class='name'>{{name}}</view>
-						<view class='money' v-if="recordType == 4">￥<text class='num'>{{extractCount}}</text></view>
-						<view class='money' v-else>￥<text class='num'>{{commissionCount}}</text></view>
+						<view class='money' v-if="type === 1">￥<text class='num'>{{ fen2yuan(spreadInfo.withdrawBrokeragePrice, 0) }}</text></view>
+						<view class='money' v-else>￥<text class='num'>{{ fen2yuan(spreadInfo.brokeragePrice, 0) }}</text></view>
 					</view>
 					<view class='iconfont icon-jinbi1'></view>
 				</view>
 			</view>
-			<view class='sign-record' v-if="recordType == 4">
-				<block v-for="(item,index) in recordList" :key="index" v-if="recordList.length>0">
-					<view class='list pad30'>
+      <!-- 情况一：提现列表 -->
+			<view class='sign-record' v-if="type === 1">
+				<block v-for="(item,index) in recordList" :key="index" v-if="recordList.length > 0">
+					<view class='list'>
 						<view class='item'>
-							<view class='data'>{{item.date}}</view>
 							<view class='listn borRadius14'>
-								<block v-for="(child,indexn) in item.list" :key="indexn">
+								<block :key="index">
 									<view class='itemn acea-row row-between-wrapper'>
 										<view>
-											<view class='name line1'>{{child.status | statusFilter}}</view>
-											<view>{{child.createTime}}</view>
+											<view class='name line1'>{{ item.statusName }}</view>
+											<view>{{ formatDate(item.createTime) }}</view>
 										</view>
-										<view class='num font-color' v-if="child.status == 1">+{{child.extractPrice}}
-										</view>
-										<view class='num' v-else>-{{child.extractPrice}}</view>
-										<!-- <view>
-											<view class='name line1'>{{child.status === -1 ? '提现失败' : '提现成功'}}<span
-													v-show="child.status === -1"
-													style="font-size: 12px;color: red;">{{'('+child.failMsg+')'}}</span>
-											</view>
-											<view>{{child.createTime}}</view>
-										</view>
-										<view class='num font-color' v-if="child.status == -1">+{{child.extractPrice}}
-										</view>
-										<view class='num' v-else>-{{child.extractPrice}}</view> -->
+										<view class='num font-color'>+{{ fen2yuan(item.price) }}</view>
 									</view>
 								</block>
 							</view>
 						</view>
 					</view>
 				</block>
-				<view v-if="recordList.length == 0">
+				<view v-if="recordList.length === 0">
 					<emptyPage title='暂无提现记录~'></emptyPage>
 				</view>
 			</view>
-			<view class='sign-record' v-else>
-				<block v-for="(item,index) in recordList" :key="index" v-if="recordList.length>0">
-					<view class='list pad30'>
+      <!-- 情况二：佣金列表 -->
+      <view class='sign-record' v-else>
+				<block v-for="(item,index) in recordList" :key="index" v-if="recordList.length > 0">
+					<view class='list'>
 						<view class='item'>
-							<view class='data'>{{item.date}}</view>
 							<view class='listn borRadius14'>
-								<block v-for="(child,indexn) in item.list" :key="indexn">
+                <block :key="index">
 									<view class='itemn acea-row row-between-wrapper'>
 										<view>
-											<view class='name line1'>{{child.title}}</view>
-											<view>{{child.updateTime}}</view>
+											<view class='name line1'>{{ item.title }}</view>
+											<view>{{ formatDate(item.createTime) }}</view>
 										</view>
-										<view class='num font-color' v-if="child.type == 1">+{{child.price}}
+										<view class='num font-color' v-if="item.price > 0">+{{item.price}}
 										</view>
-										<view class='num' v-else>-{{child.price}}</view>
+										<view class='num' v-else>{{item.price}}</view>
 									</view>
 								</block>
 							</view>
 						</view>
 					</view>
 				</block>
-				<view v-if="recordList.length == 0">
+				<view v-if="recordList.length === 0">
 					<emptyPage title='暂无佣金记录~'></emptyPage>
 				</view>
 			</view>
@@ -77,69 +65,54 @@
 </template>
 
 <script>
-	import { getCommissionInfo, getRecordApi } from '@/api/user.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	import emptyPage from '@/components/emptyPage.vue'
 	import home from '@/components/home';
-	export default {
+  import * as BrokerageAPI from '@/api/member/brokerage.js'
+  import * as Util from '@/utils/util.js';
+  import dayjs from "@/plugin/dayjs/dayjs.min.js";
+  export default {
 		components: {
 			emptyPage,
 			home
 		},
-		filters: {
-			statusFilter(status) {
-				const statusMap = {
-					'-1': '未通过',
-					'0': '审核中',
-					'1': '已提现'
-				}
-				return statusMap[status]
-			}
-		},
 		data() {
 			return {
-				name: '',
-				type: 0,
-				page: 1,
+				name: '', // 标题
+				type: 0, // 类型；1 - 提现；2 - 佣金
+
+        page: 1,
 				limit: 10,
 				recordList: [],
-				recordType: 0,
-				statuss: false,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				extractCount: 0
-			};
+				statuss: false, // 是否到达底部
+
+        spreadInfo: {},
+      };
 		},
 		computed: mapGetters(['isLogin']),
 		onLoad(options) {
-			if (this.isLogin) {
-				this.type = options.type;
-				this.extractCount = options.extractCount;
-				this.commissionCount = options.commissionCount;
-			} else {
-				toLogin();
-			}
+			if (!this.isLogin) {
+        toLogin();
+        return;
+      }
+      this.type = parseInt(options.type);
 		},
 		onShow: function() {
+      this.getSpreadInfo();
+      // 获得列表
 			let type = this.type;
-			if (type == 1) {
+			if (type === 1) {
 				uni.setNavigationBarTitle({
 					title: "提现记录"
 				});
 				this.name = '提现总额';
-				this.recordType = 4;
 				this.getList();
-			} else if (type == 2) {
+			} else if (type === 2) {
 				uni.setNavigationBarTitle({
 					title: "佣金记录"
 				});
 				this.name = '佣金明细';
-				this.recordType = 3;
 				this.getRecordList();
 			} else {
 				uni.showToast({
@@ -157,53 +130,73 @@
 							// #ifdef H5
 							history.back();
 							// #endif
-
 						}, 1200)
 					},
 				});
 			}
-
 		},
 		methods: {
+      /**
+       * 获得提现列表
+       */
 			getList: function() {
-				let that = this;
-				let recordList = that.recordList;
-				let recordListNew = [];
-				if (that.statuss == true) return;
-				getRecordApi({
-					page: that.page,
-					limit: that.limit
+				if (this.statuss) {
+          return;
+        }
+        const recordList = this.recordList;
+        let recordListNew = [];
+        BrokerageAPI.getBrokerageWithdrawPage({
+          pageNo: this.page,
+          pageSize: this.limit
 				}).then(res => {
-					let len = res.data.list ? res.data.list.length : 0;
-					let recordListData = res.data.list || [];
+					const len = res.data.list ? res.data.list.length : 0;
+					const recordListData = res.data.list || [];
 					recordListNew = recordList.concat(recordListData);
-					that.statuss = that.limit > len;
-					that.page = that.page + 1;
-					that.$set(that, 'recordList', recordListNew);
+					this.statuss = this.limit > len;
+          this.page = this.page + 1;
+          this.$set(this, 'recordList', recordListNew);
 				});
 			},
+      /**
+       * 获得佣金列表
+       */
 			getRecordList: function() {
-				let that = this;
-				let page = that.page;
-				let limit = that.limit;
-				let statuss = that.statuss;
-				let recordList = that.recordList;
-				let recordListNew = [];
-				if (statuss == true) return;
-				getCommissionInfo({
-					page: page,
-					limit: limit
+				if (this.statuss) {
+          return;
+        }
+        let page = this.page;
+        let limit = this.limit;
+        let recordList = this.recordList;
+        let recordListNew = [];
+        BrokerageAPI.getBrokerageRecordPage({
+					pageNo: this.page,
+					pageSize: this.limit
 				}).then(res => {
-					if (res.data.list) {
-						let len = res.data.list ? res.data.list.length : 0;
-						let recordListData = res.data.list || [];
-						recordListNew = recordList.concat(recordListData);
-						that.statuss = limit > len;
-						that.page = page + 1;
-						that.$set(that, 'recordList', recordListNew);
+					if (!res.data.list) {
+						return;
 					}
+          const len = res.data.list ? res.data.list.length : 0;
+          const recordListData = res.data.list || [];
+          recordListNew = recordList.concat(recordListData);
+          this.statuss = limit > len;
+          this.page = page + 1;
+          this.$set(this, 'recordList', recordListNew);
 				});
-			}
+			},
+      /**
+       * 获取个人用户信息
+       */
+      getSpreadInfo: function() {
+        BrokerageAPI.getBrokerageUserSummary().then(res => {
+          this.$set(this,'spreadInfo',res.data);
+        });
+      },
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+      },
 		},
 		onReachBottom: function() {
 			this.getRecordList();
