@@ -769,10 +769,8 @@
 			},
 
 			leftMonthSwitch(e) {
-				// console.log('leftMonthSwitch 返回:', e)
 			},
 			rightMonthSwitch(e) {
-				// console.log('rightMonthSwitch 返回:', e)
 			}
 		}
 	}

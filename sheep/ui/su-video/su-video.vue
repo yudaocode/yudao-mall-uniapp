@@ -132,7 +132,6 @@
   const beforePlay = () => {
     uni.getNetworkType({
       success: (res) => {
-        console.log(res.networkType, 'res.networkType');
         const networkType = res.networkType;
         // if (networkType === 'wifi' || networkType === 'ethernet') {
         //   startPlay();
