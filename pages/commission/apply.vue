@@ -47,7 +47,6 @@
               />
               <s-uploader
                 v-if="item.type === 'image'"
-                v-model="item.aaa"
                 v-model:url="item.value"
                 fileMediatype="image"
                 limit="1"

@@ -74,7 +74,11 @@
     computed: {
       list() {
         if (typeof this.filesList === 'string') {
-          return [this.filesList];
+          if (this.filesList) {
+            return [this.filesList];
+          } else {
+            return [];
+          }
         }
         return this.filesList;
       },
