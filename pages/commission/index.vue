@@ -1,6 +1,6 @@
 <!-- 分销中心  -->
 <template>
-  <s-layout navbar="inner" class="index-wrap" title="分销中心" :bgStyle="bgStyle">
+  <s-layout navbar="inner" class="index-wrap" title="分销中心" :bgStyle="bgStyle" onShareAppMessage>
     <!-- 分销商信息 -->
     <commission-info />
     <!-- 账户信息 -->
