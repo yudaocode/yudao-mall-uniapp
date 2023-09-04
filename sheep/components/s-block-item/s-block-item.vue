@@ -27,6 +27,8 @@
     <s-seckill-block v-if="type === 'seckill'" :data="data" :styles="styles"></s-seckill-block>
     <s-groupon-block v-if="type === 'groupon'" :data="data" :styles="styles"></s-groupon-block>
     <s-richtext-block v-if="type === 'richtext'" :data="data" :styles="styles"></s-richtext-block>
+    <s-hotzone-block v-if="type === 'hotzone'" :data="data" :styles="styles"></s-hotzone-block>
+
   </view>
 </template>
 

@@ -5,6 +5,8 @@
     imageMode="widthFix"
     dotCur="bg-mask-40"
     :seizeHeight="300"
+    :autoplay="data.autoplay"
+    :interval="Number(data.interval)"
   />
 </template>
 

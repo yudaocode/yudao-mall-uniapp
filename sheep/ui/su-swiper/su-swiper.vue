@@ -116,7 +116,7 @@
     },
     interval: {
       type: Number,
-      default: 5000,
+      default: 3000,
     },
     duration: {
       type: Number,
