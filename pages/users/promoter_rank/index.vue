@@ -57,8 +57,10 @@
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
 	import home from '@/components/home';
-  import * as BrokerageAPI from '@/api/member/brokerage.js'
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
   import dayjs from "@/plugin/dayjs/dayjs.min.js";
+  import * as DateUtil from '@/utils/date.js';
+  import * as Util from '@/utils/util.js';
   export default {
 		components: {
 			home
@@ -105,7 +107,7 @@
           return;
         }
 				this.loading = true;
-        BrokerageAPI.getBrokerageUserRankPage({
+        BrokerageAPI.getBrokerageUserRankPageByUserCount({
 					pageNo: this.page,
 					pageSize: this.limit,
 					'times[0]': this.times[0],
@@ -143,22 +145,13 @@
         this.getRanklist();
 			},
       calculateTimes: function() {
-        // TODO @芋艿：优化代码
-        let startDate;
-        let endDate;
-        const today = new Date();
+        let times;
         if (this.type === 'week') {
-          const dayOfWeek = today.getDay();
-          startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - dayOfWeek, 0, 0, 0);
-          endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + (6 - dayOfWeek), 23, 59, 59);
+          times = DateUtil.getWeekTimes();
         } else {
-          const year = today.getFullYear();
-          const month = today.getMonth();
-          startDate = new Date(year, month, 1, 0, 0, 0);
-          const nextMonth = new Date(year, month + 1, 1);
-          endDate = new Date(nextMonth.getTime() - 1);
+          times = DateUtil.getMonthTimes();
         }
-        this.times = [ this.formatDate(startDate), this.formatDate(endDate) ]
+        this.times = [ this.formatDate(times[0]), this.formatDate(times[1]) ]
       },
       formatDate: function(date) {
         return dayjs(date).format("YYYY-MM-DD HH:mm:ss");

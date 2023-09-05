@@ -7,63 +7,49 @@
 			</view>
 			<view class="wrapper">
 				<view class="nav acea-row row-around">
-					<view class="item" :class="active == index ? 'font-color' : ''" v-for="(item,index) in navList" :key="index"
-					 @click="switchTap(index)">
+					<view class="item" :class="active === index ? 'font-color' : ''" v-for="(item,index) in navList"
+                :key="index" @click="switchTap(index)">
 						{{ item }}
 					</view>
 				</view>
 				<view class="list">
 					<view class="item acea-row row-between-wrapper" v-for="(item,index) in rankList" :key="index">
 						<view class="num" v-if="index <= 2">
-							<image :src="'/static/images/medal0'+(index+1)+'.png'"></image>
+							<image :src="'/static/images/medal0' + (index+1) + '.png'" />
 						</view>
 						<view class="num" v-else>
-							{{index+1}}
+							{{index + 1}}
 						</view>
 						<view class="picTxt acea-row row-between-wrapper">
 							<view class="pictrue">
 								<image :src="item.avatar"></image>
 							</view>
-							<view class="text line1">{{item.nickname}}</view>
+							<view class="text line1">{{ item.nickname }}</view>
 						</view>
-						<view class="people font-color">￥{{item.brokeragePrice}}</view>
+						<view class="people font-color">￥{{ fen2yuan(item.brokeragePrice) }}</view>
 					</view>
 				</view>
-				<view class='noCommodity' v-if="rankList.length == 0 && (page != 1 || active== 0)">
+				<view class='noCommodity' v-if="rankList.length === 0 && (page !== 1 || active === 0)">
 					<emptyPage title="暂无排行～"></emptyPage>
 				</view>
 			</view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</view>
 </template>
-
 <script>
-	import {
-		getBrokerageRank,
-		brokerageRankNumber
-	} from '@/api/user.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
+	import { toLogin } from '@/libs/login.js';
 	import home from '@/components/home';
 	import emptyPage from '@/components/emptyPage.vue'
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	export default {
+	import { mapGetters } from "vuex";
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
+  import dayjs from "@/plugin/dayjs/dayjs.min.js";
+  import * as DateUtil from '@/utils/date.js';
+  import * as Util from '@/utils/util.js';
+  export default {
 		components: {
 			emptyPage,
 			home,
-			// #ifdef MP
-			authorize
-			// #endif
 		},
 		data() {
 			return {
@@ -77,15 +63,13 @@
 				loadTitle: '加载更多',
 				type: 'week',
 				position: 0,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
 			};
 		},
 		computed: mapGetters(['isLogin']),
 		watch:{
 			isLogin:{
-				handler:function(newV,oldV){
-					if(newV){
+				handler:function(newV, oldV) {
+					if (newV) {
 						this.getBrokerageRankList();
 						this.getBrokerageRankNumber(this.type);
 					}
@@ -94,61 +78,73 @@
 			}
 		},
 		onLoad() {
-			if (this.isLogin) {
-				this.getBrokerageRankList();
-				this.getBrokerageRankNumber(this.type);
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return;
 			}
+      this.calculateTimes();
+      this.getBrokerageRankList();
+      this.getBrokerageRankNumber(this.type);
 		},
 		methods: {
-			onLoadFun: function() {
-				this.getBrokerageRankList();
-				this.getBrokerageRankNumber(this.type);
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
 			switchTap: function(index) {
 				this.active = index;
 				this.type = index ? 'month' : 'week';
 				this.page = 1;
 				this.loadend = false;
 				this.$set(this, 'rankList', []);
+        this.calculateTimes();
 				this.getBrokerageRankList();
 				this.getBrokerageRankNumber(this.type);
 			},
-			getBrokerageRankNumber(type) {
-				brokerageRankNumber({
-					type: type
+			getBrokerageRankNumber() {
+        BrokerageAPI.getBrokerageUserRankByPrice({
+          // 'startTime': this.times[0],
+          // 'endTime': this.times[1],
+          'times': this.times
 				}).then(res => {
 					this.position = res.data;
 				})
 			},
 			getBrokerageRankList: function() {
-				if (this.loadend) return;
-				if (this.loading) return;
+				if (this.loadend || this.loading) {
+          return;
+        }
 				this.loading = true;
 				this.loadTitle = '';
-				getBrokerageRank({
-					page: this.page,
-					limit: this.limit,
-					type: this.type
+        BrokerageAPI.getBrokerageUserRankPageByPrice({
+					pageNo: this.page,
+					pageSize: this.limit,
+          'times[0]': this.times[0],
+          'times[1]': this.times[1],
 				}).then(res => {
-					let list = res.data;
+					let list = res.data.list;
 					let loadend = list.length <= this.limit;
 					this.rankList.push.apply(this.rankList, list);
 					this.loading = false;
 					this.loadend = loadend;
 					this.loadTitle = loadend ? '😕我也是有底线的' : '加载更多';
 					this.$set(this, 'rankList', this.rankList);
-					//this.position = res.data.position;
 				}).catch(err => {
 					this.loading = false;
-					this.loadTitle = '加载更多'; 
+					this.loadTitle = '加载更多';
 				})
-			}
+			},
+      calculateTimes: function() {
+        let times;
+        if (this.type === 'week') {
+          times = DateUtil.getWeekTimes();
+        } else {
+          times = DateUtil.getMonthTimes();
+        }
+        this.times = [ this.formatDate(times[0]), this.formatDate(times[1]) ]
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+      },
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
 		},
 		onReachBottom: function() {
 			this.getBrokerageRankList();

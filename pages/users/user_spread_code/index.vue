@@ -35,10 +35,7 @@
 	// #ifdef H5
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js'
 	// #endif
-	import {
-		getUserInfo,
-		spreadBanner
-	} from '@/api/user.js';
+	import { spreadBanner } from '@/api/user.js';
 	import {
 		toLogin
 	} from '@/libs/login.js';

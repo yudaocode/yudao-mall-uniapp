@@ -61,7 +61,7 @@
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
 	import home from '@/components/home';
-  import * as BrokerageAPI from '@/api/member/brokerage.js'
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
   import * as Util from '@/utils/util.js';
   export default {
 		components: {

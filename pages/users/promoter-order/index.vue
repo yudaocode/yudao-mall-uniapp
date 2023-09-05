@@ -43,7 +43,7 @@
 	import { mapGetters } from "vuex";
 	import emptyPage from '@/components/emptyPage.vue'
 	import home from '@/components/home';
-  import * as BrokerageAPI from '@/api/member/brokerage.js'
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
   import * as Util from '@/utils/util.js';
   import dayjs from "@/plugin/dayjs/dayjs.min.js";
   export default {
