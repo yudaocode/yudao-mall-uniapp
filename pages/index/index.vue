@@ -172,7 +172,6 @@
 	import b_combination from './components/b_combination';
 	import c_bargain from './components/c_bargain';
 	import goodList from '@/components/goodList';
-	import promotionGood from '@/components/promotionGood';
 	import { goShopDetail } from '@/libs/order.js'
 	import { mapGetters } from "vuex";
 	import countDown from '@/components/countDown';
@@ -189,7 +188,6 @@
 		computed: mapGetters(['isLogin', 'uid']),
 		components: {
 			goodList,
-			promotionGood,
 			countDown,
 			a_seckill,
 			b_combination,
