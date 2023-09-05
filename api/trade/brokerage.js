@@ -5,6 +5,11 @@ export function getBrokerageUserSummary() {
   return request.get('app-api/trade/brokerage-user/get-summary');
 }
 
+// 获得下级分销统计分页
+export function getBrokerageUserChildSummaryPage(data) {
+  return request.get('app-api/trade/brokerage-user/child-summary-page', data);
+}
+
 // 获得分销用户排行分页（基于用户量）
 export function getBrokerageUserRankPageByUserCount(data) {
   return request.get('app-api/trade/brokerage-user/rank-page-by-user-count', data);

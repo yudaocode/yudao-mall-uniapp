@@ -11,21 +11,21 @@
 					</view>
           <!-- top3 排名 -->
 					<view class="rank acea-row row-bottom row-around">
-						<view class="item" v-show="Two.userId">
+						<view class="item" v-show="Two.id">
 							<view class="pictrue">
 								<image :src="Two.avatar"></image>
 							</view>
 							<view class="name line1">{{Two.nickname}}</view>
 							<view class="num">{{ Two.brokerageUserCount }}人</view>
 						</view>
-						<view class="item" v-show="One.userId">
+						<view class="item" v-show="One.id">
 							<view class="pictrue">
 								<image :src="One.avatar"></image>
 							</view>
 							<view class="name line1">{{One.nickname}}</view>
 							<view class="num">{{ One.brokerageUserCount }}人</view>
 						</view>
-						<view class="item" v-show="Three.userId">
+						<view class="item" v-show="Three.id">
 							<view class="pictrue">
 								<image :src="Three.avatar"></image>
 							</view>

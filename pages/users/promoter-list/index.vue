@@ -5,50 +5,50 @@
 				<view class='headerCon acea-row row-between'>
 					<view>
 						<view class='name'>推广人数</view>
-						<view><text class='num'>{{peopleData.count}}</text>人</view>
+						<view><text class='num'>{{peopleData.firstBrokerageUserCount + peopleData.secondBrokerageUserCount}}</text>人</view>
 					</view>
 					<view class='iconfont icon-tuandui'></view>
 				</view>
 			</view>
 			<view class="pad30">
 				<view class='nav acea-row row-around'>
-					<view :class="grade == 0 ? 'item on' : 'item'" @click='setType(0)'>一级({{peopleData.total}})</view>
-					<view :class="grade == 1 ? 'item on' : 'item'" @click='setType(1)'>二级({{peopleData.totalLevel}})
+					<view :class="level === 1 ? 'item on' : 'item'" @click='setType(1)'>一级({{peopleData.firstBrokerageUserCount}})</view>
+					<view :class="level === 2 ? 'item on' : 'item'" @click='setType(2)'>二级({{peopleData.secondBrokerageUserCount}})
 					</view>
 				</view>
 				<view class='search acea-row row-between-wrapper'>
-					<view class='input'><input placeholder='点击搜索会员名称' placeholder-class='placeholder' v-model="keyword"
+					<view class='input'><input placeholder='点击搜索会员名称' placeholder-class='placeholder' v-model="nickname"
 							@confirm="submitForm" confirm-type='search' name="search"></input></view>
 					<button class='iconfont icon-sousuo2' @click="submitForm"></button>
 				</view>
 				<view class='list'>
 					<view class="sortNav acea-row row-middle">
-						<view class="sortItem" @click='setSort("childCount","ASC")' v-if="sort == 'childCountDESC'">团队排序
+						<view class="sortItem" @click='setSort("userCount","asc")' v-if="sort === 'userCountDESC'">团队排序
 							<image src='/static/images/sort1.png'></image>
 						</view>
-						<view class="sortItem" @click='setSort("childCount")' v-else-if="sort == 'childCountASC'">团队排序
+						<view class="sortItem" @click='setSort("userCount", "desc")' v-else-if="sort === 'userCountASC'">团队排序
 							<image src='/static/images/sort3.png'></image>
 						</view>
-						<view class="sortItem" @click='setSort("childCount","DESC")' v-else>团队排序
+						<view class="sortItem" @click='setSort("userCount","desc")' v-else>团队排序
 							<image src='/static/images/sort2.png'></image>
 						</view>
-						<view class="sortItem" @click='setSort("numberCount","ASC")' v-if="sort == 'numberCountDESC'">
+						<view class="sortItem" @click='setSort("price","asc")' v-if="sort === 'priceDESC'">
 							金额排序
 							<image src='/static/images/sort1.png'></image>
 						</view>
-						<view class="sortItem" @click='setSort("numberCount")' v-else-if="sort == 'numberCountASC'">金额排序
+						<view class="sortItem" @click='setSort("price", "desc")' v-else-if="sort === 'priceASC'">金额排序
 							<image src='/static/images/sort3.png'></image>
 						</view>
-						<view class="sortItem" @click='setSort("numberCount","DESC")' v-else>金额排序
+						<view class="sortItem" @click='setSort("price","desc")' v-else>金额排序
 							<image src='/static/images/sort2.png'></image>
 						</view>
-						<view class="sortItem" @click='setSort("orderCount","ASC")' v-if="sort == 'orderCountDESC'">订单排序
+						<view class="sortItem" @click='setSort("orderCount","asc")' v-if="sort === 'orderCountDESC'">订单排序
 							<image src='/static/images/sort1.png'></image>
 						</view>
-						<view class="sortItem" @click='setSort("orderCount")' v-else-if="sort == 'orderCountASC'">订单排序
+						<view class="sortItem" @click='setSort("orderCount", "desc")' v-else-if="sort === 'orderCountASC'">订单排序
 							<image src='/static/images/sort3.png'></image>
 						</view>
-						<view class="sortItem" @click='setSort("orderCount","DESC")' v-else>订单排序
+						<view class="sortItem" @click='setSort("orderCount","desc")' v-else>订单排序
 							<image src='/static/images/sort2.png'></image>
 						</view>
 					</view>
@@ -60,83 +60,70 @@
 								</view>
 								<view class='text'>
 									<view class='name line1'>{{item.nickname}}</view>
-									<view>加入时间: {{item.time.split(' ')[0]}}</view>
+									<view>加入时间: {{ formatDate(item.brokerageTime) }}</view>
 								</view>
 							</view>
 							<view class="right">
-								<view><text class='num font-color'>{{item.childCount ? item.childCount : 0}}</text>人
+								<view><text class='num font-color'>{{ item.brokerageUserCount || 0}}</text>人
 								</view>
-								<view><text class="num">{{item.orderCount ? item.orderCount : 0}}</text>单</view>
-								<view><text class="num">{{item.numberCount ? item.numberCount : 0}}</text>元</view>
+								<view><text class="num">{{ item.orderCount|| 0}}</text>单</view>
+								<view><text class="num">{{ fen2yuan(item.brokeragePrice || 0) }}</text>元</view>
 							</view>
 						</view>
 					</block>
 					<Loading :loaded="status" :loading="loadingList"></Loading>
-					<block v-if="recordList.length == 0 && isShow">
+					<block v-if="recordList.length === 0 && isShow">
 						<emptyPage title="暂无推广人数～"></emptyPage>
 					</block>
 				</view>
 			</view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</view>
 </template>
-
 <script>
-	import {
-		spreadPeople,
-		spreadPeoCount
-	} from '@/api/user.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	import emptyPage from '@/components/emptyPage.vue'
 	import Loading from "@/components/Loading";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
 	import home from '@/components/home';
-	export default {
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
+  import * as Util from '@/utils/util.js';
+  import dayjs from "@/plugin/dayjs/dayjs.min.js";
+  export default {
 		components: {
 			Loading,
 			emptyPage,
-			// #ifdef MP
-			authorize,
-			// #endif
 			home
 		},
 		data() {
 			return {
-				page: 1,
+        peopleData: {
+          firstBrokerageUserCount: 0,
+          secondBrokerageUserCount: 0
+        },
+
+        recordList: [],
+        page: 1,
 				limit: 20,
-				keyword: '',
-				sort: '',
-				isAsc: '',
-				sortKey: '',
-				grade: 0,
+				nickname: '',
+				isAsc: 'desc',
+				sortKey: 'userCount',
+        sort: 'userCountDESC',
+        level: 1,
 				status: false,
 				loadingList: false,
-				recordList: [],
-				peopleData: {},
 				isShow: false,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false //是否隐藏授权
 			};
 		},
 		computed: mapGetters(['isLogin']),
 		onLoad() {
-			if (this.isLogin) {
-				this.userSpreadNewList();
-				this.spreadPeoCount();
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return;
 			}
+      this.userSpreadNewList();
+      this.spreadPeoCount();
 		},
 		onShow: function() {
 			if (this.is_show) this.userSpreadNewList();
@@ -145,23 +132,15 @@
 			this.is_show = true;
 		},
 		methods: {
-			onLoadFun: function(e) {
-				this.userSpreadNewList();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
 			setSort: function(sortKey, isAsc) {
-				let that = this;
-				that.isAsc = isAsc;
-				that.sort = sortKey + isAsc;
-				that.sortKey = sortKey;
-				that.page = 1;
-				that.limit = 20;
-				that.status = false;
-				that.$set(that, 'recordList', []);
-				that.userSpreadNewList();
+				this.isAsc = isAsc;
+				this.sort = sortKey + isAsc.toUpperCase();
+				this.sortKey = sortKey;
+				this.page = 1;
+				this.limit = 20;
+				this.status = false;
+				this.$set(this, 'recordList', []);
+				this.userSpreadNewList();
 			},
 			submitForm: function() {
 				this.page = 1;
@@ -171,14 +150,12 @@
 				this.userSpreadNewList();
 			},
 
-			setType: function(grade) {
-				if (this.grade != grade) {
-					this.grade = grade;
+			setType: function(level) {
+				if (this.level !== level) {
+					this.level = level;
 					this.page = 1;
 					this.limit = 20;
-					this.keyword = '';
-					this.sort = '';
-					this.isAsc = '';
+					this.nickname = '';
 					this.status = false;
 					this.loadingList = false;
 					this.$set(this, 'recordList', []);
@@ -186,41 +163,45 @@
 				}
 			},
 			spreadPeoCount() {
-				spreadPeoCount().then(res => {
+        BrokerageAPI.getBrokerageUserSummary().then(res => {
 					this.peopleData = res.data;
 				});
 			},
 			userSpreadNewList: function() {
-				let that = this;
-				let page = that.page;
-				let limit = that.limit;
-				let status = that.status;
-				let keyword = that.keyword;
-				let isAsc = that.isAsc;
-				let sortKey = that.sortKey;
-				let grade = that.grade;
-				let recordList = that.recordList;
+				let page = this.page;
+				let limit = this.limit;
+				let status = this.status;
+ 				let recordList = this.recordList;
 				let recordListNew = [];
-				if (that.loadingList) return;
-				if (status == true) return;
-				spreadPeople({
-					page: page,
-					limit: limit,
-					keyword: keyword,
-					grade: grade,
-					sortKey: sortKey,
-					isAsc: isAsc
+				if (this.loadingList || status) {
+          return;
+        }
+        BrokerageAPI.getBrokerageUserChildSummaryPage({
+					pageNo: page,
+					pageSize: limit,
+					nickname: this.nickname,
+					level: this.level,
+					'sortingField.field': this.sortKey,
+          'sortingField.order': this.isAsc,
 				}).then(res => {
 					let recordListData = res.data.list ? res.data.list : [];
 					let len = recordListData.length;
 					recordListNew = recordList.concat(recordListData);
-					that.status = limit > len;
-					that.page = page + 1;
-					that.$set(that, 'recordList', recordListNew || []);
-					that.loadingList = false;
-					if(that.recordList.length===0) that.isShow = true;
+					this.status = limit > len;
+					this.page = page + 1;
+					this.$set(this, 'recordList', recordListNew || []);
+					this.loadingList = false;
+					if (this.recordList.length === 0) {
+            this.isShow = true;
+          }
 				});
-			}
+			},
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
+      formatDate: function(date) {
+        return dayjs(date).format("YYYY-MM-DD HH:mm:ss");
+      },
 		},
 		onReachBottom: function() {
 			this.userSpreadNewList();
