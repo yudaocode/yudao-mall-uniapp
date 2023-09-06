@@ -35,31 +35,17 @@
 	// #ifdef H5
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js'
 	// #endif
-	import { spreadBanner } from '@/api/user.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	// #ifdef MP
-	import {
-		base64src
-	} from '@/utils/base64src.js'
-	import authorize from '@/components/Authorize';
-	import {
-		getQrcode
-	} from '@/api/api.js';
+	import { base64src } from '@/utils/base64src.js'
+	import { getQrcode } from '@/api/api.js';
 	// #endif
 	import home from '@/components/home';
-	import {
-		imageBase64
-	} from "@/api/public";
+	import { imageBase64 } from "@/api/public";
+  import * as TradeConfigApi from '@/api/trade/config.js';
 	export default {
 		components: {
-			// #ifdef MP
-			authorize,
-			// #endif
 			home
 		},
 		data() {
@@ -73,8 +59,6 @@
 				swiperIndex: 0,
 				spreadList: [],
 				poster: '',
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
 				qrcodeSize: 1000,
 				PromotionCode: '',
 				base64List: [],
@@ -93,12 +77,12 @@
 			}
 		},
 		onLoad() {
-			if (this.isLogin) {
-				this.userSpreadBannerList();
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return;
 			}
-		},
+      this.userSpreadBannerList();
+    },
 		/**
 		 * 用户点击右上角分享
 		 */
@@ -119,13 +103,20 @@
 					title: '获取中',
 					mask: true,
 				})
-				spreadBanner({
-					page: 1,
-					limit: 5
-				}).then(res => {
+
+        TradeConfigApi.getTradeConfig().then(res => {
 					uni.hideLoading();
-					that.$set(that, 'spreadList', res.data);
-					that.getImageBase64(res.data);
+          const spreadList = [];
+          // TODO @芋艿：这里后续可以优化下；直接使用 brokeragePosterUrls 数组，而不是要搞 pic 元素
+          if (res.data.brokeragePosterUrls) {
+            res.data.brokeragePosterUrls.forEach(item => {
+              spreadList.push({
+                pic: item
+              })
+            })
+          }
+					that.$set(that, 'spreadList', spreadList);
+					that.getImageBase64(spreadList);
 				}).catch(err => {
 					uni.hideLoading();
 				});
@@ -140,6 +131,7 @@
 				let spreadList = []
 				// 生成一个Promise对象的数组
 				images.forEach(item => {
+          // TODO @芋艿：imageBase64 这里是为了下载图片的 base64；后续看看可以前端直接操作不；
 					const oneApi = imageBase64({
 						url: item.pic
 					}).then(res => {
