@@ -33,10 +33,10 @@
 							<view class='input'><input :placeholder='"最低提现金额"+minPrice' placeholder-class='placeholder' name="money" type='digit'></input></view>
 						</view>
 						<view class='tip'>
-							当前可提现金额: <text class="price">￥{{commission.commissionCount}},</text>冻结佣金：￥{{commission.brokenCommission}}
+              当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }},</text>冻结佣金：￥{{ fen2yuan(commission.frozenBrokeragePrice) }}
 						</view>
 						<view class='tip'>
-							说明: 每笔佣金的冻结期为{{commission.brokenDay}}天，到期后可提现
+              说明: 每笔佣金的冻结期为{{frozenDays}}天，到期后可提现
 						</view>
 						<button formType="submit" class='bnt bg-color'>提现</button>
 					</form>
@@ -49,7 +49,7 @@
 						</view>
 						<view class='item acea-row row-between-wrapper'>
 							<view class='name'>提现</view>
-							<view class='input'><input :placeholder='"最低提现金额"+minPrice' placeholder-class='placeholder' name="money" type='digit'></input></view>
+							<view class='input'><input :placeholder='"最低提现金额" + minPrice' placeholder-class='placeholder' name="money" type='digit'></input></view>
 						</view>
 						<view class='item acea-row row-top row-between'>
 							<view class='name'>收款码</view>
@@ -65,10 +65,10 @@
 							</view>
 						</view>
 						<view class='tip'>
-							当前可提现金额: <text class="price">￥{{commission.commissionCount}},</text>冻结佣金：￥{{commission.brokenCommission}}
+              当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }},</text>冻结佣金：￥{{ fen2yuan(commission.frozenBrokeragePrice) }}
 						</view>
 						<view class='tip'>
-							说明: 每笔佣金的冻结期为{{commission.brokenDay}}天，到期后可提现
+              说明: 每笔佣金的冻结期为{{frozenDays}}天，到期后可提现
 						</view>
 						<button formType="submit" class='bnt bg-color'>提现</button>
 					</form>
@@ -97,43 +97,26 @@
 							</view>
 						</view>
 						<view class='tip'>
-							当前可提现金额: <text class="price">￥{{commission.commissionCount}},</text>冻结佣金：￥{{commission.brokenCommission}}
+							当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }},</text>冻结佣金：￥{{ fen2yuan(commission.frozenBrokeragePrice) }}
 						</view>
 						<view class='tip'>
-							说明: 每笔佣金的冻结期为{{commission.brokenDay}}天，到期后可提现
+							说明: 每笔佣金的冻结期为{{frozenDays}}天，到期后可提现
 						</view>
 						<button formType="submit" class='bnt bg-color'>提现</button>
 					</form>
 				</view>
 			</view>
 		</view>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 	</view>
 </template>
-
 <script>
-	import {
-		extractCash,
-		extractBank,
-		extractUser
-	} from '@/api/user.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
-	export default {
-		components: {
-			// #ifdef MP
-			authorize
-			// #endif
-		},
+	import { extractBank } from '@/api/user.js';
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
+  import * as TradeConfigApi from '@/api/trade/config.js';
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
+  import * as Util from '@/utils/util.js';
+  export default {
 		data() {
 			return {
 				navList: [{
@@ -151,22 +134,20 @@
 				],
 				currentTab: 0,
 				index: 0,
-				array: [], //提现银行
-				minPrice: 0.00, //最低提现金额
-				userInfo: [],
+				array: [], // 提现银行
+				minPrice: 0.00, // 最低提现金额
+        frozenDays: 0, // 佣金冻结期
 				isClone: false,
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				commission:{},
+				commission: {}, // 分销信息
 				qrcodeUrlW:"",
 				qrcodeUrlZ:"",
-				isCommitted: false //防止多次提交
+				isCommitted: false // 防止多次提交
 			};
 		},
 		computed: mapGetters(['isLogin']),
 		watch:{
 			isLogin:{
-				handler:function(newV,oldV){
+				handler: function(newV,oldV) {
 					if(newV){
 						this.getUserExtractBank();
 						this.getExtractUser();
@@ -176,32 +157,26 @@
 			}
 		},
 		onLoad() {
-			if (this.isLogin) {
-				this.getUserExtractBank();
-				this.getExtractUser();
-			} else {
-				toLogin();
+			if (!this.isLogin) {
+        toLogin();
+        return;
 			}
+      // this.getUserExtractBank();
+      this.getExtractUser();
 		},
 		methods: {
 			uploadpic: function (type) {
-			  let that = this;
-			  that.$util.uploadImageOne({
-			  	url: 'user/upload/image',
-			  	name: 'multipart',
-			  	model: "user",
-			  	pid: 1
-			  }, function(res) {
-			  	 if(type==='W'){
-			  			that.qrcodeUrlW = res.data.url;
-			  	 }else{
-			  			that.qrcodeUrlZ = res.data.url;
-			  	 }
-			  });
+        this.$util.uploadImageOne({}, res => {
+          this.newAvatar = res.data;
+          if (type === 'W') {
+            this.qrcodeUrlW = res.data;
+          } else {
+            this.qrcodeUrlZ = res.data;
+          }
+        });
 			},
 			/**
 			 * 删除图片
-			 * 
 			*/
 			DelPicW: function () {
 			  this.qrcodeUrlW = "";
@@ -209,20 +184,17 @@
 			DelPicZ: function () {
 			  this.qrcodeUrlZ = "";
 			},
-			onLoadFun: function() {
-				this.getUserExtractBank();
-			},
 			getExtractUser(){
-				extractUser().then(res=>{
+        BrokerageAPI.getBrokerageUser().then(res=>{
 					this.commission = res.data;
-					this.minPrice = res.data.minPrice;
 				})
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
+        TradeConfigApi.getTradeConfig().then(res => {
+          this.minPrice = (res.data.brokerageWithdrawMinPrice || 0) / 100.0;
+          this.frozenDays = res.data.brokerageWithdrawMinPrice || 0;
+        });
 			},
 			getUserExtractBank: function() {
+        // TODO 芋艿：这里要搞个银行的列表；通过数据字典；
 				let that = this;
 				extractBank().then(res => {
 					let array = res.data;
@@ -238,68 +210,89 @@
 			},
 			moneyInput(e) {
 				//正则表达试
-								e.target.value = (e.target.value.match(/^\d*(\.?\d{0,2})/g)[0]) || null
-								//重新赋值给input
-								this.$nextTick(() => {
-									this.money= e.target.value
-								})
-				
+        e.target.value = (e.target.value.match(/^\d*(\.?\d{0,2})/g)[0]) || null
+        //重新赋值给input
+        this.$nextTick(() => {
+          this.money= e.target.value
+        })
 			},
 			subCash: function(e) {
 				let that = this,
 					value = e.detail.value;
-					if (that.currentTab == 0) { //银行卡
-						if (value.name.length == 0) return this.$util.Tips({
-							title: '请填写持卡人姓名'
-						});
-						if (value.cardum.length == 0) return this.$util.Tips({
-							title: '请填写卡号'
-						});
-						if (that.index == 0) return this.$util.Tips({
-							title: "请选择银行"
-						});
-						value.extractType = 'bank';
-						value.bankName = that.array[that.index];
-					} else if (that.currentTab == 1) { //微信
-						value.extractType = 'weixin';
-						if (value.name.length == 0) return this.$util.Tips({
-							title: '请填写微信号'
-						});
-						value.wechat = value.name;
-						value.qrcodeUrl = that.qrcodeUrlW;
-					} else if (that.currentTab == 2) { //支付宝
-						value.extractType = 'alipay';
-						if (value.name.length == 0) return this.$util.Tips({
-							title: '请填写账号'
-						});
-						value.alipayCode = value.name;
-						value.qrcodeUrl = that.qrcodeUrlZ;
+        const form = {};
+					if (this.currentTab === 0) { // 银行卡
+            form.type = 2;
+            if (value.name.length === 0) {
+              return this.$util.Tips({
+                title: '请填写持卡人姓名'
+              });
+            }
+						if (value.cardum.length === 0) {
+              return this.$util.Tips({
+                title: '请填写卡号'
+              });
+            }
+						if (that.index === 0) {
+              return this.$util.Tips({
+                title: "请选择银行"
+              });
+            }
+            // TODO 芋艿：整列要搞成字典；
+            form.name = value.name;
+            form.bankName = that.array[that.index];
+					} else if (that.currentTab === 1) { // 微信
+            form.type = 3;
+						if (value.name.length === 0) {
+              return this.$util.Tips({
+                title: '请填写微信号'
+              });
+            }
+						form.accountNo = value.name;
+            form.accountQrCodeUrl = this.qrcodeUrlW;
+					} else if (that.currentTab === 2) { // 支付宝
+            form.type = 4;
+						if (value.name.length === 0) {
+              return this.$util.Tips({
+                title: '请填写账号'
+              });
+            }
+            form.accountNo = value.name;
+            form.accountQrCodeUrl = this.qrcodeUrlZ;
 					}
-					if (value.money.length == 0) return this.$util.Tips({
-						title: '请填写提现金额'
-					});
-					if (!(/^(\d?)+(\.\d{0,2})?$/.test(value.money))) return this.$util.Tips({
-						title: '提现金额保留2位小数'
-					});
-					if (value.money < that.minPrice) return this.$util.Tips({
-						title: '提现金额不能低于' + that.minPrice
-					});
-					if(this.isCommitted==false){
-						  this.isCommitted=true;
-					extractCash(value).then(res => {
-						return this.$util.Tips({
-							title: "提现成功",
-							icon: 'success'
-						},{ tab: 2, url: '/pages/users/user_spread_user/index' });
-						this.isCommitted=false;
+					if (value.money.length === 0) {
+            return this.$util.Tips({
+              title: '请填写提现金额'
+            });
+          }
+					if (!(/^(\d?)+(\.\d{0,2})?$/.test(value.money))) {
+            return this.$util.Tips({
+              title: '提现金额保留2位小数'
+            });
+          }
+					if (value.money < that.minPrice) {
+            return this.$util.Tips({
+              title: '提现金额不能低于' + that.minPrice
+            });
+          }
+          form.price = value.money * 100;
+					if (this.isCommitted === false){
+            this.isCommitted=true;
+            BrokerageAPI.createBrokerageWithdraw(form).then(res => {
+              return this.$util.Tips({
+                title: "提现成功",
+                icon: 'success'
+            },{ tab: 2, url: '/pages/users/user_spread_user/index' });
 					}).catch(err => {
 						 this.isCommitted=false;
-						return this.$util.Tips({
-							title: err
-						});
+              return this.$util.Tips({
+                title: err
+              });
 					});
 				}
-			}
+			},
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      },
 		}
 	}
 </script>
@@ -308,22 +301,22 @@
 	page {
 		background-color: #fff !important;
 	}
-	
+
 	.cash-withdrawal .nav {
 		height: 130rpx;
 		box-shadow: 0 10rpx 10rpx #f8f8f8;
 	}
-	
+
 	.cash-withdrawal .nav .item {
 		font-size: 26rpx;
 		flex: 1;
 		text-align: center;
 	}
-	
+
 	.cash-withdrawal .nav .item~.item {
 		border-left: 1px solid #f0f0f0;
 	}
-	
+
 	.cash-withdrawal .nav .item .iconfont {
 		width: 40rpx;
 		height: 40rpx;
@@ -335,28 +328,28 @@
 		font-size: 22rpx;
 		box-sizing: border-box;
 	}
-	
+
 	.cash-withdrawal .nav .item .iconfont.on {
 		background-color: $theme-color;
 		color: #fff;
 		border-color: $theme-color;
 	}
-	
+
 	.cash-withdrawal .nav .item .line {
 		width: 2rpx;
 		height: 20rpx;
 		margin: 0 auto;
 		transition: height 0.3s;
 	}
-	
+
 	.cash-withdrawal .nav .item .line.on {
 		height: 39rpx;
 	}
-	
+
 	.cash-withdrawal .wrapper .list {
 		padding: 0 30rpx;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .item {
 		border-bottom: 1rpx solid #eee;
 		min-height: 28rpx;
@@ -364,19 +357,19 @@
 		color: #333;
 		padding: 39rpx 0;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .item .name {
 		width: 130rpx;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .item .input {
 		width: 505rpx;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .item .input .placeholder {
 		color: #bbb;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .item .picEwm,.cash-withdrawal .wrapper .list .item .pictrue{
 		width:140rpx;
 		height:140rpx;
@@ -384,38 +377,38 @@
 		position: relative;
 		margin-right: 23rpx;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .item .picEwm image{
 		width:100%;
 		height:100%;
 		border-radius:3rpx;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .item .picEwm .icon-guanbi1{
 		position:absolute;
 		right: -14rpx;
 		top: -16rpx;
 		font-size:40rpx;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .item .pictrue{
 		border:1px solid rgba(221,221,221,1);
 		font-size:22rpx;
 		color: #BBBBBB;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .item .pictrue .icon-icon25201{
 		font-size: 47rpx;
 		color: #DDDDDD;
 		margin-bottom: 3px;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .tip {
 		font-size: 26rpx;
 		color: #999;
 		margin-top: 25rpx;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .bnt {
 		font-size: 32rpx;
 		color: #fff;
@@ -426,14 +419,14 @@
 		line-height: 90rpx;
 		margin: 64rpx auto;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .tip2 {
 		font-size: 26rpx;
 		color: #999;
 		text-align: center;
 		margin: 44rpx 0 20rpx 0;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .value {
 		height: 135rpx;
 		line-height: 135rpx;
@@ -441,18 +434,18 @@
 		width: 690rpx;
 		margin: 0 auto;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .value input {
 		font-size: 80rpx;
 		color: #282828;
 		height: 135rpx;
 		text-align: center;
 	}
-	
+
 	.cash-withdrawal .wrapper .list .value .placeholder2 {
 		color: #bbb;
 	}
-	
+
 	.price {
 		color: $theme-color;
 	}

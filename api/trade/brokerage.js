@@ -1,5 +1,10 @@
 import request from "@/utils/request.js";
 
+// 获得个人分销信息
+export function getBrokerageUser() {
+  return request.get('app-api/trade/brokerage-user/get');
+}
+
 // 获得个人分销统计
 export function getBrokerageUserSummary() {
   return request.get('app-api/trade/brokerage-user/get-summary');
@@ -28,6 +33,11 @@ export function getBrokerageUserRankPageByPrice(data) {
 // 获得分销提现分页记录
 export function getBrokerageWithdrawPage(data) {
   return request.get('app-api/trade/brokerage-withdraw/page', data);
+}
+
+// 创建分销提现
+export function createBrokerageWithdraw(data) {
+  return request.post('app-api/trade/brokerage-withdraw/create', data);
 }
 
 // 获得分销记录分页
