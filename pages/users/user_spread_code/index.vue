@@ -3,7 +3,7 @@
 		<view class='distribution-posters'>
 			<swiper :indicator-dots="indicatorDots" :autoplay="autoplay" :circular="circular" :interval="interval"
 				:duration="duration" @change="bindchange" previous-margin="40px" next-margin="40px">
-				<block v-for="(item,index) in spreadList" :key="index">
+				<block v-for="(item,index) in posterUrls" :key="index">
 					<swiper-item>
 						<image :src="item.pic" class="slide-image" :class="swiperIndex == index ? 'active' : 'quiet'"
 							mode='aspectFill' />
@@ -57,7 +57,7 @@
 				interval: 3000,
 				duration: 500,
 				swiperIndex: 0,
-				spreadList: [],
+				posterUrls: [],
 				poster: '',
 				qrcodeSize: 1000,
 				PromotionCode: '',
@@ -90,7 +90,7 @@
 		onShareAppMessage: function() {
 			return {
 				title: this.userInfo.nickname + '-分销海报',
-				imageUrl: this.spreadList[0].pic,
+				imageUrl: this.posterUrls[0].pic,
 				path: '/pages/index/index?spid=' + this.uid,
 			};
 		},
@@ -106,17 +106,17 @@
 
         TradeConfigApi.getTradeConfig().then(res => {
 					uni.hideLoading();
-          const spreadList = [];
+          const posterUrls = [];
           // TODO @芋艿：这里后续可以优化下；直接使用 brokeragePosterUrls 数组，而不是要搞 pic 元素
           if (res.data.brokeragePosterUrls) {
             res.data.brokeragePosterUrls.forEach(item => {
-              spreadList.push({
+              posterUrls.push({
                 pic: item
               })
             })
           }
-					that.$set(that, 'spreadList', spreadList);
-					that.getImageBase64(spreadList);
+					that.$set(that, 'posterUrls', posterUrls);
+					that.getImageBase64(posterUrls);
 				}).catch(err => {
 					uni.hideLoading();
 				});
@@ -128,7 +128,7 @@
 				});
 				let that = this;
 				// #ifdef H5
-				let spreadList = []
+				let posterUrls = []
 				// 生成一个Promise对象的数组
 				images.forEach(item => {
           // TODO @芋艿：imageBase64 这里是为了下载图片的 base64；后续看看可以前端直接操作不；
@@ -137,9 +137,9 @@
 					}).then(res => {
 						return res.data.code;
 					})
-					spreadList.push(oneApi)
+					posterUrls.push(oneApi)
 				})
-				Promise.all(spreadList).then(result => {
+				Promise.all(posterUrls).then(result => {
 					that.$set(that, 'base64List', result);
 					that.make();
 					that.setShareInfoStatus();
@@ -237,7 +237,7 @@
 									success: function(res) {
 										// 在H5平台下，tempFilePath 为 base64
 										uni.hideLoading();
-										that.spreadList[index].pic = res
+										that.posterUrls[index].pic = res
 											.tempFilePath;
 										that.$set(that, 'poster', res
 											.tempFilePath);
@@ -332,7 +332,7 @@
 						desc: '分销海报',
 						title: this.userInfo.nickname + '-分销海报',
 						link: '/pages/index/index?spread=' + this.uid,
-						imgUrl: this.spreadList[0].pic
+						imgUrl: this.posterUrls[0].pic
 					};
 					this.$wechat.wechatEvevt(["updateAppMessageShareData", "updateTimelineShareData"],
 						configAppMessage)
