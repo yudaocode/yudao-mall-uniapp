@@ -195,11 +195,11 @@
 	import { imageBase64 } from "@/api/public";
 	import { toLogin } from '@/libs/login.js';
 	import { silenceBindingSpread } from "@/utils";
-	import { spread } from "@/api/user";
   import * as ProductSpuApi from '@/api/product/spu.js';
   import * as ProductFavoriteApi from '@/api/product/favorite.js';
   import * as ProductCommentApi from '@/api/product/comment.js';
   import * as SeckillApi from '@/api/promotion/seckill.js';
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
   import * as Util from '@/utils/util.js';
   import * as ProductUtil from '@/utils/product.js';
 	export default {
@@ -307,11 +307,11 @@
 
 			// #ifdef MP || APP-NVUE
 			// 小程序链接进入获取绑定关系id
-      // TODO 芋艿：分销？？？
+      // 绑定分销关系
       setTimeout(()=>{
 				if (options.spread) {
 					app.globalData.spread = options.spread;
-					spread(options.spread).then(res => {})
+          BrokerageAPI.bindBrokerageUser(options.spread).then(res => {})
 				}
 			},2000)
 			// #endif
@@ -332,9 +332,9 @@
         let mapeMpQrCodeValue = this.$util.formatMpQrCodeData(qrCodeValue);
         app.globalData.spread = mapeMpQrCodeValue.spread;
         this.id = mapeMpQrCodeValue.id;
-        // TODO 芋艿：code 是啥
+        // 绑定分销用户
         setTimeout(()=>{
-          spread(mapeMpQrCodeValue.spread).then(res => {}).catch(res => {})
+          BrokerageAPI.bindBrokerageUser(mapeMpQrCodeValue.spread).then(res => {}).catch(res => {})
         },2000)
       } else {
         this.id = options.id;

@@ -276,7 +276,6 @@
 
 <script>
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js'
-	import { spread } from "@/api/user";
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
 	import { imageBase64 } from "@/api/public";

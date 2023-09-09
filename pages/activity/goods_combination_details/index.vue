@@ -270,11 +270,11 @@
 	import userEvaluation from '@/components/userEvaluation/index.vue'
 	import countDown from '@/components/countDown/index.vue'
 	import shareRedPackets from '@/components/shareRedPackets';
-	import { spread } from "@/api/user";
   import * as ProductSpuApi from '@/api/product/spu.js';
   import * as ProductFavoriteApi from '@/api/product/favorite.js';
   import * as ProductCommentApi from '@/api/product/comment.js';
   import * as CombinationApi from '@/api/promotion/combination.js';
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
   import * as Util from '@/utils/util.js';
   import * as ProductUtil from '@/utils/product.js';
 	export default {
@@ -350,7 +350,7 @@
         actionSheetHidden: true, // 微信小程序的右上角分享的弹出
         posterImage: '', // 海报路径
         sharePacket: { // 分销弹出信息
-          isState: true, // 默认不显示
+          enabled: false, // 默认不显示
         },
 
         // ========== 顶部 nav + scroll 相关的变量 ==========
@@ -411,9 +411,9 @@
         let mapeMpQrCodeValue = this.$util.formatMpQrCodeData(qrCodeValue);
         app.globalData.spread = mapeMpQrCodeValue.spread;
         this.id = mapeMpQrCodeValue.id;
-        // TODO 芋艿：code 是啥
+        // 绑定分销用户
         setTimeout(()=>{
-          spread(mapeMpQrCodeValue.spread).then(res => {}).catch(res => {})
+          BrokerageAPI.bindBrokerageUser(mapeMpQrCodeValue.spread).then(res => {}).catch(res => {})
         }, 2000)
       } else {
         this.id = options.id;
@@ -482,6 +482,7 @@
           this.getGoodsDetails();
           // 获得商品收藏
           this.isFavoriteExists();
+          this.getBrokeragePrice();
           // 获得商品评价列表
           this.getProductReplyList();
           this.getProductReplyCount();
@@ -569,6 +570,11 @@
             url: 1
           });
         })
+      },
+      getBrokeragePrice: function() {
+        BrokerageAPI.getProductBrokeragePrice(this.id).then(res => {
+          this.sharePacket = res.data
+        });
       },
       /**
        * 默认选中属性
@@ -1021,7 +1027,7 @@
        * 关闭分销的弹窗
        */
       closeChange: function() {
-        this.$set(this.sharePacket, 'isState', true);
+        this.$set(this.sharePacket, 'enabled', false);
       },
 
       // ========== 顶部 nav 相关的方法 ==========
