@@ -6,7 +6,15 @@
 	      <image src='../../static/images/red-packets.png'></image>
 	      <view class='text font-color'>
 	        <view>会员分享返</view>
-	        <view class='money'><text class='label'>￥</text>{{sharePacket.priceName}}</view>
+	        <view class='money' v-if="sharePacket.brokerageMinPrice && sharePacket.brokerageMaxPrice">
+            <text class='label'>￥</text>{{ fen2yuan(sharePacket.brokerageMinPrice) }} ~ {{ fen2yuan(sharePacket.brokerageMaxPrice) }}
+          </view>
+          <view class='money' v-else-if="sharePacket.brokerageMinPrice">
+            <text class='label'>￥</text>{{ fen2yuan(sharePacket.brokerageMinPrice) }}
+          </view>
+          <view class='money' v-else-if="sharePacket.brokerageMaxPrice">
+            <text class='label'>￥</text>{{ fen2yuan(sharePacket.brokerageMaxPrice) }}
+          </view>
 	        <view class='tip'>下单即返佣金</view>
 	        <view class='shareBut'>立即分享</view>
 	      </view>
@@ -15,6 +23,7 @@
 </template>
 
 <script>
+  import * as Util from '@/utils/util.js';
 	export default {
 		props: {
       sharePacket: {
@@ -22,7 +31,8 @@
         default: function() {
           return {
             enabled: true,
-            priceName:'' // 金额
+            brokerageMinPrice: undefined,
+            brokerageMaxPrice: undefined,
           }
         }
       }
@@ -38,6 +48,9 @@
       },
       goShare:function(){
         this.$emit('listenerActionSheet');
+      },
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
       }
 		}
 	}

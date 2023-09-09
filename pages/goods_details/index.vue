@@ -299,8 +299,6 @@
   // #ifdef MP
 	import { base64src } from '@/utils/base64src.js'
 	import { getQrcode } from '@/api/api.js';
-  import {getActivityListBySpuIds} from "../../api/promotion/activity";
-  import {setActivityList} from "../../utils/product";
 	// #endif
 	const app = getApp();
 	export default {
@@ -373,7 +371,7 @@
         posterbackgd: '/static/images/posterbackgd.png',  // 海报的背景，用于海报的生成
         storeImage: '', // 下载商品图片后的文件地址
         sharePacket: { // 分销弹出信息
-          enabled: true, // 默认不显示
+          enabled: false, // 默认不显示
         },
         actionSheetHidden: true, // 微信小程序的右上角分享的弹出
 
@@ -513,10 +511,6 @@
           this.$set(this.attr, 'properties', ProductUtil.convertProductPropertyList(skus));
           this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
 
-          // 设置分销相关变量 // TODO 芋艿：待接入
-          // this.$set(this.sharePacket, 'priceName', res.data.priceName);
-          // this.$set(this.sharePacket, 'enabled', Math.floor(res.data.priceName) === 0);
-
           // 设置营销活动
           PromotionActivityApi.getActivityListBySpuId(this.id).then(res => {
             let activityList = res.data;
@@ -570,9 +564,7 @@
       },
       getBrokeragePrice: function() {
         BrokerageAPI.getProductBrokeragePrice(this.id).then(res => {
-          // this.sharePacket = res.data
-          // console.log(this.sharePacket)
-          this.$set(this.sharePacket, 'isState', false);
+          this.sharePacket = res.data
         });
       },
       /**
