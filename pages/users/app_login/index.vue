@@ -119,10 +119,10 @@
 			// #ifdef MP
 			phoneSilenceAuth(code) {
 				let self = this
+        // TODO @芋艿：貌似这里没做
 				phoneSilenceAuth({
 					code: code,
 					spid: app.globalData.spid,
-					spread: app.globalData.code,
 					phone: this.account,
 					captcha: this.codeNum
 				}).then(res => {

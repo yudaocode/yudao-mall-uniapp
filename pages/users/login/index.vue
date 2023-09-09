@@ -57,12 +57,13 @@
 </template>
 <script>
 	import sendVerifyCode from "@/mixins/SendVerifyCode";
-	import { loginMobile, registerVerify, getUserInfo } from "@/api/user";
+	import { loginMobile, registerVerify } from "@/api/user";
 	import * as AuthApi from "@/api/member/auth";
 	import * as UserApi from "@/api/member/user";
 	import { appAuth, appleLogin } from "@/api/public";
 	const BACK_URL = "login_back_url";
-	export default {
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
+  export default {
 		name: "Login",
 		mixins: [sendVerifyCode],
 		data: function() {
@@ -299,14 +300,13 @@
         AuthApi.login({
           mobile: this.account,
           password: this.password,
-          spread: this.$Cache.get("spread") // TODO 芋艿：后续接入
         }).then(({ data }) => {
-          // debugger
           // TODO 芋艿：refreshToken 机制
           this.$store.commit("LOGIN", {
             'token': data.accessToken
           });
           this.getUserInfo(data);
+          this.bindBrokerUser();
         }).catch(e => {
           this.$util.Tips({
             title: e
@@ -315,32 +315,24 @@
 			},
 			getUserInfo(data) {
         this.$store.commit("SETUID", data.userId);
-        // TODO 芋艿：换成自己的先
-        if (true) {
-          UserApi.getUserInfo().then(res => {
-            this.$store.commit("UPDATE_USERINFO", res.data);
-            // 调回登录前页面
-            let backUrl = this.$Cache.get(BACK_URL) || "/pages/index/index";
-            if (backUrl.indexOf('/pages/users/login/index') !== -1) {
-              backUrl = '/pages/index/index';
-            }
-            uni.reLaunch({
-              url: backUrl
-            });
-          })
-        } else {
-          getUserInfo().then(res => {
-            this.$store.commit("UPDATE_USERINFO", res.data);
-            let backUrl = this.$Cache.get(BACK_URL) || "/pages/index/index";
-            if (backUrl.indexOf('/pages/users/login/index') !== -1) {
-              backUrl = '/pages/index/index';
-            }
-            uni.reLaunch({
-              url: backUrl
-            });
-          })
+        UserApi.getUserInfo().then(res => {
+          this.$store.commit("UPDATE_USERINFO", res.data);
+          // 调回登录前页面
+          let backUrl = this.$Cache.get(BACK_URL) || "/pages/index/index";
+          if (backUrl.indexOf('/pages/users/login/index') !== -1) {
+            backUrl = '/pages/index/index';
+          }
+          uni.reLaunch({
+            url: backUrl
+          });
+        })
+			},
+      bindBrokerUser() {
+        const spread = this.$Cache.get("spread");
+        if (spread > 0) {
+          BrokerageAPI.bindBrokerageUser(spread)
         }
-			}
+      }
 		}
 	};
 </script>

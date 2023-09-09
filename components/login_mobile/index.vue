@@ -17,19 +17,13 @@
 <script>
 	const app = getApp();
 	import sendVerifyCode from "@/mixins/SendVerifyCode";
-	import Routine from '@/libs/routine';
 	import {mapGetters} from "vuex";
 	import {
-		loginMobile,
 		registerVerify,
 		getCodeApi,
 		getUserInfo,
 		phoneSilenceAuth,
-		phoneWxSilenceAuth
 	} from "@/api/user";
-	import {
-		bindingPhone
-	} from '@/api/api.js'
 	import {
 		getUserPhone,
 		iosBinding
@@ -173,7 +167,6 @@
 				phoneSilenceAuth({
 					code: code,
 					spid: app.globalData.spid,
-					spread: app.globalData.code,
 					phone: this.account,
 					captcha: this.codeNum
 				}).then(res => {

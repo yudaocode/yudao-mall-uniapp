@@ -81,7 +81,7 @@
 			let snsapiBase = 'snsapi_base';
 			let urlData = location.pathname + location.search;
 			if (!that.$store.getters.isLogin && Auth.isWeixin()) {
-				const { code, state, scope } = option.query;
+				const { code, } = option.query;
 				if (code && code != uni.getStorageSync('snsapiCode')
           && location.pathname.indexOf('/pages/users/wechat_login/index') === -1) {
 					// 存储静默授权code
@@ -89,8 +89,7 @@
 					let spread = that.globalData.spid ? that.globalData.spid : 0;
 					Auth.auth(code, that.$Cache.get('spread'))
 						.then(res => {
-							uni.setStorageSync('snRouter', decodeURIComponent(decodeURIComponent(option.query
-								.back_url)));
+							uni.setStorageSync('snRouter', decodeURIComponent(decodeURIComponent(option.query.back_url)));
 							if (res.type === 'register') {
 								this.$Cache.set('snsapiKey', res.key);
 							}

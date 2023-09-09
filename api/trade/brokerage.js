@@ -5,6 +5,13 @@ export function getBrokerageUser() {
   return request.get('app-api/trade/brokerage-user/get');
 }
 
+// 获得个人分销信息
+export function bindBrokerageUser(bindUserId) {
+  return request.put('app-api/trade/brokerage-user/bind', {
+    bindUserId
+  });
+}
+
 // 获得个人分销统计
 export function getBrokerageUserSummary() {
   return request.get('app-api/trade/brokerage-user/get-summary');
