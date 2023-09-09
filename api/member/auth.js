@@ -30,3 +30,10 @@ export function login(data) {
     noAuth: true // TODO 芋艿：后续要做调整
   });
 }
+
+// 使用手机 + 验证码登录
+export function smsLogin(data) {
+  return request.post('app-api/member/auth/sms-login', data, {
+    noAuth: true // TODO 芋艿：后续要做调整
+  });
+}

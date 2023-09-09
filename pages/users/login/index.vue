@@ -57,12 +57,13 @@
 </template>
 <script>
 	import sendVerifyCode from "@/mixins/SendVerifyCode";
-	import { loginMobile, registerVerify } from "@/api/user";
+	import { loginMobile } from "@/api/user";
 	import * as AuthApi from "@/api/member/auth";
 	import * as UserApi from "@/api/member/user";
 	import { appAuth, appleLogin } from "@/api/public";
 	const BACK_URL = "login_back_url";
   import * as BrokerageAPI from '@/api/trade/brokerage.js'
+  import {smsLogin} from "../../../api/member/auth";
   export default {
 		name: "Login",
 		mixins: [sendVerifyCode],
@@ -224,56 +225,61 @@
        * 手机 + 验证码登录
        */
       async loginMobile() {
-				let that = this;
 				if (!this.account) {
-          return that.$util.Tips({
+          return this.$util.Tips({
             title: '请填写手机号码'
           });
         }
-				if (!/^1(3|4|5|7|8|9|6)\d{9}$/i.test(that.account)) return that.$util.Tips({
-					title: '请输入正确的手机号码'
-				});
-				if (!that.captcha) return that.$util.Tips({
-					title: '请填写验证码'
-				});
-				if (!/^[\w\d]+$/i.test(that.captcha)) return that.$util.Tips({
-					title: '请输入正确的验证码'
-				});
-				loginMobile({
-						phone: that.account,
-						captcha: that.captcha,
-						spread_spid: that.$Cache.get("spread")
-					})
-					.then(res => {
-						let data = res.data;
-						let newTime = Math.round(new Date() / 1000);
-						this.$store.commit("LOGIN", {
-							'token': res.data.token
-						});
-						that.getUserInfo(data);
-					})
-					.catch(res => {
-						that.$util.Tips({
-							title: res
-						});
-					});
+				if (!/^1(3|4|5|7|8|9|6)\d{9}$/i.test(this.account)) {
+          return this.$util.Tips({
+            title: '请输入正确的手机号码'
+          });
+        }
+				if (!this.captcha) {
+          return this.$util.Tips({
+            title: '请填写验证码'
+          });
+        }
+				if (!/^[\w\d]+$/i.test(this.captcha)) {
+          return this.$util.Tips({
+            title: '请输入正确的验证码'
+          });
+        }
+				AuthApi.smsLogin({
+          mobile: this.account,
+          code: this.captcha,
+        }).then(res => {
+          // TODO 芋艿：refreshToken 机制
+          let data = res.data;
+          this.$store.commit("LOGIN", {
+            'token': res.data.accessToken
+          });
+          this.getUserInfo(data);
+          this.bindBrokerUser();
+        }).catch(res => {
+          this.$util.Tips({
+            title: res
+          });
+        });
 			},
 			async code() {
-				let that = this;
-				if (!that.account) return that.$util.Tips({
-					title: '请填写手机号码'
-				});
-				if (!/^1(3|4|5|7|8|9|6)\d{9}$/i.test(that.account)) return that.$util.Tips({
-					title: '请输入正确的手机号码'
-				});
-				if (that.formItem == 2) that.type = "register";
-				await registerVerify(that.account)
+				if (!this.account) {
+          return this.$util.Tips({
+            title: '请填写手机号码'
+          });
+        }
+				if (!/^1(3|4|5|7|8|9|6)\d{9}$/i.test(this.account)) {
+          return this.$util.Tips({
+            title: '请输入正确的手机号码'
+          });
+        }
+				await AuthApi.sendSmsCode(this.account, 1)
 					.then(res => {
-						that.$util.Tips({title:res.message});
-						that.sendCode();
+            this.$util.Tips({title:res.message});
+            this.sendCode();
 					})
 					.catch(err => {
-						return that.$util.Tips({
+						return this.$util.Tips({
 							title: err
 						});
 					});
