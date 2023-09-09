@@ -1,5 +1,5 @@
 <template>
-	<view class='sharing-packets' :class='sharePacket.isState ? "on":""'>
+	<view class='sharing-packets' :class='!sharePacket.enabled ? "on":""'>
 	   <view class='iconfont icon-guanbi' @click="closeShare"></view>
 	   <view class='line'></view>
 	   <view class='sharing-con' @click='goShare'>
@@ -21,7 +21,7 @@
         type: Object,
         default: function() {
           return {
-            isState: true,
+            enabled: true,
             priceName:'' // 金额
           }
         }

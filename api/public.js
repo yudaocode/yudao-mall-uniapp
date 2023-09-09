@@ -27,7 +27,7 @@ export function wechatAuth(code, spread) {
 
 /**
  * 获取登录授权login
- * 
+ *
 */
 export function getLogo()
 {

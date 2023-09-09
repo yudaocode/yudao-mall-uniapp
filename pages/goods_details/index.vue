@@ -293,6 +293,7 @@
   import * as CouponApi from '@/api/promotion/coupon.js';
   import * as PromotionActivityApi from '@/api/promotion/activity.js';
   import * as TradeCartApi from '@/api/trade/cart.js';
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
   import * as Util from '@/utils/util.js';
   import * as ProductUtil from '@/utils/product.js';
   // #ifdef MP
@@ -372,7 +373,7 @@
         posterbackgd: '/static/images/posterbackgd.png',  // 海报的背景，用于海报的生成
         storeImage: '', // 下载商品图片后的文件地址
         sharePacket: { // 分销弹出信息
-          isState: true, // 默认不显示
+          enabled: true, // 默认不显示
         },
         actionSheetHidden: true, // 微信小程序的右上角分享的弹出
 
@@ -421,11 +422,11 @@
 
       // #ifdef MP || APP-PLUS
       // 小程序链接进入获取绑定关系id
-      // TODO 芋艿：分销？？？
+      // 绑定分销关系
       setTimeout(()=>{
         if(options.spread){
           app.globalData.spread = options.spread;
-          spread(options.spread).then(res => {})
+          BrokerageAPI.bindBrokerageUser(options.spread).then(res => {})
         }
       },2000)
       // #endif
@@ -448,9 +449,9 @@
 					let mapeMpQrCodeValue = this.$util.formatMpQrCodeData(qrCodeValue);
 					app.globalData.spread = mapeMpQrCodeValue.spread;
 					this.id = mapeMpQrCodeValue.id;
-					// TODO 芋艿：code 是啥
+					// 绑定分销用户
           setTimeout(()=>{
-						spread(mapeMpQrCodeValue.spread).then(res => {}).catch(res => {})
+            BrokerageAPI.bindBrokerageUser(mapeMpQrCodeValue.spread).then(res => {}).catch(res => {})
 					},2000)
 				} else {
 					this.id = options.id;
@@ -513,8 +514,8 @@
           this.$set(this, 'skuMap', ProductUtil.convertProductSkuMap(skus));
 
           // 设置分销相关变量 // TODO 芋艿：待接入
-          this.$set(this.sharePacket, 'priceName', res.data.priceName);
-          this.$set(this.sharePacket, 'isState', Math.floor(res.data.priceName) === 0);
+          // this.$set(this.sharePacket, 'priceName', res.data.priceName);
+          // this.$set(this.sharePacket, 'enabled', Math.floor(res.data.priceName) === 0);
 
           // 设置营销活动
           PromotionActivityApi.getActivityListBySpuId(this.id).then(res => {
@@ -532,6 +533,7 @@
           if (this.isLogin) {
             this.getCartCount();
             this.isFavoriteExists();
+            this.getBrokeragePrice();
             // #ifdef H5
             this.make();
             this.ShareInfo();
@@ -565,6 +567,13 @@
             url: 1
           });
         })
+      },
+      getBrokeragePrice: function() {
+        BrokerageAPI.getProductBrokeragePrice(this.id).then(res => {
+          // this.sharePacket = res.data
+          // console.log(this.sharePacket)
+          this.$set(this.sharePacket, 'isState', false);
+        });
       },
       /**
        * 查找默认选中的 sku，设置到 attr.productSelect 中
@@ -698,7 +707,6 @@
         TradeCartApi.addCart({
           count: sku.cart_num,
           skuId: sku.id,
-          addStatus: true // TODO 芋艿：去掉 addStatus 字段
         }).then(res => {
           // 关闭 attr 组件
           this.attr.cartAttr = false;
@@ -1191,7 +1199,7 @@
        * 关闭分销的弹窗
        */
       closeChange: function() {
-        this.$set(this.sharePacket, 'isState', true);
+        this.$set(this.sharePacket, 'enabled', false);
       },
 
       // ========== 顶部 nav 相关的方法 ==========

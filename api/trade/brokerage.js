@@ -51,3 +51,10 @@ export function createBrokerageWithdraw(data) {
 export function getBrokerageRecordPage(data) {
   return request.get('app-api/trade/brokerage-record/page', data);
 }
+
+// 获得商品的分销金额
+export function getProductBrokeragePrice(spuId) {
+  return request.get('app-api/trade/brokerage-record/get-product-brokerage-price', {
+    spuId
+  });
+}
