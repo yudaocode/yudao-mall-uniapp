@@ -95,7 +95,7 @@
 							<block v-for="(item,index) in menus" :key="index">
 								<navigator class="item" :url="item.url" hover-class="none"
 									v-if="!(item.url ==='/pages/service/index'
-									|| (item.url === '/pages/users/user_spread_user/index' && !userInfo.brokerageEnabled))">
+									|| (item.url === '/pages/users/user_spread_user/index' && brokerageUser && brokerageUser.enabled))">
 									<image :src="item.picUrl"></image>
 									<text>{{ item.name }}</text>
 								</navigator>
@@ -123,6 +123,8 @@
 	</view>
 </template>
 <script>
+  import {getBrokerageUser} from "../../api/trade/brokerage";
+
   let sysHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
 	import Cache from '@/utils/cache';
 	import { BACK_URL } from '@/config/cache';
@@ -133,10 +135,9 @@
   import * as DecorateApi from '@/api/promotion/decorate.js';
   import * as ProductFavoriteApi from '@/api/product/favorite.js';
   import * as CouponApi from '@/api/promotion/coupon.js';
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
   const app = getApp();
 	export default {
-		components: {
-    },
 		computed: mapGetters(['isLogin', 'chatUrl', 'userInfo']),
 		data() {
 			return {
@@ -171,6 +172,8 @@
 						num: 0
 					},
 				],
+
+        brokerageUser: {}, // 分销信息
 
         slideShows: [], // 轮播图
         circular: true,
@@ -236,6 +239,10 @@
         })
         CouponApi.getUnusedCouponCount().then(res => {
           this.couponCount = res.data;
+        })
+        // 获取分销信息
+        BrokerageAPI.getBrokerageUser().then(res => {
+          this.brokerageUser = res.data;
         })
       },
 			getOrderData() {
