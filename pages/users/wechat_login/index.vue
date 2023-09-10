@@ -27,7 +27,8 @@
 			</view>
 		</view>
 		<block v-if="isUp">
-			<mobileLogin :isUp="isUp" @close="maskClose" :authKey="authKey" @wechatPhone="wechatPhone"></mobileLogin>
+			<mobileLogin :isUp="isUp" @close="maskClose" @wechatPhone="wechatPhone"
+                   :social-code="socialCode" :social-state="socialState" />
 		</block>
 		<block v-if="isPhoneBox">
 			<routinePhone :logoUrl="logoUrl" :isPhoneBox="isPhoneBox" @close="bindPhoneClose" :authKey="authKey">
@@ -35,7 +36,6 @@
 		</block>
 	</view>
 </template>
-
 <script>
 	const app = getApp();
 	let statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
@@ -61,7 +61,10 @@
 				authKey: '',
 				options: '',
 				userInfo: {},
-				codeNum: 0
+				codeNum: 0,
+
+        socialCode: '',
+        socialState: '',
 			}
 		},
 		components: {
@@ -72,7 +75,7 @@
 			getLogo().then(res => {
 				this.logoUrl = res.data.logoUrl
 			})
-			let that = this
+
 			// #ifdef H5
 			document.body.addEventListener("focusout", () => {
 				setTimeout(() => {
@@ -81,23 +84,14 @@
 					window.scrollTo(0, Math.max(scrollHeight - 1, 0));
 				}, 100);
 			});
-			const {
-				code,
-				state,
-				scope
-			} = options;
+			const { code, state, scope } = options;
 			this.options = options
 			// 获取确认授权code
 			this.code = code || ''
-			//if(!code) location.replace(decodeURIComponent(decodeURIComponent(option.query.back_url)));
 			if (code && this.options.scope !== 'snsapi_base') {
 				let spread = app.globalData.spid ? app.globalData.spid : 0;
-				//公众号授权登录回调 wechatAuth(code, Cache.get("spread"), loginType)
-				wechat.auth(code, spread).then(res => {
-					if (res.type === 'register') {
-						this.authKey = res.key;
-						this.isUp = true
-					}
+				// 公众号授权登录回调
+				wechat.auth(code, state).then(res => {
 					if (res.type === 'login') {
 						this.$store.commit('LOGIN', {
 							token: res.token
@@ -105,19 +99,16 @@
 						this.$store.commit("SETUID", res.uid);
 						this.getUserInfo();
 						this.wechatPhone();
-						//location.replace(decodeURIComponent(decodeURIComponent(option.query.back_url)));
 					}
-				}).catch(error => {});
+				}).catch(error => {
+          debugger
+          // 异常的情况，说明可能是账号没登录，所以发起手机绑定
+          this.socialCode = code;
+          this.socialState = state;
+          this.isUp = true
+        });
 			}
 			// #endif
-			let pages = getCurrentPages();
-			// let prePage = pages[pages.length - 2];
-			// if (prePage.route == 'pages/order_addcart/order_addcart') {
-			// 	this.isHome = true
-			// } else {
-			// 	this.isHome = false
-			// }
-
 		},
 		methods: {
 			back() {
@@ -144,7 +135,6 @@
 				} else {
 					this.isPhoneBox = false
 				}
-
 			},
 			// #ifdef MP
 			// 小程序获取手机号码
@@ -273,26 +263,12 @@
 					});
 
 			},
-
-
 			// #endif
+
 			// #ifdef H5
-			// 获取url后面的参数
-			getQueryString(name) {
-				var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
-				var reg_rewrite = new RegExp("(^|/)" + name + "/([^/]*)(/|$)", "i");
-				var r = window.location.search.substr(1).match(reg);
-				var q = window.location.pathname.substr(1).match(reg_rewrite);
-				if (r != null) {
-					return unescape(r[2]);
-				} else if (q != null) {
-					return unescape(q[2]);
-				} else {
-					return null;
-				}
-			},
 			// 公众号登录
 			wechatLogin() {
+        debugger
 				if (!this.code && this.options.scope !== 'snsapi_base') {
 					this.$wechat.oAuth('snsapi_userinfo', '/pages/users/wechat_login/index');
 				} else {
@@ -304,6 +280,7 @@
 			},
 			// 输入手机号后的回调
 			wechatPhone() {
+        debugger
 				this.$Cache.clear('snsapiKey');
 				if (this.options.back_url) {
 					let url = uni.getStorageSync('snRouter');

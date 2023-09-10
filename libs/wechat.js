@@ -1,15 +1,11 @@
 // #ifdef H5
 import WechatJSSDK from "@/plugin/jweixin-module/index.js";
+import * as AuthApi from "@/api/member/auth";
 
-
-import {
-	wechatAuth
-} from "@/api/public";
 import * as WeiXinApi from '@/api/system/weixin.js';
 import {
 	WX_AUTH,
 	STATE_KEY,
-	LOGINTYPE,
 	BACK_URL
 } from '@/config/cache';
 import {
@@ -156,9 +152,9 @@ class AuthWechat {
 	 */
 	oAuth(snsapiBase,url) {
     // TODO 芋艿：先链式去掉这个逻辑；
-    if (true) {
-      return;
-    }
+    // if (true) {
+    //   return;
+    // }
 		if (uni.getStorageSync(WX_AUTH) && store.state.app.token && snsapiBase == 'snsapi_base') return;
 		const {
 			code
@@ -174,41 +170,23 @@ class AuthWechat {
 					})
 				})
 		}
-		// if (uni.getStorageSync(WX_AUTH) && store.state.app.token) return;
-		// const {
-		// 	code
-		// } = parseQuery();
-		// if (!code){
-		// 	return this.toAuth(snsapiBase,url);
-		// }else{
-		// 	if(Cache.has('snsapiKey'))
-		// 		return this.auth(code).catch(error=>{
-		// 			uni.showToast({
-		// 				title:error,
-		// 				icon:'none'
-		// 			})
-		// 		})
-		// }
 	}
 
 	/**
-	 * 授权登录获取token
-	 * @param {Object} code
+	 * 微信公众号的授权登录获取 token
+   *
+   * 实现逻辑是：发起社交登录
 	 */
-	auth(code) {
+	auth(code, state) {
 		return new Promise((resolve, reject) => {
-			wechatAuth(code, Cache.get("spread"))
-				.then(({
-					data
-				}) => {
-					resolve(data);
-					Cache.set(WX_AUTH, code);
-					Cache.clear(STATE_KEY);
-					// Cache.clear('spread');
-					loginType && Cache.clear(LOGINTYPE);
-
-				})
-				.catch(reject);
+      // 31 的原因，它是公众号登录的社交类型
+      AuthApi.socialLogin(31, code, state)
+        .then((data) => {
+          debugger
+          resolve(data);
+          Cache.set(WX_AUTH, code);
+          Cache.clear(STATE_KEY);
+        }).catch(reject);
 		});
 	}
 
@@ -218,33 +196,25 @@ class AuthWechat {
 	 */
 	getAuthUrl(appId,snsapiBase,backUrl) {
 		let url = `${location.origin}${backUrl}`
-				if(url.indexOf('?') == -1){
-							url = url+'?'
-						}else{
-							url = url+'&'
-						}
-				const redirect_uri = encodeURIComponent(
-					`${url}scope=${snsapiBase}&back_url=` +
-					encodeURIComponent(
-						encodeURIComponent(
-							uni.getStorageSync(BACK_URL) ?
-							uni.getStorageSync(BACK_URL) :
-							location.pathname + location.search
-						)
-					)
-				);
-				uni.removeStorageSync(BACK_URL);
-				const state = encodeURIComponent(
-					("" + Math.random()).split(".")[1] + "authorizestate"
-				);
-				uni.setStorageSync(STATE_KEY, state);
-				return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
-				// if(snsapiBase==='snsapi_base'){
-				// 	return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_base&state=${state}#wechat_redirect`;
-				// }else{
-				// 	return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
-				// }
+    if(url.indexOf('?') === -1){
+      url = url+'?'
+    }else{
+      url = url+'&'
     }
+    const redirect_uri = encodeURIComponent(`${url}scope=${snsapiBase}&back_url=` +
+      encodeURIComponent(
+        encodeURIComponent(
+          uni.getStorageSync(BACK_URL) ? uni.getStorageSync(BACK_URL) : location.pathname + location.search
+        )
+      )
+    );
+    uni.removeStorageSync(BACK_URL);
+    const state = encodeURIComponent(
+      ("" + Math.random()).split(".")[1] + "authorizestate"
+    );
+    uni.setStorageSync(STATE_KEY, state);
+    return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
+  }
 
 	/**
 	 * 跳转自动登录
@@ -294,6 +264,9 @@ class AuthWechat {
 		});
 	}
 
+  /**
+   * 判断是否在微信公众号的浏览器中
+   */
 	isWeixin() {
 		return navigator.userAgent.toLowerCase().indexOf("micromessenger") !== -1;
 	}

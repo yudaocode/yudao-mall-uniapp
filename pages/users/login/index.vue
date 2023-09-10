@@ -66,7 +66,6 @@
 	const BACK_URL = "login_back_url";
   import * as BrokerageAPI from '@/api/trade/brokerage.js'
   import Routine from '@/libs/routine.js';
-  import {weixinMiniAppLogin} from "../../../api/member/auth";
   export default {
 		name: "Login",
 		mixins: [sendVerifyCode],

@@ -18,16 +18,10 @@
 	const app = getApp();
 	import sendVerifyCode from "@/mixins/SendVerifyCode";
 	import {mapGetters} from "vuex";
-	import {
-		registerVerify,
-		getCodeApi,
-		getUserInfo,
-		phoneSilenceAuth,
-	} from "@/api/user";
-	import {
-		getUserPhone,
-		iosBinding
-	} from '@/api/public';
+  import * as AuthApi from "@/api/member/auth";
+  import * as UserApi from "@/api/member/user";
+  import { getUserInfo, } from "@/api/user";
+	import { iosBinding } from '@/api/public';
 	const BACK_URL = "login_back_url";
 	export default {
 		name: 'login_mobile',
@@ -41,6 +35,14 @@
 				type: String,
 				default: '',
 			},
+      socialCode: {
+        type: String,
+        default: '',
+      },
+      socialState: {
+        type: String,
+        default: '',
+      },
 			isShow: {
 				type: Boolean,
 				default: true
@@ -60,7 +62,6 @@
 		},
 		data() {
 			return {
-				keyCode: '',
 				account: '',
 				codeNum: '',
 				isApp: 0
@@ -70,34 +71,26 @@
 		methods: {
 			// 获取验证码
 			async code() {
-				let that = this;
-				if (!that.account) return that.$util.Tips({
-					title: '请填写手机号码'
-				});
-				if (!/^1(3|4|5|7|8|9|6)\d{9}$/i.test(that.account)) return that.$util.Tips({
-					title: '请输入正确的手机号码'
-				});
-				await registerVerify(that.account).then(res => {
-					that.$util.Tips({
-						title: res.msg
-					});
-					that.sendCode();
-				}).catch(err => {
-					return that.$util.Tips({
-						title: err
-					})
-				})
-			},
-			// 获取验证码api
-			getCode() {
-				let that = this
-				getCodeApi().then(res => {
-					that.keyCode = res.data.key;
-				}).catch(res => {
-					that.$util.Tips({
-						title: res
-					});
-				});
+				if (!this.account) {
+          return this.$util.Tips({
+            title: '请填写手机号码'
+          });
+        }
+				if (!/^1(3|4|5|7|8|9|6)\d{9}$/i.test(this.account)) {
+          return this.$util.Tips({
+            title: '请输入正确的手机号码'
+          });
+        }
+        await AuthApi.sendSmsCode(this.account, 1)
+          .then(res => {
+            this.$util.Tips({title:res.message});
+            this.sendCode();
+          })
+          .catch(err => {
+            return this.$util.Tips({
+              title: err
+            });
+          });
 			},
 			close() {
 				this.$emit('close', false)
@@ -105,22 +98,29 @@
 			// 登录
 			loginBtn() {
 				let that = this
-				if (!that.account) return that.$util.Tips({
-					title: '请填写手机号码'
-				});
-				if (!/^1(3|4|5|7|8|9|6)\d{9}$/i.test(that.account)) return that.$util.Tips({
-					title: '请输入正确的手机号码'
-				});
-				if (!that.codeNum) return that.$util.Tips({
+				if (!this.account) {
+          return this.$util.Tips({
+            title: '请填写手机号码'
+          });
+        }
+				if (!/^1(3|4|5|7|8|9|6)\d{9}$/i.test(this.account)) {
+          return this.$util.Tips({
+            title: '请输入正确的手机号码'
+          });
+        }
+				if (!this.codeNum) return this.$util.Tips({
 					title: '请填写验证码'
 				});
-				if (!/^[\w\d]+$/i.test(that.codeNum)) return that.$util.Tips({
-					title: '请输入正确的验证码'
-				});
+				if (!/^[\w\d]+$/i.test(this.codeNum)) {
+          return this.$util.Tips({
+            title: '请输入正确的验证码'
+          });
+        }
 				uni.showLoading({
 					title: !this.userInfo.phone && this.isLogin?'正在绑定中':'正在登录中'
 				});
 				if (!this.userInfo.phone && this.isLogin) {
+          // TODO 芋艿：不晓得它要搞啥哈？？？
 					iosBinding({
 						captcha: that.codeNum,
 						phone: that.account
@@ -140,16 +140,17 @@
 						})
 					})
 				} else {
-					getUserPhone({
-						captcha: that.codeNum,
-						phone: that.account,
-						// #ifdef H5
-						type: 'public',
-						// #endif
-						key: that.authKey
+          AuthApi.smsLogin({
+            mobile: this.account,
+            code: this.codeNum,
+            socialType: 31, // TODO 芋艿：先写死，不确定会不会有其它社交方式；
+            socialCode: this.socialCode,
+            socialState: this.socialState
 					}).then(res => {
-						that.$store.commit('LOGIN', {
-							token: res.data.token
+            // TODO 芋艿：refreshToken 机制
+            let data = res.data;
+            that.$store.commit('LOGIN', {
+							token: data.accessToken
 						});
 						that.$store.commit("SETUID", res.data.uid);
 						that.getUserInfo();
@@ -161,25 +162,6 @@
 					})
 				}
 			},
-			// #ifdef MP
-			phoneSilenceAuth(code) {
-				let self = this
-				phoneSilenceAuth({
-					code: code,
-					spid: app.globalData.spid,
-					phone: this.account,
-					captcha: this.codeNum
-				}).then(res => {
-					this.$store.commit('LOGIN', res.data.token);
-					this.$store.commit("SETUID", res.data.uid);
-					this.getUserInfo();
-				}).catch(error => {
-					self.$util.Tips({
-						title: error
-					})
-				})
-			},
-			// #endif
 			/**
 			 * 获取个人用户信息
 			 */

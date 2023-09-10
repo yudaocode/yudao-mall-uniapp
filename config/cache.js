@@ -13,8 +13,6 @@ module.exports = {
         WX_AUTH: 'WX_AUTH',
         //微信授权状态
         STATE_KEY: 'wx_authorize_state',
-        //登录类型
-        LOGINTYPE: 'loginType',
         //登录回调地址
         BACK_URL: 'login_back_url',
         // 小程序授权状态

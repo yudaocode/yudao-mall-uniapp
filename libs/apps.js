@@ -14,8 +14,6 @@ class Apps{
 					resolve(data);
 					Cache.set(WX_AUTH, code);
 					Cache.clear(STATE_KEY);
-					loginType && Cache.clear(LOGINTYPE);
-					
 				})
 				.catch(reject);
 		});
