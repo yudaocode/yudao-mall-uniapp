@@ -62,6 +62,7 @@
 	import { appAuth, appleLogin } from "@/api/public";
 	const BACK_URL = "login_back_url";
   import * as BrokerageAPI from '@/api/trade/brokerage.js'
+  import Routine from '@/libs/routine.js';
   export default {
 		name: "Login",
 		mixins: [sendVerifyCode],
@@ -243,9 +244,25 @@
             title: '请输入正确的验证码'
           });
         }
+
+        // 1. 三方登录的特殊逻辑
+        let socialType = undefined;
+        let socialCode = undefined;
+        let socialState = undefined;
+        // 1.1 微信小程序的情况
+        // #ifdef MP
+        socialType = 34;
+        socialCode = await Routine.getCode();
+        socialState = 'default'
+        // #endif
+
+        // 2. 短信登录
 				AuthApi.smsLogin({
           mobile: this.account,
           code: this.captcha,
+          socialType: socialType,
+          socialCode: socialCode,
+          socialState: socialState
         }).then(res => {
           // TODO 芋艿：refreshToken 机制
           let data = res.data;
@@ -301,9 +318,25 @@
             title: '请填写密码'
           });
         }
+
+        // 1. 三方登录的特殊逻辑
+        let socialType = undefined;
+        let socialCode = undefined;
+        let socialState = undefined;
+        // 1.1 微信小程序的情况
+        // #ifdef MP
+        socialType = 34;
+        socialCode = await Routine.getCode();
+        socialState = 'default'
+        // #endif
+
+        // 2. 执行登录
         AuthApi.login({
           mobile: this.account,
           password: this.password,
+          socialType: socialType,
+          socialCode: socialCode,
+          socialState: socialState
         }).then(({ data }) => {
           // TODO 芋艿：refreshToken 机制
           this.$store.commit("LOGIN", {
@@ -319,15 +352,28 @@
 			},
 			getUserInfo(data) {
         this.$store.commit("SETUID", data.userId);
+        this.$store.commit("OPENID", data.openid);
         UserApi.getUserInfo().then(res => {
           this.$store.commit("UPDATE_USERINFO", res.data);
           // 调回登录前页面
           let backUrl = this.$Cache.get(BACK_URL) || "/pages/index/index";
-          if (backUrl.indexOf('/pages/users/login/index') !== -1) {
+          if (backUrl.indexOf('/') !== 0) {
+            backUrl = '/' + backUrl;
+          }
+          if (backUrl.indexOf('/pages/users/login/index') === 0) {
             backUrl = '/pages/index/index';
           }
           uni.reLaunch({
-            url: backUrl
+            url: backUrl,
+            success:function (res) {
+              console.log("success",res);
+            },
+            fail:function (res) {
+              console.log("fail",res);
+            },
+            complete:function (res) {
+              console.log("complete",res);
+            }
           });
         })
 			},
