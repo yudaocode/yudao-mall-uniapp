@@ -48,3 +48,13 @@ export function socialLogin(type, code, state) {
     noAuth: true // TODO 芋艿：后续要做调整
   });
 }
+
+// 微信小程序的一键登录登录
+export function weixinMiniAppLogin(phoneCode, loginCode) {
+  return request.post('app-api/member/auth/weixin-mini-app-login', {
+    phoneCode,
+    loginCode
+  }, {
+    noAuth: true // TODO 芋艿：后续要做调整
+  });
+}

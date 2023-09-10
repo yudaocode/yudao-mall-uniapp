@@ -121,7 +121,7 @@ class Routine
 		});
 	}
 	/**
-	 * 小程序登录
+	 * 微信小程序静默登录
    *
    * @param code 授权码
    * @param spread 推广员编号
