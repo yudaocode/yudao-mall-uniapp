@@ -1,23 +1,25 @@
 import store from '../store';
 import { checkLogin } from './login';
-import { login } from '../api/public';
 import Cache from '../utils/cache';
-import { STATE_R_KEY, USER_INFO, EXPIRES_TIME, LOGIN_STATUS} from './../config/cache';
-class Routine 
+import { STATE_R_KEY, USER_INFO, OPENID} from './../config/cache';
+import * as AuthApi from "@/api/member/auth";
+import * as BrokerageAPI from '@/api/trade/brokerage.js'
+
+class Routine
 {
-	
-	constructor() 
+
+	constructor()
 	{
 	    this.scopeUserInfo = 'scope.userInfo';
 	}
-	
+
 	async getUserCode(){
 		let isAuth = await this.isAuth(), code = '' ;
 		if(isAuth)
 			code = await this.getCode();
 		return code;
 	}
-	
+
 	/**
 	 * 获取用户信息
 	 */
@@ -37,7 +39,7 @@ class Routine
 			})
 		})
 	}
-	
+
 	/**
 	 * 获取用户信息
 	 */
@@ -61,14 +63,16 @@ class Routine
 			})
 		})
 	}
-	
+
 	async getCode(){
 		let provider = await this.getProvider();
 		return new Promise((resolve,reject)=>{
 			uni.login({
 				provider:provider,
 				success(res) {
-					if (res.code) Cache.set(STATE_R_KEY, res.code ,10800);
+					if (res.code) {
+            Cache.set(STATE_R_KEY, res.code ,10800);
+          }
 					return resolve(res.code);
 				},
 				fail(){
@@ -77,7 +81,7 @@ class Routine
 			})
 		})
 	}
-	
+
 	/**
 	 * 获取服务供应商
 	 */
@@ -95,7 +99,7 @@ class Routine
 			});
 		});
 	}
-	
+
 	/**
 	 * 是否授权
 	 */
@@ -118,17 +122,27 @@ class Routine
 	}
 	/**
 	 * 小程序登录
+   *
+   * @param code 授权码
+   * @param spread 推广员编号
 	 */
-	authUserInfo(code,data)
-	{
+	authUserInfo(code, spread) {
 		return new Promise((resolve, reject)=>{
-			login(code,data).then(res=>{
-				if(res.data.type==='login'){
-					store.commit('LOGIN', {
-						token: res.data.token
-					});
-					store.commit("SETUID", res.data.uid);
-				}
+      // 34 的原因，它是小程序登录的社交类型
+			AuthApi.socialLogin(34, code, 'default').then(res => {
+        if (res.code !== 0) {
+          return;
+        }
+        // 设置访问令牌
+        store.commit('LOGIN', {
+          token: res.data.accessToken
+        });
+        store.commit("SETUID", res.data.userId);
+        store.commit("OPENID", res.data.openid);
+        // 绑定推广员
+        if (spread > 0) {
+          BrokerageAPI.bindBrokerageUser(spread)
+        }
 				return resolve(res);
 			}).catch(res=>{
 				return reject(res);

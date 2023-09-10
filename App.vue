@@ -122,19 +122,15 @@
 			// #endif
 
 			// #ifdef MP
-			// 小程序静默授权 TODO 芋艿：
+			// 小程序静默授权
 			if (!this.$store.getters.isLogin) {
 				let spread = that.globalData.spid ? that.globalData.spid : 0;
-				Routine.getCode()
-					.then(code => {
-						Routine.authUserInfo(code, {
-							'spread_spid': spread
-						}).then(res => {
-							// that.$store.commit('AuthorizeType', res.data.type);
-						})
-					}).catch(res => {
-						uni.hideLoading();
-					});
+				Routine.getCode().then(code => {
+          Routine.authUserInfo(code, spread)
+            .then(res => {})
+        }).catch(res => {
+          uni.hideLoading();
+        });
 			}
 			// #endif
 		},

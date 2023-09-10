@@ -57,13 +57,11 @@
 </template>
 <script>
 	import sendVerifyCode from "@/mixins/SendVerifyCode";
-	import { loginMobile } from "@/api/user";
 	import * as AuthApi from "@/api/member/auth";
 	import * as UserApi from "@/api/member/user";
 	import { appAuth, appleLogin } from "@/api/public";
 	const BACK_URL = "login_back_url";
   import * as BrokerageAPI from '@/api/trade/brokerage.js'
-  import {smsLogin} from "../../../api/member/auth";
   export default {
 		name: "Login",
 		mixins: [sendVerifyCode],

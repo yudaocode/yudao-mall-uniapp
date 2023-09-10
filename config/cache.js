@@ -3,6 +3,8 @@ module.exports = {
         LOGIN_STATUS: 'LOGIN_STATUS_TOKEN',
         // uid
         UID:'UID',
+        // openid
+        OPENID: 'OPENID',
         //用户信息
         USER_INFO: 'USER_INFO',
         //token 过期时间

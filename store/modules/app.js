@@ -1,8 +1,9 @@
 import * as UserApi from '@/api/member/user.js';
 import {
-	LOGIN_STATUS,
-	UID,
-	PLATFORM
+  LOGIN_STATUS,
+  UID,
+  OPENID,
+  PLATFORM
 } from '../../config/cache';
 import Cache from '../../utils/cache';
 import {
@@ -14,6 +15,7 @@ const state = {
 	backgroundColor: "#fff",
 	userInfo: Cache.get(USER_INFO)?JSON.parse(Cache.get(USER_INFO)):null,
 	uid: Cache.get(UID) || null,
+  openid: Cache.get() || null,
 	homeActive: false,
 	chatUrl: Cache.get('chatUrl') || '',
 	systemPlatform: Cache.get(PLATFORM)?Cache.get(PLATFORM):'',
@@ -29,6 +31,10 @@ const mutations = {
 		state.uid = val;
 		Cache.set(UID, val);
 	},
+  OPENID(state, val) {
+    state.openid = val;
+    Cache.set(OPENID, val);
+  },
 	UPDATE_LOGIN(state, token) {
 		state.token = token;
 	},
@@ -56,9 +62,6 @@ const mutations = {
 	SET_CHATURL(state, chatUrl){
 		state.chatUrl = chatUrl;
 	},
-	// AuthorizeType(state, authorizeType){
-	// 	state.authorizeType = authorizeType;
-	// },
 	SYSTEM_PLATFORM(state, systemPlatform){
 		state.systemPlatform = systemPlatform;
 		Cache.set(PLATFORM, systemPlatform);

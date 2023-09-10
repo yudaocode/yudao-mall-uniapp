@@ -37,3 +37,14 @@ export function smsLogin(data) {
     noAuth: true // TODO 芋艿：后续要做调整
   });
 }
+
+// 社交快捷登录
+export function socialLogin(type, code, state) {
+  return request.post('app-api/member/auth/social-login', {
+    type,
+    code,
+    state
+  }, {
+    noAuth: true // TODO 芋艿：后续要做调整
+  });
+}
