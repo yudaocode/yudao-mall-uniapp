@@ -13,15 +13,15 @@
 * 启动文档：<https://doc.iocoder.cn/quick-start/>
 * 视频教程：<https://doc.iocoder.cn/video/>
 
-## 🐯商城简介
+## 🐯 商城简介
 
 **芋道商城**，基于 [芋道开发平台](https://github.com/YunaiV/ruoyi-vue-pro) 构建，以开发者为中心，打造中国第一流的 Java 开源商城系统，全部开源，个人与企业可 100% 免费使用。
 
-![功能图](/.image/common/mall-feature.png)
-
 > 有任何问题，或者想要的功能，可以在 Issues 中提给艿艿。
-> 
+>
 > 😜 给项目点点 Star 吧，这对我们真的很重要！
+
+![功能图](/.image/common/mall-feature.png)
 
 * 基于 uniapp 开发，支持微信小程序、微信公众号、H5 移动端，未来会支持支付宝小程序、抖音小程序等
 * 支持 SaaS 多租户，可满足商品、订单、支付、会员、优惠券、秒杀、拼团、砍价、分销、积分等多种经营需求
