@@ -77,37 +77,30 @@
 			// #endif
 
 			// #ifdef H5
-      // TODO 芋艿：公众号的静默授权
+      // 静默登录的情况一：微信公众号
 			let snsapiBase = 'snsapi_base';
 			let urlData = location.pathname + location.search;
 			if (!that.$store.getters.isLogin && Auth.isWeixin()) {
-				const { code, } = option.query;
-        // debugger
+				const { code, state } = option.query;
+        debugger
 				if (code && code !== uni.getStorageSync('snsapiCode')
           && location.pathname.indexOf('/pages/users/wechat_login/index') === -1) {
-					// 存储静默授权code
+          // 存储静默授权code
 					uni.setStorageSync('snsapiCode', code);
-					let spread = that.globalData.spid ? that.globalData.spid : 0;
-					Auth.auth(code, that.$Cache.get('spread'))
-						.then(res => {
-							uni.setStorageSync('snRouter', decodeURIComponent(decodeURIComponent(option.query.back_url)));
-							if (res.type === 'register') {
-								this.$Cache.set('snsapiKey', res.key);
-							}
-							if (res.type === 'login') {
-								this.$store.commit('LOGIN', {
-									token: res.token
-								});
-								this.$store.commit("SETUID", res.uid);
-								location.replace(decodeURIComponent(decodeURIComponent(option.query.back_url)));
-							}
-						}).catch(error => {
-							if (!this.$Cache.has('snsapiKey')) {
-								if (location.pathname.indexOf('/pages/users/wechat_login/index') === -1) {
-									Auth.oAuth(snsapiBase, option.query.back_url);
-								}
-							}
-						});
+					Auth.auth(code, state, that.$Cache.get('spread')).then(res => {
+            // TODO 芋艿：snRouter 的作用是啥
+            uni.setStorageSync('snRouter', decodeURIComponent(decodeURIComponent(option.query.back_url)));
+            // 跳转回去
+            location.replace(decodeURIComponent(decodeURIComponent(option.query.back_url)));
+          }).catch(error => {
+            this.$Cache.set('snsapiKey', code);
+            // TODO 芋艿：为什么没有 snsapiKey 就反复认证？？？没看懂
+            // if (!this.$Cache.has('snsapiKey')) {
+            // 	if (location.pathname.indexOf('/pages/users/wechat_login/index') === -1) {
+            // 		Auth.oAuth(snsapiBase, option.query.back_url);
+            // 	}
+            // }
+          });
 				} else {
 					if (!this.$Cache.has('snsapiKey')) {
 						if (location.pathname.indexOf('/pages/users/wechat_login/index') === -1) {
@@ -123,7 +116,7 @@
 			// #endif
 
 			// #ifdef MP
-			// 小程序静默授权
+			// 静默登录的情况二：微信小程序
 			if (!this.$store.getters.isLogin) {
 				let spread = that.globalData.spid ? that.globalData.spid : 0;
 				Routine.getCode().then(code => {

@@ -33,12 +33,7 @@ export function _toLogin(push, pathLogin) {
 	// #ifdef H5
 	if (isWeixin()) {
 		let urlData = location.pathname + location.search
-		if (urlData.indexOf('?') !== -1) {
-			urlData += '&go_longin=1';
-		} else {
-			urlData += '?go_longin=1';
-		}
-		if (true && !Cache.has('snsapiKey')) {
+		if (!Cache.has('snsapiKey')) {
       // TODO 芋艿：先临时禁用掉，改成普通登录页
       // auth.oAuth('snsapi_base', urlData);
       uni.navigateTo({

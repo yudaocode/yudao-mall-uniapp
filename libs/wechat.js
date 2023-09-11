@@ -1,6 +1,7 @@
 // #ifdef H5
 import WechatJSSDK from "@/plugin/jweixin-module/index.js";
 import * as AuthApi from "@/api/member/auth";
+import * as BrokerageAPI from '@/api/trade/brokerage.js'
 
 import * as WeiXinApi from '@/api/system/weixin.js';
 import {
@@ -151,17 +152,13 @@ class AuthWechat {
 	 * 自动去授权
 	 */
 	oAuth(snsapiBase,url) {
-    // TODO 芋艿：先链式去掉这个逻辑；
-    // if (true) {
-    //   return;
-    // }
-		if (uni.getStorageSync(WX_AUTH) && store.state.app.token && snsapiBase == 'snsapi_base') return;
-		const {
-			code
-		} = parseQuery();
+		if (uni.getStorageSync(WX_AUTH) && store.state.app.token && snsapiBase === 'snsapi_base') {
+      return;
+    }
+		const { code } = parseQuery();
 		if (!code || code == uni.getStorageSync('snsapiCode')){
 			return this.toAuth(snsapiBase,url);
-		}else{
+		} else{
 			if(Cache.has('snsapiKey'))
 				return this.auth(code).catch(error=>{
 					uni.showToast({
@@ -177,13 +174,23 @@ class AuthWechat {
    *
    * 实现逻辑是：发起社交登录
 	 */
-	auth(code, state) {
+	auth(code, state, spread) {
 		return new Promise((resolve, reject) => {
       // 31 的原因，它是公众号登录的社交类型
       AuthApi.socialLogin(31, code, state)
-        .then((data) => {
-          debugger
-          resolve(data);
+        .then(res => {
+          // 设置访问令牌
+          store.commit('LOGIN', {
+            token: res.data.accessToken
+          });
+          store.commit("SETUID", res.data.userId);
+          store.commit("OPENID", res.data.openid);
+          // 绑定推广员
+          if (spread > 0) {
+            BrokerageAPI.bindBrokerageUser(spread)
+          }
+          // 回调
+          resolve(res);
           Cache.set(WX_AUTH, code);
           Cache.clear(STATE_KEY);
         }).catch(reject);
@@ -213,7 +220,7 @@ class AuthWechat {
       ("" + Math.random()).split(".")[1] + "authorizestate"
     );
     uni.setStorageSync(STATE_KEY, state);
-    return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirect_uri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
+    return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirect_uri}&response_type=code&scope=${snsapiBase}&state=${state}#wechat_redirect`;
   }
 
 	/**
