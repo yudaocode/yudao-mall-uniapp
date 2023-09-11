@@ -34,20 +34,16 @@ export function _toLogin(push, pathLogin) {
 	if (isWeixin()) {
 		let urlData = location.pathname + location.search
 		if (!Cache.has('snsapiKey')) {
-      // TODO 芋艿：先临时禁用掉，改成普通登录页
-      // auth.oAuth('snsapi_base', urlData);
-      uni.navigateTo({
-        url: '/pages/users/login/index'
-      })
+      auth.oAuth('snsapi_base', urlData);
 		} else {
-			if (['/pages/user/index'].indexOf(login_back_url) == -1) {
+			if (['/pages/user/index'].indexOf(login_back_url) === -1) {
 				uni.navigateTo({
 					url: '/pages/users/wechat_login/index'
 				})
 			}
 		}
 	} else {
-		if (['/pages/user/index'].indexOf(login_back_url) == -1) {
+		if (['/pages/user/index'].indexOf(login_back_url) === -1) {
 			uni.navigateTo({
 				url: '/pages/users/login/index'
 			})
@@ -55,11 +51,10 @@ export function _toLogin(push, pathLogin) {
 	}
 	// #endif
 
-	if (['pages/user/index','/pages/user/index'].indexOf(login_back_url) == -1) {
+	if (['pages/user/index','/pages/user/index'].indexOf(login_back_url) === -1) {
 		// #ifdef MP
-    // TODO 芋艿：先临时禁用掉，改成普通登录页
     uni.navigateTo({
-      url: '/pages/users/login/index'
+      url: '/pages/users/wechat_login/index'
     })
 		// #endif
 	}

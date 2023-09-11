@@ -82,7 +82,6 @@
 			let urlData = location.pathname + location.search;
 			if (!that.$store.getters.isLogin && Auth.isWeixin()) {
 				const { code, state } = option.query;
-        debugger
 				if (code && code !== uni.getStorageSync('snsapiCode')
           && location.pathname.indexOf('/pages/users/wechat_login/index') === -1) {
           // 存储静默授权code

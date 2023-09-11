@@ -398,16 +398,7 @@
             backUrl = '/pages/index/index';
           }
           uni.reLaunch({
-            url: backUrl,
-            success:function (res) {
-              console.log("success",res);
-            },
-            fail:function (res) {
-              console.log("fail",res);
-            },
-            complete:function (res) {
-              console.log("complete",res);
-            }
+            url: backUrl
           });
         })
 			},

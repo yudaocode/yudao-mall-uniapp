@@ -39,13 +39,13 @@
 <script>
 	const app = getApp();
 	let statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
-	import mobileLogin from '@/components/login_mobile/index.vue'
+  import * as UserApi from "@/api/member/user";
+  import mobileLogin from '@/components/login_mobile/index.vue'
 	import routinePhone from '@/components/login_mobile/routine_phone.vue'
 	import {
 		getLogo,
 		getUserPhone
 	} from '@/api/public';
-	import { getUserInfo } from '@/api/user.js'
 	import Routine from '@/libs/routine';
 	import wechat from "@/libs/wechat";
 	export default {
@@ -84,24 +84,17 @@
 					window.scrollTo(0, Math.max(scrollHeight - 1, 0));
 				}, 100);
 			});
-			const { code, state, scope } = options;
+			const { code, state } = options;
 			this.options = options
 			// 获取确认授权code
 			this.code = code || ''
-			if (code && this.options.scope !== 'snsapi_base') {
+      if (code && this.options.scope !== 'snsapi_base') {
 				let spread = app.globalData.spid ? app.globalData.spid : 0;
 				// 公众号授权登录回调
-				wechat.auth(code, state).then(res => {
-					if (res.type === 'login') {
-						this.$store.commit('LOGIN', {
-							token: res.token
-						});
-						this.$store.commit("SETUID", res.uid);
-						this.getUserInfo();
-						this.wechatPhone();
-					}
+				wechat.auth(code, state, spread).then(res => {
+          this.getUserInfo();
+          this.wechatPhone();
 				}).catch(error => {
-          debugger
           // 异常的情况，说明可能是账号没登录，所以发起手机绑定
           this.socialCode = code;
           this.socialState = state;
@@ -136,6 +129,19 @@
 					this.isPhoneBox = false
 				}
 			},
+      getUserInfo() {
+        UserApi.getUserInfo().then(res => {
+          uni.hideLoading();
+          this.userInfo = res.data
+          this.$store.commit("UPDATE_USERINFO", res.data);
+          this.$util.Tips({
+            title: '登录成功',
+            icon: 'success'
+          }, {
+            tab: 3
+          })
+        });
+      },
 			// #ifdef MP
 			// 小程序获取手机号码
 			getphonenumber(e) {
@@ -180,23 +186,6 @@
 							title: res
 						});
 					});
-			},
-			/**
-			 * 获取个人用户信息
-			 */
-			getUserInfo: function() {
-				let that = this;
-				getUserInfo().then(res => {
-					uni.hideLoading();
-					that.userInfo = res.data
-					that.$store.commit("UPDATE_USERINFO", res.data);
-					that.$util.Tips({
-						title: '登录成功',
-						icon: 'success'
-					}, {
-						tab: 3
-					})
-				});
 			},
 			getUserProfile() {
 				let self = this;
@@ -272,9 +261,6 @@
 				if (!this.code && this.options.scope !== 'snsapi_base') {
 					this.$wechat.oAuth('snsapi_userinfo', '/pages/users/wechat_login/index');
 				} else {
-					// if (this.authKey) {
-					// 	this.isUp = true;
-					// }
 					this.isUp = true;
 				}
 			},

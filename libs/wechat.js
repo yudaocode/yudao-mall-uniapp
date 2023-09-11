@@ -156,7 +156,7 @@ class AuthWechat {
       return;
     }
 		const { code } = parseQuery();
-		if (!code || code == uni.getStorageSync('snsapiCode')){
+		if (!code || code === uni.getStorageSync('snsapiCode')){
 			return this.toAuth(snsapiBase,url);
 		} else{
 			if(Cache.has('snsapiKey'))

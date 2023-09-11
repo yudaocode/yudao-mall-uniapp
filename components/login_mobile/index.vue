@@ -20,7 +20,7 @@
 	import {mapGetters} from "vuex";
   import * as AuthApi from "@/api/member/auth";
   import * as UserApi from "@/api/member/user";
-  import { getUserInfo, } from "@/api/user";
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
 	import { iosBinding } from '@/api/public';
 	const BACK_URL = "login_back_url";
 	export default {
@@ -97,7 +97,6 @@
 			},
 			// 登录
 			loginBtn() {
-				let that = this
 				if (!this.account) {
           return this.$util.Tips({
             title: '请填写手机号码'
@@ -122,20 +121,20 @@
 				if (!this.userInfo.phone && this.isLogin) {
           // TODO 芋艿：不晓得它要搞啥哈？？？
 					iosBinding({
-						captcha: that.codeNum,
-						phone: that.account
+						captcha: this.codeNum,
+						phone: this.account
 					}).then(res => {
-						that.$util.Tips({
+						this.$util.Tips({
 							title: '绑定手机号成功',
 							icon: 'success'
 						}, {
 							tab: 3
 						})
-						that.isApp = 1;
-						that.getUserInfo();
+            this.isApp = 1;
+            this.getUserInfo();
 					}).catch(error => {
 						uni.hideLoading()
-						that.$util.Tips({
+            this.$util.Tips({
 							title: error
 						})
 					})
@@ -143,20 +142,20 @@
           AuthApi.smsLogin({
             mobile: this.account,
             code: this.codeNum,
-            socialType: 31, // TODO 芋艿：先写死，不确定会不会有其它社交方式；
+            socialType: 31,
             socialCode: this.socialCode,
             socialState: this.socialState
 					}).then(res => {
             // TODO 芋艿：refreshToken 机制
             let data = res.data;
-            that.$store.commit('LOGIN', {
-							token: data.accessToken
-						});
-						that.$store.commit("SETUID", res.data.uid);
-						that.getUserInfo();
+            this.$store.commit("LOGIN", {
+              'token': res.data.accessToken
+            });
+            this.getUserInfo(data);
+            this.bindBrokerUser();
 					}).catch(error => {
 						uni.hideLoading()
-						that.$util.Tips({
+						this.$util.Tips({
 							title: error
 						})
 					})
@@ -165,25 +164,33 @@
 			/**
 			 * 获取个人用户信息
 			 */
-			getUserInfo: function() {
-				let that = this;
-				getUserInfo().then(res => {
+			getUserInfo: function(data) {
+        this.$store.commit("SETUID", data.userId);
+        this.$store.commit("OPENID", data.openid);
+        UserApi.getUserInfo().then(res => {
 					uni.hideLoading();
-					that.$store.commit("UPDATE_USERINFO", res.data);
-					// #ifdef MP
-					that.$util.Tips({
+          this.$store.commit("UPDATE_USERINFO", res.data);
+          // 调回登录前页面
+          // #ifdef MP
+					this.$util.Tips({
 						title: '登录成功',
 						icon: 'success'
 					}, {
 						tab: 3
 					})
-					that.close()
+					this.close()
 					// #endif
 					// #ifdef H5
-					that.$emit('wechatPhone', true)
+					this.$emit('wechatPhone', true)
 					// #endif
 				});
 			},
+      bindBrokerUser() {
+        const spread = this.$Cache.get("spread");
+        if (spread > 0) {
+          BrokerageAPI.bindBrokerageUser(spread)
+        }
+      }
 		}
 	}
 </script>
