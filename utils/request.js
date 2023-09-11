@@ -75,7 +75,7 @@ function baseRequest(url, method, data, {
 					toLogin();
 					reject(res.data);
 				} else
-					reject(res.data.message || '系统错误');
+					reject(res.data.msg || res.data.message || '系统错误');
 			},
 			fail: (msg) => {
 				reject('请求失败');
