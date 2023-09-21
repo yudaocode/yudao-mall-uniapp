@@ -33,7 +33,7 @@
 							<view class='input'><input :placeholder='"最低提现金额"+minPrice' placeholder-class='placeholder' name="money" type='digit'></input></view>
 						</view>
 						<view class='tip'>
-              当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }},</text>冻结佣金：￥{{ fen2yuan(commission.frozenBrokeragePrice) }}
+              当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }}，</text>冻结佣金：￥{{ fen2yuan(commission.frozenPrice) }}
 						</view>
 						<view class='tip'>
               说明: 每笔佣金的冻结期为{{frozenDays}}天，到期后可提现
@@ -65,7 +65,7 @@
 							</view>
 						</view>
 						<view class='tip'>
-              当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }},</text>冻结佣金：￥{{ fen2yuan(commission.frozenBrokeragePrice) }}
+              当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }}，</text>冻结佣金：￥{{ fen2yuan(commission.frozenPrice) }}
 						</view>
 						<view class='tip'>
               说明: 每笔佣金的冻结期为{{frozenDays}}天，到期后可提现
@@ -97,7 +97,7 @@
 							</view>
 						</view>
 						<view class='tip'>
-							当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }},</text>冻结佣金：￥{{ fen2yuan(commission.frozenBrokeragePrice) }}
+							当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }}，</text>冻结佣金：￥{{ fen2yuan(commission.frozenPrice) }}
 						</view>
 						<view class='tip'>
 							说明: 每笔佣金的冻结期为{{frozenDays}}天，到期后可提现
@@ -190,7 +190,7 @@
 				})
         TradeConfigApi.getTradeConfig().then(res => {
           this.minPrice = (res.data.brokerageWithdrawMinPrice || 0) / 100.0;
-          this.frozenDays = res.data.brokerageWithdrawMinPrice || 0;
+          this.frozenDays = res.data.brokerageFrozenDays || 0;
         });
 			},
 			getUserExtractBank: function() {
