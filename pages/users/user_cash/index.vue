@@ -2,14 +2,15 @@
 	<view>
 		<view class='cash-withdrawal'>
 			<view class='nav acea-row'>
-				<view v-for="(item,index) in navList" :key="index" class='item font-color' @click="swichNav(index)">
-					<view class='line bg-color' :class='currentTab==index ? "on":""'></view>
-					<view class='iconfont' :class='item.icon+" "+(currentTab==index ? "on":"")'></view>
+				<view v-for="(item, index) in WithdrawTypeEnum" :key="index" v-if="withdrawTypes.includes(item.type)"
+              class='item font-color' @click="switchWithdrawType(item.type)">
+					<view class='line bg-color' :class='withdrawType === item.type ? "on":""'></view>
+					<view class='iconfont' :class='item.icon+" "+(withdrawType === item.type ? "on":"")'></view>
 					<view>{{item.name}}</view>
 				</view>
 			</view>
 			<view class='wrapper'>
-				<view :hidden='currentTab != 0' class='list'>
+				<view :hidden='withdrawType !== WithdrawTypeEnum.BANK.type' class='list'>
 					<form @submit="subCash" report-submit='true'>
 						<view class='item acea-row row-between-wrapper'>
 							<view class='name'>持卡人</view>
@@ -41,7 +42,7 @@
 						<button formType="submit" class='bnt bg-color'>提现</button>
 					</form>
 				</view>
-				<view :hidden='currentTab != 1' class='list'>
+				<view :hidden='withdrawType !== WithdrawTypeEnum.WECHAT.type' class='list'>
 					<form @submit="subCash" report-submit='true'>
 						<view class='item acea-row row-between-wrapper'>
 							<view class='name'>账号</view>
@@ -73,7 +74,7 @@
 						<button formType="submit" class='bnt bg-color'>提现</button>
 					</form>
 				</view>
-				<view :hidden='currentTab != 2' class='list'>
+				<view :hidden='withdrawType !== WithdrawTypeEnum.ALIPAY.type' class='list'>
 					<form @submit="subCash" report-submit='true'>
 						<view class='item acea-row row-between-wrapper'>
 							<view class='name'>账号</view>
@@ -116,28 +117,17 @@
   import * as BrokerageAPI from '@/api/trade/brokerage.js'
   import * as Util from '@/utils/util.js';
   import { getDicts } from "@/api/system/dict";
-  import { DICT_TYPE } from "@/utils/dict";
+  import { DICT_TYPE, BrokerageWithdrawTypeEnum } from "@/utils/dict";
   export default {
 		data() {
 			return {
-				navList: [{
-						'name': '银行卡',
-						'icon': 'icon-yinhangqia'
-					},
-					{
-						'name': '微信',
-						'icon': 'icon-weixin2'
-					},
-					{
-						'name': '支付宝',
-						'icon': 'icon-icon34'
-					}
-				],
-				currentTab: 0,
+				WithdrawTypeEnum: BrokerageWithdrawTypeEnum,
+				withdrawType: 0,
 				bankIndex: 0,
 				bankList: [], // 提现银行
 				minPrice: 0.00, // 最低提现金额
         frozenDays: 0, // 佣金冻结期
+        withdrawTypes: [], // 提现方式
 				isClone: false,
 				commission: {}, // 分销信息
 				qrcodeUrlW:"",
@@ -190,8 +180,10 @@
 					this.commission = res.data;
 				})
         TradeConfigApi.getTradeConfig().then(res => {
-          this.minPrice = (res.data.brokerageWithdrawMinPrice || 0) / 100.0;
+          this.minPrice = Util.fen2yuan(res.data.brokerageWithdrawMinPrice || 0);
           this.frozenDays = res.data.brokerageFrozenDays || 0;
+          this.withdrawTypes = res.data.brokerageWithdrawType || [];
+          this.withdrawType = this.withdrawTypes[0]; // 默认选中第一个提现方式
         });
 			},
 			getUserExtractBank: function() {
@@ -202,8 +194,8 @@
 					that.$set(that, 'bankList', bankList);
 				});
 			},
-			swichNav: function(current) {
-				this.currentTab = current;
+			switchWithdrawType: function(current) {
+				this.withdrawType = current;
 			},
 			bindPickerChange: function(e) {
 				this.bankIndex = e.detail.value;
@@ -219,9 +211,8 @@
 			subCash: function(e) {
 				let that = this,
 					value = e.detail.value;
-        const form = {};
-					if (this.currentTab === 0) { // 银行卡
-            form.type = 2;
+        const form = { type: this.withdrawType };
+					if (this.withdrawType === this.WithdrawTypeEnum.BANK.type) { // 银行卡
             if (value.name.length === 0) {
               return this.$util.Tips({
                 title: '请填写持卡人姓名'
@@ -238,9 +229,9 @@
               });
             }
             form.name = value.name;
+            form.accountNo = value.cardum;
             form.bankName = that.bankList[that.bankIndex].value;
-					} else if (that.currentTab === 1) { // 微信
-            form.type = 3;
+					} else if (that.withdrawType === this.WithdrawTypeEnum.WECHAT.type) { // 微信
 						if (value.name.length === 0) {
               return this.$util.Tips({
                 title: '请填写微信号'
@@ -248,8 +239,7 @@
             }
 						form.accountNo = value.name;
             form.accountQrCodeUrl = this.qrcodeUrlW;
-					} else if (that.currentTab === 2) { // 支付宝
-            form.type = 4;
+					} else if (that.withdrawType === this.WithdrawTypeEnum.ALIPAY.type) { // 支付宝
 						if (value.name.length === 0) {
               return this.$util.Tips({
                 title: '请填写账号'
