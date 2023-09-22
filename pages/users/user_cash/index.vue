@@ -22,8 +22,8 @@
 						<view class='item acea-row row-between-wrapper'>
 							<view class='name'>银行</view>
 							<view class='input'>
-								<picker @change="bindPickerChange" :value="index" :range="array">
-									<text class='Bank'>{{array[index]}}</text>
+								<picker @change="bindPickerChange" :value="bankIndex" range-key="label" :range="bankList">
+									<text class='Bank'>{{bankList[bankIndex] && bankList[bankIndex].label}}</text>
 									<text class='iconfont icon-qiepian38'></text>
 								</picker>
 							</view>
@@ -110,12 +110,13 @@
 	</view>
 </template>
 <script>
-	import { extractBank } from '@/api/user.js';
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
   import * as TradeConfigApi from '@/api/trade/config.js';
   import * as BrokerageAPI from '@/api/trade/brokerage.js'
   import * as Util from '@/utils/util.js';
+  import { getDicts } from "@/api/system/dict";
+  import { DICT_TYPE } from "@/utils/dict";
   export default {
 		data() {
 			return {
@@ -133,8 +134,8 @@
 					}
 				],
 				currentTab: 0,
-				index: 0,
-				array: [], // 提现银行
+				bankIndex: 0,
+				bankList: [], // 提现银行
 				minPrice: 0.00, // 最低提现金额
         frozenDays: 0, // 佣金冻结期
 				isClone: false,
@@ -161,7 +162,7 @@
         toLogin();
         return;
 			}
-      // this.getUserExtractBank();
+      this.getUserExtractBank();
       this.getExtractUser();
 		},
 		methods: {
@@ -194,19 +195,18 @@
         });
 			},
 			getUserExtractBank: function() {
-        // TODO 芋艿：这里要搞个银行的列表；通过数据字典；
 				let that = this;
-				extractBank().then(res => {
-					let array = res.data;
-					array.unshift("请选择银行");
-					that.$set(that, 'array', array);
+        getDicts(DICT_TYPE.BROKERAGE_BANK_NAME).then(res => {
+					let bankList = res.data;
+					bankList.unshift({ label: '请选择银行' });
+					that.$set(that, 'bankList', bankList);
 				});
 			},
 			swichNav: function(current) {
 				this.currentTab = current;
 			},
 			bindPickerChange: function(e) {
-				this.index = e.detail.value;
+				this.bankIndex = e.detail.value;
 			},
 			moneyInput(e) {
 				//正则表达试
@@ -232,14 +232,13 @@
                 title: '请填写卡号'
               });
             }
-						if (that.index === 0) {
+						if (that.bankIndex === 0) {
               return this.$util.Tips({
                 title: "请选择银行"
               });
             }
-            // TODO 芋艿：整列要搞成字典；
             form.name = value.name;
-            form.bankName = that.array[that.index];
+            form.bankName = that.bankList[that.bankIndex].value;
 					} else if (that.currentTab === 1) { // 微信
             form.type = 3;
 						if (value.name.length === 0) {
