@@ -5,7 +5,7 @@
 				<view class='headerCon acea-row row-between-wrapper'>
 					<view>
 						<view class='name'>{{name}}</view>
-						<view class='money' v-if="type === 1">￥<text class='num'>{{ fen2yuan(spreadInfo.withdrawBrokeragePrice, 0) }}</text></view>
+						<view class='money' v-if="type === 1">￥<text class='num'>{{ fen2yuan(spreadInfo.withdrawPrice, 0) }}</text></view>
 						<view class='money' v-else>￥<text class='num'>{{ fen2yuan(spreadInfo.brokeragePrice, 0) }}</text></view>
 					</view>
 					<view class='iconfont icon-jinbi1'></view>
@@ -83,7 +83,7 @@
 				type: 0, // 类型；1 - 提现；2 - 佣金
 
         page: 1,
-				limit: 10,
+				limit: 15,
 				recordList: [],
 				statuss: false, // 是否到达底部
 
