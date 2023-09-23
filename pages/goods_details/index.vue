@@ -29,7 +29,7 @@
 								<view class='money font-color'>
 									￥
 									<text class='num'>{{ fen2yuan(spu.price) }}</text>
-									<text class='vip-money' v-if="spu.vipPrice && spu.vipPrice > 0">￥{{ fen2yuan(spu.vipPrice) }}</text>
+									<text class='vip-money' v-if="spu.vipPrice && spu.vipPrice > 0">￥{{ fen2yuan(spu.price - spu.vipPrice) }}</text>
 									<image v-if="spu.vipPrice && spu.vipPrice > 0" src="../../static/images/vip.png" />
 								</view>
 								<view class='iconfont icon-fenxiang' @click="listenerActionSheet"></view>

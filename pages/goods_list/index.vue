@@ -50,7 +50,7 @@
 							<view class='money font-color' :class='is_switch?"":"on"'>￥<text
 									class='num'>{{ fen2yuan(item.price) }}</text></view>
 							<view class='vip acea-row row-between-wrapper' :class='is_switch?"":"on"'>
-								<view class='vip-money' v-if="item.vipPrice > 0">￥{{ fen2yuan(item.vipPrice) }}
+								<view class='vip-money' v-if="item.vipPrice > 0">￥{{ fen2yuan(item.price - item.vipPrice) }}
 									<image src='../../static/images/vip.png'></image>
 								</view>
 								<view>已售 {{ item.salesCount || 0}} {{item.unitName}}</view>

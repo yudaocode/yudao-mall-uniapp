@@ -47,7 +47,7 @@
               <view v-if="order.status === 0" class="font-color">待付款</view>
               <view v-else-if="order.status === 10 && order.deliveryType === 1" class="font-color">待发货</view>
               <!-- TODO 芋艿：核销逻辑 -->
-              <view v-else-if="order._status === 10 && order.deliveryType === 2" class="font-color">待核销</view>
+              <view v-else-if="order.status === 10 && order.deliveryType === 2" class="font-color">待核销</view>
               <view v-else-if="order.status === 20" class="font-color">待收货</view>
               <view v-else-if="order.status === 30 && !order.commentStatus" class="font-color">待评价</view>
               <view v-else-if="order.status === 30 && order.commentStatus" class="font-color">已完成</view>

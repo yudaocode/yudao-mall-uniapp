@@ -12,7 +12,7 @@
 					<view class='text'>
 						<view class='line1'>{{ item.name }}</view>
 						<view class='money font-color'>￥<text class='num'>{{ fen2yuan(item.price) }}</text></view>
-						<view class='vip-money acea-row row-middle' v-if="item.vipPrice > 0">￥{{ fen2yuan(item.vipPrice || 0) }}
+						<view class='vip-money acea-row row-middle' v-if="item.vipPrice > 0">￥{{ fen2yuan(item.price - item.vipPrice) }}
 							<image src='../../static/images/vip.png'></image><text class='num'>已售{{ item.salesCount }}{{item.unitName}}</text>
 						</view>
 						<view class='vip-money acea-row row-middle' v-else><text class='num'>已售{{ item.salesCount }}{{item.unitName}}</text></view>

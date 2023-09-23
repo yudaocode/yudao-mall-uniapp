@@ -70,12 +70,12 @@
 							</checkbox-group>
 						</view>
 					</view>
-          <!-- VIP 展示 TODO -->
-					<!-- <view class='item acea-row row-between-wrapper'
-						v-if="priceGroup.vipPrice > 0 && userInfo.vip && !pinkId && !BargainId && !combinationId && !seckillId">
+          <!-- VIP 展示 -->
+					<view class='item acea-row row-between-wrapper'
+						v-if="orderInfoVo.price.vipPrice > 0">
 						<view>会员优惠</view>
-						<view class='discount'>-￥{{priceGroup.vipPrice}}</view>
-					</view> -->
+						<view class='discount'>-￥{{ fen2yuan(orderInfoVo.price.vipPrice) }}</view>
+					</view>
           <!-- 配送展示 TODO -->
 					<view class='item acea-row row-between-wrapper' v-if='deliveryType === 1'>
 						<view>快递费用</view>
