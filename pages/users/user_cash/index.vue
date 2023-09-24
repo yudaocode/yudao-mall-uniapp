@@ -2,14 +2,15 @@
 	<view>
 		<view class='cash-withdrawal'>
 			<view class='nav acea-row'>
-				<view v-for="(item,index) in navList" :key="index" class='item font-color' @click="swichNav(index)">
-					<view class='line bg-color' :class='currentTab==index ? "on":""'></view>
-					<view class='iconfont' :class='item.icon+" "+(currentTab==index ? "on":"")'></view>
+				<view v-for="(item, index) in WithdrawTypeEnum" :key="index" v-if="withdrawTypes.includes(item.type)"
+              class='item font-color' @click="switchWithdrawType(item.type)">
+					<view class='line bg-color' :class='withdrawType === item.type ? "on":""'></view>
+					<view class='iconfont' :class='item.icon+" "+(withdrawType === item.type ? "on":"")'></view>
 					<view>{{item.name}}</view>
 				</view>
 			</view>
 			<view class='wrapper'>
-				<view :hidden='currentTab != 0' class='list'>
+				<view :hidden='withdrawType !== WithdrawTypeEnum.BANK.type' class='list'>
 					<form @submit="subCash" report-submit='true'>
 						<view class='item acea-row row-between-wrapper'>
 							<view class='name'>持卡人</view>
@@ -22,8 +23,8 @@
 						<view class='item acea-row row-between-wrapper'>
 							<view class='name'>银行</view>
 							<view class='input'>
-								<picker @change="bindPickerChange" :value="index" :range="array">
-									<text class='Bank'>{{array[index]}}</text>
+								<picker @change="bindPickerChange" :value="bankIndex" range-key="label" :range="bankList">
+									<text class='Bank'>{{bankList[bankIndex] && bankList[bankIndex].label}}</text>
 									<text class='iconfont icon-qiepian38'></text>
 								</picker>
 							</view>
@@ -33,7 +34,7 @@
 							<view class='input'><input :placeholder='"最低提现金额"+minPrice' placeholder-class='placeholder' name="money" type='digit'></input></view>
 						</view>
 						<view class='tip'>
-              当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }},</text>冻结佣金：￥{{ fen2yuan(commission.frozenBrokeragePrice) }}
+              当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }}，</text>冻结佣金：￥{{ fen2yuan(commission.frozenPrice) }}
 						</view>
 						<view class='tip'>
               说明: 每笔佣金的冻结期为{{frozenDays}}天，到期后可提现
@@ -41,7 +42,7 @@
 						<button formType="submit" class='bnt bg-color'>提现</button>
 					</form>
 				</view>
-				<view :hidden='currentTab != 1' class='list'>
+				<view :hidden='withdrawType !== WithdrawTypeEnum.WECHAT.type' class='list'>
 					<form @submit="subCash" report-submit='true'>
 						<view class='item acea-row row-between-wrapper'>
 							<view class='name'>账号</view>
@@ -65,7 +66,7 @@
 							</view>
 						</view>
 						<view class='tip'>
-              当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }},</text>冻结佣金：￥{{ fen2yuan(commission.frozenBrokeragePrice) }}
+              当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }}，</text>冻结佣金：￥{{ fen2yuan(commission.frozenPrice) }}
 						</view>
 						<view class='tip'>
               说明: 每笔佣金的冻结期为{{frozenDays}}天，到期后可提现
@@ -73,7 +74,7 @@
 						<button formType="submit" class='bnt bg-color'>提现</button>
 					</form>
 				</view>
-				<view :hidden='currentTab != 2' class='list'>
+				<view :hidden='withdrawType !== WithdrawTypeEnum.ALIPAY.type' class='list'>
 					<form @submit="subCash" report-submit='true'>
 						<view class='item acea-row row-between-wrapper'>
 							<view class='name'>账号</view>
@@ -97,7 +98,7 @@
 							</view>
 						</view>
 						<view class='tip'>
-							当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }},</text>冻结佣金：￥{{ fen2yuan(commission.frozenBrokeragePrice) }}
+							当前可提现金额: <text class="price">￥{{ fen2yuan(commission.brokeragePrice) }}，</text>冻结佣金：￥{{ fen2yuan(commission.frozenPrice) }}
 						</view>
 						<view class='tip'>
 							说明: 每笔佣金的冻结期为{{frozenDays}}天，到期后可提现
@@ -110,33 +111,23 @@
 	</view>
 </template>
 <script>
-	import { extractBank } from '@/api/user.js';
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
   import * as TradeConfigApi from '@/api/trade/config.js';
   import * as BrokerageAPI from '@/api/trade/brokerage.js'
   import * as Util from '@/utils/util.js';
+  import { getDicts } from "@/api/system/dict";
+  import { DICT_TYPE, BrokerageWithdrawTypeEnum } from "@/utils/dict";
   export default {
 		data() {
 			return {
-				navList: [{
-						'name': '银行卡',
-						'icon': 'icon-yinhangqia'
-					},
-					{
-						'name': '微信',
-						'icon': 'icon-weixin2'
-					},
-					{
-						'name': '支付宝',
-						'icon': 'icon-icon34'
-					}
-				],
-				currentTab: 0,
-				index: 0,
-				array: [], // 提现银行
+				WithdrawTypeEnum: BrokerageWithdrawTypeEnum,
+				withdrawType: 0,
+				bankIndex: 0,
+				bankList: [], // 提现银行
 				minPrice: 0.00, // 最低提现金额
         frozenDays: 0, // 佣金冻结期
+        withdrawTypes: [], // 提现方式
 				isClone: false,
 				commission: {}, // 分销信息
 				qrcodeUrlW:"",
@@ -161,7 +152,7 @@
         toLogin();
         return;
 			}
-      // this.getUserExtractBank();
+      this.getUserExtractBank();
       this.getExtractUser();
 		},
 		methods: {
@@ -189,24 +180,25 @@
 					this.commission = res.data;
 				})
         TradeConfigApi.getTradeConfig().then(res => {
-          this.minPrice = (res.data.brokerageWithdrawMinPrice || 0) / 100.0;
-          this.frozenDays = res.data.brokerageWithdrawMinPrice || 0;
+          this.minPrice = Util.fen2yuan(res.data.brokerageWithdrawMinPrice || 0);
+          this.frozenDays = res.data.brokerageFrozenDays || 0;
+          this.withdrawTypes = res.data.brokerageWithdrawType || [];
+          this.withdrawType = this.withdrawTypes[0]; // 默认选中第一个提现方式
         });
 			},
 			getUserExtractBank: function() {
-        // TODO 芋艿：这里要搞个银行的列表；通过数据字典；
 				let that = this;
-				extractBank().then(res => {
-					let array = res.data;
-					array.unshift("请选择银行");
-					that.$set(that, 'array', array);
+        getDicts(DICT_TYPE.BROKERAGE_BANK_NAME).then(res => {
+					let bankList = res.data;
+					bankList.unshift({ label: '请选择银行' });
+					that.$set(that, 'bankList', bankList);
 				});
 			},
-			swichNav: function(current) {
-				this.currentTab = current;
+			switchWithdrawType: function(current) {
+				this.withdrawType = current;
 			},
 			bindPickerChange: function(e) {
-				this.index = e.detail.value;
+				this.bankIndex = e.detail.value;
 			},
 			moneyInput(e) {
 				//正则表达试
@@ -219,9 +211,8 @@
 			subCash: function(e) {
 				let that = this,
 					value = e.detail.value;
-        const form = {};
-					if (this.currentTab === 0) { // 银行卡
-            form.type = 2;
+        const form = { type: this.withdrawType };
+					if (this.withdrawType === this.WithdrawTypeEnum.BANK.type) { // 银行卡
             if (value.name.length === 0) {
               return this.$util.Tips({
                 title: '请填写持卡人姓名'
@@ -232,16 +223,15 @@
                 title: '请填写卡号'
               });
             }
-						if (that.index === 0) {
+						if (that.bankIndex === 0) {
               return this.$util.Tips({
                 title: "请选择银行"
               });
             }
-            // TODO 芋艿：整列要搞成字典；
             form.name = value.name;
-            form.bankName = that.array[that.index];
-					} else if (that.currentTab === 1) { // 微信
-            form.type = 3;
+            form.accountNo = value.cardum;
+            form.bankName = that.bankList[that.bankIndex].value;
+					} else if (that.withdrawType === this.WithdrawTypeEnum.WECHAT.type) { // 微信
 						if (value.name.length === 0) {
               return this.$util.Tips({
                 title: '请填写微信号'
@@ -249,8 +239,7 @@
             }
 						form.accountNo = value.name;
             form.accountQrCodeUrl = this.qrcodeUrlW;
-					} else if (that.currentTab === 2) { // 支付宝
-            form.type = 4;
+					} else if (that.withdrawType === this.WithdrawTypeEnum.ALIPAY.type) { // 支付宝
 						if (value.name.length === 0) {
               return this.$util.Tips({
                 title: '请填写账号'

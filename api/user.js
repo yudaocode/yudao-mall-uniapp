@@ -210,14 +210,6 @@ export function extractCash(data){
 }
 
 /**
- * 提现银行/提现最低金额
- *
-*/
-export function extractBank(){
-  return request.get('extract/bank');
-}
-
-/**
  * 会员等级列表
  *
 */
