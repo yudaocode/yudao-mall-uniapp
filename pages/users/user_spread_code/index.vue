@@ -42,7 +42,6 @@
 	import { getQrcode } from '@/api/api.js';
 	// #endif
 	import home from '@/components/home';
-	import { imageBase64 } from "@/api/public";
   import * as TradeConfigApi from '@/api/trade/config.js';
 	export default {
 		components: {
@@ -131,13 +130,7 @@
 				let posterUrls = []
 				// 生成一个Promise对象的数组
 				images.forEach(item => {
-          // TODO @芋艿：imageBase64 这里是为了下载图片的 base64；后续看看可以前端直接操作不；
-					const oneApi = imageBase64({
-						url: item.pic
-					}).then(res => {
-						return res.data.code;
-					})
-					posterUrls.push(oneApi)
+					posterUrls.push(item.pic)
 				})
 				Promise.all(posterUrls).then(result => {
 					that.$set(that, 'base64List', result);

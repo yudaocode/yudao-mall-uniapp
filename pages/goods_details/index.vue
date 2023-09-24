@@ -278,7 +278,6 @@
 	import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js'
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
-	import { imageBase64 } from "@/api/public";
 	import productConSwiper from '@/components/productConSwiper';
 	import couponListWindow from '@/components/couponListWindow';
 	import productWindow from '@/components/productWindow';
@@ -530,7 +529,7 @@
             // #ifdef H5
             this.make();
             this.ShareInfo();
-            this.getImageBase64();
+            this.imgTop = this.spu.picUrl;
             // #endif
             // #ifdef MP
             this.getQrcode();
@@ -1002,16 +1001,6 @@
           "onMenuShareAppMessage",
           "onMenuShareTimeline"
         ], configAppMessage);
-      },
-      /**
-       * 获得商品的封面 base64
-       */
-      getImageBase64: function() {
-        imageBase64({
-          url: this.spu.picUrl
-        }).then(res => {
-          this.imgTop = res.data.code;
-        })
       },
       /**
        * 获得小程序的二维码
