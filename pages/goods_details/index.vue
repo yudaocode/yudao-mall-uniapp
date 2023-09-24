@@ -778,7 +778,7 @@
       getProductReplyCount: function() {
         ProductCommentApi.getCommentStatistics(this.id).then(res => {
           const count = res.data.goodCount + res.data.mediocreCount + res.data.negativeCount;
-          this.$set(this, 'replyChance', 100.0 * res.data.goodCount / count);
+          this.$set(this, 'replyChance', (100.0 * res.data.goodCount / count).toFixed(0));
           this.$set(this, 'replyCount', count);
         });
       },
