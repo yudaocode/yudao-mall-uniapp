@@ -182,7 +182,7 @@
         TradeConfigApi.getTradeConfig().then(res => {
           this.minPrice = Util.fen2yuan(res.data.brokerageWithdrawMinPrice || 0);
           this.frozenDays = res.data.brokerageFrozenDays || 0;
-          this.withdrawTypes = res.data.brokerageWithdrawType || [];
+          this.withdrawTypes = res.data.brokerageWithdrawTypes || [];
           this.withdrawType = this.withdrawTypes[0]; // 默认选中第一个提现方式
         });
 			},
