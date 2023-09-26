@@ -98,7 +98,7 @@
 						</view>
 						<view class="listBox acea-row">
 							<view class="list" :class='item.takeStatus ? "listHui" : "listActive" '
-                    v-for="(item, index) in couponList.slice(0,2)" :key="index">
+                    v-for="(item, index) in couponList" :key="index">
 								<view class="tit line1" :class='item.takeStatus ? "pricehui" : "titActive" '>{{ item.name }}</view>
 								<view class="price" :class='item.takeStatus ? "pricehui" : "icon-color" '>
                   <text v-if="item.discountType === 1">{{ fen2yuan(item.discountPrice) }} 元</text>
@@ -381,8 +381,8 @@
        * 获得优惠劵列表
        */
       getcouponList() {
-        CouponApi.getCouponTemplateList().then(res => {
-          this.$set(this, 'couponList', res.data);
+        CouponApi.getCouponTemplatePage({pageSize: 2}).then(res => {
+          this.$set(this, 'couponList', res.data.list);
         }).catch(err => {
           return this.$util.Tips({
             title: err

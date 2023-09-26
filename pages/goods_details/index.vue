@@ -819,8 +819,8 @@
        * 获取优惠券
        */
       getCouponList(useType) {
-        CouponApi.getCouponTemplateList(this.id, useType).then(res => {
-          this.$set(this.coupon, 'list', res.data);
+        CouponApi.getCouponTemplatePage({spuId: this.id, productScope: useType}).then(res => {
+          this.$set(this.coupon, 'list', res.data.list);
         })
       },
       /**

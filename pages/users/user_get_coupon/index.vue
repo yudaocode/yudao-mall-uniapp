@@ -111,6 +111,7 @@
 			getCoupon: function(id, index) {
 				// 领取优惠券
         CouponApi.takeCoupon(id).then(res => {
+          // todo 会导致take_limit_count失效
           this.couponsList[index].takeStatus = true;
 					this.$set(this, 'couponsList', this.couponsList);
           this.$util.Tips({
@@ -133,7 +134,7 @@
         CouponApi.getCouponTemplatePage({
 					pageNo: this.page,
           pageSize: this.limit,
-					useType: this.type
+          productScope: this.type
 				}).then(res => {
 					const list = res.data.list;
           const loadend = list.length < this.limit;

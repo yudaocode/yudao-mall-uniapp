@@ -15,15 +15,6 @@ export function getCouponPage(data) {
   return request.get("app-api/promotion/coupon/page", data);
 }
 
-export function getCouponTemplateList(spuId, useType) {
-  return request.get("app-api/promotion/coupon-template/list", {
-    spuId,
-    useType
-  }, {
-    noAuth: true // TODO 芋艿：后续要做调整
-  });
-}
-
 export function getCouponTemplatePage(data) {
   return request.get("app-api/promotion/coupon-template/page", data);
 }
