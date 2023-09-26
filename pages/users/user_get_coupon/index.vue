@@ -111,8 +111,8 @@
 			getCoupon: function(id, index) {
 				// 领取优惠券
         CouponApi.takeCoupon(id).then(res => {
-          // todo 会导致take_limit_count失效
-          this.couponsList[index].takeStatus = true;
+          // 设置已领取，即不能再领取
+          this.couponsList[index].takeStatus = res.data !== true;
 					this.$set(this, 'couponsList', this.couponsList);
           this.$util.Tips({
 						title: '领取成功'

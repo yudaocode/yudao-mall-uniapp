@@ -139,7 +139,7 @@
     <!-- 优惠劵的弹窗选择 -->
     <couponListWindow
       :coupon='coupon'
-      @ChangCouponsClone="ChangCouponsClone"
+      @ChangCouponsClose="ChangCouponsClose"
       :openType='openType'
       @ChangCoupons="ChangCoupons"
       :orderShow="orderShow"
@@ -441,7 +441,7 @@
       /**
        * 关闭 coupon 优惠劵的选择弹窗
        */
-      ChangCouponsClone: function() {
+      ChangCouponsClose: function() {
         this.$set(this.coupon, 'coupon', false);
       },
 

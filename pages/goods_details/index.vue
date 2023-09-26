@@ -226,7 +226,7 @@
     <!-- 优惠劵弹窗 -->
 		<couponListWindow
       :coupon='coupon'
-      @ChangCouponsClone="ChangCouponsClone"
+      @ChangCouponsClose="ChangCouponsClose"
       @ChangCoupons="ChangCoupons"
       @tabCouponType="tabCouponType"
     />
@@ -837,7 +837,7 @@
       /**
        * 关闭优惠劵弹窗
        */
-      ChangCouponsClone: function() {
+      ChangCouponsClose: function() {
         this.$set(this.coupon, 'coupon', false)
       },
       /**

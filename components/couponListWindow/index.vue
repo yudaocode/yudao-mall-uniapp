@@ -80,7 +80,7 @@
 		methods: {
 			close: function() {
 				this.type = 1
-				this.$emit('ChangCouponsClone');
+				this.$emit('ChangCouponsClose');
 			},
       /**
        * 选择优惠劵

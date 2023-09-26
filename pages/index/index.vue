@@ -394,7 +394,8 @@
        */
       getCoupon: function(id, index) {
         CouponApi.takeCoupon(id).then(res => {
-          this.$set(this.couponList[index], 'takeStatus', true);
+          // 设置已领取，即不能再领取
+          this.$set(this.couponList[index], 'takeStatus', res.data !== true);
           this.$util.Tips({
             title: '领取成功'
           });
