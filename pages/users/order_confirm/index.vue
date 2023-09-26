@@ -50,14 +50,14 @@
         <!-- 优惠劵展示 -->
 				<view class='wrapper borRadius14'>
 					<view class='item acea-row row-between-wrapper' @tap='couponTap'
-						v-if="orderInfoVo.type === 1 && productType==='normal'">
+						v-if="orderInfoVo.type === 0 && productType==='normal'">
 						<view>优惠券</view>
 						<view class='discount'>{{couponTitle}}
 							<text class='iconfont icon-jiantou'></text>
 						</view>
 					</view>
           <!-- 积分展示 -->
-          <view class='item acea-row row-between-wrapper' v-if="orderInfoVo.type === 1 && productType==='normal'">
+          <view class='item acea-row row-between-wrapper' v-if="orderInfoVo.type === 0 && productType==='normal'">
 						<view>积分抵扣</view>
 						<view class='discount acea-row row-middle'>
 							<view> {{pointStatus ? "剩余积分":"当前积分"}}
@@ -387,7 +387,10 @@
        */
       getCouponList: function() {
         CouponApi.getMatchCouponList({
-          // TODO 芋艿：这里应该补充下参数
+          price: this.orderInfoVo.price.payPrice,
+          spuIds: this.orderInfoVo.items.map(item => item.spuId),
+          skuIds: this.orderInfoVo.items.map(item => item.skuId),
+          categoryIds: this.orderInfoVo.items.map(item => item.categoryId)
         }).then(res => {
           this.$set(this.coupon, 'list', res.data);
           // 设置指定优惠劵已选择；用于 couponId 有参数时，默认选中一下
