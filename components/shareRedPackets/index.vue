@@ -1,5 +1,5 @@
 <template>
-	<view class='sharing-packets' :class='!sharePacket.enabled ? "on":""'>
+	<view class='sharing-packets' :class='!enabled ? "on":""'>
 	   <view class='iconfont icon-guanbi' @click="closeShare"></view>
 	   <view class='line'></view>
 	   <view class='sharing-con' @click='goShare'>
@@ -7,7 +7,7 @@
 	      <view class='text font-color'>
 	        <view>会员分享返</view>
 	        <view class='money' v-if="sharePacket.brokerageMinPrice && sharePacket.brokerageMaxPrice">
-            <text class='label'>￥</text>{{ fen2yuan(sharePacket.brokerageMinPrice) }} ~ {{ fen2yuan(sharePacket.brokerageMaxPrice) }}
+            <text class='label'>￥</text>{{ fen2yuan(sharePacket.brokerageMinPrice) }}~{{ fen2yuan(sharePacket.brokerageMaxPrice) }}
           </view>
           <view class='money' v-else-if="sharePacket.brokerageMinPrice">
             <text class='label'>￥</text>{{ fen2yuan(sharePacket.brokerageMinPrice) }}
@@ -41,7 +41,11 @@
 			return {
 			};
 		},
-
+    computed: {
+      enabled() {
+        return this.sharePacket.enabled && (this.sharePacket.brokerageMinPrice || this.sharePacket.brokerageMaxPrice)
+      }
+    },
 		methods: {
 			closeShare:function(){
         this.$emit('closeChange');
@@ -64,7 +68,7 @@
 	.sharing-packets .sharing-con{width:187rpx;height:210rpx;position:relative;}
 	.sharing-packets .sharing-con image{width:100%;height:100%;}
 	.sharing-packets .sharing-con .text{position:absolute;top:30rpx;font-size:20rpx;width:100%;text-align:center;}
-	.sharing-packets .sharing-con .text .money{font-size:32rpx;font-weight:bold;margin-top:5rpx;}
+	.sharing-packets .sharing-con .text .money{font-size:32rpx;font-weight:bold;margin-top:5rpx;white-space: nowrap}
 	.sharing-packets .sharing-con .text .money .label{font-size:20rpx;}
 	.sharing-packets .sharing-con .text .tip{font-size:18rpx;color:#999;margin-top:5rpx;}
 	.sharing-packets .sharing-con .text .shareBut{font-size:22rpx;color:#fff;margin-top:18rpx;height:50rpx;line-height:50rpx;}

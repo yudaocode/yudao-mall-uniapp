@@ -572,7 +572,7 @@
         })
       },
       getBrokeragePrice: function() {
-        BrokerageAPI.getProductBrokeragePrice(this.id).then(res => {
+        BrokerageAPI.getProductBrokeragePrice(this.activity.spuId).then(res => {
           this.sharePacket = res.data
         });
       },
