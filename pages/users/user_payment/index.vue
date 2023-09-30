@@ -40,7 +40,7 @@
 						 name="number"></input></view>
 					<view class="tips-title">
 						<view style="font-weight: bold; font-size: 26rpx;">提示：</view>
-						<view style="margin-top: 10rpx;">当前佣金为 <text class='font-color'>￥{{userInfo.brokeragePrice || 0}}</text></view>
+						<view style="margin-top: 10rpx;">当前佣金为 <text class='font-color'>￥{{ fen2yuan(spreadInfo.brokeragePrice || 0) }}</text></view>
 					</view>
 					<view class="tips-box">
 						<view class="tips mt-30">注意事项：</view>
@@ -57,8 +57,8 @@
 </template>
 
 <script>
-	import { transferIn } from '@/api/user.js';
   import * as WalletApi from '@/api/pay/wallet.js';
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
   import * as Util from '@/utils/util.js';
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
@@ -70,6 +70,7 @@
 		data() {
 			return {
         wallet: {},
+        spreadInfo: {},
 
         now_money: 0,
 				navRecharge: ['账户充值', '佣金转入'],
@@ -129,6 +130,10 @@
         WalletApi.getPayWallet().then(res=>{
           this.wallet = res.data;
         })
+        // 获得佣金
+        BrokerageAPI.getBrokerageUser().then(res => {
+          this.$set(this,'spreadInfo',res.data);
+        });
 
         // 获得充值套餐
         WalletApi.getWalletRechargePackageList().then(res => {
@@ -158,7 +163,7 @@
 				let value = e.detail.value.number;
 				// 转入余额
 				if (that.active) {
-					if (parseFloat(value) < 0 || parseFloat(value) == NaN || value == undefined || value == "") {
+					if (parseFloat(value) < 0 || parseFloat(value) === NaN || value === undefined || value === "") {
 						return that.$util.Tips({
 							title: '请输入金额'
 						});
@@ -167,31 +172,27 @@
 						title: '转入余额',
 						content: '转入余额后无法再次转出，确认是否转入余额',
 						success(res) {
-							if (res.confirm) {
-								transferIn({
-											price: parseFloat(value)
-								}).then(res => {
-									that.$store.commit("changInfo", {
-										amount1: 'brokeragePrice',
-										amount2: that.$util.$h.Sub(that.userInfo.brokeragePrice, parseFloat(value))
-									});
-									return that.$util.Tips({
-										title: '转入成功',
-										icon: 'success'
-									}, {
-										tab: 5,
-										url: '/pages/users/user_money/index'
-									});
-								}).catch(err=>{
-									return that.$util.Tips({
-										title: err
-									});
-								})
-							} else if (res.cancel) {
-								return that.$util.Tips({
-									title: '已取消'
-								});
+							if (!res.confirm) {
+                return that.$util.Tips({
+                  title: '已取消'
+                });
 							}
+              BrokerageAPI.createBrokerageWithdraw({
+                type: 1,
+                price: parseFloat(value) * 100
+              }).then(res => {
+                return that.$util.Tips({
+                  title: '转入成功',
+                  icon: 'success'
+                }, {
+                  tab: 5,
+                  url: '/pages/users/user_money/index'
+                });
+              }).catch(err=>{
+                return that.$util.Tips({
+                  title: err
+                });
+              })
 						},
 					})
 				} else {
