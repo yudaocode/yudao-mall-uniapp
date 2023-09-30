@@ -20,8 +20,8 @@
 					<view class="iconfont" :class="item.icon"></view>
 					<view class="text">
 						<view class=name>{{item.name}}</view>
-						<view class="info" v-if="item.value === 'yue'">
-							{{item.title}} <span class="money">￥{{ item.number }}</span>
+						<view class="info" v-if="item.code === 'wallet'">
+							{{item.title}} <span class="money">￥{{ fen2yuan(wallet.balance || 0) }}</span>
 						</view>
 						<view class="info" v-else>{{item.title}}</view>
 					</view>
@@ -40,7 +40,9 @@
 	import numberScroll from '@/components/numberScroll.vue'
   import * as PayOrderApi from '@/api/pay/order.js';
   import * as PayChannelApi from '@/api/pay/channel.js';
-	export default {
+  import * as WalletApi from '@/api/pay/wallet.js';
+  import {fen2yuan} from "../../../utils/util";
+  export default {
 		components: {
       CountDown,
 			numberScroll
@@ -51,6 +53,8 @@
         returnUrl: '', // 调回地址
         payPrice: 0, // 支付金额
         invalidTime: 0, // 过期时间
+
+        wallet: {},
 
         channelCode: '', // 选中的支付渠道
         channels: [{ // 支付方式
@@ -72,6 +76,7 @@
           name: '余额支付',
           icon: "icon-yuezhifu",
           title: '可用余额',
+          code: "wallet"
         }, {
           name: '模拟支付',
           icon: "icon-yuezhifu",
@@ -106,6 +111,7 @@
 			this.getCashierOrder()
 		},
 		methods: {
+      fen2yuan,
 			getCashierOrder() {
 				uni.showLoading({
 					title: '加载订单中'
@@ -304,6 +310,11 @@
           if (this.channels.length > 0) {
             this.payType(this.channels[0].code)
           }
+        })
+
+        // 3. // 获得钱包
+        WalletApi.getPayWallet().then(res=>{
+          this.wallet = res.data;
         })
       },
       /**
