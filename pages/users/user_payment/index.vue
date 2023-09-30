@@ -4,37 +4,43 @@
 			<view class="payment-top acea-row row-column row-center-wrapper">
 				<span class="name">我的余额</span>
 				<view class="pic">
-					￥<span class="pic-font">{{ userInfo.nowMoney || 0 }}</span>
+					￥<span class="pic-font">{{ fen2yuan(wallet.balance || 0) }}</span>
 				</view>
 			</view>
 			<view class="payment">
 				<view class="nav acea-row row-around row-middle">
 					<view class="item" :class="active==index?'on':''" v-for="(item,index) in navRecharge" :key="index" @click="navRecharges(index)">{{item}}</view>
 				</view>
+        <!-- 充值 -->
 				<view class='tip picList' v-if='!active'>
 					<view class="pic-box pic-box-color acea-row row-center-wrapper row-column" :class="activePic === index ? 'pic-box-color-active' : ''"
 					 v-for="(item, index) in picList" :key="index" @click="picCharge(index, item)">
 						<view class="pic-number-pic">
-							{{ item.price }}<span class="pic-number"> 元</span>
+							{{ fen2yuan(item.payPrice) }}<span class="pic-number"> 元</span>
 						</view>
-						<view class="pic-number">赠送：{{ item.giveMoney }} 元</view>
+						<view class="pic-number">赠送：{{ fen2yuan(item.bonusPrice) }} 元</view>
 					</view>
-					<view class="pic-box pic-box-color acea-row row-center-wrapper" :class="parseFloat(activePic)===parseFloat(picList.length)?'pic-box-color-active':''" @click="picCharge(picList.length)">
-						<input type="number" placeholder="其他" v-model="money" :maxlength="50000" class="pic-box-money pic-number-pic uni-input" :class="parseFloat(activePic) === parseFloat(picList.length) ? 'pic-box-color-active' : ''" />
+					<view class="pic-box pic-box-color acea-row row-center-wrapper" :class="parseFloat(activePic)===parseFloat(picList.length)?'pic-box-color-active':''"
+                @click="picCharge(picList.length)">
+						<input type="number" placeholder="其他" v-model="money" :maxlength="50000" class="pic-box-money pic-number-pic uni-input"
+                   :class="parseFloat(activePic) === parseFloat(picList.length) ? 'pic-box-color-active' : ''" />
 					</view>
 					<view class="tips-box">
 						<view class="tips mt-30">注意事项：</view>
 						<view class="tips-samll" v-for="item in rechargeAttention" :key="item">
-							{{ item }}
-						</view>
+              {{ item }}
+            </view>
 					</view>
-				</view>
-				<view class="tip" v-else>
+          <button class='but' formType="submit"> 立即充值 </button>
+        </view>
+
+        <!-- 佣金提现 -->
+        <view class="tip" v-else>
 					<view class='input'><text>￥</text><input placeholder="0.00" type='number' placeholder-class='placeholder' :value="number"
 						 name="number"></input></view>
 					<view class="tips-title">
 						<view style="font-weight: bold; font-size: 26rpx;">提示：</view>
-						<view style="margin-top: 10rpx;">当前佣金为 <text class='font-color'>￥{{userInfo.brokeragePrice || 0}}</text></view>
+						<view style="margin-top: 10rpx;">当前佣金为 <text class='font-color'>￥{{ fen2yuan(spreadInfo.brokeragePrice || 0) }}</text></view>
 					</view>
 					<view class="tips-box">
 						<view class="tips mt-30">注意事项：</view>
@@ -42,60 +48,46 @@
 							{{ item }}
 						</view>
 					</view>
-				</view>
-				<button class='but' formType="submit"> {{active ? '立即转入': '立即充值' }}</button>
+          <button class='but' formType="submit"> 立即转入 </button>
+        </view>
 			</view>
 		</form>
-		<!-- #ifdef MP -->
-		<!-- <authorize @onLoadFun="onLoadFun" :isAuto="isAuto" :isShowAuth="isShowAuth" @authColse="authColse"></authorize> -->
-		<!-- #endif -->
 		<home></home>
 	</view>
 </template>
 
 <script>
-	import {
-		rechargeRoutine,
-		rechargeWechat,
-		getRechargeApi,
-		transferIn,
-		appWechat
-	} from '@/api/user.js';
-	import { wechatQueryPayResult } from '@/api/order.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	// #ifdef MP
-	import authorize from '@/components/Authorize';
-	// #endif
+  import * as WalletApi from '@/api/pay/wallet.js';
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
+  import * as Util from '@/utils/util.js';
+	import { toLogin } from '@/libs/login.js';
+	import { mapGetters } from "vuex";
 	import home from '@/components/home';
 	export default {
 		components: {
-			// #ifdef MP
-			authorize,
-			// #endif
 			home
 		},
 		data() {
-			let that = this;
 			return {
-				now_money: 0,
+        wallet: {},
+        spreadInfo: {},
+
+        now_money: 0,
 				navRecharge: ['账户充值', '佣金转入'],
 				active: 0,
 				number: '',
 				placeholder: "0.00",
 				from: '',
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
 				picList: [],
 				activePic: 0,
 				money: "",
-				numberPic: '',
-				rechar_id: 0,
-				rechargeAttention: []
+				rechar_id: 0, // 选择的套餐编号
+				rechargeAttention: [
+          '1、充值金额最少为 1 元',
+          '2、充值后只能用于消费',
+          '3、提现金额需要有手续费',
+          '4、提现到账需要 2~3 天时间'
+        ]
 			};
 		},
 		computed: mapGetters(['isLogin', 'systemPlatform','userInfo']),
@@ -110,23 +102,13 @@
 			}
 		},
 		onLoad(options) {
-			// #ifdef H5
-			this.from = this.$wechat.isWeixin() ? "public" : "weixinh5";
-			// #endif
-
-      if (true) {
-        alert('充值功能暂未实现！预期 10 月份');
+			if (!this.isLogin) {
+        toLogin();
         return;
-      }
-
-			if (this.isLogin) {
-				this.getRecharge();
-			} else {
-				toLogin();
 			}
+      this.getRecharge();
 		},
 		methods: {
-
 			/**
 			 * 选择金额
 			 */
@@ -134,47 +116,46 @@
 				this.activePic = idx;
 				if (item === undefined) {
 					this.rechar_id = 0;
-					this.numberPic = "";
 				} else {
 					this.money = "";
 					this.rechar_id = item.id;
-					this.numberPic = item.price;
 				}
 			},
-
 
 			/**
 			 * 充值额度选择
 			 */
 			getRecharge() {
-				getRechargeApi()
-					.then(res => {
-						this.picList = res.data.rechargeQuota;
-						if (this.picList[0]) {
-							this.rechar_id = this.picList[0].id;
-							this.numberPic = this.picList[0].price;
-						}
-						this.rechargeAttention = res.data.rechargeAttention || [];
-					})
-					.catch(res => {
-						this.$dialog.toast({
-							mes: res
-						});
-					});
-			},
+        // 获得钱包
+        WalletApi.getPayWallet().then(res=>{
+          this.wallet = res.data;
+        })
+        // 获得佣金
+        BrokerageAPI.getBrokerageUser().then(res => {
+          this.$set(this,'spreadInfo',res.data);
+        });
 
+        // 获得充值套餐
+        WalletApi.getWalletRechargePackageList().then(res => {
+          this.picList = res.data;
+          if (this.picList.length > 0) {
+            this.rechar_id = this.picList[0].id;
+          }
+        }).catch(res => {
+          this.$dialog.toast({
+            mes: res
+          });
+        });
+			},
 
 			onLoadFun: function() {
 				this.getRecharge();
 			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
 			navRecharges: function(index) {
 				this.active = index;
 			},
-			/*
+
+			/**
 			 * 用户充值
 			 */
 			submitSub: function(e) {
@@ -182,7 +163,7 @@
 				let value = e.detail.value.number;
 				// 转入余额
 				if (that.active) {
-					if (parseFloat(value) < 0 || parseFloat(value) == NaN || value == undefined || value == "") {
+					if (parseFloat(value) < 0 || parseFloat(value) === NaN || value === undefined || value === "") {
 						return that.$util.Tips({
 							title: '请输入金额'
 						});
@@ -191,31 +172,27 @@
 						title: '转入余额',
 						content: '转入余额后无法再次转出，确认是否转入余额',
 						success(res) {
-							if (res.confirm) {
-								transferIn({
-											price: parseFloat(value)
-								}).then(res => {
-									that.$store.commit("changInfo", {
-										amount1: 'brokeragePrice',
-										amount2: that.$util.$h.Sub(that.userInfo.brokeragePrice, parseFloat(value))
-									});
-									return that.$util.Tips({
-										title: '转入成功',
-										icon: 'success'
-									}, {
-										tab: 5,
-										url: '/pages/users/user_money/index'
-									});
-								}).catch(err=>{
-									return that.$util.Tips({
-										title: err
-									});
-								})
-							} else if (res.cancel) {
-								return that.$util.Tips({
-									title: '已取消'
-								});
+							if (!res.confirm) {
+                return that.$util.Tips({
+                  title: '已取消'
+                });
 							}
+              BrokerageAPI.createBrokerageWithdraw({
+                type: 1,
+                price: parseFloat(value) * 100
+              }).then(res => {
+                return that.$util.Tips({
+                  title: '转入成功',
+                  icon: 'success'
+                }, {
+                  tab: 5,
+                  url: '/pages/users/user_money/index'
+                });
+              }).catch(err=>{
+                return that.$util.Tips({
+                  title: err
+                });
+              })
 						},
 					})
 				} else {
@@ -223,7 +200,7 @@
 						title: '正在支付',
 					})
 					let money = parseFloat(this.money);
-					if (this.rechar_id == 0) {
+					if (this.rechar_id === 0) {
 						if (Number.isNaN(money)) {
 							return that.$util.Tips({
 								title: '充值金额必须为数字'
@@ -231,131 +208,35 @@
 						}
 						if (money <= 0) {
 							return that.$util.Tips({
-								title: '充值金额不能为0'
+								title: '充值金额不能为 0'
 							});
 						}
 						if (money > 50000) {
 							return that.$util.Tips({
-								title: '充值金额最大值为50000'
+								title: '充值金额最大值为 50000'
 							});
 						}
-					} else {
-						money = this.numberPic
 					}
-					// #ifdef MP
-					rechargeRoutine({
-						price: money,
-						type: 0,
-						rechar_id: this.rechar_id
+          WalletApi.createWalletRecharge({
+            payPrice: money ? money * 100 : undefined,
+            packageId: this.rechar_id
 					}).then(res => {
-						uni.hideLoading();
-						let jsConfig = res.data.data.jsConfig;
-						uni.requestPayment({
-							timeStamp: jsConfig.timeStamp,
-							nonceStr: jsConfig.nonceStr,
-							package: jsConfig.packages,
-							signType: jsConfig.signType,
-							paySign: jsConfig.paySign,
-							success: function(res) {
-								that.$store.commit("changInfo", {
-									amount1: 'nowMoney',
-									amount2: that.$util.$h.Add(value, that.userinfo.nowMoney)
-								});
-								//that.$set(that, 'userinfo.nowMoney', that.$util.$h.Add(value, that.userinfo.nowMoney));
-								return that.$util.Tips({
-									title: '支付成功',
-									icon: 'success'
-								}, {
-									tab: 5,
-									url: '/pages/users/user_money/index'
-								});
-							},
-							fail: function(err) {
-								return that.$util.Tips({
-									title: '支付失败'
-								});
-							},
-							complete: function(res) {
-								if (res.errMsg == 'requestPayment:cancel') return that.$util.Tips({
-									title: '取消支付'
-								});
-							}
-						})
+            const returnUrl = encodeURIComponent('/pages/users/user_payment/index');
+            uni.navigateTo({
+              url: `/pages/goods/cashier/index?order_id=${res.data.payOrderId}&returnUrl=${returnUrl}`
+            })
 					}).catch(err => {
 						uni.hideLoading();
 						return that.$util.Tips({
 							title: err
 						})
 					});
-					// #endif
-					// #ifdef H5
-					rechargeWechat({
-						price: money,
-						from: that.from,
-						rechar_id: that.rechar_id,
-						payType: 0
-					}).then(res => {
-						let jsConfig = res.data.jsConfig;
-						let orderNo = res.data.orderNo;
-						let data = {
-							timestamp:jsConfig.timeStamp,
-							nonceStr:jsConfig.nonceStr,
-							package:jsConfig.packages,
-							signType:jsConfig.signType,
-							paySign:jsConfig.paySign
-						};
-						if (that.from == "weixinh5") {
-							let domain = encodeURIComponent(location.href.split('/pages')[0]);
-							let urls = jsConfig.mwebUrl + '&redirect_url='+ domain + '/pages/users/user_money/index';
-							location.replace(urls);
-							return that.$util.Tips({
-								tab: 5,
-								url: '/pages/users/user_money/index'
-							});
-							// return that.$util.Tips({
-							// 	title: '支付成功',
-							// 	icon: 'success'
-							// }, {
-							// 	tab: 5,
-							// 	url: '/pages/users/user_money/index'
-							// });
-						} else {
-							that.$wechat.pay(data)
-								.finally(() => {
-									that.$store.commit("changInfo", {
-										amount1: 'nowMoney',
-										amount2: that.$util.$h.Add(value, that.userinfo.nowMoney)
-									});
-									// that.$set(that, 'userinfo.nowMoney', that.$util.$h.Add(value, that.userinfo.nowMoney));
-									wechatQueryPayResult(orderNo).then(res => {
-										return that.$util.Tips({
-											title: '支付成功',
-											icon: 'success'
-										}, {
-											tab: 5,
-											url: '/pages/users/user_money/index'
-										});
-									}).cache(err => {
-										return that.$util.Tips({
-											title: err
-										});
-									})
-								})
-								.catch(function(err) {
-									return that.$util.Tips({
-										title: '支付失败'
-									});
-								});
-						}
-					}).catch(res=>{
-						uni.hideLoading();
-						return that.$util.Tips({
-							title: res
-						});
-					})
-					// #endif
 				}
-			}
+			},
+
+      fen2yuan(price) {
+        return Util.fen2yuan(price)
+      }
 		}
 	}
 </script>

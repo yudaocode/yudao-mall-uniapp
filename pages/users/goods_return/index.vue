@@ -79,6 +79,7 @@
 	import { mapGetters } from "vuex";
   import * as TradeOrderApi from '@/api/trade/order.js';
   import * as AfterSaleApi from '@/api/trade/afterSale.js';
+  import * as TradeConfigApi from '@/api/trade/config.js';
   export default {
 		data() {
 			return {
@@ -94,6 +95,8 @@
         reasonIndex: 0, // 选中 reasons 的位置
 
         applyPicUrls: [], // 补充凭证图片
+
+        tradeConfig: {}, // 交易配置
 			};
 		},
 		computed: mapGetters(['isLogin']),
@@ -113,23 +116,25 @@
          toLogin();
          return;
        }
-      if (!options.orderId || !options.orderItemId) {
-        return this.$util.Tips({
-          title:'缺少订单id,无法退款'
-        },{
-          tab: 3,
-          url:1
-        });
-      }
-			this.orderId = parseInt(options.orderId);
-      this.orderItemId = parseInt(options.orderItemId);
-      this.getOrderInfo();
-      this.getRefundReason();
-    },
+        if (!options.orderId || !options.orderItemId) {
+          return this.$util.Tips({
+            title:'缺少订单id,无法退款'
+          },{
+            tab: 3,
+            url:1
+          });
+        }
+        this.orderId = parseInt(options.orderId);
+        this.orderItemId = parseInt(options.orderItemId);
+        this.getOrderInfo();
+        this.getRefundReason();
+        this.getTradeConfig();
+     },
 		methods: {
 			onLoadFun:function() {
         this.getOrderInfo();
         this.getRefundReason();
+        this.getTradeConfig();
       },
       /**
        * 获取订单详情
@@ -147,6 +152,7 @@
           });
         })
       },
+
       /**
        * 更改售后方式
        */
@@ -165,9 +171,11 @@
        */
       getRefundReason: function() {
         const way = this.getWay();
-        AfterSaleApi.getAfterSaleReasonList(way).then(res => {
-          this.reasons = res.data;
-        })
+        if (way === 10) {
+          this.reasons = this.tradeConfig.afterSaleRefundReasons || [];
+        } else {
+          this.reasons = this.tradeConfig.afterSaleReturnReasons || [];
+        }
       },
       /**
        * 选择售后原因
@@ -175,6 +183,13 @@
       bindPickerChange: function(e) {
         this.$set(this, 'reasonIndex', e.detail.value);
       },
+      getTradeConfig: function () {
+        TradeConfigApi.getTradeConfig().then(res => {
+          this.tradeConfig = res.data || {};
+          this.getRefundReason();
+        });
+      },
+
       /**
        * 删除图片
        */
