@@ -25,7 +25,7 @@
 						<!-- #endif -->
 					</div>
 					<div class="store-distance" @click.stop="showMaoLocation(item)">
-						<span class="addressTxt" v-if="item.distance">距离{{ item.distance / 1000.0 }}千米</span>
+						<span class="addressTxt" v-if="item.distance">距离{{ item.distance.toFixed(2) }}千米</span>
 						<span class="addressTxt" v-else>查看地图</span>
 						<span class="iconfont icon-youjian" />
 					</div>
@@ -136,7 +136,7 @@
 						latitude: Number(e.latitude),
 						longitude: Number(e.longitude),
 						name: e.name,
-						address: `${e.address}-${e.detailedAddress}`,
+						address: `${e.areaName}-${e.detailAddress}`,
 						success: function() {
 							console.log('success');
 						}

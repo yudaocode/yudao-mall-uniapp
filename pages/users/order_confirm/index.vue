@@ -159,6 +159,7 @@
 <script>
   import * as CouponApi from '@/api/promotion/coupon.js';
   import * as OrderApi from '@/api/trade/order.js';
+  import * as ConfigApi from '@/api/trade/config.js';
   import { openPaySubscribe } from '@/utils/SubscribeMessage.js';
   import * as DeliveryApi from '@/api/trade/delivery.js';
   import couponListWindow from '@/components/couponListWindow';
@@ -168,6 +169,7 @@
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
   import * as Util from '@/utils/util.js';
+  import {getTradeConfig} from "../../../api/trade/config";
   export default {
 		components: {
 			couponListWindow,
@@ -253,8 +255,8 @@
       // 处理 address 地址
       this.addressId = options.addressId || 0;
       // 获得门店自提是否开启
-      DeliveryApi.getDeliveryConfig().then(res => {
-        this.store_self_mention = res.data.pickUpEnable && this.productType === 'normal';
+      ConfigApi.getTradeConfig().then(res => {
+        this.store_self_mention = res.data.deliveryPickUpEnabled && this.productType === 'normal';
       })
 		},
 		/**
