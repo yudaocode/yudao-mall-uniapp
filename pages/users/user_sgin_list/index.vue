@@ -9,7 +9,14 @@
 		                  <view class='name line1'>第 {{item.day}} 天签到积分奖励</view>
 		                  <view>{{ formatDate(item.createTime) }}</view>
 		               </view>
-		               <view class='num font-color'>+{{ item.point }}</view>
+                  <view>
+                    <view class='num font-color' v-if="item.point > 0">
+                      <span class="num-title">积分</span> +{{ item.point }}
+                    </view>
+                    <view class='num font-color' v-if="item.experience > 0">
+                      <span class="num-title">经验</span> +{{ item.experience }}
+                    </view>
+                  </view>
 		            </view>
 		         </view>
 		      </view>
@@ -92,4 +99,9 @@
 </script>
 
 <style>
+.sign-record .list .item .num-title {
+  font-size: 10rpx;
+  margin-right: 8rpx;
+}
+
 </style>

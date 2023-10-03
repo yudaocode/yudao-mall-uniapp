@@ -11,7 +11,7 @@
 					<view class='item acea-row row-center-wrapper' v-for="(item,index) in coupon.list"
 						@click="getCouponUser(index, item.id)" :key='index'>
             <!-- 金额 -->
-						<view class='money acea-row row-column row-center-wrapper' :class='item.takeStatus?"moneyGray":""'>
+						<view class='money acea-row row-column row-center-wrapper' :class='item.canTake ? "" : "moneyGray"'>
 							<view>￥
                 <text v-if="item.discountType === 1" class='num'>{{ fen2yuan(item.discountPrice) }}</text>
                 <text v-else class='num'>{{ (item.discountPercent / 10.0).toFixed(1) }} 折</text>
@@ -33,8 +33,8 @@
 								<view v-else>
 									{{ formatDate(item.validStartTime) + " - " + formatDate(item.validEndTime) }}
 								</view>
-								<view class='bnt gray' v-if="item.takeStatus">{{item.use_title || '已领取'}}</view>
-								<view class='bnt bg-color' v-else>{{coupon.statusTile || '立即领取'}}</view>
+								<view class='bnt bg-color' v-if="item.canTake">{{coupon.statusTile || '立即领取'}}</view>
+								<view class='bnt gray' v-else>{{item.use_title || '已领取'}}</view>
 							</view>
 						</view>
 					</view>
@@ -80,7 +80,7 @@
 		methods: {
 			close: function() {
 				this.type = 1
-				this.$emit('ChangCouponsClone');
+				this.$emit('ChangCouponsClose');
 			},
       /**
        * 选择优惠劵
@@ -88,11 +88,11 @@
 			getCouponUser: function(index, id) {
         // 领取优惠劵时，如果已经领取，则直接跳过
 				let list = this.coupon.list;
-				if (list[index].takeStatus && this.openType === 0) {
-          return;
-        }
 				switch (this.openType) {
 					case 0: // 领取优惠券
+            if (!list[index].canTake) {
+              return;
+            }
             CouponApi.takeCoupon(id).then(res => {
               this.$util.Tips({
 								title: "领取成功"

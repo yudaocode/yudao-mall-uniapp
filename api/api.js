@@ -32,7 +32,7 @@ export function setFormId(formId) {
 }
 
 /**
- * 领取优惠卷
+ * 领取优惠券
  * @param int couponId
  *
 */

@@ -60,7 +60,14 @@
 							<view class='name line1'>第 {{item.day}} 天签到积分奖励</view>
 							<view class='data'>{{ formatDate(item.createTime) }}</view>
 						</view>
-						<view class='num font-color'>+{{ item.point }}</view>
+            <view>
+              <view class='num font-color' v-if="item.point > 0">
+                <span class="num-title">积分</span> +{{ item.point }}
+              </view>
+              <view class='num font-color' v-if="item.experience > 0">
+                <span class="num-title">经验</span> +{{ item.experience }}
+              </view>
+            </view>
 					</view>
 					<view class='loading' @click='goSignList' v-if="signRecordList.length >= 3">
             点击加载更多 <text class='iconfont icon-xiangyou' />
@@ -73,7 +80,8 @@
 				<view class='signTipLight loadingpic'></view>
 				<view class='signTipCon'>
 					<view class='state'>签到成功</view>
-					<view class='integral'>获得{{ point }}积分</view>
+					<view class='integral' v-if="signResult.point > 0">获得{{ signResult.point }}积分</view>
+					<view class='integral' v-if="signResult.experience > 0">获得{{ signResult.experience }}经验</view>
 					<view class='signTipBnt' @click='close'>好的</view>
 				</view>
 			</view>
@@ -98,7 +106,7 @@
         signRecordList: [], // 签到记录
 
         active: false, // 签到提示
-				point: 0, // 刚签到获得的奖励
+        signResult: 0, // 签到的结果
 			};
 		},
 		computed: mapGetters(['isLogin', 'userInfo']),
@@ -176,7 +184,7 @@
         }
         SignInApi.createSignInRecord().then(res => {
 					this.active = true;
-					this.point = res.data.point;
+					this.signResult = res.data;
           // 重新获得签到信息
           this.getSignInfo();
           this.getSignList();
@@ -419,6 +427,11 @@
 		color: #bbbbbb;
 		margin-top: 9rpx;
 	}
+
+  .sign .list3 .item .num-title {
+    font-size: 10rpx;
+    margin-right: 8rpx;
+  }
 
 	.sign .list3 .item .num {
 		font-size: 36rpx;

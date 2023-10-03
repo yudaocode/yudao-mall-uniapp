@@ -97,16 +97,16 @@
 							</navigator>
 						</view>
 						<view class="listBox acea-row">
-							<view class="list" :class='item.takeStatus ? "listHui" : "listActive" '
-                    v-for="(item, index) in couponList.slice(0,2)" :key="index">
-								<view class="tit line1" :class='item.takeStatus ? "pricehui" : "titActive" '>{{ item.name }}</view>
-								<view class="price" :class='item.takeStatus ? "pricehui" : "icon-color" '>
+							<view class="list" :class='item.canTake ? "listActive" : "listHui"'
+                    v-for="(item, index) in couponList" :key="index">
+								<view class="tit line1" :class='item.canTake ? "titActive" : "pricehui"'>{{ item.name }}</view>
+								<view class="price" :class='item.canTake ?  "icon-color" : "pricehui"'>
                   <text v-if="item.discountType === 1">{{ fen2yuan(item.discountPrice) }} 元</text>
                   <text v-else>{{ (item.discountPercent / 10.0).toFixed(1) }} 折</text>
                 </view>
-								<view class="ling" v-if="!item.takeStatus" :class='item.takeStatus ? "pricehui" : "icon-color" '
+								<view class="ling icon-color" v-if="item.canTake"
                       @click="getCoupon(item.id,index)">领取</view>
-								<view class="ling" v-else :class='item.takeStatus ? "pricehui fonthui" : "icon-color" '>已领取</view>
+								<view class="ling pricehui fonthui" v-else>已领取</view>
 								<view class="priceM">满{{ fen2yuan(item.usePrice) }}元可用</view>
 							</view>
 						</view>
@@ -184,6 +184,7 @@
   import * as DecorateApi from '@/api/promotion/decorate.js';
   import * as ProductUtil from '@/utils/product.js';
   import * as Util from '@/utils/util.js';
+
 	export default {
 		computed: mapGetters(['isLogin', 'uid']),
 		components: {
@@ -381,7 +382,7 @@
        * 获得优惠劵列表
        */
       getcouponList() {
-        CouponApi.getCouponTemplateList().then(res => {
+        CouponApi.getCouponTemplateList({ count: 2 }).then(res => {
           this.$set(this, 'couponList', res.data);
         }).catch(err => {
           return this.$util.Tips({
@@ -394,7 +395,8 @@
        */
       getCoupon: function(id, index) {
         CouponApi.takeCoupon(id).then(res => {
-          this.$set(this.couponList[index], 'takeStatus', true);
+          // 设置已领取，即不能再领取
+          this.$set(this.couponList[index], 'canTake', res.data !== true);
           this.$util.Tips({
             title: '领取成功'
           });

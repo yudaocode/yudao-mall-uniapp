@@ -226,7 +226,7 @@
     <!-- 优惠劵弹窗 -->
 		<couponListWindow
       :coupon='coupon'
-      @ChangCouponsClone="ChangCouponsClone"
+      @ChangCouponsClose="ChangCouponsClose"
       @ChangCoupons="ChangCoupons"
       @tabCouponType="tabCouponType"
     />
@@ -819,7 +819,7 @@
        * 获取优惠券
        */
       getCouponList(useType) {
-        CouponApi.getCouponTemplateList(this.id, useType).then(res => {
+        CouponApi.getCouponTemplateList({spuId: this.id, productScope: useType, count: 10}).then(res => {
           this.$set(this.coupon, 'list', res.data);
         })
       },
@@ -837,7 +837,7 @@
       /**
        * 关闭优惠劵弹窗
        */
-      ChangCouponsClone: function() {
+      ChangCouponsClose: function() {
         this.$set(this.coupon, 'coupon', false)
       },
       /**

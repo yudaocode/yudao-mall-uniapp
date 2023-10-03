@@ -9,7 +9,7 @@
 		<view style="height: 106rpx;"></view>
 		<view class='coupon-list' v-if="couponsList.length">
 			<view class='item acea-row row-center-wrapper' v-for="(item,index) in couponsList" :key="index">
-				<view class='money' :class='item.takeStatus ? "moneyGray" : "" '>
+				<view class='money' :class='item.canTake ? "" : "moneyGray"'>
           <view>￥
             <text v-if="item.discountType === 1" class='num'>{{ fen2yuan(item.discountPrice) }}</text>
             <text v-else class='num'>{{ (item.discountPercent / 10.0).toFixed(1) }} 折</text>
@@ -18,11 +18,11 @@
 				</view>
 				<view class='text'>
 					<view class='condition line2'>
-						<span class='line-title' :class='(item.takeStatus)?"gray":""'
+						<span class='line-title' :class='item.canTake ? "" : "gray"'
 							v-if='type === 1'>通用</span>
-						<span class='line-title' :class='(item.takeStatus)?"gray":""'
+						<span class='line-title' :class='item.canTake ? "" : "gray"'
 							v-else-if='type === 3'>品类</span>
-						<span class='line-title' :class='(item.takeStatus)?"gray":""' v-else>商品</span>
+						<span class='line-title' :class='item.canTake ? "" : "gray"' v-else>商品</span>
 						<span>{{item.name}}</span>
 					</view>
 					<view class='data acea-row row-between-wrapper'>
@@ -30,8 +30,8 @@
             <view v-else>
               {{ formatDate(item.validStartTime) + " - " + formatDate(item.validEndTime) }}
             </view>
-            <view class='bnt gray' v-if="item.takeStatus">已领取</view>
-						<view class='bnt bg-color' v-else @click='getCoupon(item.id, index)'>立即领取</view>
+						<view class='bnt bg-color' v-if="item.canTake" @click='getCoupon(item.id, index)'>立即领取</view>
+            <view class='bnt gray' v-else>已领取</view>
 					</view>
 				</view>
 			</view>
@@ -111,7 +111,8 @@
 			getCoupon: function(id, index) {
 				// 领取优惠券
         CouponApi.takeCoupon(id).then(res => {
-          this.couponsList[index].takeStatus = true;
+          // 设置已领取，即不能再领取
+          this.couponsList[index].canTake = res.data;
 					this.$set(this, 'couponsList', this.couponsList);
           this.$util.Tips({
 						title: '领取成功'
@@ -133,7 +134,7 @@
         CouponApi.getCouponTemplatePage({
 					pageNo: this.page,
           pageSize: this.limit,
-					useType: this.type
+          productScope: this.type
 				}).then(res => {
 					const list = res.data.list;
           const loadend = list.length < this.limit;

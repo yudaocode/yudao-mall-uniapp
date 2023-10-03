@@ -178,7 +178,7 @@ export function orderConfirm(cartId, isNew, addAgain,secKill,combination,bargain
 }
 
 /**
- * 获取当前金额能使用的优惠卷
+ * 获取当前金额能使用的优惠券
  * @param string price
  * 
  */
