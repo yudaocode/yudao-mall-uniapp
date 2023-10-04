@@ -207,14 +207,6 @@ export function postOrderComputed(data) {
 }
 
 /**
- * 将字符串 转base64
- * @param object data
- */
-export function qrcodeApi(data) {
-	return request.post('qrcode/str2base64', data, {}, 1);
-}
-
-/**
  * 微信订单支付
  * @param object data
  */
