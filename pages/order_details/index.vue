@@ -66,20 +66,18 @@
           </view>
         </view>
 
-        <!-- TODO 芋艿：核销的情况 -->
         <view v-if="orderInfo.deliveryType === 2 && orderInfo.payStatus" class="writeOff borRadius14">
 					<view class="title">核销信息</view>
 					<view class="grayBg">
 						<view class="pictrue">
-							<!-- <div class="qrcode" ref="qrcode"></div> -->
-							<!-- <canvas canvas-id="qrcode" :style="{width: `${qrcodeSize}100%`, height: `${qrcodeSize}100%`}"/> -->
-							<image :src="codeImg"></image>
+              <div class="qrcode" ref="qrcode"></div>
+              <canvas canvas-id="qrcode" :style="{width: `${qrcodeSize}px`, height: `${qrcodeSize}px`}"/>
 						</view>
 					</view>
 					<view class="gear">
 						<image src="../../static/images/writeOff.jpg"></image>
 					</view>
-					<view class="num">{{ orderInfo.verifyCode }}</view>
+					<view class="num">{{ orderInfo.pickUpVerifyCode }}</view>
 					<view class="rules" v-if='system_store.id'>
 						<view class="item">
 							<view class="rulesTitle acea-row row-middle">
@@ -259,7 +257,6 @@
 	</view>
 </template>
 <script>
-  import { qrcodeApi } from '@/api/order.js';
   import * as OrderApi from '@/api/trade/order.js';
   import * as DeliveryApi from '@/api/trade/delivery.js';
   import { openOrderRefundSubscribe } from '@/utils/SubscribeMessage.js';
@@ -271,6 +268,8 @@
   import { mapGetters } from "vuex";
   import dayjs from '@/plugin/dayjs/dayjs.min.js';
   import * as Util from '@/utils/util.js';
+  import uQRCode from '@/js_sdk/Sansnn-uQRCode/uqrcode.js';
+
   export default {
     components: {
       payment,
@@ -291,10 +290,7 @@
 
         // ========== 门店自提（核销） ==========
         system_store: {}, // 门店信息
-
-        // TODO 芋艿：未整理
-        codeImg: '',
-        qrcodeSize: 100
+        qrcodeSize: 145
       };
     },
     computed: mapGetters(['isLogin', 'chatUrl', 'userInfo']),
@@ -363,7 +359,7 @@
             });
           }
           if (this.orderInfo.deliveryType === 2 && this.orderInfo.payStatus) {
-            this.markCode(res.data.verifyCode);
+            this.markCode(res.data.pickUpVerifyCode);
           }
         }).catch(err => {
           uni.hideLoading();
@@ -458,19 +454,21 @@
         });
       },
 
-      // TODO 芋艿：未整理
-
       /**
-       * 生成二维码
+       * 生成核销二维码
        */
       markCode(text) {
-        qrcodeApi({
-          height: '145',
+        uQRCode.make({
+          canvasId: 'qrcode',
           text: text,
-          width: '145'
-        }).then(res => {
-          this.codeImg = res.data.code
-        });
+          size: this.qrcodeSize,
+          margin: 10,
+          fail: res => {
+            this.$util.Tips({
+              title: '核销二维码生成失败！'
+            });
+          }
+        })
       },
       /**
        * 去拼团详情
