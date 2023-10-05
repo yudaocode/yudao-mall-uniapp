@@ -52,10 +52,12 @@ function baseRequest(url, method, data, {
       ...header
     }
     header['tenant-id'] = 1
-    header['Authorization'] = 'Bearer test247'
   }
 
-	if (store.state.app.token) header[TOKENNAME] = store.state.app.token;
+	if (store.state.app.token) {
+    // header[TOKENNAME] = store.state.app.token;
+    header['Authorization'] = 'Bearer ' + store.state.app.token;
+  }
 	return new Promise((reslove, reject) => {
 		uni.request({
 			// url: url.indexOf('app-api') < 0 ? Url + '/api/front/' + url
