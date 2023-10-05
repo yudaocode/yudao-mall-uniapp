@@ -113,6 +113,10 @@
 						<view>商品总价：</view>
 						<view class='money'>￥{{ fen2yuan(orderInfoVo.price.totalPrice || 0 ) }}</view>
 					</view>
+          <view class='item acea-row row-between-wrapper'>
+            <view>订单优惠：</view>
+            <view class='money'>-￥{{ fen2yuan(orderInfoVo.price.discountPrice) }}</view>
+          </view>
 					<view class='item acea-row row-between-wrapper' v-if="orderInfoVo.price.couponPrice > 0">
 						<view>优惠券抵扣：</view>
 						<view class='money'>-￥{{ fen2yuan(orderInfoVo.price.couponPrice) }}</view>
@@ -169,7 +173,6 @@
 	import { toLogin } from '@/libs/login.js';
 	import { mapGetters } from "vuex";
   import * as Util from '@/utils/util.js';
-  import {getTradeConfig} from "../../../api/trade/config";
   export default {
 		components: {
 			couponListWindow,
@@ -187,9 +190,9 @@
         },
         mark: '', // 备注信息
 
-				bargain: false, // 是否是砍价
+				bargainRecordId: false, // 是否是砍价
 				combination: false, // 是否是拼团
-				secKill: false, // 是否是秒杀
+				seckillActivityId: false, // 是否是秒杀
 
         // ========== 积分 ==========
         pointStatus: false, //是否使用积分
@@ -250,6 +253,8 @@
           count: options.count | 1
         }]
       }
+      this.seckillActivityId = options.seckillActivityId;
+      this.bargainRecordId = options.bargainRecordId;
       this.getloadPreOrder();
 
       // 处理 address 地址
@@ -363,6 +368,8 @@
           receiverMobile: this.deliveryType === 2 ? this.contactsTel : undefined,
           couponId: this.couponId > 0 ? this.couponId : undefined,
           pointStatus: this.pointStatus,
+          seckillActivityId: this.seckillActivityId,
+          bargainRecordId: this.bargainRecordId,
           // TODO 芋艿：秒杀等等
         }
       },

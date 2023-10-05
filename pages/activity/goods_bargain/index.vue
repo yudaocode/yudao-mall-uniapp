@@ -46,7 +46,7 @@
 							<view v-if="item.stock === 0">
 								<view style="font-size: 22rpx;" @tap="openSubscribe('/pages/activity/goods_bargain_details/index?id='+ item.id +'&startBargainUid='+ uid)">已售罄</view>
 							</view>
-							<view class='money font-color'>最低: ￥<text class='price'>{{ fen2yuan(item.bargainPrice) }}</text></view>
+							<view class='money font-color'>最低: ￥<text class='price'>{{ fen2yuan(item.bargainMinPrice) }}</text></view>
 						</view>
 						<view v-if="item.stock > 0" class='cutBnt bg-color'>参与砍价</view>
 						<view v-if="item.stock === 0" class='cutBnt bg-color-hui'>已售罄</view>
@@ -130,8 +130,8 @@
        */
 			getBargainHeader: function() {
         BargainApi.getBargainRecordSummary().then(res => {
-          this.bargainTotal = res.data.userCount;
-          this.bargainSuccessList = res.data.successRecords;
+          this.bargainTotal = res.data.successUserCount;
+          this.bargainSuccessList = res.data.successList;
         }).catch(err => {
           return this.$util.Tips({
             title: err

@@ -16,7 +16,9 @@
 							</view>
 							<view class="text lines1">
 								<view class="name line1">{{ item.name }}</view>
-								<view class="money">¥<text class="num">{{ fen2yuan(item.bargainPrice) }}</text></view>
+								<view class="money">
+                  ¥<text class="num">{{ fen2yuan(item.bargainMinPrice) }}</text>
+                </view>
 								<view class="btn">参与砍价</view>
 							</view>
 						</view>

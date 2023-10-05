@@ -373,17 +373,19 @@
         SeckillApi.getSeckillActivity(this.id).then(res => {
           this.activity = res.data;
           // 计算活动状态
-          const now = new Date().getTime();
-          if (this.activity.status !== 0) {
-            if (this.activity.startTime > now) {
-              this.status = 1;
-            } else if (now <= this.activity.endTime) {
-              this.status = 2;
+          if (this.activity) {
+            const now = new Date().getTime();
+            if (this.activity.status === 1) {
+              this.status = 0;
             } else {
-              this.status = 3;
+              if (this.activity.startTime > now) {
+                this.status = 1;
+              } else if (now <= this.activity.endTime) {
+                this.status = 2;
+              } else {
+                this.status = 3;
+              }
             }
-          } else {
-            this.status = 0;
           }
 
           // 获得商品详情

@@ -11,11 +11,11 @@
 							<div class="line1" style="width: 100%;">{{ item.activityName }}</div>
 							<count-down :justify-left="'justify-content:left'" :bgColor="bgColor" :is-day="true" :tip-text="'倒计时 '" :day-text="'天'"
 							 :hour-text="' 时 '" :minute-text="' 分 '"
-							 :second-text="' 秒 '" :datatime="item.expireTime / 1000" v-if="item.status === 1"></count-down>
+							 :second-text="' 秒 '" :datatime="item.endTime / 1000" v-if="item.status === 1"></count-down>
 							<div class="successTxt font-color-red" v-else-if="item.status === 2">砍价成功</div>
 							<div class="endTxt" v-else>活动已结束</div>
 							<div class="money">
-								已砍至<span class="symbol font-color-red">￥</span><span class="num font-color-red">{{ fen2yuan(item.payPrice) }}</span>
+								已砍至<span class="symbol font-color-red">￥</span><span class="num font-color-red">{{ fen2yuan(item.bargainPrice) }}</span>
 							</div>
 						</div>
 					</div>
