@@ -16,8 +16,8 @@
 						</view>
 						<view class='text acea-row row-column-around'>
 							<view class='line1'>{{ bargainInfo.name }}</view>
-							<view class="surplus">最低价：￥{{ fen2yuan(bargainInfo.bargainPrice) }}</view>
-							<view class="surplus">剩余：{{ bargainInfo.stock }} {{bargainInfo.unitName}}</view>
+							<view class="surplus">最低价：￥{{ fen2yuan(bargainInfo.bargainMinPrice) }}</view>
+              <view class="surplus">剩余：{{ bargainInfo.stock }} {{bargainInfo.unitName}}</view>
 							<view class='money font-color-red'>
 								当前: ￥ <text class='num'>{{ fen2yuan(buyPrice) }}</text>
 							</view>
@@ -40,22 +40,22 @@
           <!-- 砍价中 -->
 					<block v-if="action === 2">
 						<view class='money acea-row row-center'
-							:class="new Date().getTime() >= bargainUserInfo.expireTime ? 'font_hui': ''">
+							:class="new Date().getTime() >= bargainUserInfo.endTime ? 'font_hui': ''">
 							<view style="margin-right: 40rpx;">已砍<text class="font-color-red"
-									:class="new Date().getTime() >= bargainUserInfo.expireTime ? 'font_hui': ''">￥{{ fen2yuan(bargainUserInfo.price - bargainUserInfo.payPrice) }}</text>
+									:class="new Date().getTime() >= bargainUserInfo.endTime ? 'font_hui': ''">￥{{ fen2yuan(bargainUserInfo.bargainFirstPrice - bargainUserInfo.bargainPrice) }}</text>
 							</view>
 							<view>还剩<text class="font-color-red"
-									:class="new Date().getTime() >= bargainUserInfo.expireTime ? 'font_hui': ''">￥{{ fen2yuan(bargainUserInfo.remainPrice) }}</text>
+									:class="new Date().getTime() >= bargainUserInfo.endTime ? 'font_hui': ''">￥{{ fen2yuan(bargainUserInfo.remainPrice) }}</text>
 							</view>
 						</view>
 						<view class="cu-progress acea-row row-middle round margin-top"
-							:class="new Date().getTime() >= bargainUserInfo.expireTime ? 'bg_qian': ''">
+							:class="new Date().getTime() >= bargainUserInfo.endTime ? 'bg_qian': ''">
 							<view class='acea-row row-middle bg-red'
-								:class="new Date().getTime() >= bargainUserInfo.expireTime ? 'bg-color-hui': ''"
+								:class="new Date().getTime() >= bargainUserInfo.endTime ? 'bg-color-hui': ''"
 								:style="'width:'+ bargainUserInfo.pricePercent +'%;'" />
 						</view>
 						<view class='tip'>
-							一 已有{{ bargainInfo.successCount }}位好友砍价成功 一
+							一 已有{{ bargainInfo.successUserCount }}位好友砍价成功 一
 						</view>
 					</block>
 
@@ -187,7 +187,7 @@
 				</view>
 				<view class='goodsDetails borRadius14'>
 					<view class='conter borRadius14'>
-						<jyf-parser v-if="bargainInfo.description" :html="bargainInfo.description" ref="article" :tag-style="tagStyle" />
+            <jyf-parser v-if="bargainInfo.description" :html="bargainInfo.description" ref="article" :tag-style="tagStyle" />
 						<view v-else class="contentNo">
 							<text class="iconfont icon-xiaolian mr8" /> 暂无商品详情
 						</view>
@@ -308,7 +308,7 @@
 
         // ========== 砍价记录 ==========
         storeBargainId: 0, // 砍价记录 id
-        startBargainUid: 0, // 开启砍价用户 uid
+        startBargainUid: 0, // 开启砍价用户 uid TODO 芋艿：目前很多逻辑基于 startBargainUid 是不太合理的，应该通过后端返回的 userId 处理；等后续优化代码，在考虑
         bargainUserInfo: {}, // 开启砍价用户信息
         action: 0, // 拼团记录的参与动作
         helpAction: 0, // 帮砍动作
@@ -419,7 +419,7 @@
         BargainApi.getBargainActivityDetail(this.id).then(res => {
           const bargainInfo = res.data;
           this.bargainInfo = bargainInfo;
-          this.buyPrice = this.bargainInfo.price;
+          this.buyPrice = this.bargainInfo.bargainFirstPrice;
           this.pages = '/pages/activity/goods_bargain_details/index?id=' + this.id +
             '&startBargainUid=' + this.uid + '&scene=' + this.uid + '&storeBargainId=' + this.storeBargainId;
           uni.setNavigationBarTitle({
@@ -479,10 +479,11 @@
           this.action = this.calculateAction(bargainUserInfo);
           this.helpAction = bargainUserInfo.helpAction;
           this.storeBargainId = bargainUserInfo.id || this.storeBargainId;
-          this.buyPrice = this.bargainUserInfo.payPrice || this.buyPrice;
-          if (bargainUserInfo.payPrice >= 0 && bargainUserInfo.bargainPrice >= 0) {
-            bargainUserInfo.remainPrice = bargainUserInfo.payPrice - bargainUserInfo.bargainPrice; // 剩余可砍的金额
-            bargainUserInfo.pricePercent = 100 * (bargainUserInfo.price - bargainUserInfo.payPrice) / (bargainUserInfo.price - bargainUserInfo.bargainPrice)
+          this.buyPrice = this.bargainUserInfo.bargainPrice || this.buyPrice;
+          if (bargainUserInfo.bargainPrice >= 0 && this.bargainInfo.bargainMinPrice >= 0) {
+            bargainUserInfo.remainPrice = bargainUserInfo.bargainPrice - this.bargainInfo.bargainMinPrice; // 剩余可砍的金额
+            bargainUserInfo.pricePercent = 100 * (bargainUserInfo.bargainFirstPrice - bargainUserInfo.bargainPrice)
+              / (bargainUserInfo.bargainFirstPrice - this.bargainInfo.bargainMinPrice)
           }
 
           // 获得助力列表
@@ -547,8 +548,10 @@
         var that = this;
         BargainApi.createBargainRecord(this.id).then(res => {
           this.storeBargainId = res.data.storeBargainUserId;
-          // 自己给自己助力
-          this.setBargainHelp();
+          // 自己给自己助力 TODO 芋艿：目前自己不能给自己助力
+          // this.setBargainHelp();
+          // 获得拼团记录的最新信息
+          this.gobargainUserInfo();
         }, error => {
           that.$util.Tips({
             title: error
