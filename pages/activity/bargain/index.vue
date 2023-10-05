@@ -25,10 +25,10 @@
 						<div class="end" v-else>活动已结束</div>
 						<div class="acea-row row-middle row-right">
 							<div class="bnt bg-color-red" v-if="item.status === 2 && !item.orderId" @click="goConfirm(item)">
-                去付款
+                去下单
               </div>
-							<div class="bnt bg-color-red" v-if="item.status === 2 && item.orderId && !item.payStatus" @click="goPay(item.surplusPrice,item.orderNo)">
-								立即付款
+							<div class="bnt bg-color-red" v-if="item.status === 2 && item.orderId && !item.payStatus" @click="goPay(item.payOrderId)">
+								去付款
 							</div>
 							<div class="bnt bg-color-red" v-if="item.status === 1" @click="goDetail(item.id)">
 								继续砍价
@@ -46,7 +46,6 @@
 			<emptyPage title="暂无砍价记录～"></emptyPage>
 		</block>
 		<home></home>
-		<payment :payMode='payMode' :pay_close="pay_close" @onChangeFun='onChangeFun' :order_id="pay_order_id" :totalPrice='totalPrice'></payment>
 	</view>
 </template>
 <script>
@@ -56,9 +55,9 @@
   import * as BargainApi from '@/api/promotion/bargain.js';
   import Loading from "@/components/Loading";
 	import home from '@/components/home';
-	import payment from '@/components/payment';
 	import { mapGetters } from "vuex";
   import * as Util from '@/utils/util.js';
+  import { toLogin } from '@/libs/login.js';
   export default {
 		name: "BargainRecord",
 		components: {
@@ -66,7 +65,6 @@
 			Loading,
 			emptyPage,
 			home,
-			payment
 		},
 		props: {},
 		computed: mapGetters(['isLogin', 'userInfo', 'uid']),
@@ -100,9 +98,6 @@
 						number: 0
 					}
 				],
-				pay_close: false,
-				pay_order_id: '',
-				totalPrice: '0'
 			};
 		},
 		onLoad: function() {
@@ -188,42 +183,12 @@
 			/**
 			 * 打开支付组件
 			 */
-			goPay(pay_price, order_id) {
-				this.$set(this, 'pay_close', true);
-				this.$set(this, 'pay_order_id', order_id);
-				this.$set(this, 'totalPrice', pay_price);
-			},
-			/**
-			 * 事件回调
-			 */
-			onChangeFun: function(e) {
-				let opt = e;
-				let action = opt.action || null;
-				let value = opt.value != undefined ? opt.value : null;
-				(action && this[action]) && this[action](value);
-			},
-			/**
-			 * 关闭支付组件
-			 */
-			payClose: function() {
-				this.pay_close = false;
-			},
-			/**
-			 * 支付成功回调
-			 */
-			pay_complete: function() {
-				this.status = false;
-				this.page = 1;
-				this.$set(this, 'bargain', []);
-				this.$set(this, 'pay_close', false);
-				this.getBargainUserList();
-			},
-			/**
-			 * 支付失败回调
-			 */
-			pay_fail: function() {
-				this.pay_close = false;
-			},
+			goPay: function (payOrderId) {
+        const returnUrl = encodeURIComponent('/pages/activity/bargain/index');
+        uni.navigateTo({
+          url: `/pages/goods/cashier/index?order_id=${payOrderId}&returnUrl=${returnUrl}`
+        });
+      },
 
       fen2yuan(price) {
         return Util.fen2yuan(price)
