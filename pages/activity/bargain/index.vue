@@ -27,10 +27,10 @@
 							<div class="bnt bg-color-red" v-if="item.status === 2 && !item.orderId" @click="goConfirm(item)">
                 去下单
               </div>
-							<div class="bnt bg-color-red" v-if="item.status === 2 && item.orderId && !item.payStatus" @click="goPay(item.payOrderId)">
+							<div class="bnt bg-color-red" v-if="item.status === 2 && item.orderId && !item.payStatus" @click="goPay(item.orderId, item.payOrderId)">
 								去付款
 							</div>
-							<div class="bnt bg-color-red" v-if="item.status === 1" @click="goDetail(item.id)">
+							<div class="bnt bg-color-red" v-if="item.status === 1" @click="goDetail(item.id, item.activityId)">
 								继续砍价
 							</div>
 							<div class="bnt bg-color-red" v-if="item.status === 3" @click="goList">
@@ -146,9 +146,9 @@
       /**
        * 前往砍价记录的详情
        */
-      goDetail: function(id) {
+      goDetail: function(id, activityId) {
         uni.navigateTo({
-          url: `/pages/activity/goods_bargain_details/index?id=${id}&startBargainUid=${this.uid}`
+          url: `/pages/activity/goods_bargain_details/index?id=${activityId}&startBargainUid=${this.uid}&storeBargainId=${id}`
         })
       },
       /**
@@ -183,8 +183,8 @@
 			/**
 			 * 打开支付组件
 			 */
-			goPay: function (payOrderId) {
-        const returnUrl = encodeURIComponent('/pages/activity/bargain/index');
+			goPay: function (orderId, payOrderId) {
+        const returnUrl = encodeURIComponent('/pages/order_pay_status/index?order_id=' + orderId);
         uni.navigateTo({
           url: `/pages/goods/cashier/index?order_id=${payOrderId}&returnUrl=${returnUrl}`
         });

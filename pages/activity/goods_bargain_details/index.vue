@@ -465,6 +465,12 @@
         uni.navigateTo({
           url: `/pages/activity/bargain/index`
         })
+
+        // 下单界面
+        const returnUrl = encodeURIComponent('/pages/order_pay_status/index?order_id=' + this.bargainUserInfo.orderId);
+        uni.navigateTo({
+          url: `/pages/goods/cashier/index?order_id=${this.bargainUserInfo.payOrderId}&returnUrl=${returnUrl}`
+        });
       },
 
       // ========== 砍价记录 ==========
@@ -473,7 +479,7 @@
        * 获得拼团记录
        */
       gobargainUserInfo: function() {
-        BargainApi.getBargainRecordDetail(this.bargainId, this.id).then(res => {
+        BargainApi.getBargainRecordDetail(this.storeBargainId, this.id).then(res => {
           const bargainUserInfo = res.data;
           this.bargainUserInfo = bargainUserInfo;
           this.action = this.calculateAction(bargainUserInfo);

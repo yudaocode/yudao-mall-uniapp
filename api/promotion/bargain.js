@@ -44,8 +44,8 @@ export function getBargainRecordPage(data) {
 // 获得砍价活动详情
 export function getBargainRecordDetail(id, activityId) {
   return request.get("app-api/promotion/bargain-record/get-detail", {
-    id,
-    activityId
+    id: id > 0 ? id : undefined,
+    activityId: activityId > 0 ? activityId : undefined
   }, {
     noAuth: true // TODO 芋艿：后续要做调整
   });
