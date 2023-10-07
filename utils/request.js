@@ -37,6 +37,7 @@ function baseRequest(url, method, data, {
 	if (!noAuth) {
 		//登录过期自动登录
 		if (!store.state.app.token && !checkLogin()) {
+      // debugger
 			toLogin();
 			return Promise.reject({
 				msg: '未登录'

@@ -56,5 +56,7 @@ export function getBrokerageRecordPage(data) {
 export function getProductBrokeragePrice(spuId) {
   return request.get('app-api/trade/brokerage-record/get-product-brokerage-price', {
     spuId
+  }, {
+    noAuth: true // TODO 芋艿：后续要做调整
   });
 }
