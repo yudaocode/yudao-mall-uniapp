@@ -113,7 +113,7 @@
 						<view>商品总价：</view>
 						<view class='money'>￥{{ fen2yuan(orderInfoVo.price.totalPrice || 0 ) }}</view>
 					</view>
-          <view class='item acea-row row-between-wrapper'>
+          <view class='item acea-row row-between-wrapper' v-if="orderInfoVo.price.discountPrice > 0">
             <view>订单优惠：</view>
             <view class='money'>-￥{{ fen2yuan(orderInfoVo.price.discountPrice) }}</view>
           </view>
@@ -190,9 +190,9 @@
         },
         mark: '', // 备注信息
 
-				bargainRecordId: false, // 是否是砍价
-				combination: false, // 是否是拼团
-				seckillActivityId: false, // 是否是秒杀
+				bargainRecordId: undefined, // 是否是砍价
+				seckillActivityId: undefined, // 是否是秒杀
+        combinationActivityId: undefined, // 是否是拼团
 
         // ========== 积分 ==========
         pointStatus: false, //是否使用积分
@@ -255,6 +255,7 @@
       }
       this.seckillActivityId = options.seckillActivityId;
       this.bargainRecordId = options.bargainRecordId;
+      this.combinationActivityId = options.combinationActivityId;
       this.getloadPreOrder();
 
       // 处理 address 地址
@@ -370,6 +371,7 @@
           pointStatus: this.pointStatus,
           seckillActivityId: this.seckillActivityId,
           bargainRecordId: this.bargainRecordId,
+          combinationActivityId: this.combinationActivityId,
           // TODO 芋艿：秒杀等等
         }
       },

@@ -100,7 +100,7 @@
 				<div class="item" v-for="(item, index) in storeCombinationHost" :key="index" @click="goDetail(item.id)">
 					<div class="pictrue">
 						<img :src="item.picUrl" />
-						<div class="team" v-text="(item.userSize - item.userCount) + '人团'"></div>
+						<div class="team" v-text="(item.userSize) + '人团'"></div>
 					</div>
 					<div class="name line1" v-text="item.spuName"></div>
 					<div class="money font-color-red" v-text="'￥' + fen2yuan(item.combinationPrice)"></div>

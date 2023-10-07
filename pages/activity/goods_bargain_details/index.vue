@@ -461,7 +461,6 @@
        * 去支付
        */
       goConfirm() {
-        // TODO 芋艿：目前跳转不合理,应该跳转到支付界面
         uni.navigateTo({
           url: `/pages/activity/bargain/index`
         })
