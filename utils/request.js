@@ -9,6 +9,7 @@ import {
 	checkLogin
 } from '../libs/login';
 import store from '../store';
+import {getTerminal} from "./util";
 
 // TODO 芋艿：临时解决 uniapp 在小程序，undefined 会被 tostring 的问题
 function deleteUndefinedProperties(obj) {
@@ -54,6 +55,9 @@ function baseRequest(url, method, data, {
     }
     header['tenant-id'] = 1
   }
+
+  	// 终端
+	header['terminal'] = getTerminal()
 
 	if (store.state.app.token) {
     // header[TOKENNAME] = store.state.app.token;

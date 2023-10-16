@@ -1,4 +1,6 @@
 import { HTTP_REQUEST_URL } from '@/config/app.js';
+import {TerminalEnum} from "./dict";
+import wechat from "../libs/wechat";
 
 export default {
 
@@ -813,4 +815,24 @@ export function handleTree(data, id, parentId, children, rootId) {
     return father[parentId] === rootId;
   });
   return treeData !== '' ? treeData : data;
+}
+
+/**
+ * 获取终端类型
+ * https://uniapp.dcloud.net.cn/tutorial/platform.html#preprocessor
+ *
+ * @return {number | null} 终端类型
+ */
+export function getTerminal() {
+	let terminal = null;
+	// #ifdef MP-WEIXIN
+	terminal = TerminalEnum.WECHAT_MINI_PROGRAM.terminal
+	// #endif
+	// #ifdef H5 || WEB
+	terminal = wechat.isWeixin() ? TerminalEnum.WECHAT_WAP.terminal : TerminalEnum.H5.terminal
+	// #endif
+	// #ifdef APP-PLUS || APP
+	terminal = TerminalEnum.APP.terminal
+	// #endif
+	return terminal;
 }
