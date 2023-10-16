@@ -49,6 +49,7 @@ const app = defineStore({
       },
     },
     shareInfo: {}, // 全局分享信息
+    has_wechat_trade_managed: 0 // 小程序发货信息管理  0 没有 || 1 有
   }),
   actions: {
     // 获取Shopro应用配置和模板
@@ -64,6 +65,7 @@ const app = defineStore({
         this.info = res.data.app;
         this.platform = res.data.platform;
         this.template = res.data.template;
+        this.has_wechat_trade_managed = res.data.has_wechat_trade_managed;
         if (!res.data.template) {
           $router.error('TemplateError');
         }

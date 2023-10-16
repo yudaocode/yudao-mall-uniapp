@@ -317,6 +317,8 @@
 
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   const headerBg = sheep.$url.css('/static/img/shop/order/order_bg.png');
+  const tradeManaged = computed(() => sheep.$store('app').has_wechat_trade_managed);
+
   const state = reactive({
     orderInfo: {},
     merchantTradeNo: '', // 商户订单号
@@ -399,14 +401,11 @@
     // todo:
     // 1.怎么检测是否开启了发货组件功能？如果没有开启的话就不能在这里return出去
     // 2.如果开启了走mpConfirm方法,需要在App.vue的show方法中拿到确认收货结果
-    let isOpenBusinessView = true;
-    if (
-      sheep.$platform.name === 'WechatMiniProgram' &&
-      !isEmpty(state.orderInfo.wechat_extra_data) &&
-      isOpenBusinessView &&
-      !ignore
-    ) {
-      mpConfirm(orderId);
+    if (sheep.$platform.name === 'WechatMiniProgram' && !ignore) {
+      if (!isEmpty(state.orderInfo.wechat_extra_data) && tradeManaged.value === 1) {
+        mpConfirm(orderId);
+        return;
+      }
       return;
     }
 
@@ -427,8 +426,8 @@
     wx.openBusinessView({
       businessType: 'weappOrderConfirm',
       extraData: {
-        merchant_id: '1481069012',
-        merchant_trade_no: state.orderInfo.wechat_extra_data.merchant_trade_no,
+        // merchant_id: '1481069012',
+        // merchant_trade_no: state.orderInfo.wechat_extra_data.merchant_trade_no,
         transaction_id: state.orderInfo.wechat_extra_data.transaction_id,
       },
       success(response) {
