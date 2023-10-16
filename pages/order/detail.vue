@@ -313,11 +313,14 @@
   import sheep from '@/sheep';
   import { onLoad } from '@dcloudio/uni-app';
   import { computed, reactive } from 'vue';
+  import { isEmpty } from 'lodash';
 
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   const headerBg = sheep.$url.css('/static/img/shop/order/order_bg.png');
   const state = reactive({
     orderInfo: {},
+    merchantTradeNo: '', // 商户订单号
+    comeinType: '', // 进入订单详情的来源类型
   });
 
   const addressText = computed(() => {
@@ -390,13 +393,61 @@
     });
   }
 
-  // 确认收货
-  async function onConfirm(orderId) {
+  //确认收货
+  async function onConfirm(orderId, ignore = false) {
+    // 需开启确认收货组件
+    // todo:
+    // 1.怎么检测是否开启了发货组件功能？如果没有开启的话就不能在这里return出去
+    // 2.如果开启了走mpConfirm方法,需要在App.vue的show方法中拿到确认收货结果
+    let isOpenBusinessView = true;
+    if (
+      sheep.$platform.name === 'WechatMiniProgram' &&
+      !isEmpty(state.orderInfo.wechat_extra_data) &&
+      isOpenBusinessView &&
+      !ignore
+    ) {
+      mpConfirm(orderId);
+      return;
+    }
+
+    // 正常的确认收货流程
     const { error, data } = await sheep.$api.order.confirm(orderId);
     if (error === 0) {
       getOrderDetail(data.order_sn);
     }
   }
+
+  // #ifdef MP-WEIXIN
+  // 小程序确认收货组件
+  function mpConfirm(orderId) {
+    if (!wx.openBusinessView) {
+      sheep.$helper.toast(`请升级微信版本`);
+      return;
+    }
+    wx.openBusinessView({
+      businessType: 'weappOrderConfirm',
+      extraData: {
+        merchant_id: '1481069012',
+        merchant_trade_no: state.orderInfo.wechat_extra_data.merchant_trade_no,
+        transaction_id: state.orderInfo.wechat_extra_data.transaction_id,
+      },
+      success(response) {
+        console.log('success:', response);
+        if (response.errMsg === 'openBusinessView:ok') {
+          if (response.extraData.status === 'success') {
+            onConfirm(orderId, true);
+          }
+        }
+      },
+      fail(error) {
+        console.log('error:', error);
+      },
+      complete(result) {
+        console.log('result:', result);
+      },
+    });
+  }
+  // #endif
 
   // 查看发票
   function onOrderInvoice(invoiceId) {
@@ -423,21 +474,32 @@
     });
   }
   async function getOrderDetail(id) {
-    const { data, error } = await sheep.$api.order.detail(id);
-    if (error === 0) {
-      state.orderInfo = data;
+    let res = {};
+    if (state.comeinType === 'wechat') {
+      res = await sheep.$api.order.detail(id, {
+        merchant_trade_no: state.merchantTradeNo,
+      });
+    } else {
+      res = await sheep.$api.order.detail(id);
+    }
+    if (res.error === 0) {
+      state.orderInfo = res.data;
     } else {
       sheep.$router.back();
     }
   }
 
   onLoad(async (options) => {
-    let id = '';
+    let id = 0;
     if (options.orderSN) {
       id = options.orderSN;
     }
     if (options.id) {
       id = options.id;
+    }
+    state.comeinType = options.comein_type;
+    if (state.comeinType === 'wechat') {
+      state.merchantTradeNo = options.merchant_trade_no;
     }
     getOrderDetail(id);
   });

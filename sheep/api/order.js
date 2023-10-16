@@ -2,10 +2,11 @@ import request from '@/sheep/request';
 
 export default {
   // 订单详情
-  detail: (id) =>
+  detail: (id,params) =>
     request({
       url: 'order/order/' + id,
       method: 'GET',
+      params,
     }),
   // 发票详情
   invoice: (id) =>

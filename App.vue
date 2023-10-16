@@ -14,7 +14,7 @@
     console.log('AppOnError:', err);
   });
 
-  onShow(() => {
+  onShow((options) => {
     // #ifdef APP-PLUS
     // 获取urlSchemes参数
     const args = plus.runtime.arguments;
@@ -26,6 +26,13 @@
       success: (res) => { },
     });
     // #endif
+
+    // #ifdef MP-WEIXIN
+    // 确认收货回调结果
+    console.log(options,'options');
+    // #endif
+
+
   });
 </script>
 
