@@ -50,9 +50,6 @@
 			<div class="tips">
 				<div v-if="current === 0" @click="current = 1">快速登录</div>
 				<div v-if="current === 1" @click="current = 0">账号登录</div>
-        <!-- #ifdef MP-WEIXIN -->
-        <button open-type="getPhoneNumber" type="primary" @getphonenumber="getPhoneNumber">一键登录</button>
-        <!-- #endif -->
       </div>
 		</div>
 		<div class="bottom"></div>
@@ -353,37 +350,6 @@
           });
         });
 			},
-      /**
-       * 微信一键登录
-       */
-      async getPhoneNumber(e) {
-        // 情况一：拒绝授权手机号码
-        const phoneCode = e.detail.code
-        if (!e.detail.code) {
-          uni.showModal({
-            title: '授权失败',
-            content: '您已拒绝获取绑定手机号登录授权，可以使用其他手机号验证登录',
-            confirmText: '知道了',
-            confirmColor: '#3C9CFFFF'
-          })
-          return;
-        }
-        // 情况二：允许授权手机号码
-        const loginCode = await Routine.getCode()
-        AuthApi.weixinMiniAppLogin(phoneCode, loginCode).then(res => {
-          const data = res.data;
-          // TODO 芋艿：refreshToken 机制
-          this.$store.commit("LOGIN", {
-            'token': data.accessToken
-          });
-          this.getUserInfo(data);
-          this.bindBrokerUser();
-        }).catch(e => {
-          this.$util.Tips({
-            title: e
-          });
-        });
-      },
       getUserInfo(data) {
         this.$store.commit("SETUID", data.userId);
         this.$store.commit("OPENID", data.openid);

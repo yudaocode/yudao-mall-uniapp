@@ -23,6 +23,9 @@
 				<!-- #ifdef MP -->
 				<button hover-class="none" @tap="getUserProfile" class="bg-green btn1">微信登录</button>
 				<!-- #endif -->
+        <!-- #ifdef MP-WEIXIN -->
+        <button open-type="getPhoneNumber" type="primary" @getphonenumber="getPhoneNumber">一键登录</button>
+        <!-- #endif -->
 				<!-- <button hover-class="none" @click="isUp = true" class="btn2">手机号登录</button> -->
 			</view>
 		</view>
@@ -40,12 +43,11 @@
 	const app = getApp();
 	let statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
   import * as UserApi from "@/api/member/user";
+  import * as AuthApi from "@/api/member/auth";
   import mobileLogin from '@/components/login_mobile/index.vue'
 	import routinePhone from '@/components/login_mobile/routine_phone.vue'
-	import {
-		getLogo,
-		getUserPhone
-	} from '@/api/public';
+  import * as BrokerageAPI from '@/api/trade/brokerage.js'
+  import { getUserPhone } from '@/api/public';
 	import Routine from '@/libs/routine';
 	import wechat from "@/libs/wechat";
 	export default {
@@ -56,7 +58,7 @@
 				statusBarHeight: statusBarHeight,
 				isHome: false,
 				isPhoneBox: false,
-				logoUrl: '',
+				// logoUrl: '',
 				code: '',
 				authKey: '',
 				options: '',
@@ -72,9 +74,9 @@
 			routinePhone
 		},
 		onLoad(options) {
-			getLogo().then(res => {
-				this.logoUrl = res.data.logoUrl
-			})
+			// getLogo().then(res => {
+			// 	this.logoUrl = res.data.logoUrl
+			// })
 
 			// #ifdef H5
 			document.body.addEventListener("focusout", () => {
@@ -142,51 +144,13 @@
           })
         });
       },
+      bindBrokerUser() {
+        const spread = this.$Cache.get("spread");
+        if (spread > 0) {
+          BrokerageAPI.bindBrokerageUser(spread)
+        }
+      },
 			// #ifdef MP
-			// 小程序获取手机号码
-			getphonenumber(e) {
-				uni.showLoading({
-					title: '正在登录中'
-				});
-				Routine.getCode()
-					.then(code => {
-						this.getUserPhoneNumber(e.detail.encryptedData, e.detail.iv, code);
-					})
-					.catch(error => {
-						uni.$emit('closePage', false)
-						uni.hideLoading();
-					});
-			},
-			// 小程序获取手机号码回调
-			getUserPhoneNumber(encryptedData, iv, code) {
-				getUserPhone({
-						encryptedData: encryptedData,
-						iv: iv,
-						code: code,
-						type: 'routine',
-						key: this.authKey
-					})
-					.then(res => {
-						this.$store.commit('LOGIN', {
-							token: res.data.token
-						});
-						this.$store.commit("SETUID", res.data.uid);
-						this.getUserInfo();
-						this.$util.Tips({
-							title: '登录成功',
-							icon: 'success'
-						}, {
-							tab: 3
-						})
-
-					})
-					.catch(res => {
-						uni.hideLoading();
-						that.$util.Tips({
-							title: res
-						});
-					});
-			},
 			getUserProfile() {
 				let self = this;
 				uni.showLoading({
@@ -206,52 +170,37 @@
 						uni.hideLoading();
 					});
 			},
-
-			getWxUser(code, res) {
-				let self = this
-				let userInfo = res.userInfo;
-				userInfo.code = code;
-				userInfo.spread_spid = app.globalData.spid; //获取推广人ID
-				userInfo.spread_code = app.globalData.code; //获取推广人分享二维码ID
-				userInfo.avatar = userInfo.userInfo.avatarUrl;
-				userInfo.city = userInfo.userInfo.city;
-				userInfo.country = userInfo.userInfo.country;
-				userInfo.nickName = userInfo.userInfo.nickName;
-				userInfo.province = userInfo.userInfo.province;
-				userInfo.sex = userInfo.userInfo.gender;
-				userInfo.type = 'routine'
-				Routine.authUserInfo(userInfo.code, userInfo)
-					.then(res => {
-						self.authKey = res.data.key;
-						if (res.data.type === 'register') {
-							uni.hideLoading();
-							self.isPhoneBox = true
-						}
-						if (res.data.type === 'login') {
-							uni.hideLoading();
-							self.$store.commit('LOGIN', {
-								token: res.data.token
-							});
-							self.$store.commit("SETUID", res.data.uid);
-							self.getUserInfo();
-							self.$util.Tips({
-								title: res,
-								icon: 'success'
-							}, {
-								tab: 3
-							})
-						}
-					})
-					.catch(res => {
-						uni.hideLoading();
-						uni.showToast({
-							title: res,
-							icon: 'none',
-							duration: 2000
-						});
-					});
-
-			},
+      /**
+       * 微信一键登录
+       */
+      async getPhoneNumber(e) {
+        // 情况一：拒绝授权手机号码
+        const phoneCode = e.detail.code
+        if (!e.detail.code) {
+          uni.showModal({
+            title: '授权失败',
+            content: '您已拒绝获取绑定手机号登录授权，可以使用其他手机号验证登录',
+            confirmText: '知道了',
+            confirmColor: '#3C9CFFFF'
+          })
+          return;
+        }
+        // 情况二：允许授权手机号码
+        const loginCode = await Routine.getCode()
+        AuthApi.weixinMiniAppLogin(phoneCode, loginCode).then(res => {
+          const data = res.data;
+          // TODO 芋艿：refreshToken 机制
+          this.$store.commit("LOGIN", {
+            'token': data.accessToken
+          });
+          this.getUserInfo();
+          this.bindBrokerUser();
+        }).catch(e => {
+          this.$util.Tips({
+            title: e
+          });
+        });
+      },
 			// #endif
 
 			// #ifdef H5
