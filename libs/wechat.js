@@ -3,7 +3,6 @@ import WechatJSSDK from "@/plugin/jweixin-module/index.js";
 import * as AuthApi from "@/api/member/auth";
 import * as BrokerageAPI from '@/api/trade/brokerage.js'
 
-import * as WeiXinApi from '@/api/system/weixin.js';
 import {
 	WX_AUTH,
 	STATE_KEY,
@@ -29,7 +28,7 @@ class AuthWechat {
 	wechat() {
 		return new Promise((resolve, reject) => {
 			// if (this.status) return resolve(this.instance);
-      WeiXinApi.createJsapiSignature(location.href).then(res => {
+      AuthApi.createWeixinMpJsapiSignature(location.href).then(res => {
         // debugger
         const jsapiTicket = res.data;
         jsapiTicket.jsApiList = ['chooseWXPay']; // TODO  芋艿:这里要设置下
