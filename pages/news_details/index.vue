@@ -114,6 +114,8 @@
           }
           // #endif
         });
+				// 增加文章浏览量
+        ArticleApi.addArticleBrowseCount(this.id)
       },
       goodInfo(id) {
         ProductSpuApi.getSpuDetail(id).then(res=>{

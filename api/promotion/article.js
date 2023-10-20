@@ -29,3 +29,10 @@ export function getArticle(id) {
     noAuth: true // TODO 芋艿：后续要做调整
   });
 }
+
+// 增加文章浏览量
+export function addArticleBrowseCount(id) {
+  return request.put("app-api/promotion/article/add-browse-count?id=" + id, {}, {
+    noAuth: true // TODO 芋艿：后续要做调整
+  });
+}
