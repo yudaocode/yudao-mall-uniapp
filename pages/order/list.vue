@@ -157,7 +157,7 @@
             <button
               v-if="order.btns.includes('confirm')"
               class="tool-btn ss-reset-button"
-              @tap.stop="onConfirm(order.id)"
+              @tap.stop="onConfirm(order)"
             >
               确认收货
             </button>
@@ -239,6 +239,7 @@
   import { formatOrderColor } from '@/sheep/hooks/useGoods';
   import sheep from '@/sheep';
   import _ from 'lodash';
+  import { isEmpty } from 'lodash';
 
   const pagination = {
     data: [],
@@ -329,21 +330,62 @@
   }
 
   // 确认收货
-  async function onConfirm(orderId) {
-    uni.showModal({
-      title: '提示',
-      content: '请确认包裹全部到达后再确认收货',
-      success: async function (res) {
-        if (res.confirm) {
-          const { error, data } = await sheep.$api.order.confirm(orderId);
-          if (error === 0) {
-            let index = state.pagination.data.findIndex((order) => order.id === orderId);
-            state.pagination.data[index] = data;
+  async function onConfirm(order, ignore = false) {
+    // 需开启确认收货组件
+    // todo:
+    // 1.怎么检测是否开启了发货组件功能？如果没有开启的话就不能在这里return出去
+    // 2.如果开启了走mpConfirm方法,需要在App.vue的show方法中拿到确认收货结果
+    let isOpenBusinessView = true;
+    if (
+      sheep.$platform.name === 'WechatMiniProgram' &&
+      !isEmpty(order.wechat_extra_data) &&
+      isOpenBusinessView &&
+      !ignore
+    ) {
+      mpConfirm(order);
+      return;
+    }
+
+    // 正常的确认收货流程
+
+    const { error } = await sheep.$api.order.confirm(order.id);
+    if (error === 0) {
+      state.pagination = pagination;
+      getOrderList();
+    }
+  }
+
+  // #ifdef MP-WEIXIN
+  // 小程序确认收货组件
+  function mpConfirm(order) {
+    if (!wx.openBusinessView) {
+      sheep.$helper.toast(`请升级微信版本`);
+      return;
+    }
+    wx.openBusinessView({
+      businessType: 'weappOrderConfirm',
+      extraData: {
+        merchant_id: '1481069012',
+        merchant_trade_no: order.wechat_extra_data.merchant_trade_no,
+        transaction_id: order.wechat_extra_data.transaction_id,
+      },
+      success(response) {
+        console.log('success:', response);
+        if (response.errMsg === 'openBusinessView:ok') {
+          if (response.extraData.status === 'success') {
+            onConfirm(order, true);
           }
         }
       },
+      fail(error) {
+        console.log('error:', error);
+      },
+      complete(result) {
+        console.log('result:', result);
+      },
     });
   }
+  // #endif
 
   // 查看物流
   async function onExpress(orderId) {
