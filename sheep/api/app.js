@@ -2,6 +2,18 @@ import request from '@/sheep/request';
 import { baseUrl } from '@/sheep/config';
 
 export default {
+  // TODO 芋艿：测试
+  test: () =>
+    request({
+      url: '/app-api/promotion/decorate/list',
+      params: {
+        page: 1
+      },
+      custom: {
+        showError: false,
+        showLoading: false,
+      },
+    }),
   // 系统初始化
   init: (templateId) =>
     request({

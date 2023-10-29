@@ -51,6 +51,9 @@
     if (options.page) {
       sheep.$router.go(decodeURIComponent(options.page));
     }
+
+    // TODO 芋艿：测试接口的调用
+    sheep.$api.app.test();
   });
 
   // 下拉刷新
