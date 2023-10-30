@@ -242,6 +242,7 @@
   });
 
   onLoad(async (options) => {
+	  console.log('页面被访问')
     // 非法参数
     if (!options.id) {
       state.goodsInfo = null;
@@ -250,10 +251,15 @@
     state.goodsId = options.id;
     // 加载商品信息
     sheep.$api.goods.detail(state.goodsId).then((res) => {
+		console.log(res)
       state.skeletonLoading = false;
-      if (res.error === 0) {
+      if (res.code === 0) {
+		  // 在此处对数据做出转换
+		res.data.sales=res.data.salesCount
+		res.data.original_price=res.data.price
+		res.data.introduction=res.data.title
         state.goodsInfo = res.data;
-        state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.images);
+        state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.picUrl.split(','));
       } else {
         // 未找到商品
         state.goodsInfo = null;

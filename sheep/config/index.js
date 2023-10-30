@@ -7,7 +7,7 @@ if (process.env.NODE_ENV === 'development') {
   baseUrl = import.meta.env.SHOPRO_BASE_URL;
 }
 version = import.meta.env.SHOPRO_VERSION;
-console.log(`[Shopro ${version}]  https://www.sheepjs.com/`);
+console.log(`[Shopro ${version}]  http://api-dashboard.yudao.iocoder.cn/`);
 export const apiPath = import.meta.env.SHOPRO_API_PATH;
 
 export const staticUrl = import.meta.env.SHOPRO_STATIC_URL;

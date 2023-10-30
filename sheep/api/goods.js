@@ -1,10 +1,11 @@
 import request from '@/sheep/request';
+import request2 from '@/sheep/request2';
 
 export default {
   // 商品详情
   detail: (id, params = {}) =>
-    request({
-      url: 'goods/goods/' + id,
+    request2({
+      url: 'product/spu/get-detail?id=' + id,
       method: 'GET',
       params,
       custom: {
