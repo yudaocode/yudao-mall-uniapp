@@ -47,7 +47,8 @@
     const { data } = await sheep.$api.goods.comment(id, {
       list_rows: 3,
     });
-    state.commentList = data.data;
+	console.log(data)
+    state.commentList = data;
     state.total = data.total;
   }
   onBeforeMount(() => {

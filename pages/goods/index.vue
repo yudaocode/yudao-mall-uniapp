@@ -256,10 +256,12 @@
       if (res.code === 0) {
 		  // 在此处对数据做出转换
 		res.data.sales=res.data.salesCount
-		res.data.original_price=res.data.price
-		res.data.introduction=res.data.title
+		res.data.original_price=res.data.marketPrice/100
+		res.data.subtitle=res.data.introduction
+		res.data.title=res.data.name
+		res.data.price=[res.data.price/100]
         state.goodsInfo = res.data;
-        state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.picUrl.split(','));
+        state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.sliderPicUrls);
       } else {
         // 未找到商品
         state.goodsInfo = null;

@@ -40,8 +40,8 @@ export default {
 
   // 商品评价列表
   comment: (id, params = {}) =>
-    request({
-      url: 'goods/comment/' + id,
+    request2({
+      url: 'product/comment/list?spuId=' + id,
       method: 'GET',
       params,
       custom: {
