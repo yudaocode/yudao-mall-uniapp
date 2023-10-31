@@ -16,8 +16,8 @@ export default {
 
   // 商品列表
   list: (params) =>
-    request({
-      url: 'goods/goods',
+    request2({
+      url: 'product/spu/page',
       method: 'GET',
       params,
       custom: {
@@ -42,6 +42,16 @@ export default {
   comment: (id, params = {}) =>
     request2({
       url: 'product/comment/list?spuId=' + id,
+      method: 'GET',
+      params,
+      custom: {
+        showLoading: false,
+        showError: false,
+      },
+    }),
+  comment2: (id, params = {pageNo:1,pageSize:10,type:0}) =>
+    request2({
+      url: 'product/comment/page?spuId='+id,
       method: 'GET',
       params,
       custom: {

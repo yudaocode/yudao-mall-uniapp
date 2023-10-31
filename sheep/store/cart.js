@@ -15,7 +15,7 @@ const cart = defineStore({
       if (!state.selectedIds.length) return price.toFixed(2);
       state.list.forEach((item) => {
         price += state.selectedIds.includes(item.id)
-          ? Number(item.sku_price.price) * item.goods_num
+          ? Number(item.sku.price/100) * item.count
           : 0;
       });
       return price.toFixed(2);
@@ -24,9 +24,9 @@ const cart = defineStore({
   actions: {
     // 获取购物车列表
     async getList() {
-      const { data, error } = await cartApi.list();
-      if (error === 0) {
-        this.list = data;
+      const { data, code } = await cartApi.list();
+      if (code === 0) {
+        this.list = data.validList;
       }
     },
     // 添加购物车
@@ -44,8 +44,8 @@ const cart = defineStore({
     // 更新购物车
     async update(goodsInfo) {
       const { error } = await cartApi.update({
-        goods_id: goodsInfo.goods_id,
-        goods_num: goodsInfo.goods_num,
+        id: goodsInfo.goods_id,
+        count: goodsInfo.goods_num,
         goods_sku_price_id: goodsInfo.goods_sku_price_id,
       });
       if (error === 0) {
@@ -58,8 +58,8 @@ const cart = defineStore({
       if (typeof ids === 'array') {
         ids = ids.join(',');
       }
-      const { error } = await cartApi.delete(ids);
-      if (error === 0) {
+      const { code } = await cartApi.delete(ids);
+      if (code === 0) {
         this.selectAll(false);
         this.getList();
       }

@@ -68,7 +68,7 @@ const http = new Request({
  */
 http.interceptors.request.use(
   (config) => {
-	  console.log(config);
+	  // console.log(config);
     if (config.custom.auth && !$store('user').isLogin) {
       showAuthModal();
       return Promise.reject();
@@ -110,7 +110,7 @@ http.interceptors.response.use(
     }
 
     response.config.custom.showLoading && closeLoading();
-    if (response.data.error !== 0) {
+    if (response.data.code !== 0) {
       if (response.config.custom.showError)
         uni.showToast({
           title: response.data.msg || '服务器开小差啦,请稍后再试~',

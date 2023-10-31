@@ -95,7 +95,7 @@
         <!-- 评价 -->
         <detail-comment-card class="detail-comment-selector" :goodsId="state.goodsId" />
         <!-- 详情 -->
-        <detail-content-card class="detail-content-selector" :content="state.goodsInfo.content" />
+        <detail-content-card class="detail-content-selector" :content="state.goodsInfo.description" />
 
         <!-- 活动跳转 -->
         <detail-activity-tip
