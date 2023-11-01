@@ -46,9 +46,10 @@
   async function getComment(id) {
     const { data } = await sheep.$api.goods.comment(id, {
       list_rows: 3,
-    });
-    state.commentList = data.data;
-    state.total = data.total;
+    });  
+	 const {data:datas} = await sheep.$api.goods.comment2(id);
+    state.commentList = data;
+    state.total = datas.total;
   }
   onBeforeMount(() => {
     getComment(props.goodsId);

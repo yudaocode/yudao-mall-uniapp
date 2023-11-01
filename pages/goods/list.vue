@@ -261,12 +261,12 @@
       sort: Sort,
       order: Order,
       category_id: !keyword ? categoryId : '',
-      list_rows,
+      pageSize:list_rows,
       keyword: keyword,
-      page,
+      pageNo:page,
     });
-    if (res.error === 0) {
-        let couponList = _.concat(state.pagination.data, res.data.data);
+    if (res.code === 0) {
+        let couponList = _.concat(state.pagination.data, res.data.list);
         state.pagination = {
           ...res.data,
           data: couponList,

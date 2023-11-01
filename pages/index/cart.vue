@@ -36,19 +36,19 @@
               />
             </label>
             <s-goods-item
-              :title="item.goods.title"
-              :img="item.sku_price.image || item.goods.image"
-              :price="item.sku_price.price"
-              :skuText="item.sku_price.goods_sku_text"
+              :title="item.spu.name"
+              :img="item.spu.picUrl || item.goods.image"
+              :price="item.sku.price/100"
+              :skuText="item.sku.properties.length>1? item.sku.properties.reduce((items2,items)=>items2.valueName+' '+items.valueName):item.sku.properties[0].valueName"
               priceColor="#FF3000"
               :titleWidth="400"
             >
               <template v-if="!state.editMode" v-slot:tool>
                 <su-number-box
                   :min="0"
-                  :max="item.sku_price.stock"
+                  :max="item.sku.stock"
                   :step="1"
-                  v-model="item.goods_num"
+                  v-model="item.count"
                   @change="onNumberChange($event, item)"
                 ></su-number-box>
               </template>
@@ -112,9 +112,9 @@
     isAllSelected: computed(() => cart.isAllSelected),
     totalPriceSelected: computed(() => cart.totalPriceSelected),
   });
-
   // 单选选中
   function onSelectSingle(id) {
+	  console.log('单选')
     cart.selectSingle(id);
   }
   // 全选
@@ -154,7 +154,7 @@
     if(cartItem.goods_num === e) return;
     cartItem.goods_num = e;
     cart.update({
-      goods_id: cartItem.goods_id,
+      goods_id: cartItem.id,
       goods_num: e,
       goods_sku_price_id: cartItem.goods_sku_price_id,
     });

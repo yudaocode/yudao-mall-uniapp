@@ -5,19 +5,19 @@
         <image class="avatar" :src="sheep.$url.cdn(item.user_avatar)"></image>
       </view>
       <view class="nickname ss-m-r-20">
-        {{ item.user_nickname }}
+        {{ item.userNickname }}
       </view>
       <view class="">
-        <uni-rate :readonly="true" v-model="item.level" size="18" />
+        <uni-rate :readonly="true" v-model="item.scores" size="18" />
       </view>
     </view>
     <view class="content">
       {{ item.content }}
     </view>
-    <view class="ss-m-t-24" v-if="item.images?.length">
+    <view class="ss-m-t-24" v-if="item.picUrls?.length">
       <scroll-view class="scroll-box" scroll-x scroll-anchoring>
         <view class="ss-flex">
-          <view v-for="(item, index) in item.images" :key="item" class="ss-m-r-10">
+          <view v-for="(item, index) in item.picUrls" :key="item" class="ss-m-r-10">
             <su-image class="content-img" isPreview :previewList="state.commentImages" :current="index" :src="item"
               :height="120" :width="120" mode="aspectFill"></su-image>
           </view>

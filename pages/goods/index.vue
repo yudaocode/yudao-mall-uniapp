@@ -95,7 +95,7 @@
         <!-- 评价 -->
         <detail-comment-card class="detail-comment-selector" :goodsId="state.goodsId" />
         <!-- 详情 -->
-        <detail-content-card class="detail-content-selector" :content="state.goodsInfo.content" />
+        <detail-content-card class="detail-content-selector" :content="state.goodsInfo.description" />
 
         <!-- 活动跳转 -->
         <detail-activity-tip
@@ -242,6 +242,7 @@
   });
 
   onLoad(async (options) => {
+	  console.log('页面被访问')
     // 非法参数
     if (!options.id) {
       state.goodsInfo = null;
@@ -250,10 +251,17 @@
     state.goodsId = options.id;
     // 加载商品信息
     sheep.$api.goods.detail(state.goodsId).then((res) => {
+		console.log(res)
       state.skeletonLoading = false;
-      if (res.error === 0) {
+      if (res.code === 0) {
+		  // 在此处对数据做出转换
+		res.data.sales=res.data.salesCount
+		res.data.original_price=res.data.marketPrice/100
+		res.data.subtitle=res.data.introduction
+		res.data.title=res.data.name
+		res.data.price=[res.data.price/100]
         state.goodsInfo = res.data;
-        state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.images);
+        state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.sliderPicUrls);
       } else {
         // 未找到商品
         state.goodsInfo = null;
