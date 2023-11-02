@@ -1,4 +1,5 @@
 import appApi from '@/sheep/api/app';
+import diyTemplateApi from '@/sheep/api/promotion/diy/template';
 import { defineStore } from 'pinia';
 import $platform from '@/sheep/platform';
 import $router from '@/sheep/router';
@@ -70,6 +71,17 @@ const app = defineStore({
           $router.error('TemplateError');
         }
         this.chat = res.data.chat;
+
+        const diyTemplate = await diyTemplateApi.getUsedDiyTemplate();
+        if (diyTemplate?.data?.property) {
+          const templateProperty = JSON.parse(diyTemplate?.data?.property)
+          this.template.basic.tabbar = templateProperty.tabBar
+          if (templateProperty?.tabBar.theme) {
+            this.template.basic.theme = templateProperty?.tabBar.theme;
+          }
+        } else {
+          $router.error('TemplateError');
+        }
 
         // 加载主题
         const sysStore = sys();
