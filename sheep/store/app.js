@@ -72,16 +72,7 @@ const app = defineStore({
         }
         this.chat = res.data.chat;
 
-        const diyTemplate = await diyTemplateApi.getUsedDiyTemplate();
-        if (diyTemplate?.data?.property) {
-          const templateProperty = JSON.parse(diyTemplate?.data?.property)
-          this.template.basic.tabbar = templateProperty.tabBar
-          if (templateProperty?.tabBar.theme) {
-            this.template.basic.theme = templateProperty?.tabBar.theme;
-          }
-        } else {
-          $router.error('TemplateError');
-        }
+        await adaptTemplate(this.template);
 
         // 加载主题
         const sysStore = sys();
@@ -107,5 +98,19 @@ const app = defineStore({
     ],
   },
 });
+
+// todo: @owen 先做数据适配，后期重构
+const adaptTemplate = async (appTemplate) => {
+  const diyTemplate = await diyTemplateApi.getUsedDiyTemplate();
+  const tabBar = diyTemplate?.data?.property?.tabBar;
+  if (tabBar) {
+    appTemplate.basic.tabbar = tabBar
+    if (tabBar?.theme) {
+      appTemplate.basic.theme = tabBar?.theme;
+    }
+  }
+  appTemplate.home = diyTemplate?.data?.home;
+  // appTemplate.user = diyTemplate?.data?.user;
+}
 
 export default app;
