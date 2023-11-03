@@ -15,7 +15,7 @@ const state = {
 	backgroundColor: "#fff",
 	userInfo: Cache.get(USER_INFO)?JSON.parse(Cache.get(USER_INFO)):null,
 	uid: Cache.get(UID) || null,
-  openid: Cache.get() || null,
+    openid: Cache.get(OPENID) || null,
 	homeActive: false,
 	chatUrl: Cache.get('chatUrl') || '',
 	systemPlatform: Cache.get(PLATFORM)?Cache.get(PLATFORM):'',
