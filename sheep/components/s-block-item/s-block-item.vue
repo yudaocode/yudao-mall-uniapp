@@ -5,7 +5,7 @@
     <s-video-block v-if="type === 'videoPlayer'" :data="data" :styles="styles" />
     <s-image-cube v-if="type === 'imageCube'" :data="data" :styles="styles" />
 
-    <s-notice-block v-if="type === 'noticeBlock'" :data="data" />
+    <s-notice-block v-if="type === 'NoticeBar'" :data="data" />
     <s-search-block v-if="type === 'searchBlock'" :data="data" :navbar="false" />
     <s-title-block v-if="type === 'titleBlock'" :data="data" :styles="styles" />
     <s-line-block v-if="type === 'lineBlock'" :data="data" />

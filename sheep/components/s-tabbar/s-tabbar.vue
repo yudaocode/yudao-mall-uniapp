@@ -1,29 +1,29 @@
 <template>
-  <view class="u-page__item" v-if="tabbar?.list.length > 0">
+  <view class="u-page__item" v-if="tabbar?.items.length > 0">
     <su-tabbar
       :value="path"
       :fixed="true"
       :placeholder="true"
       :safeAreaInsetBottom="true"
-      :inactiveColor="tabbar.inactiveColor"
-      :activeColor="tabbar.activeColor"
+      :inactiveColor="tabbar.style.color"
+      :activeColor="tabbar.style.activeColor"
       :midTabBar="tabbar.mode === 2"
       :customStyle="tabbarStyle"
     >
       <su-tabbar-item
-        v-for="(item, index) in tabbar.list"
+        v-for="(item, index) in tabbar.items"
         :key="item.text"
         :text="item.text"
         :name="item.url"
         :isCenter="getTabbarCenter(index)"
-        :centerImage="sheep.$url.cdn(item.inactiveIcon)"
+        :centerImage="sheep.$url.cdn(item.iconUrl)"
         @tap="sheep.$router.go(item.url)"
       >
         <template v-slot:active-icon>
-          <image class="u-page__item__slot-icon" :src="sheep.$url.cdn(item.activeIcon)"></image>
+          <image class="u-page__item__slot-icon" :src="sheep.$url.cdn(item.activeIconUrl)"></image>
         </template>
         <template v-slot:inactive-icon>
-          <image class="u-page__item__slot-icon" :src="sheep.$url.cdn(item.inactiveIcon)"></image>
+          <image class="u-page__item__slot-icon" :src="sheep.$url.cdn(item.iconUrl)"></image>
         </template>
       </su-tabbar-item>
     </su-tabbar>
@@ -39,20 +39,22 @@
   });
 
   const tabbarStyle = computed(() => {
-    const backgroundStyle = tabbar.value.background;
-    if (backgroundStyle.type == 'color') return { background: backgroundStyle.bgColor };
-    if (backgroundStyle.type == 'image')
+    const backgroundStyle = tabbar.value.style;
+    if (backgroundStyle.bgType === 'color') {
+      return { background: backgroundStyle.bgColor };
+    }
+    if (backgroundStyle.bgType === 'img')
       return {
         background: `url(${sheep.$url.cdn(
-          backgroundStyle.bgImage,
+          backgroundStyle.bgImg,
         )}) no-repeat top center / 100% auto`,
       };
   });
 
   const getTabbarCenter = (index) => {
     if (unref(tabbar).mode !== 2) return false;
-    return unref(tabbar).list % 2 > 0
-      ? Math.ceil(unref(tabbar).list.length / 2) === index + 1
+    return unref(tabbar).items % 2 > 0
+      ? Math.ceil(unref(tabbar).items.length / 2) === index + 1
       : false;
   };
 
