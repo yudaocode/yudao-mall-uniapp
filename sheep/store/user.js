@@ -44,8 +44,8 @@ const user = defineStore({
   actions: {
     // 获取个人信息
     async getInfo() {
-      const { error, data } = await userApi.profile();
-      if (error !== 0) return;
+      const { code, data } = await userApi.profile();
+      if (code !== 0) return;
       this.userInfo = data;
 
       return Promise.resolve(data);

@@ -1,16 +1,26 @@
 import request from '@/sheep/request';
+import request2 from '@/sheep/request2';
 import $platform from '@/sheep/platform';
 
 export default {
   profile: () =>
-    request({
-      url: '/user/api/user/profile',
+    request2({
+      url: 'member/user/get',
       method: 'GET',
       custom: {
         showLoading: false,
         auth: true,
       },
     }),
+  // profile: () =>
+  //   request({
+  //     url: '/user/api/user/profile',
+  //     method: 'GET',
+  //     custom: {
+  //       showLoading: false,
+  //       auth: true,
+  //     },
+  //   }),
   update: (data) =>
     request({
       url: '/user/api/user/update',
