@@ -6,7 +6,7 @@
     <s-image-cube v-if="type === 'imageCube'" :data="data" :styles="styles" />
 
     <s-notice-block v-if="type === 'NoticeBar'" :data="data" />
-    <s-search-block v-if="type === 'searchBlock'" :data="data" :navbar="false" />
+    <s-search-block v-if="type === 'SearchBar'" :data="data" :styles="styles" :navbar="false" />
     <s-title-block v-if="type === 'titleBlock'" :data="data" :styles="styles" />
     <s-line-block v-if="type === 'lineBlock'" :data="data" />
 
