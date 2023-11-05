@@ -1,6 +1,6 @@
 <template>
   <view>
-    <s-image-block v-if="type === 'imageBlock'" :data="data" :styles="styles" />
+    <s-image-block v-if="type === 'ImageBar'" :data="data" :styles="styles" />
     <s-image-banner v-if="type === 'imageBanner'" :data="data" :styles="styles" />
     <s-video-block v-if="type === 'videoPlayer'" :data="data" :styles="styles" />
     <s-image-cube v-if="type === 'imageCube'" :data="data" :styles="styles" />
