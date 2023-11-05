@@ -4,8 +4,9 @@
     class="sss"
     :uid="guid()"
     :src="sheep.$url.cdn(data.videoUrl)"
-    :poster="sheep.$url.cdn(data.src)"
+    :poster="sheep.$url.cdn(data.posterUrl)"
     :height="styles.height * 2"
+    :autoplay="data.autoplay"
   ></su-video>
 </template>
 
