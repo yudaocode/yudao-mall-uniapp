@@ -64,6 +64,7 @@
   ];
 
   const numData = computed(() => sheep.$store('user').numData);
+  console.log(numData)
 </script>
 
 <style lang="scss" scoped>

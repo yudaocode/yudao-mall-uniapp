@@ -1,4 +1,5 @@
 import request from '@/sheep/request';
+import request2 from '@/sheep/request2';
 
 export default {
   // 订单详情
@@ -33,14 +34,23 @@ export default {
     }),
   // 订单列表
   list: (params) =>
-    request({
-      url: 'order/order',
+    request2({
+      url: 'trade/order/page',
       method: 'GET',
       params,
       custom: {
         showLoading: false,
       },
     }),
+  // list: (params) =>
+  //   request({
+  //     url: 'order/order',
+  //     method: 'GET',
+  //     params,
+  //     custom: {
+  //       showLoading: false,
+  //     },
+  //   }),
   // 计算订单信息
   calc: (data) =>
     request({

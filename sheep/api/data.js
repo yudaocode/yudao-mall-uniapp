@@ -1,11 +1,17 @@
 import request from '@/sheep/request';
+import request2 from '@/sheep/request2';
 
 export default {
   area: () =>
-    request({
-      url: 'data/area',
+    request2({
+      url: 'system/area/tree',
       method: 'GET',
     }),
+  // area: () =>
+  //   request({
+  //     url: 'data/area',
+  //     method: 'GET',
+  //   }),
   faq: () =>
     request({
       url: 'data/faq',

@@ -62,9 +62,16 @@ const user = defineStore({
 
     // 获取订单、优惠券等其他资产信息
     async getNumData() {
-      const { error, data } = await userApi.data();
-      if (error === 0) {
-        this.numData = data;
+      const { code, data } = await userApi.data();
+      const data2 = await userApi.data2();
+      if (code === 0&&data2.code===0) {
+		  console.log(data);
+        this.numData = {order_num:{
+			noget:data.deliveredCount,
+			unpaid:data.unpaidCount,
+			nocomment:data.uncommentedCount,
+			aftersale:data2.data
+		}};
       }
     },
 

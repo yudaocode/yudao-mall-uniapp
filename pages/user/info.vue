@@ -312,12 +312,17 @@
 
   // 保存信息
   async function onSubmit() {
-    const { error, data } = await sheep.$api.user.update({
+    // const { error, data } = await sheep.$api.user.update({
+    //   avatar: state.model.avatar,
+    //   nickname: state.model.nickname,
+    //   gender: state.model.gender,
+    // });  
+	 const { code, data } = await sheep.$api.user.update({
       avatar: state.model.avatar,
       nickname: state.model.nickname,
-      gender: state.model.gender,
+      // gender: state.model.gender,
     });
-    if (error === 0) {
+    if (code === 0) {
       getUserInfo();
     }
   }
