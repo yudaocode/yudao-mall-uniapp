@@ -1,12 +1,13 @@
 <template>
   <su-swiper
     :list="imgList"
-    :dotStyle="dotMap[data.indicator]"
-    imageMode="widthFix"
+    :dotStyle="data.indicator === 'dot' ? 'long' : 'tag'"
+    imageMode="scaleToFill"
     dotCur="bg-mask-40"
     :seizeHeight="300"
     :autoplay="data.autoplay"
-    :interval="Number(data.interval)"
+    :interval="data.interval * 1000"
+    :mode="data.type"
   />
 </template>
 
@@ -14,10 +15,7 @@
   import { computed } from 'vue';
   import sheep from '@/sheep';
 
-  const dotMap = {
-    1: 'long',
-    2: 'tag',
-  };
+  // 轮播图
   const props = defineProps({
     data: {
       type: Object,
@@ -30,11 +28,15 @@
   });
 
   const imgList = computed(() =>
-    props.data.list.map((item) => ({
-      ...item,
-      src: sheep.$url.cdn(item.src),
-      poster: sheep.$url.cdn(item.poster),
-    })),
+      props.data.items.map((item) => {
+        const src = item.type === 'img' ? item.imgUrl : item.videoUrl;
+        return {
+          ...item,
+          type: item.type === 'img' ? 'image' : 'video',
+          src: sheep.$url.cdn(src),
+          poster: sheep.$url.cdn(item.imgUrl),
+        };
+      }),
   );
 </script>
 
