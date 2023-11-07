@@ -131,7 +131,7 @@
       pageNo:page,
     });
     if (res.code === 0) {
-		console.log(res)
+		console.log('yudao收藏列表',res)
       let orderList = _.concat(state.pagination.data, res.data.list);
       state.pagination = {
         ...res.data,

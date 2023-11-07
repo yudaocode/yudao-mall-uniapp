@@ -12,6 +12,15 @@ export default {
 				auth: true,
 			},
 		}),
+	balance: () =>
+		request2({
+			url: '/app-api/pay/wallet/get',
+			method: 'GET',
+			custom: {
+				showLoading: false,
+				auth: true,
+			},
+		}),
 	// profile: () =>
 	//   request({
 	//     url: '/user/api/user/profile',
@@ -316,7 +325,8 @@ export default {
 				url: 'product/favorite/delete-list',
 				method: 'DELETE',
 				data: {
-					spuIds: id.split(','),
+					spuIds: id.split(',').map(item=>item*1),
+					// spuIds: id.split(',').join(','),
 				},
 				custom: {
 					showSuccess: true,
@@ -356,12 +366,19 @@ export default {
 	},
 	wallet: {
 		log: (params) =>
-			request({
-				url: '/user/api/walletLog',
+			request2({
+				url: 'pay/wallet-transaction/page',
 				method: 'GET',
 				params,
 				custom: {},
 			}),
+			// log: (params) =>
+			// request({
+			// 	url: '/user/api/walletLog',
+			// 	method: 'GET',
+			// 	params,
+			// 	custom: {},
+			// }),
 	},
 	account: {
 		info: (params) =>

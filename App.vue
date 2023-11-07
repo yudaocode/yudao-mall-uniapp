@@ -21,7 +21,7 @@
     if (args) {
     }
 
-    // 获取剪贴板
+    // 获取剪贴板 
     uni.getClipboardData({
       success: (res) => { },
     });

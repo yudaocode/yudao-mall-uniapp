@@ -45,7 +45,10 @@ const user = defineStore({
     // 获取个人信息
     async getInfo() {
       const { code, data } = await userApi.profile();
-      if (code !== 0) return;
+	  // 为了兼容 获取用户余额 可能还会用到其他参数
+      const { code:code2, data:data2 } = await userApi.balance();
+      if (code !== 0||code2!=0) return;
+	  data.money=data2.balance/100;
       this.userInfo = data;
 
       return Promise.resolve(data);
@@ -65,7 +68,7 @@ const user = defineStore({
       const { code, data } = await userApi.data();
       const data2 = await userApi.data2();
       if (code === 0&&data2.code===0) {
-		  console.log(data);
+		  console.log('订单数据',data);
         this.numData = {order_num:{
 			noget:data.deliveredCount,
 			unpaid:data.unpaidCount,

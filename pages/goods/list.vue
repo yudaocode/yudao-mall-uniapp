@@ -137,8 +137,8 @@
       total: 1,
       last_page: 1,
     },
-    currentSort: 'weigh',
-    currentOrder: 'desc',
+    // currentSort: 'weigh',
+    // currentOrder: 'desc',
     currentTab: 0,
     filterParams: {},
     curFilter: 0,
@@ -148,32 +148,32 @@
     tabList: [
       {
         name: '综合推荐',
-        value: 'weigh',
+        // value: '',
         list: [
           {
             label: '综合推荐',
-            sort: 'weigh',
-            order: 'desc',
+            // sort: '',
+            // order: true,
           },
           {
             label: '价格升序',
             sort: 'price',
-            order: 'asc',
+            order: true,
           },
           {
             label: '价格降序',
             sort: 'price',
-            order: 'desc',
+            order: false,
           },
         ],
       },
       {
         name: '销量',
-        value: 'total_sales',
+        // value: 'salesCount',
       },
       {
         name: '新品优先',
-        value: 'create_time',
+        // value: 'create_time',
       },
     ],
     loadStatus: '',
@@ -239,6 +239,7 @@
 
   // 点击筛选项
   const onFilterItem = (val) => {
+	  console.log(val)
     if (
       state.currentSort === state.tabList[0].list[val].sort &&
       state.currentOrder === state.tabList[0].list[val].order
@@ -258,8 +259,8 @@
   async function getList(Sort, Order, categoryId, keyword, page = 1, list_rows = 6) {
     state.loadStatus = 'loading';
     const res = await sheep.$api.goods.list({
-      sort: Sort,
-      order: Order,
+      sortField: Sort,
+      sortAsc: Order,
       category_id: !keyword ? categoryId : '',
       pageSize:list_rows,
       keyword: keyword,

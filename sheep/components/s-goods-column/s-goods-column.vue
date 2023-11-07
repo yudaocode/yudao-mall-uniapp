@@ -65,7 +65,7 @@
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src)"></image>
       </view>
-      <image class="md-img-box" :src="sheep.$url.cdn(data.image)" mode="widthFix"></image>
+      <image class="md-img-box" :src="sheep.$url.cdn(data.image||data.picUrl)" mode="widthFix"></image>
       <view
         class="md-goods-content ss-flex-col ss-row-around ss-p-b-20 ss-p-t-20 ss-p-x-16"
         :id="elId"
@@ -75,7 +75,7 @@
           class="md-goods-title ss-line-1"
           :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]"
         >
-          {{ data.title }}
+          {{ data.title||data.name }}
         </view>
         <view
           v-if="goodsFields.subtitle?.show"
@@ -106,12 +106,12 @@
           </view>
 
           <view
-            v-if="goodsFields.original_price?.show && data.original_price > 0"
+            v-if="(goodsFields.original_price?.show||goodsFields.marketPrice?.show) &&( data.original_price > 0|| data.marketPrice > 0)"
             class="goods-origin-price ss-m-t-16 font-OPPOSANS ss-flex"
             :style="[{ color: originPriceColor }]"
           >
             <text class="price-unit ss-font-20">{{ priceUnit }}</text>
-            <view class="ss-m-l-8">{{ data.original_price }}</view>
+            <view class="ss-m-l-8">{{ data.original_price||data.marketPrice }}</view>
           </view>
         </view>
 
@@ -141,7 +141,7 @@
       <view v-if="grouponTag" class="groupon-tag ss-flex ss-row-center">
         <view class="tag-icon">拼团</view>
       </view>
-      <image class="lg-img-box" :src="sheep.$url.cdn(data.image)" mode="aspectFill"></image>
+      <image class="lg-img-box" :src="sheep.$url.cdn(data.image||data.picUrl)" mode="aspectFill"></image>
       <view class="lg-goods-content ss-flex-1 ss-flex-col ss-row-between ss-p-b-10 ss-p-t-20">
         <view>
           <view
@@ -149,7 +149,7 @@
             class="lg-goods-title ss-line-2"
             :style="[{ color: titleColor }]"
           >
-            {{ data.title }}
+            {{ data.title||data.name }}
           </view>
           <view
             v-if="goodsFields.subtitle?.show"
@@ -177,12 +177,12 @@
               {{ isArray(data.price) ? data.price[0] : data.price }}
             </view>
             <view
-              v-if="goodsFields.original_price?.show && data.original_price > 0"
+              v-if="(goodsFields.original_price?.show||goodsFields.marketPrice?.show) &&( data.original_price > 0|| data.marketPrice > 0)"
               class="goods-origin-price ss-flex ss-col-bottom font-OPPOSANS"
               :style="[{ color: originPriceColor }]"
             >
               <text class="price-unit ss-font-20">{{ priceUnit }}</text>
-              <view class="ss-m-l-8">{{ data.original_price }}</view>
+              <view class="ss-m-l-8">{{ data.original_price||data.marketPrice }}</view>
             </view>
           </view>
           <view class="ss-m-t-8 ss-flex ss-col-center ss-flex-wrap">
@@ -204,7 +204,7 @@
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src)"></image>
       </view>
 
-      <image class="sl-img-box" :src="sheep.$url.cdn(data.image)" mode="aspectFill"></image>
+      <image class="sl-img-box" :src="sheep.$url.cdn(data.image||data.picUrl)" mode="aspectFill"></image>
 
       <view class="sl-goods-content">
         <view>
@@ -213,7 +213,7 @@
             class="sl-goods-title ss-line-1"
             :style="[{ color: titleColor }]"
           >
-            {{ data.title }}
+            {{ data.title||data.name }}
           </view>
           <view
             v-if="goodsFields.subtitle?.show"
@@ -241,12 +241,12 @@
               {{ isArray(data.price) ? data.price[0] : data.price }}
             </view>
             <view
-              v-if="goodsFields.original_price?.show && data.original_price > 0"
+              v-if="(goodsFields.original_price?.show||goodsFields.marketPrice?.show) &&( data.original_price > 0|| data.marketPrice > 0)"
               class="goods-origin-price ss-m-t-16 font-OPPOSANS ss-flex"
               :style="[{ color: originPriceColor }]"
             >
               <text class="price-unit ss-font-20">{{ priceUnit }}</text>
-              <view class="ss-m-l-8">{{ data.original_price }}</view>
+              <view class="ss-m-l-8">{{ data.original_price||data.marketPrice }}</view>
             </view>
           </view>
           <view class="ss-m-t-16 ss-flex ss-flex-wrap">
@@ -313,6 +313,7 @@
           original_price: { show: true },
           sales: { show: true },
           stock: { show: true },
+          salesCount: { show: true },
         };
       },
     },
@@ -396,8 +397,8 @@
   // 格式化销量、库存信息
   const salesAndStock = computed(() => {
     let text = [];
-    if (props.goodsFields.sales?.show) {
-      text.push(formatSales(props.data.sales_show_type, props.data.sales));
+    if (props.goodsFields.salesCount?.show) {
+      text.push(formatSales(props.data.sales_show_type, props.data.salesCount));
     }
     if (props.goodsFields.stock?.show) {
       text.push(formatStock(props.data.stock_show_type, props.data.stock));

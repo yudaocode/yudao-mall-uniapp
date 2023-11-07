@@ -6,4 +6,9 @@ export default {
       url: 'promotion/decorate/list?page=1',
       method: 'GET',
     }),
+  spids: () =>
+    request2({
+      url: 'product/spu/page?recommendType=best&pageNo=1&pageSize=10',
+      method: 'GET',
+    }),
 };
