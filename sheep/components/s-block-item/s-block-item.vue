@@ -7,7 +7,7 @@
     <!-- 基础组件：菜单导航 -->
     <s-menu-button v-if="type === 'menuButton'" :data="data" :styles="styles" />
     <!-- 基础组件：列表导航 -->
-    <s-menu-list v-if="type === 'menuList'" :data="data" />
+    <s-menu-list v-if="type === 'MenuList'" :data="data" />
     <!-- 基础组件：宫格导航 -->
     <s-menu-grid v-if="type === 'menuGrid'" :data="data" />
 
