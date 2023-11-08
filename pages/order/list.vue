@@ -7,19 +7,19 @@
 		<s-empty v-if="state.pagination.total === 0" icon="/static/order-empty.png" text="暂无订单"></s-empty>
 		<view v-if="state.pagination.total > 0">
 			<view class="bg-white order-list-card-box ss-r-10 ss-m-t-14 ss-m-20" v-for="order in state.pagination.data"
-				:key="order.id" @tap="onOrderDetail(order.order_sn)">
+				:key="order.id" @tap="onOrderDetail(order.no)">
 				<view class="order-card-header ss-flex ss-col-center ss-row-between ss-p-x-20">
-					<view class="order-no">订单号：{{ order.order_sn }}</view>
+					<view class="order-no">订单号：{{ order.no }}</view>
 					<view class="order-state ss-font-26" :class="formatOrderColor(order.status_code)">{{
-            order.status_text
+            order.status
           }}</view>
 				</view>
 				<view class="border-bottom" v-for="item in order.items" :key="item.id">
-					<s-goods-item :img="item.goods_image" :title="item.goods_title" :skuText="item.goods_sku_text"
-						:price="item.goods_price" :score="order.score_amount" :num="item.goods_num">
+					<s-goods-item :img="item.picUrl" :title="item.spuName" :skuText="item.properties.length>1? item.properties.reduce((items2,items)=>items2.valueName+' '+items.valueName):item.properties[0].valueName"
+						:price="item.price/100" :score="order.score_amount" :num="item.count">
 						<template #tool>
 							<view class="ss-flex">
-								<button class="ss-reset-button apply-btn" v-if="item.btns.includes('aftersale')"
+								<!-- <button class="ss-reset-button apply-btn" v-if="item.btns.includes('aftersale')"
 									@tap.stop="
                     sheep.$router.go('/pages/order/aftersale/apply', {
                       item: JSON.stringify(item),
@@ -51,25 +51,25 @@
                     })
                   ">
 									再次购买
-								</button>
+								</button> -->
 							</view>
 						</template>
 					</s-goods-item>
 				</view>
 				<view class="pay-box ss-m-t-30 ss-flex ss-row-right ss-p-r-20">
-					<view v-if="order.total_discount_fee > 0" class="ss-flex ss-col-center ss-m-r-8">
+					<!-- <view v-if="order.total_discount_fee > 0" class="ss-flex ss-col-center ss-m-r-8">
 						<view class="discounts-title">优惠:￥</view>
 						<view class="discounts-money">{{ order.total_discount_fee }}</view>
-					</view>
-					<view class="ss-flex ss-col-center ss-m-r-8">
+					</view> -->
+				<!-- 	<view class="ss-flex ss-col-center ss-m-r-8">
 						<view class="discounts-title">运费:￥</view>
 						<view class="discounts-money">{{ order.dispatch_amount }}</view>
-					</view>
+					</view> -->
 					<view class="ss-flex ss-col-center">
-						<view class="discounts-title pay-color">总金额:</view>
-						<view class="discounts-money pay-color" v-if="Number(order.order_amount) > 0">
-							￥{{ order.order_amount }}</view>
-						<view v-if="order.score_amount && Number(order.order_amount) > 0">+</view>
+						<view class="discounts-title pay-color">共{{count}}件商品,总金额:</view>
+						<view class="discounts-money pay-color" v-if="Number(order.payPrice) > 0">
+							￥{{ order.payPrice/100 }}</view>
+						<view v-if="order.score_amount && Number(order.payPrice) > 0">+</view>
 						<view class="discounts-money pay-color ss-flex ss-col-center" v-if="order.score_amount">
 							<image :src="sheep.$url.static('/static/img/shop/goods/score1.svg')" class="score-img">
 							</image>
@@ -96,7 +96,7 @@
             </template>
           </su-popover> -->
 					<view class="ss-flex ss-col-center">
-						<button v-if="order.btns.includes('groupon')" class="tool-btn ss-reset-button"
+		<!-- 				<button v-if="order.btns.includes('groupon')" class="tool-btn ss-reset-button"
 							@tap.stop="onOrderGroupon(order)">
 							{{ order.status_code === 'groupon_ing' ? '邀请拼团' : '拼团详情' }}
 						</button>
@@ -146,7 +146,7 @@
 						<button v-if="order.btns.includes('pay')" class="tool-btn ss-reset-button ui-BG-Main-Gradient"
 							@tap.stop="onPay(order.order_sn)">
 							继续支付
-						</button>
+						</button> -->
 					</view>
 				</view>
 			</view>
@@ -200,23 +200,23 @@
 
 	const tabMaps = [{
 			name: '全部',
-			value: 'all',
+			// value: 'all',
 		},
 		{
 			name: '待付款',
-			value: 'unpaid',
+			value: 0,
 		},
 		{
 			name: '待发货',
-			value: 'nosend',
+			value: 10,
 		},
 		{
 			name: '待收货',
-			value: 'noget',
+			value: 20,
 		},
 		{
 			name: '待评价',
-			value: 'nocomment',
+			value: 30,
 		},
 	];
 
@@ -399,9 +399,10 @@
 	async function getOrderList(page = 1, list_rows = 5) {
 		state.loadStatus = 'loading';
 		let res = await sheep.$api.order.list({
-			type: tabMaps[state.currentTab].value,
-			pageNo: list_rows,
+			status: tabMaps[state.currentTab].value,
+			pageSize: list_rows,
 			pageNo: page,
+			commentStatus: tabMaps[state.currentTab].value==30?false:null
 		});
 		state.error = res.code;
 		if (res.code === 0) {
