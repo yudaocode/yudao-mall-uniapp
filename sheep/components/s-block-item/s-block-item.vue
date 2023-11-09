@@ -5,7 +5,7 @@
     <!-- 基础组件：公告栏 -->
     <s-notice-block v-if="type === 'NoticeBar'" :data="data" />
     <!-- 基础组件：菜单导航 -->
-    <s-menu-button v-if="type === 'menuButton'" :data="data" :styles="styles" />
+    <s-menu-button v-if="type === 'MenuSwiper'" :data="data" :styles="styles" />
     <!-- 基础组件：列表导航 -->
     <s-menu-list v-if="type === 'MenuList'" :data="data" />
     <!-- 基础组件：宫格导航 -->
