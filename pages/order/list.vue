@@ -412,7 +412,7 @@
 				data: orderList,
 			};
 			console.log(state.pagination)
-			if (state.pagination.current_page < state.pagination.last_page) {
+			if (state.pagination.data.length < state.pagination.total) {
 				state.loadStatus = 'more';
 			} else {
 				state.loadStatus = 'noMore';
@@ -430,7 +430,7 @@
 	// 加载更多
 	function loadmore() {
 		if (state.loadStatus !== 'noMore') {
-			getOrderList(state.pagination.current_page + 1);
+			getOrderList(parseInt((state.pagination.data.length/5)+1));
 		}
 	}
 
