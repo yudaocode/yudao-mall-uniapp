@@ -29,24 +29,23 @@
       v-model="state.searchVal"
     />
     <view class="keyword-link ss-flex">
-      <view v-for="(item, index) in data.keywords" :key="index">
+      <view v-for="(item, index) in data.hotKeywords" :key="index">
         <view
           class="ss-m-r-16"
-          :style="[{ color: item.color }]"
-          @tap.stop="sheep.$router.go('/pages/goods/list', { keyword: item.text })"
-          >{{ item.text }}</view
+          :style="[{ color: data.textColor }]"
+          @tap.stop="sheep.$router.go('/pages/goods/list', { keyword: item })"
+          >{{ item }}</view
         >
       </view>
     </view>
-
-    <view v-if="data.keywords && data.keywords.length && navbar" class="ss-flex">
+    <view v-if="data.hotKeywords && data.hotKeywords.length && navbar" class="ss-flex">
       <button
         class="ss-reset-button keyword-btn"
-        v-for="(item, index) in data.keywords"
+        v-for="(item, index) in data.hotKeywords"
         :key="index"
-        :style="[{ color: item.color, marginRight: '10rpx' }]"
+        :style="[{ color: data.textColor, marginRight: '10rpx' }]"
       >
-        {{ item.text }}
+        {{ item }}
       </button>
     </view>
   </view>

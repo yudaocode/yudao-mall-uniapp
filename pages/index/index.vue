@@ -1,9 +1,9 @@
 <template>
 	<view v-if="template">
-		<s-layout title="首页" navbar="custom" tabbar="/pages/index/index" :bgStyle="template.style?.background"
+		<s-layout title="首页" navbar="custom" tabbar="/pages/index/index" :bgStyle="template.page"
 			:navbarStyle="template.style?.navbar" onShareAppMessage>
-			<s-block v-for="(item, index) in template.data" :key="index" :styles="item.style">
-				<s-block-item :type="item.type" :data="item.data" :styles="item.style" />
+			<s-block v-for="(item, index) in template.components" :key="index" :styles="item.property.style">
+				<s-block-item :type="item.id" :data="item.property" :styles="item.property.style" />
 			</s-block>
 			<!-- 广告模块 -->
 			<s-popup-image />
@@ -22,12 +22,10 @@
 	} from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
 	import $share from '@/sheep/platform/share';
-	import index2Api from '@/sheep/api/index2';
 	// 隐藏原生tabBar
 	uni.hideTabBar();
 
 	const template = computed(() => sheep.$store('app').template?.home);
-
 	// 在此处拦截改变一下首页轮播图 此处先写死后期复活 放到启动函数里
 	(async function() {
 		console.log('原代码首页定制化数据',template)
@@ -49,6 +47,7 @@
 			}
 		})
 	}())
+
 
 	onLoad((options) => {
 		// #ifdef MP

@@ -8,7 +8,7 @@
         <image
           v-if="icon"
           :name="icon"
-          :color="isActive ? parentData.activeColor : parentData.inactiveColor"
+          :color="isActive ? parentData.activeColor : parentData.color"
           :size="20"
         ></image>
         <block v-else>
@@ -29,7 +29,7 @@
         <text
           class="u-tabbar-item__text"
           :style="{
-            color: isActive ? parentData.activeColor : parentData.inactiveColor,
+            color: isActive ? parentData.activeColor : parentData.color,
           }"
         >
           {{ text }}
@@ -120,7 +120,7 @@
         parentData: {
           value: null,
           activeColor: '',
-          inactiveColor: '',
+          color: '',
         },
         parent: {},
       };
