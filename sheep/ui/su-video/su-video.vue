@@ -18,6 +18,7 @@
       @pause="pause"
       @ended="end"
       :poster="poster"
+      :autoplay="autoplay"
     >
       <!-- #ifdef APP-PLUS -->
       <cover-view :style="{ transform: 'translateX(' + moveX + 'px)' }" />
@@ -90,6 +91,10 @@
       type: String,
       default: 'https://img1.baidu.com/it/u=1601695551,235775011&fm=26&fmt=auto',
     },
+    autoplay: {
+      type: Boolean,
+      default: false,
+    }
   });
 
   // 事件

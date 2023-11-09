@@ -1,4 +1,5 @@
 import appApi from '@/sheep/api/app';
+import diyTemplateApi from '@/sheep/api/promotion/diy/template';
 import { defineStore } from 'pinia';
 import $platform from '@/sheep/platform';
 import $router from '@/sheep/router';
@@ -71,6 +72,8 @@ const app = defineStore({
         }
         this.chat = res.data.chat;
 
+        await adaptTemplate(this.template);
+
         // 加载主题
         const sysStore = sys();
         sysStore.setTheme();
@@ -95,5 +98,19 @@ const app = defineStore({
     ],
   },
 });
+
+// todo: @owen 先做数据适配，后期重构
+const adaptTemplate = async (appTemplate) => {
+  const diyTemplate = await diyTemplateApi.getUsedDiyTemplate();
+  const tabBar = diyTemplate?.data?.property?.tabBar;
+  if (tabBar) {
+    appTemplate.basic.tabbar = tabBar
+    if (tabBar?.theme) {
+      appTemplate.basic.theme = tabBar?.theme;
+    }
+  }
+  appTemplate.home = diyTemplate?.data?.home;
+  // appTemplate.user = diyTemplate?.data?.user;
+}
 
 export default app;

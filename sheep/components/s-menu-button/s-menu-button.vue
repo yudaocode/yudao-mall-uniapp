@@ -21,12 +21,12 @@
         :class="{ cur: state.cur == index }"
       >
         <!-- 宫格 -->
-        <view class="grid-wrap" :col="data.rowNum">
+        <view class="grid-wrap">
           <view
             v-for="(item, index) in arr"
             :key="index"
             class="grid-item ss-flex ss-flex-col ss-col-center ss-row-center"
-            :style="[{ width: clWidth + 'px', height: '200rpx' }]"
+            :style="[{ width: `${100 * (1 / data.column)}%`, height: '200rpx' }]"
             hover-class="ss-hover-btn"
             @tap="sheep.$router.go(item.url)"
           >
@@ -34,12 +34,12 @@
               <view
                 v-if="item.badge.show"
                 class="tag-box"
-                :style="[{ background: item.badge.bgColor, color: item.badge.color }]"
+                :style="[{ background: item.badge.bgColor, color: item.badge.textColor }]"
               >
                 {{ item.badge.text }}
               </view>
               <image
-                v-if="item.src"
+                v-if="item.iconUrl"
                 class="menu-icon"
                 :style="[
                   {
@@ -47,15 +47,15 @@
                     height: props.iconSize + 'rpx',
                   },
                 ]"
-                :src="sheep.$url.cdn(item.src)"
+                :src="sheep.$url.cdn(item.iconUrl)"
                 mode="aspectFill"
               ></image>
               <view
-                v-if="data.layout == 1"
+                v-if="data.layout === 'iconText'"
                 class="menu-title"
-                :style="[{ color: item.title.color }]"
+                :style="[{ color: item.titleColor }]"
               >
-                {{ item.title.text }}
+                {{ item.title }}
               </view>
             </view>
           </view>
@@ -206,15 +206,9 @@
   });
 
   // 生成数据
-  const menuList = computed(() => splitData(props.data.list, props.data.row * props.data.col));
-  const swiperHeight = computed(() => props.data.row * (props.data.layout == 1 ? 200 : 180));
+  const menuList = computed(() => splitData(props.data.list, props.data.row * props.data.column));
+  const swiperHeight = computed(() => props.data.row * (props.data.layout === 'iconText' ? 200 : 180));
   const windowWidth = sheep.$platform.device.windowWidth;
-  const clWidth = computed(
-    () =>
-      (windowWidth -
-        (props.styles.marginLeft + props.styles.marginRight + props.styles.padding * 2)) /
-      props.data.col,
-  );
 
   // current 改变时会触发 change 事件
   const swiperChange = (e) => {

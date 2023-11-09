@@ -1,6 +1,6 @@
 <template>
   <view @tap="sheep.$router.go(data?.url)">
-    <su-image :src="sheep.$url.cdn(data.src)" mode="widthFix"></su-image>
+    <su-image :src="sheep.$url.cdn(data.imgUrl)" mode="widthFix"></su-image>
   </view>
 </template>
 
