@@ -35,25 +35,26 @@
             <label
               class="check-box ss-flex ss-col-center ss-p-l-10"
               v-if="state.editMode"
-              @tap="onSelect(item.goods_id)"
+              @tap="onSelect(item.spuId)"
             >
               <radio
-                :checked="state.selectedCollectList.includes(item.goods_id)"
+                :checked="state.selectedCollectList.includes(item.spuId)"
                 color="var(--ui-BG-Main)"
                 style="transform: scale(0.8)"
-                @tap.stop="onSelect(item.goods_id)"
+                @tap.stop="onSelect(item.spuId)"
               />
             </label>
+			  <!-- :skuText="item.goods.subtitle" -->
             <s-goods-item
-              :title="item.goods.title"
-              :img="item.goods.image"
-              :price="item.goods.price[0]"
-              :skuText="item.goods.subtitle"
+              :title="item.spuName"
+              :img="item.picUrl"
+              :price="item.price"
+            
               priceColor="#FF3000"
               :titleWidth="400"
               @tap="
                 sheep.$router.go('/pages/goods/index', {
-                  id: item.goods_id,
+                  id: item.spuId,
                 })
               "
             >
@@ -126,15 +127,17 @@
   async function getData(page = 1, list_rows = 6) {
     state.loadStatus = 'loading';
     let res = await sheep.$api.user.favorite.list({
-      list_rows,
-      page,
+      pageSize:list_rows,
+      pageNo:page,
     });
-    if (res.error === 0) {
-      let orderList = _.concat(state.pagination.data, res.data.data);
+    if (res.code === 0) {
+		console.log('yudao收藏列表',res)
+      let orderList = _.concat(state.pagination.data, res.data.list);
       state.pagination = {
         ...res.data,
         data: orderList,
       };
+	  // 没有原接口文档不太理解这字段意思
       if (state.pagination.current_page < state.pagination.last_page) {
         state.loadStatus = 'more';
       } else {
@@ -173,8 +176,8 @@
   async function onCancel() {
     if (state.selectedCollectList) {
       state.selectedCollectList = state.selectedCollectList.toString();
-      const { error } = await sheep.$api.user.favorite.cancel(state.selectedCollectList);
-      if (error === 0) {
+      const { code } = await sheep.$api.user.favorite.cancel(state.selectedCollectList);
+      if (code === 0) {
         state.editMode = false;
         state.selectedCollectList = [];
         state.selectAll = false;

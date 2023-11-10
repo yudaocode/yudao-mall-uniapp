@@ -62,6 +62,7 @@
 
   // 用户信息
   const userInfo = computed(() => sheep.$store('user').userInfo);
+  console.log('用户信息',userInfo)
 
   // 是否登录
   const isLogin = computed(() => sheep.$store('user').isLogin);

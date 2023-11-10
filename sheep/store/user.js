@@ -44,8 +44,11 @@ const user = defineStore({
   actions: {
     // 获取个人信息
     async getInfo() {
-      const { error, data } = await userApi.profile();
-      if (error !== 0) return;
+      const { code, data } = await userApi.profile();
+	  // 为了兼容 获取用户余额 可能还会用到其他参数
+      const { code:code2, data:data2 } = await userApi.balance();
+      if (code !== 0||code2!=0) return;
+	  data.money=data2.balance/100;
       this.userInfo = data;
 
       return Promise.resolve(data);
@@ -62,9 +65,16 @@ const user = defineStore({
 
     // 获取订单、优惠券等其他资产信息
     async getNumData() {
-      const { error, data } = await userApi.data();
-      if (error === 0) {
-        this.numData = data;
+      const { code, data } = await userApi.data();
+      const data2 = await userApi.data2();
+      if (code === 0&&data2.code===0) {
+		  console.log('订单数据',data);
+        this.numData = {order_num:{
+			noget:data.deliveredCount,
+			unpaid:data.unpaidCount,
+			nocomment:data.uncommentedCount,
+			aftersale:data2.data
+		}};
       }
     },
 

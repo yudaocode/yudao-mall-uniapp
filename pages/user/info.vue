@@ -36,7 +36,7 @@
       </view>
 
       <view class="bg-white ss-p-x-30">
-        <uni-forms-item name="username" label="用户名" @tap="onChangeUsername" class="label-box">
+      <!--  <uni-forms-item name="username" label="用户名" @tap="onChangeUsername" class="label-box">
           <uni-easyinput
             v-model="userInfo.username"
             disabled
@@ -53,7 +53,7 @@
               </button>
             </template>
           </uni-easyinput>
-        </uni-forms-item>
+        </uni-forms-item> -->
 
         <uni-forms-item name="nickname" label="昵称">
           <uni-easyinput
@@ -65,7 +65,7 @@
           />
         </uni-forms-item>
 
-        <uni-forms-item name="gender" label="性别">
+<!--        <uni-forms-item name="gender" label="性别">
           <view class="ss-flex ss-col-center ss-h-100">
             <radio-group @change="onChangeGender" class="ss-flex ss-col-center">
               <label class="radio" v-for="item in genderRadioMap" :key="item.value">
@@ -81,7 +81,7 @@
               </label>
             </radio-group>
           </view>
-        </uni-forms-item>
+        </uni-forms-item> -->
 
         <uni-forms-item name="mobile" label="手机号" @tap="onChangeMobile">
           <uni-easyinput
@@ -312,12 +312,17 @@
 
   // 保存信息
   async function onSubmit() {
-    const { error, data } = await sheep.$api.user.update({
+    // const { error, data } = await sheep.$api.user.update({
+    //   avatar: state.model.avatar,
+    //   nickname: state.model.nickname,
+    //   gender: state.model.gender,
+    // });  
+	 const { code, data } = await sheep.$api.user.update({
       avatar: state.model.avatar,
       nickname: state.model.nickname,
-      gender: state.model.gender,
+      // gender: state.model.gender,
     });
-    if (error === 0) {
+    if (code === 0) {
       getUserInfo();
     }
   }
@@ -327,6 +332,8 @@
     state.model = clone(userInfo);
 
     if (sheep.$platform.name !== 'H5') {
+		return;
+		// 这个先注释,要不然小程序保存个人信息有问题,
       let { data, error } = await sheep.$api.user.thirdOauthInfo();
       if (error === 0) {
         state.thirdOauthInfo = data;

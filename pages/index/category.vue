@@ -82,7 +82,8 @@
 		});
 		if (code === 0) {
 			state.categoryList = {
-				children: data
+				children: data,
+				style: 'first_one'
 			};
 		}
 	}
@@ -96,17 +97,18 @@
 				total: 1,
 				last_page: 1,
 			};
+			getGoodsList(state.categoryList.children[val].id);
 		}
 		// 这段代码本来是在判断里的
-		getGoodsList(state.categoryList.children[val].id);
+		// getGoodsList(state.categoryList.children[val].id);
 	};
 
 	async function getGoodsList(id, page = 1, list_rows = 6) {
 		state.loadStatus = 'loading';
 		const res = await sheep.$api.goods.list({
 			categoryId: id,
-			pageSize:list_rows,
-			pageNo:page,
+			pageSize: list_rows,
+			pageNo: page,
 		});
 		if (res.code === 0) {
 			let couponList = _.concat(state.pagination.data, res.data.list);

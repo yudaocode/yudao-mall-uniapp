@@ -16,7 +16,7 @@ const modal = defineStore({
     }
   }),
   persist: {
-    enabled: true,
+    enabled: true, 
     strategies: [
       {
         key: 'modal-store',

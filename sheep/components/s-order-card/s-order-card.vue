@@ -64,6 +64,7 @@
   ];
 
   const numData = computed(() => sheep.$store('user').numData);
+  console.log('更换后的yuda订单数量',numData)
 </script>
 
 <style lang="scss" scoped>
