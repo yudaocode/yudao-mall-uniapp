@@ -3,10 +3,10 @@
     <view v-for="(item, index) in data.list" :key="index">
       <view
         class="cube-img-wrap"
-        :style="[parseImgStyle(item), { margin: data.space + 'rpx' }]"
+        :style="[parseImgStyle(item), { margin: data.space + 'px' }]"
         @tap="sheep.$router.go(item.url)"
       >
-        <image class="cube-img" :src="sheep.$url.cdn(item.src)" mode="aspectFill"></image>
+        <image class="cube-img" :src="sheep.$url.cdn(item.imgUrl)" mode="aspectFill"></image>
       </view>
     </view>
   </view>
@@ -49,7 +49,7 @@
   const cell = computed(() => {
     return (
       (windowWidth -
-        (props.styles.marginLeft + props.styles.marginRight + props.styles.padding * 2)) /
+        ((props.styles.marginLeft || 0) + (props.styles.marginRight || 0) + (props.styles.padding || 0) * 2)) /
       4
     );
   });
