@@ -18,7 +18,7 @@
     <!-- 基础组件：标题栏 -->
     <s-title-block v-if="type === 'titleBlock'" :data="data" :styles="styles" />
     <!-- 图文组件：广告魔方 -->
-    <s-image-cube v-if="type === 'imageCube'" :data="data" :styles="styles" />
+    <s-image-cube v-if="type === 'MagicCube'" :data="data" :styles="styles" />
     <!-- 图文组件：视频播放 -->
     <s-video-block v-if="type === 'VideoPlayer'" :data="data" :styles="styles" />
     <!-- 基础组件：辅助线 -->
