@@ -1,8 +1,8 @@
 <template>
   <!-- 商品卡片 -->
   <view>
-    <!-- 1 100%宽卡片列表-->
-    <view v-if="mode === 1 && state.goodsList.length" class="goods-sl-box">
+    <!-- 布局1. 单列大图（上图，下内容）-->
+    <view v-if="layoutType === LayoutTypeEnum.ONE_COL_BIG_IMG && state.goodsList.length" class="goods-sl-box">
       <view
         class="goods-box"
         v-for="item in state.goodsList"
@@ -12,27 +12,28 @@
         <s-goods-column
           class=""
           size="sl"
-          :goodsFields="goodsFields"
-          :tagStyle="tagStyle"
+          :goodsFields="productFields"
+          :tagStyle="badge"
           :data="item"
-          :titleColor="goodsFields.title?.color"
-          :subTitleColor="goodsFields.subtitle.color"
+          :titleColor="data.fields.name?.color"
+          :subTitleColor="data.fields.introduction.color"
           :topRadius="data.borderRadiusTop"
           :bottomRadius="data.borderRadiusBottom"
           @click="sheep.$router.go('/pages/goods/index', { id: item.id })"
         >
+          <!-- 购买按钮 -->
           <template v-slot:cart>
             <button class="ss-reset-button cart-btn" :style="[buyStyle]">
-              {{ buyNowStyle.mode === 1 ? buyNowStyle.text : '' }}
+              {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
             </button>
           </template>
         </s-goods-column>
       </view>
     </view>
 
-    <!-- 2   双列瀑布流列表-->
+    <!-- 布局2. 双列（每一列：上图，下内容）-->
     <view
-      v-if="mode === 2 && state.goodsList.length"
+      v-if="layoutType === LayoutTypeEnum.TWO_COL && state.goodsList.length"
       class="goods-md-wrap ss-flex ss-flex-wrap ss-col-top"
     >
       <view class="goods-list-box">
@@ -45,20 +46,21 @@
           <s-goods-column
             class="goods-md-box"
             size="md"
-            :goodsFields="goodsFields"
-            :tagStyle="tagStyle"
+            :goodsFields="productFields"
+            :tagStyle="badge"
             :data="item"
-            :titleColor="goodsFields.title?.color"
-            :subTitleColor="goodsFields.subtitle.color"
+            :titleColor="data.fields.name?.color"
+            :subTitleColor="data.fields.introduction.color"
             :topRadius="data.borderRadiusTop"
             :bottomRadius="data.borderRadiusBottom"
             :titleWidth="330 - marginLeft - marginRight"
             @click="sheep.$router.go('/pages/goods/index', { id: item.id })"
-            @getHeight="mountMasonry($event, 'left')"
+            @getHeight="calculateGoodsColumn($event, 'left')"
           >
+            <!-- 购买按钮 -->
             <template v-slot:cart>
               <button class="ss-reset-button cart-btn" :style="[buyStyle]">
-                {{ buyNowStyle.mode === 1 ? buyNowStyle.text : '' }}
+                {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
               </button>
             </template>
           </s-goods-column>
@@ -74,20 +76,21 @@
           <s-goods-column
             class="goods-md-box"
             size="md"
-            :goodsFields="goodsFields"
-            :tagStyle="tagStyle"
+            :goodsFields="productFields"
+            :tagStyle="badge"
             :data="item"
-            :titleColor="goodsFields.title?.color"
-            :subTitleColor="goodsFields.subtitle.color"
+            :titleColor="data.fields.name?.color"
+            :subTitleColor="data.fields.introduction.color"
             :topRadius="data.borderRadiusTop"
             :bottomRadius="data.borderRadiusBottom"
             :titleWidth="330 - marginLeft - marginRight"
             @click="sheep.$router.go('/pages/goods/index', { id: item.id })"
-            @getHeight="mountMasonry($event, 'right')"
+            @getHeight="calculateGoodsColumn($event, 'right')"
           >
+            <!-- 购买按钮 -->
             <template v-slot:cart>
               <button class="ss-reset-button cart-btn" :style="[buyStyle]">
-                {{ buyNowStyle.mode === 1 ? buyNowStyle.text : '' }}
+                {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
               </button>
             </template>
           </s-goods-column>
@@ -95,8 +98,8 @@
       </view>
     </view>
 
-    <!-- 3  30%卡片列表-->
-    <view v-if="mode === 3 && state.goodsList.length" class="goods-lg-box">
+    <!-- 布局3. 单列小图（左图，右内容） -->
+    <view v-if="layoutType === LayoutTypeEnum.ONE_COL_SMALL_IMG && state.goodsList.length" class="goods-lg-box">
       <view
         class="goods-box"
         :style="[{ marginBottom: data.space + 'px' }]"
@@ -106,18 +109,19 @@
         <s-goods-column
           class="goods-card"
           size="lg"
-          :goodsFields="goodsFields"
+          :goodsFields="productFields"
           :data="item"
-          :tagStyle="tagStyle"
-          :titleColor="goodsFields.title?.color"
-          :subTitleColor="goodsFields.subtitle.color"
+          :tagStyle="badge"
+          :titleColor="data.fields.name?.color"
+          :subTitleColor="data.fields.introduction.color"
           :topRadius="data.borderRadiusTop"
           :bottomRadius="data.borderRadiusBottom"
           @tap="sheep.$router.go('/pages/goods/index', { id: item.id })"
         >
+          <!-- 购买按钮 -->
           <template v-slot:cart>
             <button class="ss-reset-button cart-btn" :style="[buyStyle]">
-              {{ buyNowStyle.mode === 1 ? buyNowStyle.text : '' }}
+              {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
             </button>
           </template>
         </s-goods-column>
@@ -128,11 +132,21 @@
 
 <script setup>
   /**
-   * 商品模板，装修商品卡片
-   * @description style 1:带tab 2：瀑布流，横向两个，上图下内容 3：大图，横向一个
+   * 商品卡片
    */
   import { computed, reactive, onMounted } from 'vue';
   import sheep from '@/sheep';
+  import SpuApi from '@/sheep/api/product/spu';
+
+  // 布局类型
+  const LayoutTypeEnum = {
+    // 单列大图
+    ONE_COL_BIG_IMG: 'oneColBigImg',
+    // 双列
+    TWO_COL: 'twoCol',
+    // 单列小图
+    ONE_COL_SMALL_IMG: 'oneColSmallImg',
+  }
 
   const state = reactive({
     goodsList: [],
@@ -150,55 +164,95 @@
     },
   });
 
-  const { mode, tagStyle, buyNowStyle, goodsFields, goodsIds } = props.data ?? {};
+  const { layoutType, btnBuy, spuIds } = props.data ?? {};
   const { marginLeft, marginRight } = props.styles ?? {};
 
-  async function getGoodsListByIds(ids) {
-    let { data } = await sheep.$api.goods.ids({ ids });
-    return data;
-  }
-
-  onMounted(async () => {
-    state.goodsList = await getGoodsListByIds(goodsIds.join(','));
-    if (mode === 2) {
-      mountMasonry();
+  // 购买按钮样式
+  const buyStyle = computed(() => {
+    if (btnBuy.type === 'text') {
+      // 文字按钮：线性渐变背景颜色
+      return {
+        background: `linear-gradient(to right, ${btnBuy.bgBeginColor}, ${btnBuy.bgEndColor})`,
+      };
+    } else if (btnBuy.type === 'img') {
+      // 图片按钮
+      return {
+        width: '54rpx',
+        height: '54rpx',
+        background: `url(${sheep.$url.cdn(btnBuy.imgUrl)}) no-repeat`,
+        backgroundSize: '100% 100%',
+      };
     }
   });
 
-  // 加载瀑布流
+  // 商品字段配置，todo @owen 字段名称与服务端对齐，这里先转换，后期重构时再修改
+  const productFields = computed(()  => {
+    return {
+      title: props.data.fields.name,
+      subtitle: props.data.fields.introduction,
+      price: props.data.fields.price,
+      original_price: props.data.fields.marketPrice,
+      stock: props.data.fields.stock,
+      salesCount: props.data.fields.salesCount,
+    }
+  })
+
+  // 角标，todo @owen 规范命名，这里先转换，后期重构时再修改
+  const badge = computed(() => {
+    return {
+      show: props.data.badge.show,
+      src: props.data.badge.imgUrl,
+    }
+  })
+
+  //region 商品瀑布流布局
+  // 下一个要处理的商品索引
   let count = 0;
+  // 左列的高度
   let leftHeight = 0;
+  // 右列的高度
   let rightHeight = 0;
 
-  function mountMasonry(height = 0, where = 'left') {
+  /**
+   * 计算商品在左列还是右列
+   * @param height 商品的高度
+   * @param where 添加到哪一列
+   */
+  function calculateGoodsColumn(height = 0, where = 'left') {
+    // 处理完
     if (!state.goodsList[count]) return;
+    // 增加列的高度
     if (where === 'left') leftHeight += height;
     if (where === 'right') rightHeight += height;
+    // 添加到矮的一列
     if (leftHeight <= rightHeight) {
       state.leftGoodsList.push(state.goodsList[count]);
     } else {
       state.rightGoodsList.push(state.goodsList[count]);
     }
+    // 计数
     count++;
   }
+  //endregion
 
-  // 购买按钮样式
-  const buyStyle = computed(() => {
-    if (buyNowStyle.mode == 1) {
-      // button
-      return {
-        background: `linear-gradient(to right, ${buyNowStyle.color1}, ${buyNowStyle.color2})`,
-      };
-    }
+  /**
+   * 根据商品编号列表，获取商品列表
+   * @param ids 商品编号列表
+   * @return {Promise<undefined>} 商品列表
+   */
+  async function getGoodsListByIds(ids) {
+    const { data } = await SpuApi.getSpuListByIds(ids);
+    return data;
+  }
 
-    if (buyNowStyle.mode == 2) {
-      // image
-      return {
-        width: '54rpx',
-        height: '54rpx',
-        background: `url(${sheep.$url.cdn(buyNowStyle.src)}) no-repeat`,
-        backgroundSize: '100% 100%',
-      };
+  // 初始化
+  onMounted(async () => {
+    // 加载商品列表
+    state.goodsList = await getGoodsListByIds(spuIds.join(','));
+    // 只有双列布局时需要
+    if (layoutType === LayoutTypeEnum.TWO_COL){
+      // 分列
+      calculateGoodsColumn();
     }
   });
 </script>
