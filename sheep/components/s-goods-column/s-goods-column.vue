@@ -21,7 +21,7 @@
           class="xs-goods-title ss-line-1"
           :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]"
         >
-          {{ data.title }}
+          {{ data.title || data.name }}
         </view>
         <view
           v-if="goodsFields.price?.show"
@@ -47,7 +47,7 @@
         :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]"
       >
         <view v-if="goodsFields.title?.show" class="sm-goods-title ss-line-1 ss-m-b-16">
-          {{ data.title }}
+          {{ data.title || data.name }}
         </view>
         <view
           v-if="goodsFields.price?.show"
@@ -75,14 +75,14 @@
           class="md-goods-title ss-line-1"
           :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]"
         >
-          {{ data.title||data.name }}
+          {{ data.title || data.name }}
         </view>
         <view
           v-if="goodsFields.subtitle?.show"
           class="md-goods-subtitle ss-m-t-16 ss-line-1"
           :style="[{ color: subTitleColor, background: subTitleBackground }]"
         >
-          {{ data.subtitle }}
+          {{ data.subtitle || data.introduction }}
         </view>
         <slot name="activity">
           <view v-if="data.promos?.length" class="tag-box ss-flex-wrap ss-flex ss-col-center">
@@ -149,14 +149,14 @@
             class="lg-goods-title ss-line-2"
             :style="[{ color: titleColor }]"
           >
-            {{ data.title||data.name }}
+            {{ data.title || data.name }}
           </view>
           <view
             v-if="goodsFields.subtitle?.show"
             class="lg-goods-subtitle ss-m-t-10 ss-line-1"
             :style="[{ color: subTitleColor, background: subTitleBackground }]"
           >
-            {{ data.subtitle }}
+            {{ data.subtitle || data.introduction }}
           </view>
         </view>
         <view>
@@ -213,14 +213,14 @@
             class="sl-goods-title ss-line-1"
             :style="[{ color: titleColor }]"
           >
-            {{ data.title||data.name }}
+            {{ data.title || data.name }}
           </view>
           <view
             v-if="goodsFields.subtitle?.show"
             class="sl-goods-subtitle ss-m-t-16"
             :style="[{ color: subTitleColor, background: subTitleBackground }]"
           >
-            {{ data.subtitle }}
+            {{ data.subtitle || data.introduction }}
           </view>
         </view>
         <view>

@@ -29,7 +29,7 @@
     <s-hotzone-block v-if="type === 'hotzone'" :data="data" :styles="styles" />
 
     <!-- 商品组件：商品卡片 -->
-    <s-goods-card v-if="type === 'goodsCard'" :data="data" :styles="styles" />
+    <s-goods-card v-if="type === 'ProductCard'" :data="data" :styles="styles" />
     <!-- 商品组件：商品栏 -->
     <s-goods-shelves v-if="type === 'goodsShelves'" :data="data" :styles="styles" />
 
