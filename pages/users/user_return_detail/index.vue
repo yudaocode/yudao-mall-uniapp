@@ -6,14 +6,14 @@
         <view class='picTxt acea-row row-middle'>
           <!-- 状态图 -->
           <view class='pictrue'>
-            <image v-if="afterSale.status === 10" src="@/static/images/order/status_0.gif" />
-            <image v-if="afterSale.status === 20" src="@/static/images/order/status_10.gif" />
-            <image v-if="afterSale.status === 30" src="@/static/images/order/status_20.gif" />
-            <image v-if="afterSale.status === 40" src="@/static/images/order/status_30a.gif" />
-            <image v-if="afterSale.status === 50" src="@/static/images/order/status_30b.gif" />
-            <image v-if="afterSale.status === 61" src="@/static/images/order/status_40.gif" />
-            <image v-if="afterSale.status === 62" src="@/static/images/order/status_40.gif" />
-            <image v-if="afterSale.status === 63" src="@/static/images/order/status_40.gif" />
+            <image v-if="afterSale.status === 10" src="http://test.yudao.iocoder.cn/order/status_0.gif" />
+            <image v-if="afterSale.status === 20" src="http://test.yudao.iocoder.cn/order/status_10.gif" />
+            <image v-if="afterSale.status === 30" src="http://test.yudao.iocoder.cn/order/status_20.gif" />
+            <image v-if="afterSale.status === 40" src="http://test.yudao.iocoder.cn/order/status_30a.gif" />
+            <image v-if="afterSale.status === 50" src="http://test.yudao.iocoder.cn/order/status_30b.gif" />
+            <image v-if="afterSale.status === 61" src="http://test.yudao.iocoder.cn/order/status_40.gif" />
+            <image v-if="afterSale.status === 62" src="http://test.yudao.iocoder.cn/order/status_40.gif" />
+            <image v-if="afterSale.status === 63" src="http://test.yudao.iocoder.cn/order/status_40.gif" />
           </view>
           <view class='data'>
             <!-- 状态提示 -->
