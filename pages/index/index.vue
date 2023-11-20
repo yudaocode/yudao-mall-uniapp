@@ -22,6 +22,7 @@
 	} from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
 	import $share from '@/sheep/platform/share';
+  import index2Api from '@/sheep/api/index2';
 	// 隐藏原生tabBar
 	uni.hideTabBar();
 
