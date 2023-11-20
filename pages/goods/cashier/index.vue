@@ -42,8 +42,10 @@
   import * as PayChannelApi from '@/api/pay/channel.js';
   import * as WalletApi from '@/api/pay/wallet.js';
   import {fen2yuan} from "../../../utils/util";
+  import { mapGetters } from "vuex";
   export default {
-		components: {
+    computed: mapGetters([ 'openid' ]),
+    components: {
       CountDown,
 			numberScroll
 		},
@@ -165,7 +167,8 @@
           returnUrl: this.getPayReturnUrl(),
           channelExtras: { // TODO 芋艿：等登录接入完成，需要改成动态读取
             // openid: "ockUAwIZ-0OeMZl9ogcZ4ILrGba0" // wx_pub 微信公众号支付的 openid
-            openid: "oLefc4g5GjKWHJjLjMSXB3wX0fD0" // wx_lite 微信小程序支付的 openid
+            // openid: "oLefc4g5GjKWHJjLjMSXB3wX0fD0" // wx_lite 微信小程序支付的 openid
+            openid: this.openid
           }
 				}).then(res => {
           this.handleSubmitOrderResult(res.data);
