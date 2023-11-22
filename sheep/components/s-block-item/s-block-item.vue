@@ -42,7 +42,7 @@
     <!-- 营销组件：小程序直播 -->
     <s-live-block v-if="type === 'mplive'" :data="data" :styles="styles" />
     <!-- 营销组件：优惠券 -->
-    <s-coupon-block v-if="type === 'coupon'" :data="data" :styles="styles" />
+    <s-coupon-block v-if="type === 'CouponCard'" :data="data" :styles="styles" />
 
     <!-- 会员组件：会员卡片 -->
     <s-user-card v-if="type === 'userCard'" />

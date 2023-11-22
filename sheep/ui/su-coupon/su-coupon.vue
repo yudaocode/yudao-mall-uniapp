@@ -43,7 +43,7 @@
         </view>
         <view class="ss-m-b-28">
           <view class="title-text ss-m-b-10">{{ props.title }}</view>
-          <view class="surplus-text">仅剩：{{ props.surplus }}张</view>
+          <view class="surplus-text" v-if="props.surplus">仅剩：{{ props.surplus }}张</view>
         </view>
       </view>
       <view class="card-right ss-flex ss-row-center">
@@ -82,7 +82,7 @@
             {{ state.stateMap[props.state] }}
           </button>
         </slot>
-        <view class="surplus-text ss-m-t-24">仅剩：{{ props.surplus }}张</view>
+        <view class="surplus-text ss-m-t-24" v-if="props.surplus">仅剩：{{ props.surplus }}张</view>
       </view>
     </view>
   </view>
@@ -159,7 +159,7 @@
     },
     surplus: {
       type: [Number, String],
-      default: 1000,
+      default: 0,
     },
     type: {
       type: String,
