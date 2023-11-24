@@ -11,7 +11,7 @@
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src)"></image>
       </view>
-      <image class="xs-img-box" :src="sheep.$url.cdn(data.image)" mode="aspectFit"></image>
+      <image class="xs-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFit"></image>
       <view
         v-if="goodsFields.title?.show || goodsFields.price?.show"
         class="xs-goods-content ss-flex-col ss-row-around"
@@ -39,7 +39,7 @@
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src)"></image>
       </view>
-      <image class="sm-img-box" :src="sheep.$url.cdn(data.image)" mode="aspectFill"></image>
+      <image class="sm-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFill"></image>
 
       <view
         v-if="goodsFields.title?.show || goodsFields.price?.show"
@@ -65,7 +65,7 @@
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src)"></image>
       </view>
-      <image class="md-img-box" :src="sheep.$url.cdn(data.image||data.picUrl)" mode="widthFix"></image>
+      <image class="md-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="widthFix"></image>
       <view
         class="md-goods-content ss-flex-col ss-row-around ss-p-b-20 ss-p-t-20 ss-p-x-16"
         :id="elId"
@@ -141,7 +141,7 @@
       <view v-if="grouponTag" class="groupon-tag ss-flex ss-row-center">
         <view class="tag-icon">拼团</view>
       </view>
-      <image class="lg-img-box" :src="sheep.$url.cdn(data.image||data.picUrl)" mode="aspectFill"></image>
+      <image class="lg-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFill"></image>
       <view class="lg-goods-content ss-flex-1 ss-flex-col ss-row-between ss-p-b-10 ss-p-t-20">
         <view>
           <view
@@ -204,7 +204,7 @@
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src)"></image>
       </view>
 
-      <image class="sl-img-box" :src="sheep.$url.cdn(data.image||data.picUrl)" mode="aspectFill"></image>
+      <image class="sl-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFill"></image>
 
       <view class="sl-goods-content">
         <view>
