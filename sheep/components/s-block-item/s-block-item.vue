@@ -23,8 +23,6 @@
     <s-video-block v-if="type === 'VideoPlayer'" :data="data" :styles="styles" />
     <!-- 基础组件：辅助线 -->
     <s-line-block v-if="type === 'lineBlock'" :data="data" />
-    <!-- 图文组件：富文字 -->
-    <s-richtext-block v-if="type === 'richtext'" :data="data" :styles="styles" />
     <!-- 图文组件：热区 -->
     <s-hotzone-block v-if="type === 'hotzone'" :data="data" :styles="styles" />
 
@@ -43,6 +41,8 @@
     <s-live-block v-if="type === 'mplive'" :data="data" :styles="styles" />
     <!-- 营销组件：优惠券 -->
     <s-coupon-block v-if="type === 'CouponCard'" :data="data" :styles="styles" />
+    <!-- 营销组件：文章 -->
+    <s-richtext-block v-if="type === 'PromotionArticle'" :data="data" :styles="styles" />
 
     <!-- 会员组件：会员卡片 -->
     <s-user-card v-if="type === 'userCard'" />
