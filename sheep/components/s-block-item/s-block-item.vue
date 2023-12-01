@@ -48,10 +48,10 @@
     <s-user-card v-if="type === 'UserCard'" />
     <!-- 用户组件：用户订单 -->
     <s-order-card v-if="type === 'UserOrder'" :data="data" />
-    <!-- 用户组件：资产卡片 -->
-    <s-wallet-card v-if="type === 'walletCard'" />
-    <!-- 用户组件：卡券卡片 -->
-    <s-coupon-card v-if="type === 'couponCard'" />
+    <!-- 用户组件：用户资产 -->
+    <s-wallet-card v-if="type === 'UserWallet'" />
+    <!-- 用户组件：用户卡券 -->
+    <s-coupon-card v-if="type === 'UserCoupon'" />
   </view>
 </template>
 
