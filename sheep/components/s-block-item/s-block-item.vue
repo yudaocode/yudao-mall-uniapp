@@ -45,7 +45,7 @@
     <s-richtext-block v-if="type === 'PromotionArticle'" :data="data" :styles="styles" />
 
     <!-- 会员组件：会员卡片 -->
-    <s-user-card v-if="type === 'userCard'" />
+    <s-user-card v-if="type === 'UserCard'" />
     <!-- 会员组件：订单卡片 -->
     <s-order-card v-if="type === 'orderCard'" :data="data" />
     <!-- 会员组件：资产卡片 -->
