@@ -32,7 +32,7 @@
     <s-goods-shelves v-if="type === 'ProductList'" :data="data" :styles="styles" />
 
     <!-- 营销组件：拼团 -->
-    <s-groupon-block v-if="type === 'groupon'" :data="data" :styles="styles" />
+    <s-groupon-block v-if="type === 'PromotionCombination'" :data="data" :styles="styles" />
     <!-- 营销组件：秒杀 -->
     <s-seckill-block v-if="type === 'PromotionSeckill'" :data="data" :styles="styles" />
     <!-- 营销组件：积分商城（模式不一样，无法适配） -->

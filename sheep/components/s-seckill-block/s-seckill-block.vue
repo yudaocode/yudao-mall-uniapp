@@ -100,12 +100,12 @@
   // 购买按钮样式
   const buyStyle = computed(() => {
     let btnBuy = props.data.btnBuy;
-    if (btnBuy.type === 'text') {
+    if (btnBuy?.type === 'text') {
       return {
         background: `linear-gradient(to right, ${btnBuy.bgBeginColor}, ${btnBuy.bgEndColor})`,
       };
     }
-    if (btnBuy.type === 'img') {
+    if (btnBuy?.type === 'img') {
       return {
         width: '54rpx',
         height: '54rpx',
