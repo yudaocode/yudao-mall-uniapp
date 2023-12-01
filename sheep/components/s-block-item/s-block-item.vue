@@ -21,8 +21,8 @@
     <s-image-cube v-if="type === 'MagicCube'" :data="data" :styles="styles" />
     <!-- 图文组件：视频播放 -->
     <s-video-block v-if="type === 'VideoPlayer'" :data="data" :styles="styles" />
-    <!-- 基础组件：辅助线 -->
-    <s-line-block v-if="type === 'lineBlock'" :data="data" />
+    <!-- 基础组件：分割线 -->
+    <s-line-block v-if="type === 'Divider'" :data="data" />
     <!-- 图文组件：热区 -->
     <s-hotzone-block v-if="type === 'hotzone'" :data="data" :styles="styles" />
 
