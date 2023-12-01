@@ -12,8 +12,8 @@
         <s-goods-column
           class=""
           size="sl"
-          :goodsFields="productFields"
-          :tagStyle="badge"
+          :goodsFields="data.fields"
+          :tagStyle="data.badge"
           :data="item"
           :titleColor="data.fields.name?.color"
           :subTitleColor="data.fields.introduction.color"
@@ -46,8 +46,8 @@
           <s-goods-column
             class="goods-md-box"
             size="md"
-            :goodsFields="productFields"
-            :tagStyle="badge"
+            :goodsFields="data.fields"
+            :tagStyle="data.badge"
             :data="item"
             :titleColor="data.fields.name?.color"
             :subTitleColor="data.fields.introduction.color"
@@ -76,8 +76,8 @@
           <s-goods-column
             class="goods-md-box"
             size="md"
-            :goodsFields="productFields"
-            :tagStyle="badge"
+            :goodsFields="data.fields"
+            :tagStyle="data.badge"
             :data="item"
             :titleColor="data.fields.name?.color"
             :subTitleColor="data.fields.introduction.color"
@@ -109,9 +109,9 @@
         <s-goods-column
           class="goods-card"
           size="lg"
-          :goodsFields="productFields"
+          :goodsFields="data.fields"
           :data="item"
-          :tagStyle="badge"
+          :tagStyle="data.badge"
           :titleColor="data.fields.name?.color"
           :subTitleColor="data.fields.introduction.color"
           :topRadius="data.borderRadiusTop"
@@ -174,7 +174,8 @@
       return {
         background: `linear-gradient(to right, ${btnBuy.bgBeginColor}, ${btnBuy.bgEndColor})`,
       };
-    } else if (btnBuy.type === 'img') {
+    }
+    if (btnBuy.type === 'img') {
       // 图片按钮
       return {
         width: '54rpx',
@@ -184,26 +185,6 @@
       };
     }
   });
-
-  // 商品字段配置，todo @owen 字段名称与服务端对齐，这里先转换，后期重构时再修改
-  const productFields = computed(()  => {
-    return {
-      title: props.data.fields.name,
-      subtitle: props.data.fields.introduction,
-      price: props.data.fields.price,
-      original_price: props.data.fields.marketPrice,
-      stock: props.data.fields.stock,
-      salesCount: props.data.fields.salesCount,
-    }
-  })
-
-  // 角标，todo @owen 规范命名，这里先转换，后期重构时再修改
-  const badge = computed(() => {
-    return {
-      show: props.data.badge.show,
-      src: props.data.badge.imgUrl,
-    }
-  })
 
   //region 商品瀑布流布局
   // 下一个要处理的商品索引

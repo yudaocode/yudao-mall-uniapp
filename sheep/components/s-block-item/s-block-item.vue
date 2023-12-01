@@ -34,11 +34,11 @@
     <!-- 营销组件：拼团 -->
     <s-groupon-block v-if="type === 'groupon'" :data="data" :styles="styles" />
     <!-- 营销组件：秒杀 -->
-    <s-seckill-block v-if="type === 'seckill'" :data="data" :styles="styles" />
-    <!-- 营销组件：积分商城 -->
-    <s-score-block v-if="type === 'scoreGoods'" :data="data" :styles="styles" />
-    <!-- 营销组件：小程序直播 -->
-    <s-live-block v-if="type === 'mplive'" :data="data" :styles="styles" />
+    <s-seckill-block v-if="type === 'PromotionSeckill'" :data="data" :styles="styles" />
+    <!-- 营销组件：积分商城（模式不一样，无法适配） -->
+    <s-score-block v-if="type === 'PromotionPoint'" :data="data" :styles="styles" />
+    <!-- 营销组件：小程序直播（暂时没有这个功能） -->
+    <s-live-block v-if="type === 'MpLive'" :data="data" :styles="styles" />
     <!-- 营销组件：优惠券 -->
     <s-coupon-block v-if="type === 'CouponCard'" :data="data" :styles="styles" />
     <!-- 营销组件：文章 -->

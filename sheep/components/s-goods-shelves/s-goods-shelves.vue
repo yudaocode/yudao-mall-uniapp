@@ -19,10 +19,10 @@
         <s-goods-column
           class="goods-card"
           size="xs"
-          :goodsFields="productFields"
-          :tagStyle="tagStyle"
+          :goodsFields="data.fields"
+          :tagStyle="data.badge"
           :data="item"
-          :titleColor="productFields.title?.color"
+          :titleColor="data.fields.name?.color"
           :topRadius="data.borderRadiusTop"
           :bottomRadius="data.borderRadiusBottom"
           :titleWidth="(454 - marginRight * 2 - data.space * 2 - marginLeft * 2) / 2"
@@ -49,10 +49,10 @@
         <s-goods-column
           class="goods-card"
           size="sm"
-          :goodsFields="productFields"
-          :tagStyle="tagStyle"
+          :goodsFields="data.fields"
+          :tagStyle="data.badge"
           :data="item"
-          :titleColor="productFields.title?.color"
+          :titleColor="data.fields.name?.color"
           :topRadius="data.borderRadiusTop"
           :bottomRadius="data.borderRadiusBottom"
           @click="sheep.$router.go('/pages/goods/index', { id: item.id })"
@@ -73,10 +73,10 @@
             <s-goods-column
               class="goods-card"
               size="sm"
-              :goodsFields="productFields"
-              :tagStyle="tagStyle"
+              :goodsFields="data.fields"
+              :tagStyle="data.badge"
               :data="item"
-              :titleColor="productFields.title?.color"
+              :titleColor="data.fields.name?.color"
               :titleWidth="(750 - marginRight * 2 - data.space * 4 - marginLeft * 2) / 3"
               @click="sheep.$router.go('/pages/goods/index', { id: item.id })"
             ></s-goods-column>
@@ -105,7 +105,7 @@
       default() {},
     },
   });
-  const { layoutType, tagStyle, spuIds } = props.data;
+  const { layoutType, spuIds } = props.data;
   let { marginLeft, marginRight } = props.styles;
   const goodsList = ref([]);
   onMounted(async () => {
@@ -114,26 +114,6 @@
       goodsList.value = data;
     }
   });
-
-  // 商品字段配置，todo @owen 字段名称与服务端对齐，这里先转换，后期重构时再修改
-  const productFields = computed(()  => {
-    return {
-      title: props.data.fields.name,
-      subtitle: props.data.fields.introduction,
-      price: props.data.fields.price,
-      original_price: props.data.fields.marketPrice,
-      stock: props.data.fields.stock,
-      salesCount: props.data.fields.salesCount,
-    }
-  })
-
-  // 角标，todo @owen 规范命名，这里先转换，后期重构时再修改
-  const badge = computed(() => {
-    return {
-      show: props.data.badge.show,
-      src: props.data.badge.imgUrl,
-    }
-  })
 </script>
 
 <style lang="scss" scoped>
