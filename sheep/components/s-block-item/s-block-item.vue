@@ -21,10 +21,8 @@
     <s-image-cube v-if="type === 'MagicCube'" :data="data" :styles="styles" />
     <!-- 图文组件：视频播放 -->
     <s-video-block v-if="type === 'VideoPlayer'" :data="data" :styles="styles" />
-    <!-- 基础组件：辅助线 -->
-    <s-line-block v-if="type === 'lineBlock'" :data="data" />
-    <!-- 图文组件：富文字 -->
-    <s-richtext-block v-if="type === 'richtext'" :data="data" :styles="styles" />
+    <!-- 基础组件：分割线 -->
+    <s-line-block v-if="type === 'Divider'" :data="data" />
     <!-- 图文组件：热区 -->
     <s-hotzone-block v-if="type === 'hotzone'" :data="data" :styles="styles" />
 
@@ -34,24 +32,26 @@
     <s-goods-shelves v-if="type === 'ProductList'" :data="data" :styles="styles" />
 
     <!-- 营销组件：拼团 -->
-    <s-groupon-block v-if="type === 'groupon'" :data="data" :styles="styles" />
+    <s-groupon-block v-if="type === 'PromotionCombination'" :data="data" :styles="styles" />
     <!-- 营销组件：秒杀 -->
-    <s-seckill-block v-if="type === 'seckill'" :data="data" :styles="styles" />
-    <!-- 营销组件：积分商城 -->
-    <s-score-block v-if="type === 'scoreGoods'" :data="data" :styles="styles" />
-    <!-- 营销组件：小程序直播 -->
-    <s-live-block v-if="type === 'mplive'" :data="data" :styles="styles" />
+    <s-seckill-block v-if="type === 'PromotionSeckill'" :data="data" :styles="styles" />
+    <!-- 营销组件：积分商城（模式不一样，无法适配） -->
+    <s-score-block v-if="type === 'PromotionPoint'" :data="data" :styles="styles" />
+    <!-- 营销组件：小程序直播（暂时没有这个功能） -->
+    <s-live-block v-if="type === 'MpLive'" :data="data" :styles="styles" />
     <!-- 营销组件：优惠券 -->
     <s-coupon-block v-if="type === 'CouponCard'" :data="data" :styles="styles" />
+    <!-- 营销组件：文章 -->
+    <s-richtext-block v-if="type === 'PromotionArticle'" :data="data" :styles="styles" />
 
-    <!-- 会员组件：会员卡片 -->
-    <s-user-card v-if="type === 'userCard'" />
-    <!-- 会员组件：订单卡片 -->
-    <s-order-card v-if="type === 'orderCard'" :data="data" />
-    <!-- 会员组件：资产卡片 -->
-    <s-wallet-card v-if="type === 'walletCard'" />
-    <!-- 会员组件：卡券卡片 -->
-    <s-coupon-card v-if="type === 'couponCard'" />
+    <!-- 用户组件：用户卡片 -->
+    <s-user-card v-if="type === 'UserCard'" />
+    <!-- 用户组件：用户订单 -->
+    <s-order-card v-if="type === 'UserOrder'" :data="data" />
+    <!-- 用户组件：用户资产 -->
+    <s-wallet-card v-if="type === 'UserWallet'" />
+    <!-- 用户组件：用户卡券 -->
+    <s-coupon-card v-if="type === 'UserCoupon'" />
   </view>
 </template>
 

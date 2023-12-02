@@ -1,12 +1,12 @@
 <template>
-  <su-subline :color="data.lineColor" :lineStyle="data.style"></su-subline>
+  <su-subline v-bind="data"></su-subline>
 </template>
 
 <script setup>
   const props = defineProps({
     data: {
       type: Object,
-      default() {},
+      default: {},
     },
   });
 </script>

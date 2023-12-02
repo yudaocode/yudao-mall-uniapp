@@ -1,6 +1,6 @@
 import request from '@/sheep/request';
 
-export default {
+const SpuApi = {
     // 获得商品 SPU 列表
     getSpuList: (recommendType) => {
         return request({
@@ -34,3 +34,4 @@ export default {
         });
     }
 };
+export default SpuApi;

@@ -9,15 +9,15 @@
       @tap="onClick"
     >
       <view v-if="tagStyle.show" class="tag-icon-box">
-        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src)"></image>
+        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
       <image class="xs-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFit"></image>
       <view
-        v-if="goodsFields.title?.show || goodsFields.price?.show"
+        v-if="goodsFields.title?.show || goodsFields.name?.show || goodsFields.price?.show"
         class="xs-goods-content ss-flex-col ss-row-around"
       >
         <view
-          v-if="goodsFields.title?.show"
+          v-if="goodsFields.title?.show || goodsFields.name?.show"
           class="xs-goods-title ss-line-1"
           :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]"
         >
@@ -37,16 +37,16 @@
     <!-- sm卡片：竖向紧凑，一行放三个，图上内容下 -->
     <view v-if="size === 'sm'" class="sm-goods-card ss-flex-col" :style="[elStyles]" @tap="onClick">
       <view v-if="tagStyle.show" class="tag-icon-box">
-        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src)"></image>
+        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
       <image class="sm-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFill"></image>
 
       <view
-        v-if="goodsFields.title?.show || goodsFields.price?.show"
+        v-if="goodsFields.title?.show || goodsFields.name?.show || goodsFields.price?.show"
         class="sm-goods-content"
         :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]"
       >
-        <view v-if="goodsFields.title?.show" class="sm-goods-title ss-line-1 ss-m-b-16">
+        <view v-if="goodsFields.title?.show || goodsFields.name?.show" class="sm-goods-title ss-line-1 ss-m-b-16">
           {{ data.title || data.name }}
         </view>
         <view
@@ -63,7 +63,7 @@
     <!-- md卡片：竖向，一行放两个，图上内容下 -->
     <view v-if="size === 'md'" class="md-goods-card ss-flex-col" :style="[elStyles]" @tap="onClick">
       <view v-if="tagStyle.show" class="tag-icon-box">
-        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src)"></image>
+        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
       <image class="md-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="widthFix"></image>
       <view
@@ -71,14 +71,14 @@
         :id="elId"
       >
         <view
-          v-if="goodsFields.title?.show"
+          v-if="goodsFields.title?.show || goodsFields.name?.show"
           class="md-goods-title ss-line-1"
           :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]"
         >
           {{ data.title || data.name }}
         </view>
         <view
-          v-if="goodsFields.subtitle?.show"
+          v-if="goodsFields.subtitle?.show || goodsFields.introduction?.show"
           class="md-goods-subtitle ss-m-t-16 ss-line-1"
           :style="[{ color: subTitleColor, background: subTitleBackground }]"
         >
@@ -135,7 +135,7 @@
       @tap="onClick"
     >
       <view v-if="tagStyle.show" class="tag-icon-box">
-        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src)"></image>
+        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
       <view v-if="seckillTag" class="seckill-tag ss-flex ss-row-center"> 秒杀 </view>
       <view v-if="grouponTag" class="groupon-tag ss-flex ss-row-center">
@@ -145,14 +145,14 @@
       <view class="lg-goods-content ss-flex-1 ss-flex-col ss-row-between ss-p-b-10 ss-p-t-20">
         <view>
           <view
-            v-if="goodsFields.title?.show"
+            v-if="goodsFields.title?.show || goodsFields.name?.show"
             class="lg-goods-title ss-line-2"
             :style="[{ color: titleColor }]"
           >
             {{ data.title || data.name }}
           </view>
           <view
-            v-if="goodsFields.subtitle?.show"
+            v-if="goodsFields.subtitle?.show || goodsFields.introduction?.show"
             class="lg-goods-subtitle ss-m-t-10 ss-line-1"
             :style="[{ color: subTitleColor, background: subTitleBackground }]"
           >
@@ -201,7 +201,7 @@
     <!-- sl卡片：竖向型，一行放一个，图片上内容下边 -->
     <view v-if="size === 'sl'" class="sl-goods-card ss-flex-col" :style="[elStyles]" @tap="onClick">
       <view v-if="tagStyle.show" class="tag-icon-box">
-        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src)"></image>
+        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
 
       <image class="sl-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFill"></image>
@@ -209,14 +209,14 @@
       <view class="sl-goods-content">
         <view>
           <view
-            v-if="goodsFields.title?.show"
+            v-if="goodsFields.title?.show || goodsFields.name?.show"
             class="sl-goods-title ss-line-1"
             :style="[{ color: titleColor }]"
           >
             {{ data.title || data.name }}
           </view>
           <view
-            v-if="goodsFields.subtitle?.show"
+            v-if="goodsFields.subtitle?.show || goodsFields.introduction?.show"
             class="sl-goods-subtitle ss-m-t-16"
             :style="[{ color: subTitleColor, background: subTitleBackground }]"
           >
@@ -307,12 +307,25 @@
       type: [Array, Object],
       default() {
         return {
+          // 商品名称（旧）
           title: { show: true },
+          // 商品介绍（旧）
           subtitle: { show: true },
+          // 商品价格
           price: { show: true },
+          // 市场价（旧）
           original_price: { show: true },
+          // 销量（旧）
           sales: { show: true },
+          // 库存
           stock: { show: true },
+          // 商品名称（新）
+          name: { show: true },
+          // 商品介绍（新）
+          introduction: { show: true },
+          // 市场价（新）
+          marketPrice: { show: true },
+          // 销量（新）
           salesCount: { show: true },
         };
       },
