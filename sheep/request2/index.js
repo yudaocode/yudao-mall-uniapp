@@ -55,7 +55,8 @@ const http = new Request({
 	method: 'GET',
 	header: {
 		Accept: 'text/json',
-		'Content-Type': 'application/json;charset=UTF-8',
+		'Content-Type': 'application/json',
+		// ;charset=UTF-8
 		platform: $platform.name,
 	},
 	// #ifdef APP-PLUS

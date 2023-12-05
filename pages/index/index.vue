@@ -22,17 +22,18 @@
 	} from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
 	import $share from '@/sheep/platform/share';
+	import index2Api from '@/sheep/api/index2'
 	// 隐藏原生tabBar
 	uni.hideTabBar();
 
 	const template = computed(() => sheep.$store('app').template?.home);
 	// 在此处拦截改变一下首页轮播图 此处先写死后期复活 放到启动函数里
 	(async function() {
-		console.log('原代码首页定制化数据',template)
+		console.log('原代码首页定制化数据', template)
 		let {
 			data
 		} = await index2Api.decorate();
-		console.log('首页导航配置化过高无法兼容',JSON.parse(data[1].value))
+		console.log('首页导航配置化过高无法兼容', JSON.parse(data[1].value))
 		// 改变首页底部数据 但是没有通过数组id获取商品数据接口
 		// let {
 		// 	data: datas

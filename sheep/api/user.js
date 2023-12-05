@@ -187,9 +187,17 @@ export default {
 		}),
 
 	address: {
+		// default: () =>
+		// 	request({
+		// 		url: 'user/address/default',
+		// 		method: 'GET',
+		// 		custom: {
+		// 			showError: false,
+		// 		},
+		// 	}),
 		default: () =>
-			request({
-				url: 'user/address/default',
+			request2({
+				url: 'member/address/get-default',
 				method: 'GET',
 				custom: {
 					showError: false,
@@ -225,7 +233,7 @@ export default {
 		//       showSuccess: true,
 		//     },
 		//   }),
-		update: ( data) =>
+		update: (data) =>
 			request2({
 				url: 'member/address/update',
 				method: 'PUT',
@@ -325,7 +333,7 @@ export default {
 				url: 'product/favorite/delete-list',
 				method: 'DELETE',
 				data: {
-					spuIds: id.split(',').map(item=>item*1),
+					spuIds: id.split(',').map(item => item * 1),
 					// spuIds: id.split(',').join(','),
 				},
 				custom: {
@@ -372,13 +380,13 @@ export default {
 				params,
 				custom: {},
 			}),
-			// log: (params) =>
-			// request({
-			// 	url: '/user/api/walletLog',
-			// 	method: 'GET',
-			// 	params,
-			// 	custom: {},
-			// }),
+		// log: (params) =>
+		// request({
+		// 	url: '/user/api/walletLog',
+		// 	method: 'GET',
+		// 	params,
+		// 	custom: {},
+		// }),
 	},
 	account: {
 		info: (params) =>
