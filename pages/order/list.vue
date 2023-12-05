@@ -7,7 +7,7 @@
 		<s-empty v-if="state.pagination.total === 0" icon="/static/order-empty.png" text="暂无订单"></s-empty>
 		<view v-if="state.pagination.total > 0">
 			<view class="bg-white order-list-card-box ss-r-10 ss-m-t-14 ss-m-20" v-for="order in state.pagination.data"
-				:key="order.id" @tap="onOrderDetail(order.no)">
+				:key="order.id" @tap="onOrderDetail(order.id)">
 				<view class="order-card-header ss-flex ss-col-center ss-row-between ss-p-x-20">
 					<view class="order-no">订单号：{{ order.no }}</view>
 					<view class="order-state ss-font-26" :class="formatOrderColor(order.status_code)">{{
@@ -15,7 +15,8 @@
           }}</view>
 				</view>
 				<view class="border-bottom" v-for="item in order.items" :key="item.id">
-					<s-goods-item :img="item.picUrl" :title="item.spuName" :skuText="item.properties.length>1? item.properties.reduce((items2,items)=>items2.valueName+' '+items.valueName):item.properties[0].valueName"
+					<s-goods-item :img="item.picUrl" :title="item.spuName"
+						:skuText="item.properties.length>1? item.properties.reduce((items2,items)=>items2.valueName+' '+items.valueName):item.properties[0].valueName"
 						:price="item.price/100" :score="order.score_amount" :num="item.count">
 						<template #tool>
 							<view class="ss-flex">
@@ -61,7 +62,7 @@
 						<view class="discounts-title">优惠:￥</view>
 						<view class="discounts-money">{{ order.total_discount_fee }}</view>
 					</view> -->
-				<!-- 	<view class="ss-flex ss-col-center ss-m-r-8">
+					<!-- 	<view class="ss-flex ss-col-center ss-m-r-8">
 						<view class="discounts-title">运费:￥</view>
 						<view class="discounts-money">{{ order.dispatch_amount }}</view>
 					</view> -->
@@ -96,7 +97,7 @@
             </template>
           </su-popover> -->
 					<view class="ss-flex ss-col-center">
-		<!-- 				<button v-if="order.btns.includes('groupon')" class="tool-btn ss-reset-button"
+						<!-- 				<button v-if="order.btns.includes('groupon')" class="tool-btn ss-reset-button"
 							@tap.stop="onOrderGroupon(order)">
 							{{ order.status_code === 'groupon_ing' ? '邀请拼团' : '拼团详情' }}
 						</button>
@@ -402,7 +403,7 @@
 			status: tabMaps[state.currentTab].value,
 			pageSize: list_rows,
 			pageNo: page,
-			commentStatus: tabMaps[state.currentTab].value==30?false:null
+			commentStatus: tabMaps[state.currentTab].value == 30 ? false : null
 		});
 		state.error = res.code;
 		if (res.code === 0) {
@@ -430,7 +431,7 @@
 	// 加载更多
 	function loadmore() {
 		if (state.loadStatus !== 'noMore') {
-			getOrderList(parseInt((state.pagination.data.length/5)+1));
+			getOrderList(parseInt((state.pagination.data.length / 5) + 1));
 		}
 	}
 

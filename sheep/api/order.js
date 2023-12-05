@@ -4,11 +4,17 @@ import request2 from '@/sheep/request2';
 export default {
 	// 订单详情
 	detail: (id, params) =>
-		request({
-			url: 'order/order/' + id,
+		request2({
+			url: 'trade/order/get-detail?id=' + id,
 			method: 'GET',
 			params,
 		}),
+	// detail: (id, params) =>
+	// 	request({
+	// 		url: 'order/order/' + id,
+	// 		method: 'GET',
+	// 		params,
+	// 	}),
 	// 发票详情
 	invoice: (id) =>
 		request({
@@ -59,12 +65,12 @@ export default {
 		// 解决 SpringMVC 接受 List<Item> 参数的问题
 		delete data2.items
 		for (let i = 0; i < data.items.length; i++) {
-			data2['items[' + i + '' + '].skuId'] = data.items[i].skuId + '';
-			data2['items[' + i + '' + '].count'] = data.items[i].count + '';
-			data2['items[' + i + '' + '].cartId'] = data.items[i].cartId + '';
-			// data2['items' + `%5B${i}%5D` + '.skuId'] = data.items[i].skuId + '';
-			// data2['items' + `%5B${i}%5D` + '.count'] = data.items[i].count + '';
-			// data2['items' + `%5B${i}%5D` + '.cartId'] = data.items[i].cartId + '';
+			// data2['items[' + i + '' + '].skuId'] = data.items[i].skuId + '';
+			// data2['items[' + i + '' + '].count'] = data.items[i].count + '';
+			// data2['items[' + i + '' + '].cartId'] = data.items[i].cartId + '';
+			data2['items' + `%5B${i}%5D` + '.skuId'] = data.items[i].skuId + '';
+			data2['items' + `%5B${i}%5D` + '.count'] = data.items[i].count + '';
+			data2['items' + `%5B${i}%5D` + '.cartId'] = data.items[i].cartId + '';
 		}
 		console.log(data2, '对比数据')
 		return request2({
