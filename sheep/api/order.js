@@ -107,12 +107,18 @@ export default {
 			method: 'PUT',
 		}),
 	// 评价订单
-	comment: (id, data) =>
-		request({
-			url: 'order/order/comment/' + id,
+	comment: (data) =>
+		request2({
+			url: 'trade/order/item/create-comment',
 			method: 'POST',
 			data,
 		}),
+	// comment: (id, data) =>
+	// 	request({
+	// 		url: 'order/order/comment/' + id,
+	// 		method: 'POST',
+	// 		data,
+	// 	}),
 	// 申请退款
 	applyRefund: (id) =>
 		request({

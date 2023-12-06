@@ -200,7 +200,7 @@
 				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.btns?.includes('confirm')"
 					@tap="onConfirm(state.orderInfo.id)">确认收货</button>
 				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.btns?.includes('comment')"
-					@tap="onComment(state.orderInfo.order_sn)">评价晒单</button>
+					@tap="onComment(state.orderInfo.id,state.orderInfo)">评价晒单</button>
 				<button v-if="state.orderInfo.btns?.includes('invoice')" class="ss-reset-button cancel-btn"
 					@tap.stop="onOrderInvoice(state.orderInfo.invoice?.id)">
 					查看发票
@@ -389,12 +389,15 @@
 	}
 
 	// 评价
-	function onComment(orderSN) {
+	function onComment(orderSN, orderId) {
+		console.log(orderId);
+		// return;
 		uni.$once('SELECT_INVOICE', (e) => {
 			state.invoiceInfo = e.invoiceInfo;
 		});
 		sheep.$router.go('/pages/goods/comment/add', {
 			orderSN,
+			orderId
 		});
 	}
 	async function getOrderDetail(id) {
@@ -410,7 +413,8 @@
 		console.log(res, '我的订单详情数据');
 		if (res.code === 0) {
 			let obj = {
-				10: ['待发货', '等待买家付款', ["apply_refund"]]
+				10: ['待发货', '等待买家付款', ["apply_refund"]],
+				30: ['待评价', '等待买家评价', ["express", "comment"]]
 			}
 			res.data.status_text = obj[res.data.status][0];
 			res.data.status_desc = obj[res.data.status][1];

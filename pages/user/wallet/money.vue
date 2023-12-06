@@ -20,7 +20,7 @@
 		<su-sticky>
 			<!-- 统计 -->
 			<view class="filter-box ss-p-x-30 ss-flex ss-col-center ss-row-between">
-<!-- 				<uni-datetime-picker v-model="state.data" type="daterange" @change="onChangeTime" :end="state.today">
+				<!-- 				<uni-datetime-picker v-model="state.data" type="daterange" @change="onChangeTime" :end="state.today">
 					<button class="ss-reset-button date-btn">
 						<text>{{ dateFilterText }}</text>
 						<text class="cicon-drop-down ss-seldate-icon"></text>
@@ -28,9 +28,9 @@
 				</uni-datetime-picker> -->
 
 				<view class="total-box">
-					 <!-- state.pagination.income.toFixed(2) -->
-					<view class="ss-m-b-10">总收入￥{{ }}</view>
-					<view>总支出￥{{  }}</view>
+					<!-- state.pagination.income.toFixed(2) -->
+					<!-- 		<view class="ss-m-b-10">总收入￥{{ }}</view>
+					<view>总支出￥{{  }}</view> -->
 					<!-- (-state.pagination.expense).toFixed(2) -->
 				</view>
 			</view>
@@ -45,7 +45,8 @@
 						<!-- <text class="title ss-line-1">{{ item.event_text }}{{ item.memo ? '-' + item.memo : '' }}</text> -->
 						<text class="title ss-line-1">{{ item.title }}</text>
 						<view class="money">
-							<text v-if="(item.amount >= 0||item.price>=0)" class="add">+{{ item.amount||item.price }}</text>
+							<text v-if="(item.amount >= 0||item.price>=0)"
+								class="add">+{{ item.amount||item.price }}</text>
 							<text v-else class="minus">{{ item.price }}</text>
 						</view>
 					</view>
@@ -133,7 +134,7 @@
 				income: res.data.income,
 				expense: res.data.expense,
 			};
-			console.log('交易数据',state.pagination)
+			console.log('交易数据', state.pagination)
 			if (state.pagination.current_page < state.pagination.last_page) {
 				state.loadStatus = 'more';
 			} else {
