@@ -3,13 +3,13 @@
     title="我的"
     tabbar="/pages/index/user"
     navbar="custom"
-    :bgStyle="template.style?.background"
+    :bgStyle="template.page"
     :navbarStyle="template.style?.navbar"
     onShareAppMessage
     :showFloatButton="true"
   >
-    <s-block v-for="(item, index) in template.data" :key="index" :styles="item.style">
-      <s-block-item :type="item.type" :data="item.data" :styles="item.style" />
+    <s-block v-for="(item, index) in template.components" :key="index" :styles="item.property.style">
+      <s-block-item :type="item.id" :data="item.property" :styles="item.property.style" />
     </s-block>
   </s-layout>
 </template>

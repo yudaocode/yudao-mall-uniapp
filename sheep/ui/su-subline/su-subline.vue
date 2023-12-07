@@ -1,42 +1,62 @@
 <template>
-  <view class="ui-subline-wrap" :style="[elStyle]"></view>
+  <view class="wrap" :style="{height: `${height}px`}">
+    <view class="divider" :style="[elStyle]"></view>
+  </view>
 </template>
 
 <script setup>
   /**
-   * 辅助线
-   *
-   * @property {String} width = ['thin', 'medium', 'thick', '10px']				- 线条宽度
-   * @property {String} color = #000 												- 线条颜色
-   * @property {String} style = ['dotted', 'solid', 'double', 'dashed']			- 线条样式,圆点，实线，双线，虚线
-   *
+   * 分割线
    */
 
   import { computed } from 'vue';
 
   // 接收参数
   const props = defineProps({
-    color: {
+    // 线条颜色
+    lineColor: {
       type: String,
       default: '#000',
     },
-    lineStyle: {
+    // 线条样式：'dotted', 'solid', 'double', 'dashed'
+    borderType: {
       type: String,
       default: 'dashed',
     },
-    width: {
-      type: String,
-      default: 'thin',
+    // 线条宽度
+    lineWidth: {
+      type: Number,
+      default: 1,
     },
+    // 高度
+    height: {
+      type: [Number, String],
+      default: 'auto'
+    },
+    // 左右边距：none - 无边距，horizontal - 左右留边
+    paddingType: {
+      type: String,
+      default: 'none'
+    }
   });
 
   const elStyle = computed(() => {
     return {
-      'border-top-width': props.width,
-      'border-top-color': props.color,
-      'border-top-style': props.lineStyle,
+      'border-top-width': `${props.lineWidth}px`,
+      'border-top-color': props.lineColor,
+      'border-top-style': props.borderType,
+      margin: props.paddingType === 'none' ? '0' : '0px 16px'
     };
   });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.wrap {
+  display: flex;
+  align-items: center;
+
+  .divider {
+    width: 100%;
+  }
+}
+</style>

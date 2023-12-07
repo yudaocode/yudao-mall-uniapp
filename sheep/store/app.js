@@ -110,7 +110,7 @@ const adaptTemplate = async (appTemplate) => {
     }
   }
   appTemplate.home = diyTemplate?.data?.home;
-  // appTemplate.user = diyTemplate?.data?.user;
+  appTemplate.user = diyTemplate?.data?.user;
 }
 
 export default app;

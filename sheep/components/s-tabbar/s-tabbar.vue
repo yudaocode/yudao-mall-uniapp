@@ -1,5 +1,5 @@
 <template>
-  <view class="u-page__item" v-if="tabbar?.items.length > 0">
+  <view class="u-page__item" v-if="tabbar?.items?.length > 0">
     <su-tabbar
       :value="path"
       :fixed="true"
