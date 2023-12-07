@@ -1,126 +1,54 @@
 <!-- 优惠券组  -->
 <template>
-  <view>
-    <!-- 样式1 -->
-    <view class="lg-coupon-wrap" v-if="mode == 1">
-      <scroll-view class="scroll-box" scroll-x scroll-anchoring>
-        <view class="coupon-box ss-flex">
-          <view
-            class="coupon-item"
-            :style="[couponBg, { marginLeft: data.space + 'px' }]"
-            v-for="(item, index) in couponList"
-            :key="index"
-          >
-            <su-coupon
-              size="lg"
-              :textColor="data.fill.color"
-              background=""
-              :couponId="item.id"
-              :title="item.amount_text"
-              :value="item.amount"
-              :surplus="item.stock"
-              :type="item.type"
-              :sellBy="`${item.get_start_time.substring(0, 10)} 至 ${item.get_end_time.substring(
-                0,
-                10,
-              )}`"
+  <scroll-view class="scroll-box" scroll-x scroll-anchoring>
+    <view class="coupon-box ss-flex">
+      <view
+        class="coupon-item"
+        :style="[couponBg, { marginLeft: `${data.space}px` }]"
+        v-for="(item, index) in couponList"
+        :key="index"
+      >
+        <su-coupon
+          :size="SIZE_LIST[columns - 1]"
+          :textColor="data.textColor"
+          background=""
+          :couponId="item.id"
+          :title="item.name"
+          :type="formatCouponDiscountType(item)"
+          :value="formatCouponDiscountValue(item)"
+          :sellBy="formatValidityType(item)"
+        >
+          <template v-slot:btn>
+            <!-- 两列时，领取按钮坚排 -->
+            <button
+              v-if="columns === 2"
+              @click.stop="onGetCoupon(item.id)"
+              class="ss-reset-button card-btn vertical"
+              :style="[btnStyles]"
             >
-              <template v-slot:btn>
-                <button
-                  class="ss-reset-button card-btn"
-                  :style="[btnStyles]"
-                  @click.stop="onGetCoupon(item.id)"
-                >
-                  {{ item.get_status_text }}
-                </button>
-              </template>
-            </su-coupon>
-          </view>
-        </view>
-      </scroll-view>
-    </view>
-    <!-- 样式2 -->
-    <view class="md-coupon-wrap" v-if="mode == 2">
-      <scroll-view class="scroll-box" scroll-x scroll-anchoring>
-        <view class="coupon-box ss-flex">
-          <view
-            class="coupon-item"
-            :style="[couponBg, { marginLeft: data.space + 'px' }]"
-            v-for="(item, index) in couponList"
-            :key="index"
-          >
-            <su-coupon
-              size="md"
-              :textColor="data.fill.color"
-              background=""
-              :title="item.amount_text"
-              :value="item.amount"
-              :surplus="item.stock"
-              :couponId="item.id"
-              :type="item.type"
-              :sellBy="`${item.get_start_time.substring(0, 10)} 至 ${item.get_end_time.substring(
-                0,
-                10,
-              )}`"
+              <view class="btn-text">立即领取</view>
+            </button>
+            <button
+              v-else
+              class="ss-reset-button card-btn"
+              :style="[btnStyles]"
+              @click.stop="onGetCoupon(item.id)"
             >
-              <template v-slot:btn>
-                <button
-                  @click.stop="onGetCoupon(item.id)"
-                  class="ss-reset-button card-btn ss-flex ss-row-center ss-col-center"
-                  :style="[btnStyles]"
-                >
-                  <view class="btn-text">{{ item.get_status_text }}</view>
-                </button>
-              </template>
-            </su-coupon>
-          </view>
-        </view>
-      </scroll-view>
+              立即领取
+            </button>
+          </template>
+        </su-coupon>
+      </view>
     </view>
-    <!-- 样式3 -->
-    <view class="xs-coupon-wrap" v-if="mode == 3">
-      <scroll-view class="scroll-box" scroll-x scroll-anchoring>
-        <view class="coupon-box ss-flex">
-          <view
-            class="coupon-item"
-            :style="[couponBg, { marginLeft: data.space + 'px' }]"
-            v-for="(item, index) in couponList"
-            :key="index"
-          >
-            <su-coupon
-              size="xs"
-              :textColor="data.fill.color"
-              background=""
-              :title="item.amount_text"
-              :value="item.amount"
-              :surplus="item.stock"
-              :couponId="item.id"
-              :type="item.type"
-              :sellBy="`${item.get_start_time.substring(0, 10)} 至 ${item.get_end_time.substring(
-                0,
-                10,
-              )}`"
-            >
-              <template v-slot:btn>
-                <button
-                  class="ss-reset-button card-btn"
-                  :style="[btnStyles]"
-                  @click.stop="onGetCoupon(item.id)"
-                >
-                  {{ item.get_status_text }}
-                </button>
-              </template>
-            </su-coupon>
-          </view>
-        </view>
-      </scroll-view>
-    </view>
-  </view>
+  </scroll-view>
 </template>
 
 <script setup>
   import sheep from '@/sheep';
+  import TemplateApi from '@/sheep/api/promotion/coupon';
   import { ref, onMounted } from 'vue';
+  import {CouponTemplateValidityTypeEnum, PromotionDiscountTypeEnum} from "@/sheep/util/const";
+  import {floatToFixed2, formatDate} from "@/sheep/util";
 
   const props = defineProps({
     data: {
@@ -132,14 +60,48 @@
       default: () => ({}),
     },
   });
-  const { mode, button } = props.data;
+  const { columns, button } = props.data;
+  const SIZE_LIST = ['lg', 'md', 'xs']
   const couponBg = {
-    background: `url(${sheep.$url.cdn(props.data.fill.bgImage)}) no-repeat top center / 100% 100%`,
+    background: `url(${sheep.$url.cdn(props.data.bgImg)}) no-repeat top center / 100% 100%`,
   };
   const btnStyles = {
     background: button.bgColor,
     color: button.color,
   };
+
+  // 格式化【折扣类型】
+  const formatCouponDiscountType = (coupon) => {
+    if(coupon.discountType === PromotionDiscountTypeEnum.PRICE.type) {
+      return 'reduce'
+    }
+    if(coupon.discountType === PromotionDiscountTypeEnum.PERCENT.type) {
+      return 'percent'
+    }
+    return `未知【${coupon.discountType}】`
+  }
+
+  // 格式化【折扣】
+  const formatCouponDiscountValue = (coupon) => {
+    if(coupon.discountType === PromotionDiscountTypeEnum.PRICE.type) {
+      return floatToFixed2(coupon.discountPrice)
+    }
+    if(coupon.discountType === PromotionDiscountTypeEnum.PERCENT.type) {
+      return coupon.discountPercent
+    }
+    return `未知【${coupon.discountType}】`
+  }
+  // 格式化【有效期限】
+  const formatValidityType = (row) => {
+    if (row.validityType === CouponTemplateValidityTypeEnum.DATE.type) {
+      return `${formatDate(row.validStartTime)} 至 ${formatDate(row.validEndTime)}`
+    }
+    if (row.validityType === CouponTemplateValidityTypeEnum.TERM.type) {
+      return `领取后第 ${row.fixedStartTerm} - ${row.fixedEndTerm} 天内可用`
+    }
+    return '未知【' + row.validityType + '】'
+  }
+
   const couponList = ref([]);
   //立即领取优惠券
   async function onGetCoupon(id) {
@@ -149,15 +111,16 @@
         title: msg,
         icon: 'none',
       });
-    } else {
-      let { data } = await sheep.$api.coupon.list({ ids: props.data.couponIds.join(',') });
-      couponList.value = [...data.data];
+      return
     }
+    await getCouponTemplateList()
   }
-  onMounted(async () => {
-    let { data } = await sheep.$api.coupon.list({ ids: props.data.couponIds.join(',') });
-    // couponList.value = [...data.data, ...data.data, ...data.data, ...data.data];
-    couponList.value = [...data.data];
+  const getCouponTemplateList = async () => {
+    const { data } = await TemplateApi.getCouponTemplateListByIds(props.data.couponIds.join(','));
+    couponList.value = data;
+  }
+  onMounted(() => {
+    getCouponTemplateList()
   });
 </script>
 
@@ -168,25 +131,21 @@
     border-radius: 25rpx;
     font-size: 24rpx;
     line-height: 50rpx;
-  }
-  .coupon-item {
-    &:nth-of-type(1) {
-      margin-left: 0 !important;
-    }
-  }
-  .md-coupon-wrap {
-    .card-btn {
+    &.vertical {
       width: 50rpx;
       height: 140rpx;
-      margin: auto 0;
-      margin-right: 20rpx;
+      margin: auto 20rpx auto 0;
 
       .btn-text {
         font-size: 24rpx;
         text-align: center;
         writing-mode: vertical-lr;
-        writing-mode: tb-lr;
       }
+    }
+  }
+  .coupon-item {
+    &:nth-of-type(1) {
+      margin-left: 0 !important;
     }
   }
 </style>
