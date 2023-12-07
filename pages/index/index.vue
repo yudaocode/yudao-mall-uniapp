@@ -28,26 +28,26 @@
 
 	const template = computed(() => sheep.$store('app').template?.home);
 	// 在此处拦截改变一下首页轮播图 此处先写死后期复活 放到启动函数里
-	(async function() {
-		console.log('原代码首页定制化数据',template)
-		let {
-			data
-		} = await index2Api.decorate();
-		console.log('首页导航配置化过高无法兼容',JSON.parse(data[1].value))
+	// (async function() {
+		// console.log('原代码首页定制化数据',template)
+		// let {
+		// 	data
+		// } = await index2Api.decorate();
+		// console.log('首页导航配置化过高无法兼容',JSON.parse(data[1].value))
 		// 改变首页底部数据 但是没有通过数组id获取商品数据接口
 		// let {
 		// 	data: datas
 		// } = await index2Api.spids();
 		// template.value.data[9].data.goodsIds = datas.list.map(item => item.id);
-		template.value.data[0].data.list = JSON.parse(data[0].value).map(item => {
-			return {
-				src: item.picUrl,
-				url: item.url,
-				title: item.name,
-				type: "image"
-			}
-		})
-	}())
+		// template.value.data[0].data.list = JSON.parse(data[0].value).map(item => {
+		// 	return {
+		// 		src: item.picUrl,
+		// 		url: item.url,
+		// 		title: item.name,
+		// 		type: "image"
+		// 	}
+		// })
+	// }())
 
 
 	onLoad((options) => {
