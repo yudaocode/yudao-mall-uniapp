@@ -147,14 +147,23 @@ export default {
 				data,
 			}),
 		list: (params) =>
-			request({
-				url: 'order/aftersale',
+			request2({
+				url: 'trade/after-sale/page',
 				method: 'GET',
 				params,
 				custom: {
 					showLoading: false,
 				},
 			}),
+		// list: (params) =>
+		// 	request({
+		// 		url: 'order/aftersale',
+		// 		method: 'GET',
+		// 		params,
+		// 		custom: {
+		// 			showLoading: false,
+		// 		},
+		// 	}),
 		//取消售后
 		cancel: (id) =>
 			request({
@@ -169,8 +178,8 @@ export default {
 			}),
 		// 售后详情
 		detail: (id) =>
-			request({
-				url: 'order/aftersale/' + id,
+			request2({
+				url: 'trade/after-sale/get?id=' + id,
 				method: 'GET',
 			}),
 	},

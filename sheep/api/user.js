@@ -3,6 +3,15 @@ import request2 from '@/sheep/request2';
 import $platform from '@/sheep/platform';
 
 export default {
+	getUnused: () =>
+		request2({
+			url: 'promotion/coupon/get-unused-count',
+			method: 'GET',
+			custom: {
+				showLoading: false,
+				auth: true,
+			},
+		}),
 	profile: () =>
 		request2({
 			url: 'member/user/get',
@@ -375,7 +384,16 @@ export default {
 	wallet: {
 		log: (params) =>
 			request2({
+				// url: 'member/point/record/page',
 				url: 'pay/wallet-transaction/page',
+				method: 'GET',
+				params,
+				custom: {},
+			}),
+		log2: (params) =>
+			request2({
+				url: 'member/point/record/page',
+				// url: 'pay/wallet-transaction/page',
 				method: 'GET',
 				params,
 				custom: {},

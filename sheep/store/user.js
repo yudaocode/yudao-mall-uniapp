@@ -56,8 +56,9 @@ const user = defineStore({
 				code,
 				data
 			} = await userApi.profile();
+
 			// 为了兼容 获取用户余额 可能还会用到其他参数
-			// 优惠券数量,积分数量 应该在这里
+			// 优惠券数量,积分数量 应该在这里	
 			const {
 				code: code2,
 				data: data2
@@ -85,9 +86,12 @@ const user = defineStore({
 				data
 			} = await userApi.data();
 			const data2 = await userApi.data2();
+			let data3 = await userApi.getUnused();
+			console.log(data3.data, '优惠券')
 			if (code === 0 && data2.code === 0) {
 				console.log('订单数据', data);
 				this.numData = {
+					coupons_num: data3.data,
 					order_num: {
 						noget: data.deliveredCount,
 						unpaid: data.unpaidCount,
@@ -149,9 +153,9 @@ const user = defineStore({
 			// 登录后设置全局分享参数
 			$share.getShareInfo();
 			// 提醒绑定手机号
-			if (app().platform.bind_mobile && !this.userInfo.verification?.mobile) {
-				showAuthModal('changeMobile');
-			}
+			// if (app().platform.bind_mobile && !this.userInfo.verification?.mobile) {
+			// 	showAuthModal('changeMobile');
+			// }
 
 			// 添加分享记录
 			const shareLog = uni.getStorageSync('shareLog');
