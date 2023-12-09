@@ -10,6 +10,8 @@
     <s-menu-list v-if="type === 'MenuList'" :data="data" />
     <!-- 基础组件：宫格导航 -->
     <s-menu-grid v-if="type === 'MenuGrid'" :data="data" />
+    <!-- 基础组件：弹窗广告 -->
+    <s-popup-image v-if="type === 'Popover'" :data="data" />
 
     <!-- 图文组件：图片展示 -->
     <s-image-block v-if="type === 'ImageBar'" :data="data" :styles="styles" />
