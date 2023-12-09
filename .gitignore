@@ -9,3 +9,4 @@ deploy.sh
 yarn.lock
 package-lock.json
 *.keystore
+pnpm-lock.yaml

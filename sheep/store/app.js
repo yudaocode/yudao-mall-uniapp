@@ -61,18 +61,18 @@ const app = defineStore({
         $router.error('NetworkError');
       }
 
+      await adaptTemplate(this.template, templateId)
       const res = await appApi.init(templateId);
       if (res.error === 0) {
         this.info = res.data.app;
         this.platform = res.data.platform;
-        this.template = res.data.template;
-        this.has_wechat_trade_managed = res.data.has_wechat_trade_managed;
-        if (!res.data.template) {
-          $router.error('TemplateError');
-        }
-        this.chat = res.data.chat;
 
-        await adaptTemplate(this.template);
+        // this.template = res.data.template;
+        this.has_wechat_trade_managed = res.data.has_wechat_trade_managed;
+        // if (!res.data.template) {
+        //   $router.error('TemplateError');
+        // }
+        this.chat = res.data.chat;
 
         // 加载主题
         const sysStore = sys();
@@ -100,17 +100,26 @@ const app = defineStore({
 });
 
 // todo: @owen 先做数据适配，后期重构
-const adaptTemplate = async (appTemplate) => {
-  const diyTemplate = await diyTemplateApi.getUsedDiyTemplate();
-  const tabBar = diyTemplate?.data?.property?.tabBar;
+const adaptTemplate = async (appTemplate, templateId) => {
+  const { data: diyTemplate } = templateId
+      // 查询指定模板，一般是预览时使用
+      ? await diyTemplateApi.getDiyTemplate(templateId)
+      : await diyTemplateApi.getUsedDiyTemplate();
+  // 模板不存在
+  if (!diyTemplate) {
+    $router.error('TemplateError');
+    return
+  }
+
+  const tabBar = diyTemplate?.property?.tabBar;
   if (tabBar) {
     appTemplate.basic.tabbar = tabBar
     if (tabBar?.theme) {
       appTemplate.basic.theme = tabBar?.theme;
     }
   }
-  appTemplate.home = diyTemplate?.data?.home;
-  appTemplate.user = diyTemplate?.data?.user;
+  appTemplate.home = diyTemplate?.home;
+  appTemplate.user = diyTemplate?.user;
 }
 
 export default app;
