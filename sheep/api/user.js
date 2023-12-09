@@ -3,6 +3,15 @@ import request2 from '@/sheep/request2';
 import $platform from '@/sheep/platform';
 
 export default {
+	getUnused: () =>
+		request2({
+			url: 'promotion/coupon/get-unused-count',
+			method: 'GET',
+			custom: {
+				showLoading: false,
+				auth: true,
+			},
+		}),
 	profile: () =>
 		request2({
 			url: 'member/user/get',
@@ -187,9 +196,17 @@ export default {
 		}),
 
 	address: {
+		// default: () =>
+		// 	request({
+		// 		url: 'user/address/default',
+		// 		method: 'GET',
+		// 		custom: {
+		// 			showError: false,
+		// 		},
+		// 	}),
 		default: () =>
-			request({
-				url: 'user/address/default',
+			request2({
+				url: 'member/address/get-default',
 				method: 'GET',
 				custom: {
 					showError: false,
@@ -225,7 +242,7 @@ export default {
 		//       showSuccess: true,
 		//     },
 		//   }),
-		update: ( data) =>
+		update: (data) =>
 			request2({
 				url: 'member/address/update',
 				method: 'PUT',
@@ -325,7 +342,7 @@ export default {
 				url: 'product/favorite/delete-list',
 				method: 'DELETE',
 				data: {
-					spuIds: id.split(',').map(item=>item*1),
+					spuIds: id.split(',').map(item => item * 1),
 					// spuIds: id.split(',').join(','),
 				},
 				custom: {
@@ -367,18 +384,27 @@ export default {
 	wallet: {
 		log: (params) =>
 			request2({
+				// url: 'member/point/record/page',
 				url: 'pay/wallet-transaction/page',
 				method: 'GET',
 				params,
 				custom: {},
 			}),
-			// log: (params) =>
-			// request({
-			// 	url: '/user/api/walletLog',
-			// 	method: 'GET',
-			// 	params,
-			// 	custom: {},
-			// }),
+		log2: (params) =>
+			request2({
+				url: 'member/point/record/page',
+				// url: 'pay/wallet-transaction/page',
+				method: 'GET',
+				params,
+				custom: {},
+			}),
+		// log: (params) =>
+		// request({
+		// 	url: '/user/api/walletLog',
+		// 	method: 'GET',
+		// 	params,
+		// 	custom: {},
+		// }),
 	},
 	account: {
 		info: (params) =>
