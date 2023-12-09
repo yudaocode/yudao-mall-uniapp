@@ -36,9 +36,6 @@
         <!-- 页面内容插槽 -->
         <slot />
 
-        <!-- 悬浮按钮 -->
-        <s-float-menu v-if="showFloatButton"></s-float-menu>
-
         <!-- 底部导航 -->
         <s-tabbar v-if="tabbar !== ''" :path="tabbar" />
       </view>
@@ -129,11 +126,6 @@
     defaultSearch: {
       type: String,
       default: '',
-    },
-    //展示悬浮按钮
-    showFloatButton: {
-      type: Boolean,
-      default: false,
     },
     //展示返回按钮
     showLeftButton: {
