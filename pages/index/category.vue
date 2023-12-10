@@ -1,7 +1,9 @@
+<!-- 分类列表 -->
 <template>
 	<s-layout title="分类" tabbar="/pages/index/category" :bgStyle="{ color: '#fff' }">
 		<view class="s-category">
 			<view class="three-level-wrap ss-flex ss-col-top" :style="[{ height: pageHeight + 'px' }]">
+        <!-- 商品分类（左） -->
 				<scroll-view class="side-menu-wrap" scroll-y :style="[{ height: pageHeight + 'px' }]">
 					<view class="menu-item ss-flex" v-for="(item, index) in state.categoryList?.children" :key="item.id"
 						:class="[{ 'menu-item-active': index == state.activeMenu }]" @tap="onMenu(index)">
@@ -10,7 +12,8 @@
 						</view>
 					</view>
 				</scroll-view>
-				<scroll-view class="goods-list-box" scroll-y :style="[{ height: pageHeight + 'px' }]"
+        <!-- 商品分类（右） -->
+        <scroll-view class="goods-list-box" scroll-y :style="[{ height: pageHeight + 'px' }]"
 					v-if="state.categoryList?.children?.length">
 					<image v-if="state.categoryList.children[state.activeMenu].image" class="banner-img"
 						:src="sheep.$url.cdn(state.categoryList.children[state.activeMenu].image)" mode="widthFix">
@@ -20,8 +23,6 @@
 					<first-two v-if="state.categoryList.style === 'first_two'" :data="state.categoryList"
 						:activeMenu="state.activeMenu" :pagination="state.pagination" />
 					<second-one v-if="state.categoryList.style === 'second_one'" :data="state.categoryList"
-						:activeMenu="state.activeMenu" :pagination="state.pagination" />
-					<third-one v-if="state.categoryList.style === 'third_one'" :data="state.categoryList"
 						:activeMenu="state.activeMenu" :pagination="state.pagination" />
 					<uni-load-more v-if="
               (state.categoryList.style === 'first_one' ||
@@ -38,7 +39,6 @@
 
 <script setup>
 	import secondOne from './components/second-one.vue';
-	import thirdOne from './components/third-one.vue';
 	import firstOne from './components/first-one.vue';
 	import firstTwo from './components/first-two.vue';
 	import sheep from '@/sheep';
@@ -52,8 +52,10 @@
 		reactive
 	} from 'vue';
 	import _ from 'lodash';
+  import { handleTree } from '@/sheep/util';
 	const state = reactive({
-		categoryList: [],
+    style: 'second_one', // first_one（一级 - 样式一）, first_two（二级 - 样式二）, second_one（二级）
+		categoryList: [], // 商品分类树
 		activeMenu: '0',
 
 		pagination: {
@@ -65,12 +67,7 @@
 		loadStatus: '',
 	});
 
-	const {
-		screenHeight,
-		safeAreaInsets,
-		screenWidth,
-		safeArea
-	} = sheep.$platform.device;
+	const { safeArea } = sheep.$platform.device;
 	const pageHeight = computed(() => safeArea.height - 44 - 50);
 
 	async function getList(options) {
@@ -82,8 +79,8 @@
 		});
 		if (code === 0) {
 			state.categoryList = {
-				children: data,
-				style: 'first_one'
+				children: handleTree(data),
+				style: 'second_one'
 			};
 		}
 	}

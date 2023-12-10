@@ -1,23 +1,25 @@
-<!-- 页面  -->
+<!-- 分类展示：second-one 风格  -->
 <template>
   <view>
+    <!-- 一级分类的名字 -->
     <view class="title-box ss-flex ss-col-center ss-row-center ss-p-b-30">
-      <view class="title-line-left"></view>
+      <view class="title-line-left" />
       <view class="title-text ss-p-x-20">{{ props.data.children[activeMenu].name }}</view>
-      <view class="title-line-right"></view>
+      <view class="title-line-right" />
     </view>
+    <!-- 二级分类的名字 -->
     <view class="goods-item-box ss-flex ss-flex-wrap ss-p-b-20">
       <view
         class="goods-item"
         v-for="item in props.data.children[activeMenu].children"
         :key="item.id"
-		@tap="
-		  sheep.$router.go('/pages/goods/list', {
-		    categoryId: item.id,
-		  })
-		"
+        @tap="
+          sheep.$router.go('/pages/goods/list', {
+            categoryId: item.id,
+          })
+        "
       >
-        <image class="goods-img" :src="sheep.$url.cdn(item.image)" mode="aspectFill"></image>
+        <image class="goods-img" :src="item.picUrl" mode="aspectFill" />
         <view class="ss-p-10">
           <view class="goods-title ss-line-1">{{ item.name }}</view>
         </view>
@@ -28,13 +30,13 @@
 
 <script setup>
   import sheep from '@/sheep';
+
   const props = defineProps({
     data: {
       type: Object,
       default: () => ({}),
     },
-    activeMenu: [Number, String],
-    pagination: Object,
+    activeMenu: [Number, String]
   });
 </script>
 
