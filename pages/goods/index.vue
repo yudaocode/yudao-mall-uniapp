@@ -87,8 +87,12 @@
 						<button class="ss-reset-button disabled-btn" disabled> 已售罄 </button>
 					</view>
 				</detail-tabbar>
+
+        <!-- 优惠劵弹窗 -->
 				<s-coupon-get v-model="state.couponInfo" :show="state.showModel" @close="state.showModel = false"
                       @get="onGet" />
+
+        <!-- TODO 芋艿：待接入 -->
 				<s-activity-pop v-model="state.activityInfo" :show="state.showActivityModel"
                         @close="state.showActivityModel = false" />
 			</block>
@@ -100,6 +104,7 @@
 	import { reactive, computed } from 'vue';
 	import { onLoad, onPageScroll } from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
+  import CouponApi from '@/sheep/api/promotion/coupon';
   import { formatSales, formatGoodsSwiper, fen2yuan, } from '@/sheep/hooks/useGoods';
 	import detailNavbar from './components/detail/detail-navbar.vue';
 	import detailCellSku from './components/detail/detail-cell-sku.vue';
@@ -114,9 +119,6 @@
 		isEmpty
 	} from 'lodash';
 
-	// import detailActivityTip from './components/detail/detail-activity-tip.vue';
-	// import detailTab from './components/detail/detail-tab.vue';
-	// import detailCoupon from './components/detail/detail-coupon.vue';
 	onPageScroll(() => {});
 
 	const state = reactive({
@@ -125,8 +127,8 @@
 		goodsInfo: {}, // SPU 信息
 		showSelectSku: false, // 是否展示 SKU 选择弹窗
 		selectedSku: {}, // 选中的 SKU
-		showModel: false,
-		couponInfo: [],
+		showModel: false, // 是否展示 Coupon 优惠劵的弹窗
+		couponInfo: [], // 可领取的 Coupon 优惠劵的列表
 		showActivityModel: false,
 		activityInfo: [],
 	});
@@ -161,7 +163,7 @@
 		state.showActivityModel = true;
 	}
 
-	//立即领取  TODO 芋艿：待测试
+	// 立即领取  TODO 芋艿：待测试
 	async function onGet(id) {
 		const {
 			error,
@@ -215,19 +217,14 @@
 			state.skeletonLoading = false;
       state.goodsInfo = res.data;
 		});
-    // TODO 芋艿：下面接口的调整
-    if (true) {
-      return
-    }
 
     // 2. 加载优惠劵信息
-		const {
-			error,
-			data
-		} = await sheep.$api.coupon.listByGoods(state.goodsId);
-		if (error === 0) {
-			state.couponInfo = data;
-		}
+    CouponApi.getCouponTemplateList(state.goodsId,2, 10).then((res) => {
+      if (res.code !== 0) {
+        return;
+      }
+      state.couponInfo = res.data;
+    });
 	});
 </script>
 
