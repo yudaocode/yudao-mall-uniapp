@@ -49,16 +49,6 @@ export default {
         showError: false,
       },
     }),
-  comment2: (id, params = {pageNo:1,pageSize:10,type:0}) =>
-    request2({
-      url: 'product/comment/page?spuId='+id,
-      method: 'GET',
-      params,
-      custom: {
-        showLoading: false,
-        showError: false,
-      },
-    }),
   // 商品评价类型
   getType: (id) =>
     request({

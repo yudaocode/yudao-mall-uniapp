@@ -34,8 +34,7 @@
 						<view class="discounts-box ss-flex ss-row-between ss-m-b-28">
 							<div class="tag-content">
 								<view class="tag-box ss-flex">
-									<view class="tag ss-m-r-10" v-for="promos in state.goodsInfo.promos"
-										:key="promos.id" @tap="onActivity">
+									<view class="tag ss-m-r-10" v-for="promos in state.goodsInfo.promos" :key="promos.id" @tap="onActivity">
 										{{ promos.title }}
 									</view>
 								</view>
@@ -71,10 +70,10 @@
 				<!-- 详情 -->
 				<detail-content-card class="detail-content-selector" :content="state.goodsInfo.description" />
 
-				<!-- 活动跳转 -->
-				<detail-activity-tip v-if="state.goodsInfo.activities" :data="state.goodsInfo"></detail-activity-tip>
+				<!-- TODO 芋艿：活动跳转 -->
+				<detail-activity-tip v-if="state.goodsInfo.activities" :data="state.goodsInfo" />
 
-				<!-- 详情tabbar -->
+				<!-- 详情 tabbar -->
 				<detail-tabbar v-model="state.goodsInfo">
 					<view class="buy-box ss-flex ss-col-center ss-p-r-20" v-if="state.goodsInfo.stock > 0">
 						<button class="ss-reset-button add-btn ui-Shadow-Main" @tap="state.showSelectSku = true">

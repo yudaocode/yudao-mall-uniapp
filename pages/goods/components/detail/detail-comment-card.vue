@@ -1,3 +1,4 @@
+<!-- 商品评论的卡片 -->
 <template>
   <view class="detail-comment-card bg-white">
     <view class="card-header ss-flex ss-col-center ss-row-between ss-p-b-30">
@@ -12,19 +13,20 @@
         v-if="state.commentList.length > 0"
       >
         <button class="ss-reset-button more-btn">查看全部</button>
-        <text class="cicon-forward"></text>
+        <text class="cicon-forward" />
       </view>
     </view>
+    <!-- 评论列表 -->
     <view class="card-content">
       <view class="comment-box ss-p-y-30" v-for="item in state.commentList" :key="item.id">
-        <comment-item :item="item"></comment-item>
+        <comment-item :item="item" />
       </view>
       <s-empty
         v-if="state.commentList.length === 0"
         paddingTop="0"
         icon="/static/comment-empty.png"
         text="期待您的第一个评价"
-      ></s-empty>
+      />
     </view>
   </view>
 </template>
@@ -32,25 +34,27 @@
 <script setup>
   import { reactive, onBeforeMount } from 'vue';
   import sheep from '@/sheep';
+  import CommentApi from '@/sheep/api/product/comment';
   import commentItem from './comment-item.vue';
+
   const props = defineProps({
     goodsId: {
       type: [Number, String],
       default: 0,
     },
   });
+
   const state = reactive({
-    commentList: [],
-    total: 0,
+    commentList: [], // 评论列表，只展示最近的 3 条
+    total: 0, // 总评论数
   });
+
   async function getComment(id) {
-    const { data } = await sheep.$api.goods.comment(id, {
-      list_rows: 3,
-    });  
-	 const {data:datas} = await sheep.$api.goods.comment2(id);
-    state.commentList = data;
-    state.total = datas.total;
+    const { data } = await CommentApi.getCommentPage(id, 1, 3, 0);
+    state.commentList = data.list;
+    state.total = data.total;
   }
+
   onBeforeMount(() => {
     getComment(props.goodsId);
   });
