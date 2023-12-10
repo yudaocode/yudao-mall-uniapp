@@ -1,75 +1,93 @@
 <template>
-  <!-- TODO-jj: 点击遮罩关闭 -->
-  <view>
-    <view v-if="data?.show === 1">
-      <uni-fab
-        ref="fabRef"
-        :pattern="state.pattern"
-        :content="state.content"
-        horizontal="right"
-        vertical="bottom"
-        :direction="state.direction"
-        @trigger="trigger"
-        @fabClick="fabClick"
-        :popMenu="true"
-      ></uni-fab>
-    </view>
-    <view :class="state.show ? 'float-bg' : ''" @click="onTap"></view>
-  </view>
+  <!-- 模态背景：展开时显示，点击后折叠 -->
+  <view class="modal-bg" v-if="fabRef?.isShow" @click="handleCollapseFab"></view>
+  <!-- 悬浮按钮 -->
+  <uni-fab
+    ref="fabRef"
+    horizontal="right"
+    vertical="bottom"
+    :direction="state.direction"
+    :pattern="state.pattern"
+    :content="state.content"
+    @trigger="handleOpenLink"
+  />
 </template>
 <script setup>
+  /**
+   * 悬浮按钮
+   */
+
   import sheep from '@/sheep';
-  import { computed, reactive, ref, unref, getCurrentInstance } from 'vue';
+  import { reactive, ref, unref } from 'vue';
   import { onBackPress } from '@dcloudio/uni-app';
-  const data = computed(() => sheep.$store('app').template.basic?.floatMenu);
+
+  // 定义属性
+  const props = defineProps({
+    data: {
+      type: Object,
+      default() {
+        return {
+          // horizontal vertical
+          direction: 'vertical',
+          showText: true,
+          list: [{
+            imgUrl: 'http://localhost/logo.gif',
+            url: '',
+            text: '客服',
+            textColor: '',
+          }],
+        }
+      },
+    }
+  })
+
+  // 悬浮按钮配置： https://uniapp.dcloud.net.cn/component/uniui/uni-fab.html#fab-props
   const state = reactive({
+    // 可选样式配置项
     pattern: [],
+    // 展开菜单内容配置项
     content: [],
+    // 展开菜单显示方式：horizontal-水平显示，vertical-垂直显示
     direction: '',
-    show: false,
   });
 
+  // 悬浮按钮引用
   const fabRef = ref(null);
-  const vm = getCurrentInstance();
-  if (data.value?.mode === 1) {
-    state.direction = 'vertical';
-  } else {
-    state.direction = 'horizontal';
-  }
-  data.value?.list.forEach((i) => {
-    if (data.value?.isText === 0) {
-      state.content.push({ iconPath: sheep.$url.cdn(i.src), url: i.url });
-    } else {
-      state.content.push({ iconPath: sheep.$url.cdn(i.src), text: i.title.text + '', url: i.url });
-    }
-    state.pattern.push({ color: i.title.color });
+  // 按钮方向
+  state.direction = props.data.direction;
+  props.data?.list.forEach((item) => {
+    // 按钮文字
+    const text = props.data?.showText ? item.text : ''
+    // 生成内容配置项
+    state.content.push({ iconPath: sheep.$url.cdn(item.imgUrl), url: item.url, text });
+    // 生成样式配置项
+    state.pattern.push({ color: item.textColor });
   });
-  function trigger(e) {
+
+  // 处理链接跳转
+  function handleOpenLink(e) {
     sheep.$router.go(e.item.url);
   }
-  function onTap() {
-    if (state.show) {
-      state.show = false;
-      vm.refs.fabRef.close();
-    } else {
-      state.show = true;
-      vm.refs.fabRef.open();
+
+  // 折叠
+  function handleCollapseFab() {
+    if (unref(fabRef)?.isShow) {
+      unref(fabRef)?.close();
     }
   }
-  function fabClick() {
-    state.show = !state.show;
-  }
+
+  // 按返回值后，折叠悬浮按钮
   onBackPress(() => {
-    if (unref(fabRef).isShow) {
-      unref(fabRef).close();
+    if (unref(fabRef)?.isShow) {
+      unref(fabRef)?.close();
       return true;
-    } else {
-      return false;
     }
+    return false;
   });
 </script>
 <style lang="scss" scoped>
-  .float-bg {
+  /* 模态背景 */
+  .modal-bg {
     position: fixed;
     left: 0;
     top: 0;

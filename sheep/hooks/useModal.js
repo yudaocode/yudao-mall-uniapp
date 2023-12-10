@@ -121,8 +121,8 @@ export function saveAdvHistory(adv) {
   const modal = $store('modal');
 
   modal.$patch((state) => {
-    if (!state.advHistory.includes(adv.src)) {
-      state.advHistory.push(adv.src);
+    if (!state.advHistory.includes(adv.imgUrl)) {
+      state.advHistory.push(adv.imgUrl);
     }
   });
 }

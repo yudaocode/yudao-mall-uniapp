@@ -5,8 +5,6 @@
 			<s-block v-for="(item, index) in template.components" :key="index" :styles="item.property.style">
 				<s-block-item :type="item.id" :data="item.property" :styles="item.property.style" />
 			</s-block>
-			<!-- 广告模块 -->
-			<s-popup-image />
 		</s-layout>
 	</view>
 </template>
