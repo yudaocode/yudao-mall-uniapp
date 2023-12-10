@@ -1,70 +1,56 @@
 <template>
 	<!-- 规格弹窗 -->
 	<su-popup :show="show" round="10" @close="emits('close')">
+    <!-- SKU 信息 -->
 		<view class="ss-modal-box bg-white ss-flex-col">
 			<view class="modal-header ss-flex ss-col-center">
 				<view class="header-left ss-m-r-30">
-					<image class="sku-image" :src="state.selectedSkuPrice.image || goodsInfo.image"
-						mode="aspectFill"></image>
+					<image class="sku-image" :src="state.selectedSku.picUrl || goodsInfo.picUrl" mode="aspectFill" />
 				</view>
 				<view class="header-right ss-flex-col ss-row-between ss-flex-1">
-					<view class="goods-title ss-line-2">{{ goodsInfo.title }}</view>
+					<view class="goods-title ss-line-2">{{ goodsInfo.name }}</view>
 					<view class="header-right-bottom ss-flex ss-col-center ss-row-between">
 						<view class="ss-flex">
-							<view v-if="goodsPrice.price > 0" class="price-text">
-								{{ goodsPrice.price }}
-							</view>
-							<view class="ss-flex">
-								<view v-if="goodsPrice.price > 0 && goodsPrice.score > 0" class="score-text ss-m-l-4">+
-								</view>
-								<image v-if="goodsPrice.score > 0"
-									:src="sheep.$url.static('/static/img/shop/goods/score1.svg')" class="score-img">
-								</image>
-								<view v-if="goodsPrice.score > 0" class="score-text">
-									{{ goodsPrice.score }}
-								</view>
+							<view class="price-text">
+								{{ fen2yuan( state.selectedSku.price || goodsInfo.price) }}
 							</view>
 						</view>
-
 						<view class="stock-text ss-m-l-20">
-							{{
-                state.selectedSkuPrice.stock
-                  ? formatStock(goodsInfo.stock_show_type, state.selectedSkuPrice.stock)
-                  : formatStock(goodsInfo.stock_show_type, goodsInfo.stock)
-              }}
+							{{ formatStock('exact', state.selectedSku.stock || goodsInfo.stock) }}
 						</view>
 					</view>
 				</view>
 			</view>
+
+      <!-- 属性选择 -->
 			<view class="modal-content ss-flex-1">
 				<scroll-view scroll-y="true" class="modal-content-scroll" @touchmove.stop>
-					<view class="sku-item ss-m-b-20" v-for="sku1 in skuList" :key="sku1.id">
-						<view class="label-text ss-m-b-20">{{ sku1.name }}</view>
+					<view class="sku-item ss-m-b-20" v-for="property in propertyList" :key="property.id">
+						<view class="label-text ss-m-b-20">{{ property.name }}</view>
 						<view class="ss-flex ss-col-center ss-flex-wrap">
-							<button class="ss-reset-button spec-btn" v-for="sku2 in sku1.values" :class="[
+							<button class="ss-reset-button spec-btn" v-for="value in property.values" :class="[
                   {
-                    'ui-BG-Main-Gradient': state.currentSkuArray[sku1.id] == sku2.id,
+                    'ui-BG-Main-Gradient': state.currentPropertyArray[property.id] === value.id,
                   },
                   {
-                    'disabled-btn': sku2.disabled === true,
+                    'disabled-btn': value.disabled === true,
                   },
-                ]" :key="sku2.id" :disabled="sku2.disabled === true" @tap="onSelectSku(sku1.id, sku2.id)">
-								{{ sku2.name }}
+                ]" :key="value.id" :disabled="value.disabled === true" @tap="onSelectSku(property.id, value.id)">
+								{{ value.name }}
 							</button>
 						</view>
 					</view>
 					<view class="buy-num-box ss-flex ss-col-center ss-row-between ss-m-b-40">
 						<view class="label-text">购买数量</view>
-						<su-number-box :min="1" :max="state.selectedSkuPrice.stock" :step="1"
-							v-model="state.selectedSkuPrice.goods_num" @change="onNumberChange($event)" />
+						<su-number-box :min="1" :max="state.selectedSku.stock" :step="1"
+                           v-model="state.selectedSku.goods_num" @change="onNumberChange($event)" />
 					</view>
 				</scroll-view>
 			</view>
+
+      <!-- 操作区 -->
 			<view class="modal-footer border-top">
-				<view class="buy-box ss-flex ss-col-center ss-flex ss-col-center ss-row-center" v-if="isScore">
-					<button class="ss-reset-button score-btn ui-Shadow-Main" @tap="onBuy">立即兑换</button>
-				</view>
-				<view class="buy-box ss-flex ss-col-center ss-flex ss-col-center ss-row-center" v-else>
+				<view class="buy-box ss-flex ss-col-center ss-flex ss-col-center ss-row-center">
 					<button class="ss-reset-button add-btn ui-Shadow-Main" @tap="onAddCart">加入购物车</button>
 					<button class="ss-reset-button buy-btn ui-Shadow-Main" @tap="onBuy">立即购买</button>
 				</view>
@@ -74,20 +60,9 @@
 </template>
 
 <script setup>
-	import {
-		computed,
-		reactive,
-		watch
-	} from 'vue';
+	import { computed, reactive, watch } from 'vue';
 	import sheep from '@/sheep';
-	import {
-		formatStock,
-		formatPrice,
-    convertProductPropertyList
-	} from '@/sheep/hooks/useGoods';
-	import {
-		isEmpty
-	} from 'lodash';
+  import { formatStock, convertProductPropertyList, fen2yuan } from '@/sheep/hooks/useGoods';
 
 	const emits = defineEmits(['change', 'addCart', 'buy', 'close']);
 	const props = defineProps({
@@ -98,48 +73,27 @@
 		show: {
 			type: Boolean,
 			default: false,
-		},
-		isScore: {
-			type: Boolean,
-			default: false,
-		},
+		}
 	});
 
 	const state = reactive({
-		selectedSkuPrice: {},
-		currentSkuArray: [],
+		selectedSku: {}, // 选中的 SKU
+		currentPropertyArray: [], // 当前选中的属性，实际是个 Map。key 是 property 编号，value 是 value 编号
 	});
-	// 输入框改变数量
-	function onNumberChange(e) {
-		if (e === 0) return;
-		if (state.selectedSkuPrice.goods_num === e) return;
-		state.selectedSkuPrice.goods_num = e;
-	}
-  // TODO 芋艿：去除单规格
-	// 默认单规格
-	// if (!props.goodsInfo.is_sku) {
-	// 	state.selectedSkuPrice = props.goodsInfo.sku_prices[0];
-	// }
 
-	const skuList = convertProductPropertyList(props.goodsInfo.skus);
+	const propertyList = convertProductPropertyList(props.goodsInfo.skus);
 
-	// 可选规格
-	const skuPrices = computed(() => {
+	// SKU 列表
+	const skuList = computed(() => {
 		let skuPrices = props.goodsInfo.skus;
-    // TODO 芋艿：去除单规格
-		// if (props.goodsInfo.is_sku) {
-		// 	skuPrices.forEach((item) => {
-		// 		item.goods_sku_id_arr = item.goods_sku_ids.split(',');
-		// 	});
-		// }
     for (let price of skuPrices) {
-      price.goods_sku_id_arr = price.properties.map((item) => item.valueId).join(',')
+      price.value_id_array = price.properties.map((item) => item.valueId)
     }
 		return skuPrices;
 	});
 
 	watch(
-		() => state.selectedSkuPrice,
+		() => state.selectedSku,
 		(newVal) => {
 			emits('change', newVal);
 		}, {
@@ -148,189 +102,174 @@
 		},
 	);
 
-	const goodsPrice = computed(() => {
-    let price, score;
-		if (isEmpty(state.selectedSkuPrice)) {
-			price = props.goodsInfo.price[0];
-			score = props.goodsInfo.score || 0;
-		} else {
-			price = state.selectedSkuPrice.price;
-			score = state.selectedSkuPrice.score || 0;
-		}
-		return {
-			price,
-			score,
-		};
-	});
+  // 输入框改变数量
+  function onNumberChange(e) {
+    if (e === 0) return;
+    if (state.selectedSku.goods_num === e) return;
+    state.selectedSku.goods_num = e;
+  }
 
+  // 加入购物车
 	function onAddCart() {
-		if (state.selectedSkuPrice.goods_id) {
-			if (state.selectedSkuPrice.stock <= 0) {
-				sheep.$helper.toast('库存不足');
-			} else {
-				emits('addCart', state.selectedSkuPrice);
-			}
-		} else {
-			sheep.$helper.toast('请选择规格');
+		if (state.selectedSku.id <= 0) {
+      sheep.$helper.toast('请选择规格');
+      return;
 		}
+    if (state.selectedSku.stock <= 0) {
+      sheep.$helper.toast('库存不足');
+      return;
+    }
+
+    emits('addCart', state.selectedSku);
 	}
 
+  // 立即购买
 	function onBuy() {
-		if (state.selectedSkuPrice.goods_id) {
-			if (state.selectedSkuPrice.stock <= 0) {
-				sheep.$helper.toast('库存不足');
-			} else {
-				emits('buy', state.selectedSkuPrice);
-			}
-		} else {
-			sheep.$helper.toast('请选择规格');
-		}
+    if (state.selectedSku.id <= 0) {
+      sheep.$helper.toast('请选择规格');
+      return;
+    }
+    if (state.selectedSku.stock <= 0) {
+      sheep.$helper.toast('库存不足');
+      return;
+    }
+    emits('buy', state.selectedSku);
 	}
-	// 改变禁用状态
-	function changeDisabled(isChecked = false, pid = 0, skuId = 0) {
-    let newPrice = []; // 所有可以选择的 skuPrice
 
+	// 改变禁用状态：计算每个 property 属性值的按钮，是否禁用
+	function changeDisabled(isChecked = false, propertyId = 0, valueId = 0) {
+    let newSkus = []; // 所有可以选择的 sku 数组
 		if (isChecked) {
-			// 选中规格
-			// 当前点击选中规格下的 所有可用 skuPrice
-			for (let price of skuPrices.value) {
+			// 情况一：选中 property
+			// 获得当前点击选中 property 的、所有可用 SKU
+			for (let price of skuList.value) {
 				if (price.stock <= 0) {
-					// this.goodsNum 不判断是否大于当前选择数量，在 uni-number-box 判断，并且 取 stock 和 goods_num 的小值
 					continue;
 				}
-        console.log(price.goods_sku_id_arr, '=======')
-				if (price.goods_sku_id_arr.indexOf(skuId.toString()) >= 0) {
-					newPrice.push(price);
+				if (price.value_id_array.indexOf(valueId) >= 0) {
+					newSkus.push(price);
 				}
 			}
 		} else {
-			// 取消选中
-			// 当前所选规格下，所有可以选择的 skuPrice
-			newPrice = getCanUseSkuPrice();
+			// 情况二：取消选中 property
+			// 当前所选 property 下，所有可以选择的 SKU
+			newSkus = getCanUseSkuList();
 		}
 
-		// 所有存在并且有库存未选择的规格项 的 子项 id
-		let noChooseSkuIds = [];
-		for (let price of newPrice) {
-			noChooseSkuIds = noChooseSkuIds.concat(price.goods_sku_id_arr);
+		// 所有存在并且有库存未选择的 SKU 的 value 属性值 id
+		let noChooseValueIds = [];
+		for (let price of newSkus) {
+			noChooseValueIds = noChooseValueIds.concat(price.value_id_array);
 		}
-
-		// 去重
-		noChooseSkuIds = Array.from(new Set(noChooseSkuIds));
+		noChooseValueIds = Array.from(new Set(noChooseValueIds)); // 去重
 
 		if (isChecked) {
-			// 去除当前选中的规格项
-			let index = noChooseSkuIds.indexOf(skuId.toString());
-			noChooseSkuIds.splice(index, 1);
+			// 去除当前选中的 value 属性值 id
+			let index = noChooseValueIds.indexOf(valueId);
+			noChooseValueIds.splice(index, 1);
 		} else {
-			// 循环去除当前已选择的规格项
-			state.currentSkuArray.forEach((sku) => {
-				if (sku.toString() != '') {
-					// sku 为空是反选 填充的
-					let index = noChooseSkuIds.indexOf(sku.toString());
-					if (index >= 0) {
-						// sku 存在于 noChooseSkuIds
-						noChooseSkuIds.splice(index, 1);
-					}
+			// 循环去除当前已选择的 value 属性值 id
+			state.currentPropertyArray.forEach((currentPropertyId) => {
+				if (currentPropertyId.toString() !== '') {
+          return;
 				}
+        // currentPropertyId 为空是反选 填充的
+        let index = noChooseValueIds.indexOf(currentPropertyId);
+        if (index >= 0) {
+          // currentPropertyId 存在于 noChooseValueIds
+          noChooseValueIds.splice(index, 1);
+        }
 			});
 		}
 
-		// 当前已选择的规格大类
-		let chooseSkuKey = [];
+    // 当前已选择的 property 数组
+		let choosePropertyIds = [];
 		if (!isChecked) {
-			// 当前已选择的规格大类
-			state.currentSkuArray.forEach((sku, key) => {
-				if (sku != '') {
-					// sku 为空是反选 填充的
-					chooseSkuKey.push(key);
+			// 当前已选择的 property
+			state.currentPropertyArray.forEach((currentPropertyId, currentValueId) => {
+				if (currentPropertyId !== '') {
+					// currentPropertyId 为空是反选 填充的
+					choosePropertyIds.push(currentValueId);
 				}
 			});
 		} else {
-			// 当前点击选择的规格大类
-			chooseSkuKey = [pid];
+			// 当前点击选择的 property
+			choosePropertyIds = [propertyId];
 		}
 
-		for (let i in skuList) {
-			// 当前点击的规格，或者取消选择时候 已选中的规格 不进行处理
-			if (chooseSkuKey.indexOf(skuList[i]['id']) >= 0) {
+    for (let propertyIndex in propertyList) {
+			// 当前点击的 property、或者取消选择时候，已选中的 property 不进行处理
+			if (choosePropertyIds.indexOf(propertyList[propertyIndex]['id']) >= 0) {
 				continue;
 			}
-
-			for (let j in skuList[i]['children']) {
-				// 如果当前规格项 id 不存在于有库存的规格项中，则禁用
-				if (noChooseSkuIds.indexOf(skuList[i]['children'][j]['id'].toString()) >= 0) {
-					skuList[i]['children'][j]['disabled'] = false;
-				} else {
-					skuList[i]['children'][j]['disabled'] = true;
-				}
+      // 如果当前 property id 不存在于有库存的 SKU 中，则禁用
+      for (let valueIndex in propertyList[propertyIndex]['values']) {
+				propertyList[propertyIndex]['values'][valueIndex]['disabled'] =
+          noChooseValueIds.indexOf(propertyList[propertyIndex]['values'][valueIndex]['id']) < 0; // true 禁用 or false 不禁用
 			}
 		}
 	}
-	// 当前所选规格下，获取所有有库存的 skuPrice
-	function getCanUseSkuPrice() {
-    // debugger
-		let newPrice = [];
 
-		for (let price of skuPrices.value) {
-			if (price.stock <= 0) {
-				// || price.stock < this.goodsNum		不判断是否大于当前选择数量，在 uni-number-box 判断，并且 取 stock 和 goods_num 的小值
+	// 当前所选属性下，获取所有有库存的 SKU 们
+	function getCanUseSkuList() {
+		let newSkus = [];
+		for (let sku of skuList.value) {
+			if (sku.stock <= 0) {
 				continue;
 			}
-			var isOk = true;
-
-			state.currentSkuArray.forEach((sku) => {
-				// sku 不为空，并且，这个 条 skuPrice 没有被选中,则排除
-				if (sku.toString() != '' && price.goods_sku_id_arr.indexOf(sku.toString()) < 0) {
+      let isOk = true;
+      state.currentPropertyArray.forEach((propertyId) => {
+				// propertyId 不为空，并且，这个 条 sku 没有被选中，则排除
+				if (propertyId.toString() !== '' && sku.value_id_array.indexOf(propertyId) < 0) {
 					isOk = false;
 				}
 			});
-
 			if (isOk) {
-				newPrice.push(price);
+				newSkus.push(sku);
 			}
 		}
-
-		return newPrice;
+		return newSkus;
 	}
+
 	// 选择规格
-	function onSelectSku(pid, skuId) {
-    // debugger
+	function onSelectSku(propertyId, valueId) {
 		// 清空已选择
 		let isChecked = true; // 选中 or 取消选中
-		if (state.currentSkuArray[pid] != undefined && state.currentSkuArray[pid] == skuId) {
+		if (state.currentPropertyArray[propertyId] !== undefined && state.currentPropertyArray[propertyId] === valueId) {
 			// 点击已被选中的，删除并填充 ''
 			isChecked = false;
-			state.currentSkuArray.splice(pid, 1, '');
+			state.currentPropertyArray.splice(propertyId, 1, '');
 		} else {
 			// 选中
-			state.currentSkuArray[pid] = skuId;
+			state.currentPropertyArray[propertyId] = valueId;
 		}
 
-		let chooseSkuId = []; // 选中的规格大类
-		state.currentSkuArray.forEach((sku) => {
-			if (sku != '') {
-				// sku 为空是反选 填充的
-				chooseSkuId.push(sku);
+    // 选中的 property 大类
+		let choosePropertyId = [];
+		state.currentPropertyArray.forEach((currentPropertyId) => {
+			if (currentPropertyId !== '') {
+				// currentPropertyId 为空是反选 填充的
+				choosePropertyId.push(currentPropertyId);
 			}
 		});
 
-		// 当前所选规格下，所有可以选择的 skuPrice
-		let newPrice = getCanUseSkuPrice();
+		// 当前所选 property 下，所有可以选择的 SKU 们
+		let newSkuList = getCanUseSkuList();
 
-		// 判断所有规格大类是否选择完成
-		if (chooseSkuId.length == skuList.length && newPrice.length) {
-			newPrice[0].goods_num = state.selectedSkuPrice.goods_num || 1;
-			state.selectedSkuPrice = newPrice[0];
+		// 判断所有 property 大类是否选择完成
+		if (choosePropertyId.length === propertyList.length && newSkuList.length) {
+			newSkuList[0].goods_num = state.selectedSku.goods_num || 1;
+			state.selectedSku = newSkuList[0];
 		} else {
-			state.selectedSkuPrice = {};
+			state.selectedSku = {};
 		}
 
-		// 改变规格项禁用状态
-		changeDisabled(isChecked, pid, skuId);
+		// 改变 property 禁用状态
+		changeDisabled(isChecked, propertyId, valueId);
 	}
 
 	changeDisabled(false);
+  // TODO 芋艿：待讨论的优化点：1）单规格，要不要默认选中；2）默认要不要选中第一个规格
 </script>
 
 <style lang="scss" scoped>

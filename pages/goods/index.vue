@@ -12,24 +12,25 @@
 			<block v-else>
 				<view class="detail-swiper-selector">
 					<!-- 商品轮播图  -->
-					<su-swiper class="ss-m-b-14" isPreview :list="state.goodsSwiper" dotStyle="tag" imageMode="widthFix"
-						dotCur="bg-mask-40" :seizeHeight="750" />
+					<su-swiper class="ss-m-b-14" isPreview :list="formatGoodsSwiper(state.goodsInfo.sliderPicUrls)"
+                     dotStyle="tag" imageMode="widthFix" dotCur="bg-mask-40" :seizeHeight="750" />
 
 					<!-- 价格+标题 -->
 					<view class="title-card detail-card ss-p-y-40 ss-p-x-20">
 						<view class="ss-flex ss-row-between ss-col-center ss-m-b-26">
 							<view class="price-box ss-flex ss-col-bottom">
 								<view class="price-text ss-m-r-16">
-									{{ state.selectedSkuPrice.price || formatPrice(state.goodsInfo.price) }}
+									{{ fen2yuan(state.selectedSku.price || state.goodsInfo.price) }}
 								</view>
-								<view class="origin-price-text" v-if="state.goodsInfo.original_price > 0">
-									{{ state.selectedSkuPrice.original_price || state.goodsInfo.original_price }}
+								<view class="origin-price-text" v-if="state.goodsInfo.marketPrice > 0">
+									{{ fen2yuan(state.selectedSku.marketPrice || state.goodsInfo.marketPrice) }}
 								</view>
 							</view>
 							<view class="sales-text">
-								{{ formatSales(state.goodsInfo.sales_show_type, state.goodsInfo.sales) }}
+								{{ formatSales('exact', state.goodsInfo.salesCount) }}
 							</view>
 						</view>
+            <!-- TODO 芋艿：promos 未写 -->
 						<view class="discounts-box ss-flex ss-row-between ss-m-b-28">
 							<div class="tag-content">
 								<view class="tag-box ss-flex">
@@ -40,27 +41,29 @@
 								</view>
 							</div>
 
+              <!-- TODO 芋艿：couponInfo 优惠劵 -->
 							<view class="get-coupon-box ss-flex ss-col-center ss-m-l-20" @tap="state.showModel = true"
 								v-if="state.couponInfo.length">
 								<view class="discounts-title ss-m-r-8">领券</view>
 								<text class="cicon-forward"></text>
 							</view>
 						</view>
-						<view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo.title }}</view>
-						<view class="subtitle-text ss-line-1">{{ state.goodsInfo.subtitle }}</view>
+						<view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo.name }}</view>
+						<view class="subtitle-text ss-line-1">{{ state.goodsInfo.introduction }}</view>
 					</view>
 
 					<!-- 功能卡片 -->
 					<view class="detail-cell-card detail-card ss-flex-col">
-						<detail-cell-sku v-model="state.selectedSkuPrice.goods_sku_text" :skus="state.goodsInfo.skus"
-							@tap="state.showSelectSku = true" />
+						<detail-cell-sku v-model="state.selectedSku.goods_sku_text" :sku="state.selectedSku"
+                             @tap="state.showSelectSku = true" />
+            <!-- TODO 芋艿：可能暂时不考虑使用 -->
 						<detail-cell-service v-if="state.goodsInfo.service" v-model="state.goodsInfo.service" />
 						<detail-cell-params v-if="state.goodsInfo.params" v-model="state.goodsInfo.params" />
 					</view>
 
 					<!-- 规格与数量弹框 -->
 					<s-select-sku :goodsInfo="state.goodsInfo" :show="state.showSelectSku" @addCart="onAddCart"
-						@buy="onBuy" @change="onSkuChange" @close="state.showSelectSku = false" />
+                        @buy="onBuy" @change="onSkuChange" @close="state.showSelectSku = false" />
 				</view>
 
 				<!-- 评价 -->
@@ -73,7 +76,6 @@
 
 				<!-- 详情tabbar -->
 				<detail-tabbar v-model="state.goodsInfo">
-					<!-- TODO: 缺货中 已售罄 判断 设计-->
 					<view class="buy-box ss-flex ss-col-center ss-p-r-20" v-if="state.goodsInfo.stock > 0">
 						<button class="ss-reset-button add-btn ui-Shadow-Main" @tap="state.showSelectSku = true">
 							加入购物车
@@ -87,29 +89,19 @@
 					</view>
 				</detail-tabbar>
 				<s-coupon-get v-model="state.couponInfo" :show="state.showModel" @close="state.showModel = false"
-					@get="onGet" />
+                      @get="onGet" />
 				<s-activity-pop v-model="state.activityInfo" :show="state.showActivityModel"
-					@close="state.showActivityModel = false" />
+                        @close="state.showActivityModel = false" />
 			</block>
 		</s-layout>
 	</view>
 </template>
 
 <script setup>
-	import {
-		reactive,
-		computed
-	} from 'vue';
-	import {
-		onLoad,
-		onPageScroll
-	} from '@dcloudio/uni-app';
+	import { reactive, computed } from 'vue';
+	import { onLoad, onPageScroll } from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
-	import {
-		formatSales,
-		formatGoodsSwiper,
-		formatPrice
-	} from '@/sheep/hooks/useGoods';
+  import { formatSales, formatGoodsSwiper, fen2yuan, } from '@/sheep/hooks/useGoods';
 	import detailNavbar from './components/detail/detail-navbar.vue';
 	import detailCellSku from './components/detail/detail-cell-sku.vue';
 	import detailCellService from './components/detail/detail-cell-service.vue';
@@ -130,29 +122,27 @@
 
 	const state = reactive({
 		goodsId: 0,
-		skeletonLoading: true,
-		goodsInfo: {},
-		showSelectSku: false,
-		goodsSwiper: [],
-		selectedSkuPrice: {},
+		skeletonLoading: true, // SPU 加载中
+		goodsInfo: {}, // SPU 信息
+		showSelectSku: false, // 是否展示 SKU 选择弹窗
+		selectedSku: {}, // 选中的 SKU
 		showModel: false,
-		total: 0,
 		couponInfo: [],
 		showActivityModel: false,
 		activityInfo: [],
 	});
 
-	// 规格变更
+	// 规格变更 TODO 芋艿：待测试
 	function onSkuChange(e) {
-		state.selectedSkuPrice = e;
+		state.selectedSku = e;
 	}
 
-	// 添加购物车
+	// 添加购物车  TODO 芋艿：待测试
 	function onAddCart(e) {
 		sheep.$store('cart').add(e);
 	}
 
-	// 立即购买
+	// 立即购买  TODO 芋艿：待测试
 	function onBuy(e) {
 		sheep.$router.go('/pages/order/confirm', {
 			data: JSON.stringify({
@@ -165,13 +155,14 @@
 			}),
 		});
 	}
-	//营销活动
+
+	// 营销活动  TODO 芋艿：待测试
 	function onActivity() {
 		state.activityInfo = state.goodsInfo.promos;
 		state.showActivityModel = true;
 	}
 
-	//立即领取
+	//立即领取  TODO 芋艿：待测试
 	async function onGet(id) {
 		const {
 			error,
@@ -187,10 +178,11 @@
 		}
 	}
 
+  //  TODO 芋艿：待测试
 	const shareInfo = computed(() => {
 		if (isEmpty(state.goodsInfo)) return {};
 		return sheep.$platform.share.getShareInfo({
-			title: state.goodsInfo.title,
+			title: state.goodsInfo.name,
 			image: sheep.$url.cdn(state.goodsInfo.image),
 			desc: state.goodsInfo.subtitle,
 			params: {
@@ -199,7 +191,7 @@
 			},
 		}, {
 			type: 'goods', // 商品海报
-			title: state.goodsInfo.title, // 商品标题
+			title: state.goodsInfo.name, // 商品标题
 			image: sheep.$url.cdn(state.goodsInfo.image), // 商品主图
 			price: state.goodsInfo.price[0], // 商品价格
 			original_price: state.goodsInfo.original_price, // 商品原价
@@ -207,41 +199,29 @@
 	});
 
 	onLoad(async (options) => {
-		console.log('页面被访问')
 		// 非法参数
 		if (!options.id) {
 			state.goodsInfo = null;
 			return;
 		}
 		state.goodsId = options.id;
-		// 加载商品信息
+		// 1. 加载商品信息
 		sheep.$api.goods.detail(state.goodsId).then((res) => {
-			// 处理数据适配
-			// let arr = [];
-			// res.skus = res.data.skus.map(item => {
-			// 	arr = [...arr, ...item.properties];
-			// 	item.children = item.properties;
-			// 	item.goods_id = res.data.id;
-			// 	item.name = item.children[0].propertyName;
-			// 	return item;
-			// })
-			// console.log(arr, '合并');
-			// console.log(res.data, '替换后订单数据');
+      // 未找到商品
+      if (res.code !== 0 || !res.data) {
+        state.goodsInfo = null;
+        return;
+      }
+			// 加载到商品
 			state.skeletonLoading = false;
-			if (res.code === 0) {
-				// 在此处对数据做出转换
-				res.data.sales = res.data.salesCount
-				res.data.original_price = res.data.marketPrice / 100
-				res.data.subtitle = res.data.introduction
-				res.data.title = res.data.name
-				res.data.price = [res.data.price / 100]
-				state.goodsInfo = res.data;
-				state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.sliderPicUrls);
-			} else {
-				// 未找到商品
-				state.goodsInfo = null;
-			}
+      state.goodsInfo = res.data;
 		});
+    // TODO 芋艿：下面接口的调整
+    if (true) {
+      return
+    }
+
+    // 2. 加载优惠劵信息
 		const {
 			error,
 			data
