@@ -30,9 +30,9 @@
 								{{ formatSales('exact', state.goodsInfo.salesCount) }}
 							</view>
 						</view>
-            <!-- TODO 芋艿：promos 未写 -->
 						<view class="discounts-box ss-flex ss-row-between ss-m-b-28">
-							<div class="tag-content">
+              <!-- 满减送/限时折扣活动的提示 TODO 芋艿：promos 未写 -->
+              <div class="tag-content">
 								<view class="tag-box ss-flex">
 									<view class="tag ss-m-r-10" v-for="promos in state.goodsInfo.promos" :key="promos.id" @tap="onActivity">
 										{{ promos.title }}
@@ -40,7 +40,7 @@
 								</view>
 							</div>
 
-              <!-- TODO 芋艿：couponInfo 优惠劵 -->
+              <!-- 优惠劵 -->
 							<view class="get-coupon-box ss-flex ss-col-center ss-m-l-20" @tap="state.showModel = true"
 								v-if="state.couponInfo.length">
 								<view class="discounts-title ss-m-r-8">领券</view>
@@ -70,8 +70,8 @@
 				<!-- 详情 -->
 				<detail-content-card class="detail-content-selector" :content="state.goodsInfo.description" />
 
-				<!-- TODO 芋艿：活动跳转 -->
-				<detail-activity-tip v-if="state.goodsInfo.activities" :data="state.goodsInfo" />
+				<!-- 活动跳转：拼团/秒杀/砍价活动 -->
+				<detail-activity-tip v-if="state.activityList.length > 0" :activity-list="state.activityList" />
 
 				<!-- 详情 tabbar -->
 				<detail-tabbar v-model="state.goodsInfo">
@@ -92,7 +92,7 @@
 				<s-coupon-get v-model="state.couponInfo" :show="state.showModel" @close="state.showModel = false"
                       @get="onGet" />
 
-        <!-- TODO 芋艿：待接入 -->
+        <!-- 满减送/限时折扣活动弹窗 -->
 				<s-activity-pop v-model="state.activityInfo" :show="state.showActivityModel"
                         @close="state.showActivityModel = false" />
 			</block>
@@ -105,6 +105,7 @@
 	import { onLoad, onPageScroll } from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
   import CouponApi from '@/sheep/api/promotion/coupon';
+  import ActivityApi from '@/sheep/api/promotion/activity';
   import { formatSales, formatGoodsSwiper, fen2yuan, } from '@/sheep/hooks/useGoods';
 	import detailNavbar from './components/detail/detail-navbar.vue';
 	import detailCellSku from './components/detail/detail-cell-sku.vue';
@@ -115,9 +116,7 @@
 	import detailCommentCard from './components/detail/detail-comment-card.vue';
 	import detailContentCard from './components/detail/detail-content-card.vue';
 	import detailActivityTip from './components/detail/detail-activity-tip.vue';
-	import {
-		isEmpty
-	} from 'lodash';
+	import { isEmpty } from 'lodash';
 
 	onPageScroll(() => {});
 
@@ -129,11 +128,12 @@
 		selectedSku: {}, // 选中的 SKU
 		showModel: false, // 是否展示 Coupon 优惠劵的弹窗
 		couponInfo: [], // 可领取的 Coupon 优惠劵的列表
-		showActivityModel: false,
-		activityInfo: [],
+		showActivityModel: false, // 【满减送/限时折扣】是否展示 Activity 营销活动的弹窗
+		activityInfo: [], // 【满减送/限时折扣】可参与的 Activity 营销活动的列表
+    activityList: [], // 【秒杀/拼团/砍价】可参与的 Activity 营销活动的列表
 	});
 
-	// 规格变更 TODO 芋艿：待测试
+	// 规格变更
 	function onSkuChange(e) {
 		state.selectedSku = e;
 	}
@@ -224,6 +224,14 @@
         return;
       }
       state.couponInfo = res.data;
+    });
+
+    // 3. 加载营销活动信息
+    ActivityApi.getActivityListBySpuId(state.goodsId).then((res) => {
+      if (res.code !== 0) {
+        return;
+      }
+      state.activityList = res.data;
     });
 	});
 </script>

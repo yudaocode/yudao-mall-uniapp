@@ -1,52 +1,57 @@
 <template>
   <su-fixed bottom placeholder :val="44">
     <view>
-      <view v-for="activity in data.activities" :key="activity.id">
+      <view v-for="activity in props.activityList" :key="activity.id">
+        <!-- TODO 芋艿：拼团 -->
         <view
           class="activity-box ss-p-x-38 ss-flex ss-row-between ss-col-center"
-          :class="activity.type == 'seckill' ? 'seckill-box' : 'groupon-box'"
+          :class="activity.type === 1 ? 'seckill-box' : 'groupon-box'"
         >
           <view class="activity-title ss-flex">
             <view class="ss-m-r-16">
               <image
+                v-if="activity.type === 1"
                 :src="sheep.$url.static('/static/img/shop/goods/seckill-icon.png')"
-                v-if="activity.type == 'seckill'"
                 class="activity-icon"
-              ></image>
+              />
+              <!-- TODO 芋艿：拼团 -->
               <image
+                v-else-if="activity.type === 3"
                 :src="sheep.$url.static('/static/img/shop/goods/groupon-icon.png')"
                 class="activity-icon"
-                v-else
-              ></image>
+              />
             </view>
-            <view>该商品正在参与{{ activity.type_text }}活动</view>
+            <view>该商品正在参与{{ activity.name }}活动</view>
           </view>
           <button class="ss-reset-button activity-go" @tap="onActivity(activity)"> GO </button>
         </view>
-        <!-- <button @tap="onActivity(activity)">{{ activity.title }} {{ activity.type_text }}</button> -->
       </view>
     </view>
   </su-fixed>
 </template>
 
 <script setup>
-  import { ref, reactive } from 'vue';
   import sheep from '@/sheep';
 
+  // TODO 芋艿：这里要迁移下；
   const seckillBg = sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png');
   const grouponBg = sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png');
 
   const props = defineProps({
-    data: {
-      type: Object,
-      default() {},
-    },
+    activityList: {
+      type: Array,
+      default() {
+        return [];
+      }
+    }
   });
+
   function onActivity(activity) {
-    let type = activity.type;
-    if (type === 'groupon_ladder') type = 'groupon';
-    sheep.$router.go(`/pages/goods/${type}`, {
-      id: props.data.id,
+    const type = activity.type;
+    const typePath = type === 1 ? 'seckill' :
+      type === 2 ? 'TODO 拼团' : 'groupon';
+    sheep.$router.go(`/pages/goods/${typePath}`, {
+      id: activity.spuId,
       activity_id: activity.id,
     });
   }
