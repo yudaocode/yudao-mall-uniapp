@@ -4,14 +4,14 @@
     <!-- 一级分类的名字 -->
     <view class="title-box ss-flex ss-col-center ss-row-center ss-p-b-30">
       <view class="title-line-left" />
-      <view class="title-text ss-p-x-20">{{ props.data.children[activeMenu].name }}</view>
+      <view class="title-text ss-p-x-20">{{ props.data[activeMenu].name }}</view>
       <view class="title-line-right" />
     </view>
     <!-- 二级分类的名字 -->
     <view class="goods-item-box ss-flex ss-flex-wrap ss-p-b-20">
       <view
         class="goods-item"
-        v-for="item in props.data.children[activeMenu].children"
+        v-for="item in props.data[activeMenu].children"
         :key="item.id"
         @tap="
           sheep.$router.go('/pages/goods/list', {
@@ -36,7 +36,7 @@
       type: Object,
       default: () => ({}),
     },
-    activeMenu: [Number, String]
+    activeMenu: [Number, String],
   });
 </script>
 
