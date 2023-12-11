@@ -138,7 +138,7 @@
 		state.selectedSku = e;
 	}
 
-	// 添加购物车  TODO 芋艿：待测试
+	// 添加购物车
 	function onAddCart(e) {
 		sheep.$store('cart').add(e);
 	}
