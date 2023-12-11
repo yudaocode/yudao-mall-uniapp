@@ -23,8 +23,8 @@ const app = defineStore({
       copytime: '', // 版权信息 II
     },
     platform: {
-      payment: [], // 支持的支付方式
-      recharge_payment: [], // 支持的充值支付方式
+      payment: [], // 支持的支付方式 TODO 芋艿：可删除
+      recharge_payment: [], // 支持的充值支付方式 TODO 芋艿：可删除
       share: {
         methods: [], // 支持的分享方式
         forwardInfo: {}, // 默认转发信息

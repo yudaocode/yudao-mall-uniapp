@@ -29,8 +29,8 @@ export default class SheepPay {
         alipay: () => {
           this.redirectPay(); // 现在公众号可以直接跳转支付宝页面
         },
-        money: () => {
-          this.moneyPay();
+        wallet: () => {
+          this.walletPay();
         },
         offline: () => {
           this.offlinePay();
@@ -43,8 +43,8 @@ export default class SheepPay {
         alipay: () => {
           this.copyPayLink();
         },
-        money: () => {
-          this.moneyPay();
+        wallet: () => {
+          this.walletPay();
         },
         offline: () => {
           this.offlinePay();
@@ -57,8 +57,8 @@ export default class SheepPay {
         alipay: () => {
           this.alipay();
         },
-        money: () => {
-          this.moneyPay();
+        wallet: () => {
+          this.walletPay();
         },
         offline: () => {
           this.offlinePay();
@@ -71,8 +71,8 @@ export default class SheepPay {
         alipay: () => {
           this.redirectPay();
         },
-        money: () => {
-          this.moneyPay();
+        wallet: () => {
+          this.walletPay();
         },
         offline: () => {
           this.offlinePay();
@@ -109,7 +109,7 @@ export default class SheepPay {
     });
   }
   // #ifdef H5
-  // 微信公众号JSSDK支付
+  // 微信公众号JSSDK支付 TODO 芋艿：待接入
   async wechatOfficialAccountPay() {
     let that = this;
     let { error, data, msg } = await this.prepay();
@@ -130,7 +130,7 @@ export default class SheepPay {
     });
   }
 
-  //浏览器微信H5支付
+  //浏览器微信H5支付 TODO 芋艿：待接入
   async wechatWapPay() {
     const { error, data } = await this.prepay();
     if (error === 0) {
@@ -140,7 +140,7 @@ export default class SheepPay {
     }
   }
 
-  // 支付链接
+  // 支付链接  TODO 芋艿：待接入
   async redirectPay() {
     let { error, data } = await this.prepay();
     if (error === 0) {
@@ -152,7 +152,7 @@ export default class SheepPay {
 
   // #endif
 
-  // 微信小程序支付
+  // 微信小程序支付  TODO 芋艿：待接入
   async wechatMiniProgramPay() {
     let that = this;
     let result = await this.prepay();
@@ -172,19 +172,19 @@ export default class SheepPay {
     });
   }
 
-  // 余额支付
-  async moneyPay() {
+  // 余额支付  TODO 芋艿：待接入
+  async walletPay() {
     const { error } = await this.prepay();
     error === 0 && this.payResult('success');
   }
 
-  // 货到付款
+  // 货到付款  TODO 芋艿：待接入
   async offlinePay() {
     const { error } = await this.prepay();
     error === 0 && this.payResult('success');
   }
 
-  // 支付宝复制链接支付
+  // 支付宝复制链接支付  TODO 芋艿：待接入
   async copyPayLink() {
     let that = this;
     let { error, data } = await this.prepay();
@@ -203,7 +203,7 @@ export default class SheepPay {
     }
   }
 
-  // 支付宝支付
+  // 支付宝支付  TODO 芋艿：待接入
   async alipay() {
     let that = this;
     const { error, data } = await this.prepay();
@@ -225,7 +225,7 @@ export default class SheepPay {
     }
   }
 
-  // 微信支付
+  // 微信支付  TODO 芋艿：待接入
   async wechatAppPay() {
     let that = this;
     let { error, data } = await this.prepay();
@@ -252,4 +252,67 @@ export default class SheepPay {
       orderType: this.orderType,
     });
   }
+}
+
+export function getPayMethods(channels) {
+  const payMethods = [
+    {
+      icon: '/static/img/shop/pay/wechat.png',
+      title: '微信支付',
+      value: 'wechat',
+      disabled: true,
+    },
+    {
+      icon: '/static/img/shop/pay/alipay.png',
+      title: '支付宝支付',
+      value: 'alipay',
+      disabled: true,
+    },
+    {
+      icon: '/static/img/shop/pay/wallet.png',
+      title: '余额支付',
+      value: 'wallet',
+      disabled: true,
+    },
+    {
+      icon: '/static/img/shop/pay/apple.png',
+      title: 'Apple Pay',
+      value: 'apple',
+      disabled: true,
+    },
+    {
+      icon: '/static/img/shop/pay/wallet.png',
+      title: '模拟支付',
+      value: 'mock',
+      disabled: true,
+    }
+  ];
+  const platform = sheep.$platform.name
+
+  // 1. 处理【微信支付】
+  const wechatMethod = payMethods[0];
+  if ((platform === 'WechatOfficialAccount' && channels.includes('wx_pub'))
+    || platform === 'WechatMiniProgram' && channels.includes('wx_lite')
+    || platform === 'App' && channels.includes('wx_app')) {
+    wechatMethod.disabled = false;
+  }
+  // 2. 处理【支付宝支付】
+  const alipayMethod = payMethods[1];
+  if ((platform === 'WechatOfficialAccount' && channels.includes('alipay_wap'))
+    || platform === 'WechatMiniProgram' && channels.includes('alipay_wap')
+    || platform === 'App' && channels.includes('alipay_app')) {
+    alipayMethod.disabled = false;
+  }
+  // 3. 处理【余额支付】
+  const walletMethod = payMethods[2];
+  if (channels.includes('wallet')) {
+    walletMethod.disabled = false;
+  }
+  // 4. 处理【苹果支付】TODO 芋艿：未来接入
+  // 5. 处理【模拟支付】
+  const mockMethod = payMethods[4];
+  if (channels.includes('mock')) {
+    mockMethod.disabled = false;
+  }
+  return payMethods;
 }
