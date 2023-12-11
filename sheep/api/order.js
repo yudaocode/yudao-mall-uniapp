@@ -65,18 +65,24 @@ export default {
 		// 解决 SpringMVC 接受 List<Item> 参数的问题
 		delete data2.items
 		for (let i = 0; i < data.items.length; i++) {
-			// data2['items[' + i + '' + '].skuId'] = data.items[i].skuId + '';
-			// data2['items[' + i + '' + '].count'] = data.items[i].count + '';
-			// data2['items[' + i + '' + '].cartId'] = data.items[i].cartId + '';
-			data2['items' + `%5B${i}%5D` + '.skuId'] = data.items[i].skuId + '';
-			data2['items' + `%5B${i}%5D` + '.count'] = data.items[i].count + '';
-			data2['items' + `%5B${i}%5D` + '.cartId'] = data.items[i].cartId + '';
+			// 此处转码问题,待解决方案
+			// data2[encodeURIComponent('items[' + i + '' + '].skuId')] = data.items[i].skuId + '';
+			// data2[encodeURIComponent('items[' + i + '' + '].count')] = data.items[i].count + '';
+			// data2[encodeURIComponent('items[' + i + '' + '].cartId')] = data.items[i].cartId + '';
+
+			// data2['items' + `[${i}]` + '.skuId'] = data.items[i].skuId + '';
+			// data2['items' + `[${i}]` + '.count'] = data.items[i].count + '';
+			// data2['items' + `[${i}]` + '.cartId'] = data.items[i].cartId + '';
+
+			// data2['items' + `%5B${i}%5D` + '.skuId'] = data.items[i].skuId + '';
+			// data2['items' + `%5B${i}%5D` + '.count'] = data.items[i].count + '';
+			// data2['items' + `%5B${i}%5D` + '.cartId'] = data.items[i].cartId + '';
 		}
-		console.log(data2, '对比数据')
+		console.log(data2, '手动转码的参数')
 		return request2({
 			url: 'trade/order/settlement',
 			method: 'GET',
-			// data,
+			// data: data2,
 			params: data2
 		})
 	},

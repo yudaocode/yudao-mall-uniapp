@@ -55,7 +55,8 @@ const http = new Request({
 	method: 'GET',
 	header: {
 		Accept: 'text/json',
-		'Content-Type': 'application/json;charset=UTF-8',
+		'Content-Type': 'application/json',
+		// ;charset=UTF-8
 		platform: $platform.name,
 	},
 	// #ifdef APP-PLUS
@@ -97,6 +98,7 @@ http.interceptors.request.use(
 			config.header['tenant-id'] = '1';
 			config.header['Authorization'] = 'Bearer test247';
 		}
+		// console.log(config, '看参数')
 		return config;
 	},
 	(error) => {

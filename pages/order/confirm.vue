@@ -281,7 +281,7 @@
 	}
 
 	onLoad(async (options) => {
-		console.log(options)
+		console.log(options, '确认订单启动参数')
 		if (options.data) {
 			state.orderPayload = JSON.parse(options.data);
 			changeConsignee();

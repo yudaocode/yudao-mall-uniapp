@@ -148,10 +148,19 @@
 		});
 		if (res.code === 0) {
 			// 拦截修改数据
+			let obj2 = {
+				2: '折扣',
+				1: '满减'
+			}
 			let obj = {
 				1: '可用',
 				2: '已用',
 				3: '过期'
+			}
+			let obj3 = {
+				1: '已领取',
+				2: '已使用',
+				3: '已过期'
 			}
 			res.data.list = res.data.list.map(item => {
 				return {
@@ -160,7 +169,8 @@
 					amount: (item.discountPrice / 100).toFixed(2),
 					use_start_time: sheep.$helper.timeFormat(item.validStartTime, 'yyyy-mm-dd hh:MM:ss'),
 					use_end_time: sheep.$helper.timeFormat(item.validEndTime, 'yyyy-mm-dd hh:MM:ss'),
-					status_text: obj[item.status]
+					status_text: obj[item.status],
+					type_text: obj2[item.discountType]
 				}
 			});
 			if (page >= 2) {

@@ -12,8 +12,8 @@ export default {
 			},
 		}),
 	append: (data) =>
-		request({
-			url: 'cart',
+		request2({
+			url: '/app-api/trade/cart/add',
 			method: 'POST',
 			custom: {
 				showSuccess: true,
@@ -21,9 +21,22 @@ export default {
 			},
 			data: {
 				...data,
-				type: 'inc',
+				// type: 'inc',
 			},
 		}),
+	// append: (data) =>
+	// 	request({
+	// 		url: 'cart',
+	// 		method: 'POST',
+	// 		custom: {
+	// 			showSuccess: true,
+	// 			successMsg: '已添加到购物车~',
+	// 		},
+	// 		data: {
+	// 			...data,
+	// 			type: 'inc',
+	// 		},
+	// 	}),
 	// 删除购物车
 	delete: (ids) =>
 		request2({

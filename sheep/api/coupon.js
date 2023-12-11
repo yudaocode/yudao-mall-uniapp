@@ -33,10 +33,21 @@ export default {
 			},
 		}),
 	get: (id) =>
-		request({
-			url: 'coupon/get/' + id,
+		request2({
+			url: 'promotion/coupon/take',
 			method: 'POST',
+			data: {
+				templateId: id
+			},
+			params: {
+				templateId: id
+			},
 		}),
+	// get: (id) =>
+	// 	request({
+	// 		url: 'coupon/get/' + id,
+	// 		method: 'POST',
+	// 	}),
 	listByGoods: (id) =>
 		request({
 			url: 'coupon/listByGoods/' + id,
