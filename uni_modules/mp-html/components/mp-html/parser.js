@@ -7,7 +7,7 @@ const config = {
 	// 信任的标签（保持标签名不变）
 	trustTags: makeMap(
 		'a,abbr,ad,audio,b,blockquote,br,code,col,colgroup,dd,del,dl,dt,div,em,fieldset,h1,h2,h3,h4,h5,h6,hr,i,img,ins,label,legend,li,ol,p,q,ruby,rt,source,span,strong,sub,sup,table,tbody,td,tfoot,th,thead,tr,title,ul,video'
-		),
+	),
 
 	// 块级标签（转为 div，其他的非信任标签转为 span）
 	blockTags: makeMap('address,article,aside,body,caption,center,cite,footer,header,html,nav,pre,section'),
@@ -20,12 +20,12 @@ const config = {
 	// 要移除的标签
 	ignoreTags: makeMap(
 		'area,base,canvas,embed,frame,head,iframe,input,link,map,meta,param,rp,script,source,style,textarea,title,track,wbr'
-		),
+	),
 
 	// 自闭合的标签
 	voidTags: makeMap(
 		'area,base,br,col,circle,ellipse,embed,frame,hr,img,input,line,link,meta,param,path,polygon,rect,source,track,use,wbr'
-		),
+	),
 
 	// html 实体
 	entities: {
@@ -364,7 +364,7 @@ Parser.prototype.onAttrName = function(name) {
  * @private
  */
 Parser.prototype.onAttrVal = function(val) {
-	console.log(val, '解码转码')
+	// console.log(val, '解码转码')
 	const name = this.attrName || ''
 	if (name === 'style' || name === 'href') {
 		// 部分属性进行实体解码
@@ -502,7 +502,7 @@ Parser.prototype.onOpenTag = function(selfClose) {
 							for (let j = i + 1; j < this.stack.length; j++) {
 								const style = this.stack[j].attrs.style || ''
 								if (!style.includes(';width') && !style.includes(' width') && style.indexOf(
-									'width') !== 0) {
+										'width') !== 0) {
 									styleObj.width = ''
 									break
 								}
@@ -1151,7 +1151,7 @@ Parser.prototype.onText = function(text) {
 	if (this.hook(node)) {
 		// #ifdef MP-WEIXIN
 		if (this.options.selectable === 'force' && system.includes('iOS') && !uni.canIUse(
-			'rich-text.user-select')) {
+				'rich-text.user-select')) {
 			this.expose()
 		}
 		// #endif

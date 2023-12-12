@@ -1,5 +1,4 @@
 import request from '@/sheep/request';
-import request2 from '@/sheep/request2';
 
 export default {
 	// 获得优惠劵模板列表
@@ -14,8 +13,8 @@ export default {
 	},
 	// 获得优惠劵模版列表
 	getCouponTemplateList: (params) => {
-		return request2({
-			url: `promotion/coupon/match-list?price=${params.price}&spuIds=${params.spuIds}&skuIds=${params.skuIds}&categoryIds=${params.categoryIds}`,
+		return request({
+			url: `/app-api/promotion/coupon/match-list?price=${params.price}&spuIds=${params.spuIds}&skuIds=${params.skuIds}&categoryIds=${params.categoryIds}`,
 			method: 'GET',
 			// params,
 		});

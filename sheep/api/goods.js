@@ -1,5 +1,4 @@
 import request from '@/sheep/request';
-import request2 from '@/sheep/request2';
 
 export default {
 	// 商品详情
