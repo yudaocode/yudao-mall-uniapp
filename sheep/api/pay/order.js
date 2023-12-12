@@ -9,6 +9,14 @@ const PayOrderApi = {
       params: { id }
     });
   },
+  // 提交支付订单
+  submitOrder: (data) => {
+    return request({
+      url: '/app-api/pay/order/submit',
+      method: 'POST',
+      data
+    });
+  }
 };
 
 export default PayOrderApi;

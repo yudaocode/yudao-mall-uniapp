@@ -3,19 +3,20 @@ import sheep from '@/sheep';
 import $wxsdk from '@/sheep/libs/sdk-h5-weixin';
 // #endif
 import { getRootUrl } from '@/sheep/helper';
+import PayOrderApi from '@/sheep/api/pay/order';
 
 /**
  * 支付
  *
  * @param {String} payment = ['wechat','alipay','wallet','offline']  	- 支付方式
  * @param {String} orderType = ['goods','recharge','groupon']  	- 订单类型
- * @param {String} orderSN					- 订单号
+ * @param {String} id					- 订单号
  */
 
 export default class SheepPay {
-  constructor(payment, orderType, orderSN) {
+  constructor(payment, orderType, id) {
     this.payment = payment;
-    this.orderSN = orderSN;
+    this.id = id;
     this.orderType = orderType;
     this.payAction();
   }
@@ -83,18 +84,21 @@ export default class SheepPay {
   }
 
   // 预支付
-  prepay() {
+  prepay(channel) {
     return new Promise((resolve, reject) => {
       let data = {
-        order_sn: this.orderSN,
-        payment: this.payment,
+        id: this.id,
+        channelCode: channel,
+        channelExtras: {}
       };
       if (uni.getStorageSync('openid')) {
         data.openid = uni.getStorageSync('openid');
       }
-      sheep.$api.pay.prepay(data).then((res) => {
-        res.error === 0 && resolve(res);
-        if (res.error === -1 && res.msg === 'miss_openid') {
+      PayOrderApi.submitOrder(data).then((res) => {
+        // 成功时
+        res.code === 0 && resolve(res);
+        // 失败时
+        if (res.code !== 0 && res.msg === 'miss_openid') {
           uni.showModal({
             title: '微信支付',
             content: '请先绑定微信再使用微信支付',
@@ -134,7 +138,7 @@ export default class SheepPay {
   async wechatWapPay() {
     const { error, data } = await this.prepay();
     if (error === 0) {
-      const redirect_url = `${getRootUrl()}pages/pay/result?orderSN=${this.orderSN}&payment=${this.payment
+      const redirect_url = `${getRootUrl()}pages/pay/result?id=${this.id}&payment=${this.payment
         }&orderType=${this.orderType}`;
       location.href = `${data.pay_data.h5_url}&redirect_url=${encodeURIComponent(redirect_url)}`;
     }
@@ -144,7 +148,7 @@ export default class SheepPay {
   async redirectPay() {
     let { error, data } = await this.prepay();
     if (error === 0) {
-      const redirect_url = `${getRootUrl()}pages/pay/result?orderSN=${this.orderSN}&payment=${this.payment
+      const redirect_url = `${getRootUrl()}pages/pay/result?id=${this.id}&payment=${this.payment
         }&orderType=${this.orderType}`;
       location.href = data.pay_data + encodeURIComponent(redirect_url);
     }
@@ -172,10 +176,10 @@ export default class SheepPay {
     });
   }
 
-  // 余额支付  TODO 芋艿：待接入
+  // 余额支付
   async walletPay() {
-    const { error } = await this.prepay();
-    error === 0 && this.payResult('success');
+    const { code } = await this.prepay('wallet');
+    code === 0 && this.payResult('success');
   }
 
   // 货到付款  TODO 芋艿：待接入
@@ -246,10 +250,9 @@ export default class SheepPay {
   // 支付结果跳转,success:成功，fail:失败
   payResult(resultType) {
     sheep.$router.redirect('/pages/pay/result', {
-      orderSN: this.orderSN,
-      payment: this.payment, //重新支付的时候使用
-      payState: resultType,
+      id: this.id,
       orderType: this.orderType,
+      payState: resultType
     });
   }
 }

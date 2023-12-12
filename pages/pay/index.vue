@@ -87,10 +87,11 @@
 
   // 检测支付环境
   const state = reactive({
-    payment: '',
-    orderInfo: {},
+    orderType: 'goods', // 订单类型; goods - 商品订单, recharge - 充值订单
+    orderInfo: {}, // 支付单信息
     payStatus: 0, // 0=检测支付环境, -2=未查询到支付单信息， -1=支付已过期， 1=待支付，2=订单已支付
-    payMethods: [],
+    payMethods: [], // 可选的支付方式
+    payment: '', // 选中的支付方式
   });
 
   const onPay = () => {
@@ -104,12 +105,12 @@
         content: '确定要支付吗?',
         success: function (res) {
           if (res.confirm) {
-            sheep.$platform.pay(state.payment, state.orderType, state.orderInfo.order_sn);
+            sheep.$platform.pay(state.payment, state.orderType, state.orderInfo.id);
           }
         },
       });
     } else {
-      sheep.$platform.pay(state.payment, state.orderType, state.orderInfo.order_sn);
+      sheep.$platform.pay(state.payment, state.orderType, state.orderInfo.id);
     }
   };
 
@@ -134,15 +135,16 @@
 
   // 状态转换：payOrder.status => payStatus
   function checkPayStatus() {
-    if (state.orderInfo.status === 10) {
+    if (state.orderInfo.status === 10
+      || state.orderInfo.status === 20 ) { // 支付成功
       state.payStatus = 2;
       return;
     }
-    if (state.orderInfo.status === 20) {
+    if (state.orderInfo.status === 30) { // 支付关闭
       state.payStatus = -1;
       return;
     }
-    state.payStatus = 1;
+    state.payStatus = 1; // 待支付
   }
 
   // 切换支付方式
@@ -167,24 +169,25 @@
 
   // 获得支付方式
   async function setPayMethods() {
-    const { data, code } = await PayChannelApi.getEnableChannelCodeList(state.orderInfo.appId);
+    const { data, code } = await PayChannelApi.getEnableChannelCodeList(state.orderInfo.appId)
     if (code !== 0) {
-      return;
+      return
     }
-    state.payMethods = getPayMethods(data);
+    state.payMethods = getPayMethods(data)
   }
 
   onLoad((options) => {
-    if (
-      sheep.$platform.name === 'WechatOfficialAccount' &&
-      sheep.$platform.os === 'ios' &&
-      !sheep.$platform.landingPage.includes('pages/pay/index')
-    ) {
+    if (sheep.$platform.name === 'WechatOfficialAccount'
+      && sheep.$platform.os === 'ios'
+      && !sheep.$platform.landingPage.includes('pages/pay/index')) {
       location.reload();
       return;
     }
     // 获得支付订单信息
     let id = options.id;
+    if (options.orderType) {
+      state.orderType = options.orderType;
+    }
     setOrder(id);
   });
 </script>
@@ -202,6 +205,7 @@
     .modal-header {
       position: relative;
       padding: 60rpx 20rpx 40rpx;
+
 
       .money-text {
         color: $red;
