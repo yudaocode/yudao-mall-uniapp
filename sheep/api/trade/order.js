@@ -1,4 +1,5 @@
 import request2 from '@/sheep/request2';
+import request from '@/sheep/request';
 
 const OrderApi = {
   // 计算订单信息
@@ -48,6 +49,27 @@ const OrderApi = {
       },
     });
   },
+  // 订单列表
+  getOrderPage: (params) => {
+    return request({
+      url: '/app-api/trade/order/page',
+      method: 'GET',
+      params,
+      custom: {
+        showLoading: false,
+      },
+    });
+  },
+  // 确认收货
+  receiveOrder: (id) => {
+    return request2({
+      url: `/app-api/trade/order/receive`,
+      method: 'PUT',
+      params: {
+        id,
+      },
+    });
+  },
   // 取消订单
   cancelOrder: (id) => {
     return request2({
@@ -67,7 +89,7 @@ const OrderApi = {
         id,
       },
     });
-  }
+  },
 };
 
 export default OrderApi;

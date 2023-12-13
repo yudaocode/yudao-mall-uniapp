@@ -200,7 +200,7 @@
           确认收货
         </button>
 				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.buttons?.includes('comment')"
-                @tap="onComment(state.orderInfo.id,state.orderInfo)">
+                @tap="onComment(state.orderInfo.id, state.orderInfo)">
           评价
         </button>
 			</view>
@@ -304,12 +304,9 @@
 		}
 
 		// 正常的确认收货流程
-		const {
-			error,
-			data
-		} = await sheep.$api.order.confirm(orderId);
-		if (error === 0) {
-			getOrderDetail(data.order_sn);
+		const { code } = await OrderApi.receiveOrder(orderId);
+		if (code === 0) {
+			await getOrderDetail(orderId);
 		}
 	}
 
@@ -354,11 +351,6 @@
 
 	// 评价
 	function onComment(orderSN, orderId) {
-		console.log(orderId);
-		// return;
-		uni.$once('SELECT_INVOICE', (e) => {
-			state.invoiceInfo = e.invoiceInfo;
-		});
 		sheep.$router.go('/pages/goods/comment/add', {
 			orderSN,
 			orderId

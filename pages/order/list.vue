@@ -6,7 +6,7 @@
 		</su-sticky>
 		<s-empty v-if="state.pagination.total === 0" icon="/static/order-empty.png" text="暂无订单" />
 		<view v-if="state.pagination.total > 0">
-			<view class="bg-white order-list-card-box ss-r-10 ss-m-t-14 ss-m-20" v-for="order in state.pagination.data"
+			<view class="bg-white order-list-card-box ss-r-10 ss-m-t-14 ss-m-20" v-for="order in state.pagination.list"
             :key="order.id" @tap="onOrderDetail(order.id)">
 				<view class="order-card-header ss-flex ss-col-center ss-row-between ss-p-x-20">
 					<view class="order-no">订单号：{{ order.no }}</view>
@@ -75,7 +75,7 @@
 		<!-- 加载更多 -->
 		<uni-load-more v-if="state.pagination.total > 0" :status="state.loadStatus" :content-text="{
         contentdown: '上拉加载更多',
-      }" @tap="loadmore" />
+      }" @tap="loadMore" />
 	</s-layout>
 </template>
 
@@ -100,23 +100,23 @@
 	} from 'lodash';
   import OrderApi from '@/sheep/api/trade/order';
 
-	const pagination = {
-		data: [],
-		current_page: 1,
-		total: 1
+	const paginationNull = {
+		list: [],
+    total: 0,
+		pageNo: 1,
+    pageSize: 5,
 	};
 
 	// 数据
 	const state = reactive({
 		currentTab: 0, // 选中的 tabMaps 下标
 		pagination: {
-			data: [],
-			current_page: 1,
-			total: 1
+      list: [],
+      total: 0,
+      pageNo: 1,
+      pageSize: 5,
 		},
-		loadStatus: '',
-		deleteOrderId: 0,
-		error: 0,
+		loadStatus: ''
 	});
 
 	const tabMaps = [{
@@ -142,11 +142,12 @@
 
 	// 切换选项卡
 	function onTabsChange(e) {
-		if (state.currentTab === e.index) return;
-
-		state.pagination = pagination;
+		if (state.currentTab === e.index) {
+      return;
+    }
+    // 重头加载代码
+		state.pagination = paginationNull;
 		state.currentTab = e.index;
-
 		getOrderList();
 	}
 
@@ -196,11 +197,9 @@
 		}
 
 		// 正常的确认收货流程
-		const {
-			error
-		} = await sheep.$api.order.confirm(order.id);
-		if (error === 0) {
-			state.pagination = pagination;
+		const { code } = await OrderApi.receiveOrder(order.id);
+		if (code === 0) {
+			state.pagination = paginationNull;
 			await getOrderList();
 		}
 	}
@@ -256,8 +255,8 @@
         const { code } = await OrderApi.cancelOrder(orderId);
         if (code === 0) {
           // 修改数据的状态
-          let index = state.pagination.data.findIndex((order) => order.id === orderId);
-          const orderInfo = state.pagination.data[index];
+          let index = state.pagination.list.findIndex((order) => order.id === orderId);
+          const orderInfo = state.pagination.list[index];
           orderInfo.status = 40;
           handleOrderButtons(orderInfo);
         }
@@ -275,39 +274,31 @@
 					const { code } = await OrderApi.deleteOrder(orderId);
 					if (code === 0) {
             // 删除数据
-						let index = state.pagination.data.findIndex((order) => order.id === orderId);
-						state.pagination.data.splice(index, 1);
+						let index = state.pagination.list.findIndex((order) => order.id === orderId);
+						state.pagination.list.splice(index, 1);
 					}
 				}
 			},
 		});
 	}
 
-	// 获取订单列表 TODO 芋艿：待测试
-	async function getOrderList(page = 1, list_rows = 5) {
+	// 获取订单列表
+	async function getOrderList() {
 		state.loadStatus = 'loading';
-		let res = await sheep.$api.order.list({
-			status: tabMaps[state.currentTab].value,
-			pageSize: list_rows,
-			pageNo: page,
-			commentStatus: tabMaps[state.currentTab].value == 30 ? false : null
+		let { code, data } = await OrderApi.getOrderPage({
+      pageNo: state.pagination.pageNo,
+      pageSize: state.pagination.pageSize,
+      status: tabMaps[state.currentTab].value,
+			commentStatus: tabMaps[state.currentTab].value === 30 ? false : null
 		});
-		state.error = res.code;
-		if (res.code === 0) {
-      res.data.list.forEach(order => handleOrderButtons(order));
-			let orderList = _.concat(state.pagination.data, res.data.list);
-			state.pagination = {
-				...res.data,
-				data: orderList,
-			};
-			console.log(state.pagination)
-			if (state.pagination.data.length < state.pagination.total) {
-				state.loadStatus = 'more';
-			} else {
-				state.loadStatus = 'noMore';
-			}
-		}
-	}
+    if (code !== 0) {
+      return;
+    }
+    data.list.forEach(order => handleOrderButtons(order));
+    state.pagination.list = _.concat(state.pagination.list, data.list)
+    state.pagination.total = data.total;
+    state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
+  }
 
 	onLoad(async (options) => {
 		if (options.type) {
@@ -317,20 +308,22 @@
 	});
 
 	// 加载更多
-	function loadmore() {
-		if (state.loadStatus !== 'noMore') {
-			getOrderList(parseInt((state.pagination.data.length / 5) + 1));
+	function loadMore() {
+		if (state.loadStatus === 'noMore') {
+      return
 		}
-	}
+    state.pagination.pageNo++;
+    getOrderList();
+  }
 
 	// 上拉加载更多
 	onReachBottom(() => {
-		loadmore();
+		loadMore();
 	});
 
 	// 下拉刷新
 	onPullDownRefresh(() => {
-		state.pagination = pagination;
+		state.pagination = paginationNull;
 		getOrderList();
 		setTimeout(function() {
 			uni.stopPullDownRefresh();

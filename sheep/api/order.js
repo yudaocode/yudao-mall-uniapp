@@ -37,16 +37,7 @@ export default {
 				showLoading: false,
 			},
 		}),
-	// 订单列表
-	list: (params) =>
-		request({
-			url: '/app-api/trade/order/page',
-			method: 'GET',
-			params,
-			custom: {
-				showLoading: false,
-			},
-		}),
+
 	// list: (params) =>
 	//   request({
 	//     url: 'order/order',

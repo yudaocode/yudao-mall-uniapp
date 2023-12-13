@@ -94,6 +94,7 @@ http.interceptors.request.use(
 		if (config.url.indexOf('/app-api/') !== -1) {
 			config.header['Accept'] = '*/*'
 			config.header['tenant-id'] = '1';
+      config.header['terminal'] = '20';
 			config.header['Authorization'] = 'Bearer test247';
 		}
 		return config;
@@ -212,8 +213,8 @@ const request = (config) => {
 	}
 	// TODO 芋艿：额外拼接
 	if (config.url.indexOf('/app-api/') >= 0) {
-		config.url = 'http://api-dashboard.yudao.iocoder.cn' + config.url; // 调用【云端】
-		// config.url = 'http://127.0.0.1:48080' + config.url; // 调用【本地】
+		// config.url = 'http://api-dashboard.yudao.iocoder.cn' + config.url; // 调用【云端】
+		config.url = 'http://127.0.0.1:48080' + config.url; // 调用【本地】
 	}
 	return http.middleware(config);
 };
