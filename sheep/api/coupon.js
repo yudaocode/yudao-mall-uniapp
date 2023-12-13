@@ -1,5 +1,4 @@
 import request from '@/sheep/request';
-import request2 from '@/sheep/request2';
 
 export default {
 	// 我的拼团
@@ -13,8 +12,8 @@ export default {
 			},
 		}),
 	userCoupon: (params) =>
-		request2({
-			url: 'promotion/coupon/page',
+		request({
+			url: '/app-api/promotion/coupon/page',
 			method: 'GET',
 			params,
 		}),
@@ -34,9 +33,20 @@ export default {
 		}),
 	get: (id) =>
 		request({
-			url: 'coupon/get/' + id,
+			url: '/app-api/promotion/coupon/take',
 			method: 'POST',
+			data: {
+				templateId: id
+			},
+			params: {
+				templateId: id
+			},
 		}),
+	// get: (id) =>
+	// 	request({
+	// 		url: 'coupon/get/' + id,
+	// 		method: 'POST',
+	// 	}),
 	listByGoods: (id) =>
 		request({
 			url: 'coupon/listByGoods/' + id,

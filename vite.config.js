@@ -1,4 +1,6 @@
-import { loadEnv } from 'vite';
+import {
+	loadEnv
+} from 'vite';
 import uni from '@dcloudio/vite-plugin-uni';
 import path from 'path';
 // import viteCompression from 'vite-plugin-compression';

@@ -1,13 +1,9 @@
 <template>
 	<view class="ss-m-20" :style="{ opacity: disabled ? '0.5' : '1' }">
 		<view class="content">
-			<!--      <view
-        class="tag ss-flex ss-row-center"
-        :class="
+			<view class="tag ss-flex ss-row-center" :class="
           data.status == 'expired' || data.status == 'used' ? 'disabled-bg-color' : 'info-bg-color'
-        "
-        >{{ data.type_text }}</view
-      > -->
+        ">{{ data.type_text }}</view>
 			<view class="title ss-m-x-30 ss-p-t-18">
 				<view class="ss-flex ss-row-between">
 					<view class="value-text ss-flex-1 ss-m-r-10" :class="

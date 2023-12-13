@@ -1,11 +1,10 @@
 import request from '@/sheep/request';
-import request2 from '@/sheep/request2';
 
 export default {
 	// 订单详情
 	detail: (id, params) =>
-		request2({
-			url: 'trade/order/get-detail?id=' + id,
+		request({
+			url: '/app-api/trade/order/get-detail?id=' + id,
 			method: 'GET',
 			params,
 		}),
@@ -40,8 +39,8 @@ export default {
 		}),
 	// 订单列表
 	list: (params) =>
-		request2({
-			url: 'trade/order/page',
+		request({
+			url: '/app-api/trade/order/page',
 			method: 'GET',
 			params,
 			custom: {
@@ -65,16 +64,25 @@ export default {
 		// 解决 SpringMVC 接受 List<Item> 参数的问题
 		delete data2.items
 		for (let i = 0; i < data.items.length; i++) {
+			// 此处转码问题,待解决方案
 			data2[encodeURIComponent('items[' + i + '' + '].skuId')] = data.items[i].skuId + '';
 			data2[encodeURIComponent('items[' + i + '' + '].count')] = data.items[i].count + '';
-      if (data.items[i].cartId) {
-        data2[encodeURIComponent('items[' + i + '' + '].cartId')] = data.items[i].cartId + '';
-      }
+			data2[encodeURIComponent('items[' + i + '' + '].cartId')] = data.items[i].cartId + '';
+
+			// data2['items' + `[${i}]` + '.skuId'] = data.items[i].skuId + '';
+			// data2['items' + `[${i}]` + '.count'] = data.items[i].count + '';
+			// data2['items' + `[${i}]` + '.cartId'] = data.items[i].cartId + '';
+
+			// data2['items' + `%5B${i}%5D` + '.skuId'] = data.items[i].skuId + '';
+			// data2['items' + `%5B${i}%5D` + '.count'] = data.items[i].count + '';
+			// data2['items' + `%5B${i}%5D` + '.cartId'] = data.items[i].cartId + '';
 		}
-    const queryString= Object.keys(data2).map(key => key + '=' + data2[key]).join('&')
-		return request2({
-			url: `trade/order/settlement?${queryString}`,
-			method: 'GET'
+		console.log(data2, '手动转码的参数')
+		return request({
+			url: '/app-api/trade/order/settlement',
+			method: 'GET',
+			// data: data2,
+			params: data2
 		})
 	},
 	// 创建订单
@@ -99,8 +107,8 @@ export default {
 		}),
 	// 评价订单
 	comment: (data) =>
-		request2({
-			url: 'trade/order/item/create-comment',
+		request({
+			url: '/app-api/trade/order/item/create-comment',
 			method: 'POST',
 			data,
 		}),
@@ -138,8 +146,8 @@ export default {
 				data,
 			}),
 		list: (params) =>
-			request2({
-				url: 'trade/after-sale/page',
+			request({
+				url: '/app-api/trade/after-sale/page',
 				method: 'GET',
 				params,
 				custom: {
@@ -169,8 +177,8 @@ export default {
 			}),
 		// 售后详情
 		detail: (id) =>
-			request2({
-				url: 'trade/after-sale/get?id=' + id,
+			request({
+				url: '/app-api/trade/after-sale/get?id=' + id,
 				method: 'GET',
 			}),
 	},

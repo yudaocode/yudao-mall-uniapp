@@ -12,9 +12,7 @@
 			<block v-else>
 				<view class="detail-swiper-selector">
 					<!-- 商品轮播图  -->
-					<su-swiper class="ss-m-b-14" isPreview :list="formatGoodsSwiper(state.goodsInfo.sliderPicUrls)"
-                     dotStyle="tag" imageMode="widthFix" dotCur="bg-mask-40" :seizeHeight="750" />
-
+					<su-swiper class="ss-m-b-14" isPreview :list="formatGoodsSwiper(state.goodsInfo.sliderPicUrls)" dotStyle="tag" imageMode="widthFix" dotCur="bg-mask-40" :seizeHeight="750" />
 					<!-- 价格+标题 -->
 					<view class="title-card detail-card ss-p-y-40 ss-p-x-20">
 						<view class="ss-flex ss-row-between ss-col-center ss-m-b-26">
@@ -31,6 +29,8 @@
 							</view>
 						</view>
 						<view class="discounts-box ss-flex ss-row-between ss-m-b-28">
+							<!-- 满减送/限时折扣活动的提示 TODO 芋艿：promos 未写 -->
+							<div class="tag-content">
               <!-- 满减送/限时折扣活动的提示 TODO 芋艿：promos 未写 -->
               <div class="tag-content">
 								<view class="tag-box ss-flex">
@@ -39,8 +39,7 @@
 									</view>
 								</view>
 							</div>
-
-              <!-- 优惠劵 -->
+							<!-- 优惠劵 -->
 							<view class="get-coupon-box ss-flex ss-col-center ss-m-l-20" @tap="state.showModel = true"
 								v-if="state.couponInfo.length">
 								<view class="discounts-title ss-m-r-8">领券</view>
@@ -54,8 +53,8 @@
 					<!-- 功能卡片 -->
 					<view class="detail-cell-card detail-card ss-flex-col">
 						<detail-cell-sku v-model="state.selectedSku.goods_sku_text" :sku="state.selectedSku"
-                             @tap="state.showSelectSku = true" />
-            <!-- TODO 芋艿：可能暂时不考虑使用 -->
+							@tap="state.showSelectSku = true" />
+						<!-- TODO 芋艿：可能暂时不考虑使用 -->
 						<detail-cell-service v-if="state.goodsInfo.service" v-model="state.goodsInfo.service" />
 						<detail-cell-params v-if="state.goodsInfo.params" v-model="state.goodsInfo.params" />
 					</view>
@@ -87,12 +86,13 @@
 						<button class="ss-reset-button disabled-btn" disabled> 已售罄 </button>
 					</view>
 				</detail-tabbar>
+				<!-- 优惠劵弹窗 -->
+				<s-coupon-get v-model="state.couponInfo" :show="state.showModel" @close="state.showModel = false" @get="onGet" />
 
-        <!-- 优惠劵弹窗 -->
-				<s-coupon-get v-model="state.couponInfo" :show="state.showModel" @close="state.showModel = false"
-                      @get="onGet" />
-
-        <!-- 满减送/限时折扣活动弹窗 -->
+				<!-- 满减送/限时折扣活动弹窗 -->
+        		<!-- 优惠劵弹窗 -->
+				<s-coupon-get v-model="state.couponInfo" :show="state.showModel" @close="state.showModel = false" @get="onGet" />
+       			 <!-- 满减送/限时折扣活动弹窗 -->
 				<s-activity-pop v-model="state.activityInfo" :show="state.showActivityModel"
                         @close="state.showActivityModel = false" />
 			</block>
@@ -104,9 +104,16 @@
 	import { reactive, computed } from 'vue';
 	import { onLoad, onPageScroll } from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
-  import CouponApi from '@/sheep/api/promotion/coupon';
-  import ActivityApi from '@/sheep/api/promotion/activity';
-  import { formatSales, formatGoodsSwiper, fen2yuan, } from '@/sheep/hooks/useGoods';
+	import CouponApi from '@/sheep/api/promotion/coupon';
+	import ActivityApi from '@/sheep/api/promotion/activity';
+	import {
+		formatSales,
+		formatGoodsSwiper,
+		fen2yuan,
+	} from '@/sheep/hooks/useGoods';
+    import CouponApi from '@/sheep/api/promotion/coupon';
+    import ActivityApi from '@/sheep/api/promotion/activity';
+    import { formatSales, formatGoodsSwiper, fen2yuan, } from '@/sheep/hooks/useGoods';
 	import detailNavbar from './components/detail/detail-navbar.vue';
 	import detailCellSku from './components/detail/detail-cell-sku.vue';
 	import detailCellService from './components/detail/detail-cell-service.vue';
@@ -130,16 +137,17 @@
 		couponInfo: [], // 可领取的 Coupon 优惠劵的列表
 		showActivityModel: false, // 【满减送/限时折扣】是否展示 Activity 营销活动的弹窗
 		activityInfo: [], // 【满减送/限时折扣】可参与的 Activity 营销活动的列表
-    activityList: [], // 【秒杀/拼团/砍价】可参与的 Activity 营销活动的列表
-	});
+		activityList: [], // 【秒杀/拼团/砍价】可参与的 Activity 营销活动的列表
+ 	});
 
 	// 规格变更
 	function onSkuChange(e) {
 		state.selectedSku = e;
 	}
 
-	// 添加购物车
+	// 添加购物车  TODO 芋艿：待测试
 	function onAddCart(e) {
+		console.log(e, '加入购物车');
 		sheep.$store('cart').add(e);
 	}
 
@@ -166,10 +174,10 @@
 	// 立即领取  TODO 芋艿：待测试
 	async function onGet(id) {
 		const {
-			error,
+			code,
 			msg
 		} = await sheep.$api.coupon.get(id);
-		if (error === 0) {
+		if (code === 0) {
 			uni.showToast({
 				title: msg,
 			});
@@ -180,6 +188,7 @@
 	}
 
   //  TODO 芋艿：待测试
+
 	const shareInfo = computed(() => {
 		if (isEmpty(state.goodsInfo)) return {};
 		return sheep.$platform.share.getShareInfo({
@@ -207,6 +216,75 @@
 		}
 		state.goodsId = options.id;
 		// 1. 加载商品信息
+		sheep.$api.goods.detail(state.goodsId).then(async (res) => {
+			// 未找到商品
+			if (res.code !== 0 || !res.data) {
+				state.goodsInfo = null;
+				return;
+			}
+			// 加载到商品
+			state.skeletonLoading = false;
+			// 获取收藏信息
+			let dasa = await sheep.$api.goods.exits(options.id);
+			res.data.favorite = dasa.data;
+			state.goodsInfo = res.data;
+			console.log(state.goodsInfo, '商品信息');
+
+			// 此处调试默认弹出可以修改为点击弹出
+			// 2. 加载优惠劵信息
+			CouponApi.getCouponTemplateList({
+				price: state.goodsInfo.price,
+				spuIds: [state.goodsInfo.id],
+				skuIds: state.goodsInfo.skus.map(item => item.id),
+				// 先写死
+				categoryIds: [52]
+			}).then((res) => {
+				console.log(res, '优惠券信息进行对接')
+				if (res.code !== 0) {
+					return;
+				}
+				// 拦截修改数据
+				let obj2 = {
+					2: '折扣',
+					1: '满减'
+				}
+				let obj = {
+					1: '可用',
+					2: '已用',
+					3: '过期'
+				}
+				let obj3 = {
+					1: '已领取',
+					2: '已使用',
+					3: '已过期'
+				}
+				res.data = res.data.map(item => {
+					return {
+						...item,
+						enough: (item.usePrice / 100).toFixed(2),
+						amount: (item.discountPrice / 100).toFixed(2),
+						use_start_time: sheep.$helper.timeFormat(item
+							.validStartTime,
+							'yyyy-mm-dd hh:MM:ss'),
+						use_end_time: sheep.$helper.timeFormat(item.validEndTime,
+							'yyyy-mm-dd hh:MM:ss'),
+						status_text: obj[item.status],
+						type_text: obj2[item.discountType],
+						get_status_text: obj3[item.status],
+						type_text: obj2[item.discountType]
+					}
+				});
+				state.couponInfo = res.data;
+			});
+		});
+		// return;
+		// 3. 加载营销活动信息
+		ActivityApi.getActivityListBySpuId(state.goodsId).then((res) => {
+			if (res.code !== 0) {
+				return;
+			}
+			state.activityList = res.data;
+		});
 		sheep.$api.goods.detail(state.goodsId).then((res) => {
       // 未找到商品
       if (res.code !== 0 || !res.data) {

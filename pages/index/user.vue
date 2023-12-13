@@ -1,41 +1,42 @@
 <template>
-  <s-layout
-    title="我的"
-    tabbar="/pages/index/user"
-    navbar="custom"
-    :bgStyle="template.page"
-    :navbarStyle="template.style?.navbar"
-    onShareAppMessage
-  >
-    <s-block v-for="(item, index) in template.components" :key="index" :styles="item.property.style">
-      <s-block-item :type="item.id" :data="item.property" :styles="item.property.style" />
-    </s-block>
-  </s-layout>
+
+	<s-layout title="我的" tabbar="/pages/index/user" navbar="custom" :bgStyle="template.page"
+		:navbarStyle="template.style?.navbar" onShareAppMessage>
+		<s-block v-for="(item, index) in template.components" :key="index" :styles="item.property.style">
+			<s-block-item :type="item.id" :data="item.property" :styles="item.property.style" />
+		</s-block>
+	</s-layout>
 </template>
 
 <script setup>
-  import { computed } from 'vue';
-  import { onShow, onPageScroll, onPullDownRefresh } from '@dcloudio/uni-app';
-  import sheep from '@/sheep';
+	import {
+		computed
+	} from 'vue';
+	import {
+		onShow,
+		onPageScroll,
+		onPullDownRefresh
+	} from '@dcloudio/uni-app';
+	import sheep from '@/sheep';
 
-  // 隐藏原生tabBar
-  uni.hideTabBar();
+	// 隐藏原生tabBar
+	uni.hideTabBar();
 
-  const template = computed(() => sheep.$store('app').template.user);
-  const isLogin = computed(() => sheep.$store('user').isLogin);
+	const template = computed(() => sheep.$store('app').template.user);
+	const isLogin = computed(() => sheep.$store('user').isLogin);
 
-  onShow(() => {
-    sheep.$store('user').updateUserData();
-  });
+	onShow(() => {
+		sheep.$store('user').updateUserData();
+	});
 
-  onPullDownRefresh(() => {
-    sheep.$store('user').updateUserData();
-    setTimeout(function () {
-      uni.stopPullDownRefresh();
-    }, 800);
-  });
+	onPullDownRefresh(() => {
+		sheep.$store('user').updateUserData();
+		setTimeout(function() {
+			uni.stopPullDownRefresh();
+		}, 800);
+	});
 
-  onPageScroll(() => {});
+	onPageScroll(() => {});
 </script>
 
 <style></style>
