@@ -61,7 +61,8 @@
 								<button class="ss-reset-button apply-btn" v-if="[10, 20, 30].includes(state.orderInfo.status) && item.afterSaleStatus === 0"
 									@tap.stop="
                     sheep.$router.go('/pages/order/aftersale/apply', {
-                      item: JSON.stringify(item),
+                      orderId: state.orderInfo.id,
+                      itemId: item.id
                     })
                   ">
 									申请售后
