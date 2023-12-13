@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import dayjs from 'dayjs';
 import $url from '@/sheep/url';
+import { formatDate } from '@/sheep/util';
 
 /**
  * 格式化销量
@@ -9,7 +10,7 @@ import $url from '@/sheep/url';
  * @return {string} 格式化后的销量字符串
  */
 export function formatSales(type, num) {
-  let prefix = type!=='exact' && num<10 ? '销量': '已售';
+  let prefix = type !== 'exact' && num < 10 ? '销量' : '已售';
   return formatNum(prefix, type, num)
 }
 
@@ -65,6 +66,7 @@ export function formatPrice(e) {
 
 // 视频格式后缀列表
 const VIDEO_SUFFIX_LIST = ['.avi', '.mp4']
+
 /**
  * 转换商品轮播的链接列表：根据链接的后缀，判断是视频链接还是图片链接
  *
@@ -74,7 +76,7 @@ const VIDEO_SUFFIX_LIST = ['.avi', '.mp4']
 export function formatGoodsSwiper(urlList) {
   return urlList.map((url, key) => {
     const isVideo = VIDEO_SUFFIX_LIST.some(suffix => url.includes(suffix));
-    const type = isVideo ? 'video' :'image'
+    const type = isVideo ? 'video' : 'image'
     const src = $url.cdn(url);
     return { type, src }
   });
@@ -126,6 +128,30 @@ export function formatOrderStatus(order) {
     return '已完成';
   }
   return '已关闭';
+}
+
+/**
+ * 格式化订单状态的描述
+ *
+ * @param order 订单
+ */
+export function formatOrderStatusDescription(order) {
+  if (order.status === 0) {
+    return `请在 ${ formatDate(orderInfo.payExpireTime) } 前完成支付`;
+  }
+  if (order.status === 10) {
+    return '商家未发货，请耐心等待';
+  }
+  if (order.status === 20) {
+    return '商家已发货，请耐心等待';
+  }
+  if (order.status === 30 && !order.commentStatus) {
+    return '已收货，快去评价一下吧';
+  }
+  if (order.status === 30 && order.commentStatus) {
+    return '交易完成，感谢您的支持';
+  }
+  return '交易关闭';
 }
 
 /**

@@ -64,7 +64,7 @@
 							删除订单
 						</button>
 						<button v-if="order.buttons.includes('pay')" class="tool-btn ss-reset-button ui-BG-Main-Gradient"
-                    @tap.stop="onPay(order.order_sn)">
+                    @tap.stop="onPay(order.payOrderId)">
 							继续支付
 						</button>
 					</view>
@@ -98,6 +98,7 @@
 	import {
 		isEmpty
 	} from 'lodash';
+  import OrderApi from '@/sheep/api/trade/order';
 
 	const pagination = {
 		data: [],
@@ -163,10 +164,10 @@
 		});
 	}
 
-	// 继续支付 TODO 芋艿：待测试
-	function onPay(orderSN) {
+	// 继续支付
+	function onPay(payOrderId) {
 		sheep.$router.go('/pages/pay/index', {
-			orderSN,
+			id: payOrderId,
 		});
 	}
 
@@ -205,7 +206,7 @@
 	}
 
 	// #ifdef MP-WEIXIN
-	// 小程序确认收货组件
+	// 小程序确认收货组件 TODO 芋艿：后续再接入
 	function mpConfirm(order) {
 		if (!wx.openBusinessView) {
 			sheep.$helper.toast(`请升级微信版本`);
@@ -243,38 +244,37 @@
 		});
 	}
 
-	// 取消订单 TODO 芋艿：待测试
+	// 取消订单
 	async function onCancel(orderId) {
 		uni.showModal({
 			title: '提示',
 			content: '确定要取消订单吗?',
 			success: async function(res) {
-				if (res.confirm) {
-					const {
-						error,
-						data
-					} = await sheep.$api.order.cancel(orderId);
-					if (error === 0) {
-						let index = state.pagination.data.findIndex((order) => order.id === orderId);
-						state.pagination.data[index] = data;
-					}
+				if (!res.confirm) {
+          return;
 				}
+        const { code } = await OrderApi.cancelOrder(orderId);
+        if (code === 0) {
+          // 修改数据的状态
+          let index = state.pagination.data.findIndex((order) => order.id === orderId);
+          const orderInfo = state.pagination.data[index];
+          orderInfo.status = 40;
+          handleOrderButtons(orderInfo);
+        }
 			},
 		});
 	}
 
-	// 删除订单 TODO 芋艿：待测试
+	// 删除订单
 	function onDelete(orderId) {
 		uni.showModal({
 			title: '提示',
 			content: '确定要删除订单吗?',
 			success: async function(res) {
 				if (res.confirm) {
-					const {
-						error,
-						data
-					} = await sheep.$api.order.delete(orderId);
-					if (error === 0) {
+					const { code } = await OrderApi.deleteOrder(orderId);
+					if (code === 0) {
+            // 删除数据
 						let index = state.pagination.data.findIndex((order) => order.id === orderId);
 						state.pagination.data.splice(index, 1);
 					}
@@ -313,7 +313,7 @@
 		if (options.type) {
 			state.currentTab = options.type;
 		}
-		getOrderList();
+		await getOrderList();
 	});
 
 	// 加载更多

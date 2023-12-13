@@ -1,7 +1,7 @@
 <!-- 订单详情 -->
 <template>
 	<s-layout title="订单详情" class="index-wrap" navbar="inner">
-		<!-- 订单状态 -->
+		<!-- 订单状态 TODO -->
 		<view class="state-box ss-flex-col ss-col-center ss-row-right" :style="[
         {
           marginTop: '-' + Number(statusBarHeight + 88) + 'rpx',
@@ -11,7 +11,7 @@
 			<view class="ss-flex ss-m-t-32 ss-m-b-20">
 				<image v-if="
             state.orderInfo.status_code == 'unpaid' ||
-            state.orderInfo.status_code == 'nosend' ||
+            state.orderInfo.status === 10 || // 待发货
             state.orderInfo.status_code == 'nocomment'
           " class="state-img" :src="sheep.$url.static('/static/img/shop/order/order_loading.png')">
 				</image>
@@ -26,29 +26,36 @@
 				<image v-if="state.orderInfo.status_code == 'noget'" class="state-img"
 					:src="sheep.$url.static('/static/img/shop/order/order_express.png')">
 				</image>
-				<view class="ss-font-30">{{ state.orderInfo.status_text }}</view>
+				<view class="ss-font-30">{{ formatOrderStatus(state.orderInfo) }}</view>
 			</view>
-			<view class="ss-font-26 ss-m-x-20 ss-m-b-70">{{ state.orderInfo.status_desc }}</view>
+			<view class="ss-font-26 ss-m-x-20 ss-m-b-70">{{ formatOrderStatusDescription(state.orderInfo) }}</view>
 		</view>
 
 		<!-- 收货地址 -->
-		<view class="order-address-box" v-if="state.orderInfo.address">
+		<view class="order-address-box" v-if="state.orderInfo.receiverAreaId > 0">
 			<view class="ss-flex ss-col-center">
 				<text class="address-username">
-					{{ state.orderInfo.address.consignee }}
+					{{ state.orderInfo.receiverName }}
 				</text>
-				<text class="address-phone">{{ state.orderInfo.address.mobile }}</text>
+				<text class="address-phone">{{ state.orderInfo.receiverMobile }}</text>
 			</view>
-			<view class="address-detail">{{ addressText }}</view>
+			<view class="address-detail">
+        {{ state.orderInfo.receiverAreaName }} {{ state.orderInfo.receiverDetailAddress }}
+      </view>
 		</view>
 
-		<view class="detail-goods" :style="[{ marginTop: state.orderInfo.address ? '0' : '-40rpx' }]">
-			<!-- 订单信息 -->
+		<view class="detail-goods" :style="[{ marginTop: state.orderInfo.receiverAreaId > 0 ? '0' : '-40rpx' }]">
+			<!-- 订单信息 TODO 芋艿： -->
 			<view class="order-list" v-for="item in state.orderInfo.items" :key="item.goods_id">
 				<view class="order-card">
-					<s-goods-item @tap="onGoodsDetail(item.goods_id)" :img="item.goods_image" :title="item.goods_title"
-						:skuText="item.goods_sku_text" :price="item.goods_price" :score="state.orderInfo.score_amount"
-						:num="item.goods_num">
+					<s-goods-item
+            @tap="onGoodsDetail(item.skuId)"
+            :img="item.picUrl"
+            :title="item.spuName"
+						:skuText="item.properties.map((property) => property.valueName).join(' ')"
+            :price="item.price"
+						:num="item.count"
+          >
 						<!-- 						<template #top>
 							<view class="order-item ss-flex ss-col-center ss-row-between ss-p-x-20 bg-white">
 								<view class="item-title">配送方式</view>
@@ -63,7 +70,7 @@
 						</template>
 						<template #tool>
 							<view class="ss-flex">
-								<button class="ss-reset-button apply-btn" v-if="item.btns.includes('aftersale')"
+								<button class="ss-reset-button apply-btn" v-if="item.buttons.includes('aftersale')"
 									@tap.stop="
                     sheep.$router.go('/pages/order/aftersale/apply', {
                       item: JSON.stringify(item),
@@ -71,7 +78,7 @@
                   ">
 									申请售后
 								</button>
-								<button class="ss-reset-button apply-btn" v-if="item.btns.includes('re_aftersale')"
+								<button class="ss-reset-button apply-btn" v-if="item.buttons.includes('re_aftersale')"
 									@tap.stop="
                     sheep.$router.go('/pages/order/aftersale/apply', {
                       item: JSON.stringify(item),
@@ -80,7 +87,7 @@
 									重新售后
 								</button>
 
-								<button class="ss-reset-button apply-btn" v-if="item.btns.includes('aftersale_info')"
+								<button class="ss-reset-button apply-btn" v-if="item.buttons.includes('aftersale_info')"
 									@tap.stop="
                     sheep.$router.go('/pages/order/aftersale/detail', {
                       id: item.ext.aftersale_id,
@@ -88,7 +95,7 @@
                   ">
 									售后详情
 								</button>
-								<button class="ss-reset-button apply-btn" v-if="item.btns.includes('buy_again')"
+								<button class="ss-reset-button apply-btn" v-if="item.buttons.includes('buy_again')"
 									@tap.stop="
                     sheep.$router.go('/pages/goods/index', {
                       id: item.goods_id,
@@ -107,108 +114,95 @@
 				</view>
 			</view>
 		</view>
-		<!-- 订单信息  -->
+
+		<!-- 订单信息 -->
 		<view class="notice-box">
 			<view class="notice-box__content">
 				<view class="notice-item--center">
 					<view class="ss-flex ss-flex-1">
 						<text class="title">订单编号：</text>
-						<text class="detail">{{ state.orderInfo.order_sn }}</text>
+						<text class="detail">{{ state.orderInfo.no }}</text>
 					</view>
 					<button class="ss-reset-button copy-btn" @tap="onCopy">复制</button>
 				</view>
 				<view class="notice-item">
 					<text class="title">下单时间：</text>
-					<text class="detail">{{ state.orderInfo.create_time }}</text>
+					<text class="detail">
+            {{ sheep.$helper.timeFormat(state.orderInfo.createTime, 'yyyy-mm-dd hh:MM:ss') }}
+          </text>
 				</view>
-				<view class="notice-item" v-if="state.orderInfo.paid_time">
+				<view class="notice-item" v-if="state.orderInfo.payTime">
 					<text class="title">支付时间：</text>
-					<text class="detail">{{ state.orderInfo.paid_time || '-' }}</text>
+					<text class="detail">
+            {{ sheep.$helper.timeFormat(state.orderInfo.payTime, 'yyyy-mm-dd hh:MM:ss') }}
+          </text>
 				</view>
 				<view class="notice-item">
 					<text class="title">支付方式：</text>
-					<text class="detail">{{ state.orderInfo.pay_types_text?.join(',') || '-' }}</text>
+					<text class="detail">{{ state.orderInfo.payChannelName || '-' }}</text>
 				</view>
 			</view>
 		</view>
-		<!--  价格信息  -->
+
+		<!-- 价格信息 -->
 		<view class="order-price-box">
 			<view class="notice-item ss-flex ss-row-between">
 				<text class="title">商品总额</text>
 				<view class="ss-flex">
-					<text class="detail"
-						v-if="Number(state.orderInfo.goods_amount) > 0">￥{{ state.orderInfo.goods_amount }}</text>
-					<view v-if="state.orderInfo.score_amount && Number(state.orderInfo.goods_amount) > 0"
-						class="detail">+</view>
-					<view class="price-text ss-flex ss-col-center" v-if="state.orderInfo.score_amount">
-						<image :src="sheep.$url.static('/static/img/shop/goods/score1.svg')" class="score-img"></image>
-						<view class="detail">{{ state.orderInfo.score_amount }}</view>
-					</view>
+					<text class="detail">￥{{ fen2yuan(state.orderInfo.totalPrice) }}</text>
 				</view>
 			</view>
 			<view class="notice-item ss-flex ss-row-between">
 				<text class="title">运费</text>
-				<text class="detail">￥{{ state.orderInfo.dispatch_amount }}</text>
+				<text class="detail">￥{{ fen2yuan(state.orderInfo.deliveryPrice) }}</text>
 			</view>
-			<view class="notice-item ss-flex ss-row-between" v-if="state.orderInfo.total_discount_fee > 0">
+      <!-- TODO 芋艿：优惠劵抵扣、积分抵扣 -->
+			<view class="notice-item ss-flex ss-row-between" v-if="state.orderInfo.discountPrice > 0">
 				<text class="title">优惠金额</text>
-				<text class="detail">¥{{ state.orderInfo.total_discount_fee }}</text>
+				<text class="detail">¥{{ fen2yuan(state.orderInfo.discountPrice) }}</text>
 			</view>
 			<view class="notice-item all-rpice-item ss-flex ss-m-t-20">
-				<text class="title">{{
-          ['paid', 'completed'].includes(state.orderInfo.status) ? '已付款' : '需付款'
-        }}</text>
-				<text class="detail all-price"
-					v-if="Number(state.orderInfo.pay_fee) > 0">￥{{ state.orderInfo.pay_fee }}</text>
-				<view v-if="
-            state.orderInfo.score_amount &&
-            Number(state.orderInfo.pay_fee) > 0 &&
-            ['paid', 'completed'].includes(state.orderInfo.status)
-          " class="detail all-price">+</view>
-				<view class="price-text ss-flex ss-col-center" v-if="
-            state.orderInfo.score_amount && ['paid', 'completed'].includes(state.orderInfo.status)
-          ">
-					<image :src="sheep.$url.static('/static/img/shop/goods/score1.svg')" class="score-img"></image>
-					<view class="detail all-price">{{ state.orderInfo.score_amount }}</view>
-				</view>
+				<text class="title">{{ state.orderInfo.payStatus ? '已付款' : '需付款' }}</text>
+				<text class="detail all-price">￥{{ fen2yuan(state.orderInfo.payPrice) }}</text>
 			</view>
-			<view class="notice-item all-rpice-item ss-flex ss-m-t-20" v-if="refundFee > 0">
+			<view class="notice-item all-rpice-item ss-flex ss-m-t-20" v-if="state.orderInfo.refundPrice > 0">
 				<text class="title">已退款</text>
-				<text class="detail all-price">￥{{ refundFee.toFixed(2) }}</text>
+				<text class="detail all-price">￥{{ fen2yuan(state.orderInfo.refundPrice) }}</text>
 			</view>
 		</view>
 
 		<!-- 底部按钮 -->
 		<!-- TODO: 查看物流、等待成团、评价完后返回页面没刷新页面 -->
-		<su-fixed bottom placeholder bg="bg-white" v-if="state.orderInfo.btns?.length">
+		<su-fixed bottom placeholder bg="bg-white" v-if="state.orderInfo.buttons?.length">
 			<view class="footer-box ss-flex ss-col-center ss-row-right">
-				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.btns?.includes('cancel')"
-					@tap="onCancel(state.orderInfo.id)">取消订单</button>
-				<button class="ss-reset-button pay-btn ui-BG-Main-Gradient" v-if="state.orderInfo.btns?.includes('pay')"
-					@tap="onPay(state.orderInfo.order_sn)">继续支付</button>
-				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.btns?.includes('apply_refund')"
-					@tap="onRefund(state.orderInfo.id)">申请退款</button>
-				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.btns?.includes('groupon')" @tap="
+				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.buttons?.includes('cancel')"
+                @tap="onCancel(state.orderInfo.id)">
+          取消订单
+        </button>
+				<button class="ss-reset-button pay-btn ui-BG-Main-Gradient" v-if="state.orderInfo.buttons?.includes('pay')"
+                @tap="onPay(state.orderInfo.payOrderId)">
+          继续支付
+        </button>
+        <!-- TODO 芋艿：拼团接入 -->
+				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.buttons?.includes('combination')" @tap="
             sheep.$router.go('/pages/activity/groupon/detail', {
               id: state.orderInfo.ext.groupon_id,
             })
           ">
-					{{ state.orderInfo.status_code === 'groupon_ing' ? '邀请拼团' : '拼团详情' }}
+          拼团详情
 				</button>
-				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.btns?.includes('express')"
-					@tap="onExpress(state.orderInfo.id)">查看物流</button>
-				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.btns?.includes('confirm')"
-					@tap="onConfirm(state.orderInfo.id)">确认收货</button>
-				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.btns?.includes('comment')"
-					@tap="onComment(state.orderInfo.id,state.orderInfo)">评价晒单</button>
-				<button v-if="state.orderInfo.btns?.includes('invoice')" class="ss-reset-button cancel-btn"
-					@tap.stop="onOrderInvoice(state.orderInfo.invoice?.id)">
-					查看发票
-				</button>
-				<button v-if="state.orderInfo.btns?.includes('re_apply_refund')" class="ss-reset-button cancel-btn"
-					@tap.stop="onRefund(state.orderInfo.id)">
-					重新退款
-				</button>
+				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.buttons?.includes('express')"
+                @tap="onExpress(state.orderInfo.id)">
+          查看物流
+        </button>
+				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.buttons?.includes('confirm')"
+                @tap="onConfirm(state.orderInfo.id)">
+          确认收货
+        </button>
+				<button class="ss-reset-button cancel-btn" v-if="state.orderInfo.buttons?.includes('comment')"
+                @tap="onComment(state.orderInfo.id,state.orderInfo)">
+          评价
+        </button>
 			</view>
 		</su-fixed>
 	</s-layout>
@@ -216,20 +210,14 @@
 
 <script setup>
 	import sheep from '@/sheep';
-	import {
-		onLoad
-	} from '@dcloudio/uni-app';
-	import {
-		computed,
-		reactive
-	} from 'vue';
-	import {
-		isEmpty
-	} from 'lodash';
+	import { onLoad } from '@dcloudio/uni-app';
+	import { reactive } from 'vue';
+	import { isEmpty } from 'lodash';
+  import { fen2yuan, formatOrderStatus, formatOrderStatusDescription, handleOrderButtons } from '@/sheep/hooks/useGoods';
+  import OrderApi from '@/sheep/api/trade/order';
 
 	const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
 	const headerBg = sheep.$url.css('/static/img/shop/order/order_bg.png');
-	const tradeManaged = computed(() => sheep.$store('app').has_wechat_trade_managed);
 
 	const state = reactive({
 		orderInfo: {},
@@ -237,30 +225,15 @@
 		comeinType: '', // 进入订单详情的来源类型
 	});
 
-	const addressText = computed(() => {
-		let data = state.orderInfo.address;
-		if (data) {
-			return `${data.province_name} ${data.city_name} ${data.district_name} ${data.address}`;
-		}
-		return '';
-	});
-
 	// 复制
 	const onCopy = () => {
-		sheep.$helper.copyText(state.orderInfo.order_sn);
+		sheep.$helper.copyText(state.orderInfo.sn);
 	};
-	//退款总额
-	const refundFee = computed(() => {
-		let refundFee = 0;
-		state.orderInfo.items?.forEach((i) => {
-			refundFee += Number(i.refund_fee);
-		});
-		return refundFee;
-	});
+
 	// 去支付
-	function onPay(orderSN) {
+	function onPay(payOrderId) {
 		sheep.$router.go('/pages/pay/index', {
-			orderSN,
+			id: payOrderId,
 		});
 	}
 
@@ -276,15 +249,13 @@
 			title: '提示',
 			content: '确定要取消订单吗?',
 			success: async function(res) {
-				if (res.confirm) {
-					const {
-						error,
-						data
-					} = await sheep.$api.order.cancel(orderId);
-					if (error === 0) {
-						getOrderDetail(data.order_sn);
-					}
+				if (!res.confirm) {
+					return;
 				}
+        const { code } = await OrderApi.cancelOrder(orderId);
+        if (code === 0) {
+          await getOrderDetail(orderId);
+        }
 			},
 		});
 	}
@@ -308,17 +279,17 @@
 		});
 	}
 
-	// 查看物流
+	// 查看物流 TODO 芋艿：待测试
 	async function onExpress(orderId) {
 		sheep.$router.go('/pages/order/express/list', {
 			orderId,
 		});
 	}
 
-	//确认收货
+	// 确认收货 TODO 芋艿：待测试
 	async function onConfirm(orderId, ignore = false) {
 		// 需开启确认收货组件
-		// todo:
+		// todo: 芋艿：待接入微信
 		// 1.怎么检测是否开启了发货组件功能？如果没有开启的话就不能在这里return出去
 		// 2.如果开启了走mpConfirm方法,需要在App.vue的show方法中拿到确认收货结果
 		let isOpenBusinessView = true;
@@ -373,13 +344,6 @@
 	}
 	// #endif
 
-	// 查看发票
-	function onOrderInvoice(invoiceId) {
-		sheep.$router.go('/pages/order/invoice', {
-			invoiceId,
-		});
-	}
-
 	// 配送方式详情
 	function onDetail(item) {
 		sheep.$router.go('/pages/order/dispatch/content', {
@@ -400,9 +364,10 @@
 			orderId
 		});
 	}
+
 	async function getOrderDetail(id) {
 		// 对详情数据进行适配
-		let res = {};
+		let res;
 		if (state.comeinType === 'wechat') {
 			res = await sheep.$api.order.detail(id, {
 				merchant_trade_no: state.merchantTradeNo,
@@ -410,42 +375,9 @@
 		} else {
 			res = await sheep.$api.order.detail(id);
 		}
-		console.log(res, '我的订单详情数据');
 		if (res.code === 0) {
-			let obj = {
-				10: ['待发货', '等待买家付款', ["apply_refund"]],
-				30: ['待评价', '等待买家评价', ["express", "comment"]]
-			}
-			res.data.status_text = obj[res.data.status][0];
-			res.data.status_desc = obj[res.data.status][1];
-			res.data.btns = obj[res.data.status][2];
-			res.data.address = {
-				province_name: res.data.receiverAreaName.split(' ')[0],
-				district_name: res.data.receiverAreaName.split(' ')[2],
-				city_name: res.data.receiverAreaName.split(' ')[1],
-				address: res.data.receiverDetailAddress,
-				consignee: res.data.receiverName,
-				mobile: res.data.receiverMobile,
-			}
-			res.data.pay_fee = res.data.payPrice / 100
-			res.data.create_time = sheep.$helper.timeFormat(res.data.createTime, 'yyyy-mm-dd hh:MM:ss')
-			res.data.order_sn = res.data.no
-			res.data.goods_amount = res.data.totalPrice / 100
-			res.data.dispatch_amount = res.data.deliveryPrice / 100
-			res.data.pay_types_text = res.data.payChannelName.split(',')
-			res.data.items = res.data.items.map(ite => {
-
-				return {
-					...ite,
-					goods_title: ite.spuName,
-					goods_num: ite.count,
-					goods_price: ite.price / 100,
-					goods_image: ite.picUrl,
-					goods_sku_text: ite.properties.reduce((it0, it1) => it0 + it1.valueName + ' ', '')
-				}
-			})
 			state.orderInfo = res.data;
-			console.log(state.orderInfo, '修改后数据')
+      handleOrderButtons(state.orderInfo)
 		} else {
 			sheep.$router.back();
 		}
@@ -453,17 +385,15 @@
 
 	onLoad(async (options) => {
 		let id = 0;
-		if (options.orderSN) {
-			id = options.orderSN;
-		}
 		if (options.id) {
 			id = options.id;
 		}
+    // TODO 芋艿：下面两个变量，后续接入
 		state.comeinType = options.comein_type;
 		if (state.comeinType === 'wechat') {
 			state.merchantTradeNo = options.merchant_trade_no;
 		}
-		getOrderDetail(id);
+		await getOrderDetail(id);
 	});
 </script>
 

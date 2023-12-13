@@ -48,6 +48,26 @@ const OrderApi = {
       },
     });
   },
+  // 取消订单
+  cancelOrder: (id) => {
+    return request2({
+      url: `/app-api/trade/order/cancel`,
+      method: 'DELETE',
+      params: {
+        id,
+      },
+    });
+  },
+  // 删除订单
+  deleteOrder: (id) => {
+    return request2({
+      url: `/app-api/trade/order/delete`,
+      method: 'DELETE',
+      params: {
+        id,
+      },
+    });
+  }
 };
 
 export default OrderApi;
