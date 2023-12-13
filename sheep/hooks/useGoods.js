@@ -82,26 +82,77 @@ export function formatGoodsSwiper(urlList) {
 
 /**
  * 格式化订单状态的颜色
- * @param type 订单类型
+ *
+ * @param order 订单
  * @return {string} 颜色的 class 名称
  */
-export function formatOrderColor(type) {
-  switch (type) {
-    case 'apply_refund':
-    case 'groupon_ing':
-    case 'nocomment':
-    case 'noget':
-    case 'nosend':
-      return 'warning-color';
-    case 'closed':
-    case 'groupon_invalid':
-    case 'cancel':
-    case 'refund_agree':
-      return 'danger-color';
-    case 'completed':
-      return 'success-color';
-    case 'unpaid':
-      return 'info-color';
+export function formatOrderColor(order) {
+  if (order.status === 0) {
+    return 'info-color';
+  }
+  if (order.status === 10
+    || order.status === 20
+    || (order.status === 30 && !order.commentStatus)) {
+    return 'warning-color';
+  }
+  if (order.status === 30 && order.commentStatus) {
+    return 'success-color';
+  }
+  return 'danger-color';
+}
+
+/**
+ * 格式化订单状态
+ *
+ * @param order 订单
+ */
+export function formatOrderStatus(order) {
+  if (order.status === 0) {
+    return '待付款';
+  }
+  if (order.status === 10 && order.deliveryType === 1) {
+    return '待发货';
+  }
+  if (order.status === 10 && order.deliveryType === 2) {
+    return '待核销';
+  }
+  if (order.status === 20) {
+    return '待收货';
+  }
+  if (order.status === 30 && !order.commentStatus) {
+    return '待评价';
+  }
+  if (order.status === 30 && order.commentStatus) {
+    return '已完成';
+  }
+  return '已关闭';
+}
+
+/**
+ * 处理订单的 button 操作按钮数组
+ *
+ * @param order 订单
+ */
+export function handleOrderButtons(order) {
+  order.buttons = []
+  if (order.type === 3) { // 查看拼团
+    order.buttons.push('combination');
+  }
+  if (order.status === 20) { // 确认收货
+    order.buttons.push('confirm');
+  }
+  if (order.logisticsId > 0) { // 查看物流
+    order.buttons.push('express');
+  }
+  if (order.status === 0) { // 取消订单 / 发起支付
+    order.buttons.push('cancel');
+    order.buttons.push('pay');
+  }
+  if (order.status === 30 && !order.commentStatus) { // 发起评价
+    order.buttons.push('comment');
+  }
+  if (order.status === 40) { // 删除订单
+    order.buttons.push('delete');
   }
 }
 

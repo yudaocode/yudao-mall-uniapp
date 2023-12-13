@@ -36,7 +36,6 @@ export default {
 				showError: false,
 			},
 		}),
-
 	// 商品评价列表
 	comment: (id, params = {}) =>
 		request({

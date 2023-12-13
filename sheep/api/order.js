@@ -85,12 +85,6 @@ export default {
 			params: data2
 		})
 	},
-	// calc: (data) =>
-	//   request({
-	//     url: 'order/order/calc',
-	//     method: 'POST',
-	//     data,
-	//   }),
 	// 创建订单
 	create: (data) =>
 		request({

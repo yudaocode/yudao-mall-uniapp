@@ -1,4 +1,5 @@
 <template>
+
 	<s-layout title="我的" tabbar="/pages/index/user" navbar="custom" :bgStyle="template.page"
 		:navbarStyle="template.style?.navbar" onShareAppMessage>
 		<s-block v-for="(item, index) in template.components" :key="index" :styles="item.property.style">

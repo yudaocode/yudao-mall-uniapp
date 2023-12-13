@@ -14,6 +14,7 @@ export default {
 		request({
 			url: '/app-api/trade/cart/add',
 			method: 'POST',
+      // TODO 芋艿：这里没提示
 			custom: {
 				showSuccess: true,
 				successMsg: '已添加到购物车~',

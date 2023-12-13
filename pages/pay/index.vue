@@ -2,14 +2,17 @@
 <template>
   <s-layout title="收银台">
     <view class="bg-white ss-modal-box ss-flex-col">
+      <!-- 订单信息 -->
       <view class="modal-header ss-flex-col ss-col-center ss-row-center">
         <view class="money-box ss-m-b-20">
-          <text class="money-text">{{ state.orderInfo.pay_fee }}</text>
+          <text class="money-text">{{ fen2yuan(state.orderInfo.price) }}</text>
         </view>
         <view class="time-text">
           <text>{{ payDescText }}</text>
         </view>
       </view>
+
+      <!-- 支付方式 -->
       <view class="modal-content ss-flex-1">
         <view class="pay-title ss-p-l-30 ss-m-y-30">选择支付方式</view>
         <radio-group @change="onTapPay">
@@ -17,7 +20,6 @@
             <view
               class="pay-item ss-flex ss-col-center ss-row-between ss-p-x-30 border-bottom"
               :class="{ 'disabled-pay-item': item.disabled }"
-              v-if="allowedPayment.includes(item.value)"
             >
               <view class="ss-flex ss-col-center">
                 <image
@@ -25,24 +27,18 @@
                   v-if="item.disabled"
                   :src="sheep.$url.static('/static/img/shop/pay/cod_disabled.png')"
                   mode="aspectFit"
-                ></image>
+                />
                 <image
                   class="pay-icon"
                   v-else
                   :src="sheep.$url.static(item.icon)"
                   mode="aspectFit"
-                ></image>
+                />
                 <text class="pay-title">{{ item.title }}</text>
               </view>
               <view class="check-box ss-flex ss-col-center ss-p-l-10">
-                <view class="userInfo-money ss-m-r-10" v-if="item.value == 'money'">
+                <view class="userInfo-money ss-m-r-10" v-if="item.value === 'wallet'">
                   余额: {{ userInfo.money }}元
-                </view>
-                <view
-                  class="userInfo-money ss-m-r-10"
-                  v-if="item.value == 'offline' && item.disabled"
-                >
-                  部分商品不支持
                 </view>
                 <radio
                   :value="item.value"
@@ -56,6 +52,7 @@
           </label>
         </radio-group>
       </view>
+
       <!-- 工具 -->
       <view class="modal-footer ss-flex ss-row-center ss-col-center ss-m-t-80 ss-m-b-40">
         <button v-if="state.payStatus === 0" class="ss-reset-button past-due-btn">
@@ -81,95 +78,49 @@
   import { computed, reactive } from 'vue';
   import { onLoad } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import { useDurationTime } from '@/sheep/hooks/useGoods';
+  import { fen2yuan, useDurationTime } from '@/sheep/hooks/useGoods';
+  import PayOrderApi from '@/sheep/api/pay/order';
+  import PayChannelApi from '@/sheep/api/pay/channel';
+  import { getPayMethods } from '@/sheep/platform/pay';
 
   const userInfo = computed(() => sheep.$store('user').userInfo);
 
   // 检测支付环境
   const state = reactive({
-    orderType: 'goods',
-    payment: '',
-    orderInfo: {},
+    orderType: 'goods', // 订单类型; goods - 商品订单, recharge - 充值订单
+    orderInfo: {}, // 支付单信息
     payStatus: 0, // 0=检测支付环境, -2=未查询到支付单信息， -1=支付已过期， 1=待支付，2=订单已支付
-    payMethods: [],
+    payMethods: [], // 可选的支付方式
+    payment: '', // 选中的支付方式
   });
-
-  const allowedPayment = computed(() => {
-    if(state.orderType === 'recharge') {
-      return sheep.$store('app').platform.recharge_payment
-    }
-    return sheep.$store('app').platform.payment
-    });
-
-  const payMethods = [
-    {
-      icon: '/static/img/shop/pay/wechat.png',
-      title: '微信支付',
-      value: 'wechat',
-      disabled: false,
-    },
-    {
-      icon: '/static/img/shop/pay/alipay.png',
-      title: '支付宝支付',
-      value: 'alipay',
-      disabled: false,
-    },
-    {
-      icon: '/static/img/shop/pay/wallet.png',
-      title: '余额支付',
-      value: 'money',
-      disabled: false,
-    },
-    {
-      icon: '/static/img/shop/pay/apple.png',
-      title: 'Apple Pay',
-      value: 'apple',
-      disabled: false,
-    },
-    {
-      icon: '/static/img/shop/pay/cod.png',
-      title: '货到付款',
-      value: 'offline',
-      disabled: false,
-    },
-  ];
 
   const onPay = () => {
     if (state.payment === '') {
       sheep.$helper.toast('请选择支付方式');
       return;
     }
-    if (state.payment === 'money') {
+    if (state.payment === 'wallet') {
       uni.showModal({
         title: '提示',
         content: '确定要支付吗?',
         success: function (res) {
           if (res.confirm) {
-            sheep.$platform.pay(state.payment, state.orderType, state.orderInfo.order_sn);
-          }
-        },
-      });
-    } else if (state.payment === 'offline') {
-      uni.showModal({
-        title: '提示',
-        content: '确定要下单吗?',
-        success: function (res) {
-          if (res.confirm) {
-            sheep.$platform.pay(state.payment, state.orderType, state.orderInfo.order_sn);
+            sheep.$platform.pay(state.payment, state.orderType, state.orderInfo.id);
           }
         },
       });
     } else {
-      sheep.$platform.pay(state.payment, state.orderType, state.orderInfo.order_sn);
+      sheep.$platform.pay(state.payment, state.orderType, state.orderInfo.id);
     }
   };
 
+  // 支付文案提示
   const payDescText = computed(() => {
     if (state.payStatus === 2) {
       return '该订单已支付';
     }
-    if (state.payStatus === 1 && state.orderInfo.ext.expired_time !== 0) {
-      const time = useDurationTime(state.orderInfo.ext.expired_time);
+    if (state.payStatus === 1) {
+      const time = useDurationTime(state.orderInfo.expireTime);
       if (time.ms <= 0) {
         state.payStatus = -1;
         return '';
@@ -179,86 +130,65 @@
     if (state.payStatus === -2) {
       return '未查询到支付单信息';
     }
-
     return '';
   });
 
+  // 状态转换：payOrder.status => payStatus
   function checkPayStatus() {
-    if (state.orderInfo.status === 'unpaid') {
-      state.payStatus = 1;
+    if (state.orderInfo.status === 10
+      || state.orderInfo.status === 20 ) { // 支付成功
+      state.payStatus = 2;
       return;
     }
-    if (state.orderInfo.status === 'closed') {
+    if (state.orderInfo.status === 30) { // 支付关闭
       state.payStatus = -1;
       return;
     }
-    state.payStatus = 2;
+    state.payStatus = 1; // 待支付
   }
 
+  // 切换支付方式
   function onTapPay(e) {
     state.payment = e.detail.value;
   }
 
-  async function setRechargeOrder(id) {
-    const { data, error } = await sheep.$api.trade.order(id);
-    if (error === 0) {
-      state.orderInfo = data;
-      state.payMethods = payMethods;
-      checkPayStatus();
-    } else {
+  // 设置支付订单信息
+  async function setOrder(id) {
+    // 获得支付订单信息
+    const { data, code } = await PayOrderApi.getOrder(id);
+    if (code !== 0 || !data) {
       state.payStatus = -2;
+      return;
     }
+    state.orderInfo = data;
+    // 获得支付方式
+    await setPayMethods();
+    // 设置支付状态
+    checkPayStatus();
   }
 
-  async function setGoodsOrder(id) {
-    const { data, error } = await sheep.$api.order.detail(id);
-    if (error === 0) {
-      state.orderInfo = data;
-      if (state.orderInfo.ext.offline_status === 'none') {
-        payMethods.forEach((item, index, array) => {
-          if (item.value === 'offline') {
-            array.splice(index, 1);
-          }
-        });
-      } else if (state.orderInfo.ext.offline_status === 'disabled') {
-        payMethods.forEach((item) => {
-          if (item.value === 'offline') {
-            item.disabled = true;
-          }
-        });
-      }
-      state.payMethods = payMethods;
-      checkPayStatus();
-    } else {
-      state.payStatus = -2;
+  // 获得支付方式
+  async function setPayMethods() {
+    const { data, code } = await PayChannelApi.getEnableChannelCodeList(state.orderInfo.appId)
+    if (code !== 0) {
+      return
     }
+    state.payMethods = getPayMethods(data)
   }
 
   onLoad((options) => {
-    if (
-      sheep.$platform.name === 'WechatOfficialAccount' &&
-      sheep.$platform.os === 'ios' &&
-      !sheep.$platform.landingPage.includes('pages/pay/index')
-    ) {
+    if (sheep.$platform.name === 'WechatOfficialAccount'
+      && sheep.$platform.os === 'ios'
+      && !sheep.$platform.landingPage.includes('pages/pay/index')) {
       location.reload();
       return;
     }
-    let id = '';
-    if (options.orderSN) {
-      id = options.orderSN;
+    // 获得支付订单信息
+    let id = options.id;
+    if (options.orderType) {
+      state.orderType = options.orderType;
     }
-    if (options.id) {
-      id = options.id;
-    }
-    if (options.type === 'recharge') {
-      state.orderType = 'recharge';
-      // 充值订单
-      setRechargeOrder(id);
-    } else {
-      state.orderType = 'goods';
-      // 商品订单
-      setGoodsOrder(id);
-    }
+    setOrder(id);
   });
 </script>
 
