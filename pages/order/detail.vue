@@ -56,18 +56,6 @@
             :price="item.price"
 						:num="item.count"
           >
-						<!-- 						<template #top>
-							<view class="order-item ss-flex ss-col-center ss-row-between ss-p-x-20 bg-white">
-								<view class="item-title">配送方式</view>
-								<view class="ss-flex ss-col-center">
-									<text class="item-value ss-m-r-20">{{ item.dispatch_type_text }}</text>
-									<button class="ss-reset-button copy-btn" @tap="onDetail(item)" v-if="
-                      (item.dispatch_type === 'autosend' || item.dispatch_type === 'custom') &&
-                      item.dispatch_status !== 0
-                    ">详情</button>
-								</view>
-							</view>
-						</template>
 						<template #tool>
 							<view class="ss-flex">
 								<button class="ss-reset-button apply-btn" v-if="item.buttons.includes('aftersale')"
@@ -109,7 +97,7 @@
 							<button class="ss-reset-button tag-btn" v-if="item.status_text">
 								{{ item.status_text }}
 							</button>
-						</template> -->
+						</template>
 					</s-goods-item>
 				</view>
 			</view>
@@ -340,14 +328,6 @@
 		});
 	}
 	// #endif
-
-	// 配送方式详情
-	function onDetail(item) {
-		sheep.$router.go('/pages/order/dispatch/content', {
-			id: item.order_id,
-			item_id: item.id,
-		});
-	}
 
 	// 评价
 	function onComment(orderSN, orderId) {
