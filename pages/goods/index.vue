@@ -13,7 +13,7 @@
 				<view class="detail-swiper-selector">
 					<!-- 商品轮播图  -->
 					<su-swiper class="ss-m-b-14" isPreview :list="formatGoodsSwiper(state.goodsInfo.sliderPicUrls)"
-                     dotStyle="tag" imageMode="widthFix" dotCur="bg-mask-40" :seizeHeight="750" />
+						dotStyle="tag" imageMode="widthFix" dotCur="bg-mask-40" :seizeHeight="750" />
 
 					<!-- 价格+标题 -->
 					<view class="title-card detail-card ss-p-y-40 ss-p-x-20">
@@ -31,16 +31,17 @@
 							</view>
 						</view>
 						<view class="discounts-box ss-flex ss-row-between ss-m-b-28">
-              <!-- 满减送/限时折扣活动的提示 TODO 芋艿：promos 未写 -->
-              <div class="tag-content">
+							<!-- 满减送/限时折扣活动的提示 TODO 芋艿：promos 未写 -->
+							<div class="tag-content">
 								<view class="tag-box ss-flex">
-									<view class="tag ss-m-r-10" v-for="promos in state.goodsInfo.promos" :key="promos.id" @tap="onActivity">
+									<view class="tag ss-m-r-10" v-for="promos in state.goodsInfo.promos"
+										:key="promos.id" @tap="onActivity">
 										{{ promos.title }}
 									</view>
 								</view>
 							</div>
 
-              <!-- 优惠劵 -->
+							<!-- 优惠劵 -->
 							<view class="get-coupon-box ss-flex ss-col-center ss-m-l-20" @tap="state.showModel = true"
 								v-if="state.couponInfo.length">
 								<view class="discounts-title ss-m-r-8">领券</view>
@@ -54,15 +55,15 @@
 					<!-- 功能卡片 -->
 					<view class="detail-cell-card detail-card ss-flex-col">
 						<detail-cell-sku v-model="state.selectedSku.goods_sku_text" :sku="state.selectedSku"
-                             @tap="state.showSelectSku = true" />
-            <!-- TODO 芋艿：可能暂时不考虑使用 -->
+							@tap="state.showSelectSku = true" />
+						<!-- TODO 芋艿：可能暂时不考虑使用 -->
 						<detail-cell-service v-if="state.goodsInfo.service" v-model="state.goodsInfo.service" />
 						<detail-cell-params v-if="state.goodsInfo.params" v-model="state.goodsInfo.params" />
 					</view>
 
 					<!-- 规格与数量弹框 -->
 					<s-select-sku :goodsInfo="state.goodsInfo" :show="state.showSelectSku" @addCart="onAddCart"
-                        @buy="onBuy" @change="onSkuChange" @close="state.showSelectSku = false" />
+						@buy="onBuy" @change="onSkuChange" @close="state.showSelectSku = false" />
 				</view>
 
 				<!-- 评价 -->
@@ -88,25 +89,35 @@
 					</view>
 				</detail-tabbar>
 
-        <!-- 优惠劵弹窗 -->
+				<!-- 优惠劵弹窗 -->
 				<s-coupon-get v-model="state.couponInfo" :show="state.showModel" @close="state.showModel = false"
-                      @get="onGet" />
+					@get="onGet" />
 
-        <!-- 满减送/限时折扣活动弹窗 -->
+				<!-- 满减送/限时折扣活动弹窗 -->
 				<s-activity-pop v-model="state.activityInfo" :show="state.showActivityModel"
-                        @close="state.showActivityModel = false" />
+					@close="state.showActivityModel = false" />
 			</block>
 		</s-layout>
 	</view>
 </template>
 
 <script setup>
-	import { reactive, computed } from 'vue';
-	import { onLoad, onPageScroll } from '@dcloudio/uni-app';
+	import {
+		reactive,
+		computed
+	} from 'vue';
+	import {
+		onLoad,
+		onPageScroll
+	} from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
-  import CouponApi from '@/sheep/api/promotion/coupon';
-  import ActivityApi from '@/sheep/api/promotion/activity';
-  import { formatSales, formatGoodsSwiper, fen2yuan, } from '@/sheep/hooks/useGoods';
+	import CouponApi from '@/sheep/api/promotion/coupon';
+	import ActivityApi from '@/sheep/api/promotion/activity';
+	import {
+		formatSales,
+		formatGoodsSwiper,
+		fen2yuan,
+	} from '@/sheep/hooks/useGoods';
 	import detailNavbar from './components/detail/detail-navbar.vue';
 	import detailCellSku from './components/detail/detail-cell-sku.vue';
 	import detailCellService from './components/detail/detail-cell-service.vue';
@@ -116,7 +127,9 @@
 	import detailCommentCard from './components/detail/detail-comment-card.vue';
 	import detailContentCard from './components/detail/detail-content-card.vue';
 	import detailActivityTip from './components/detail/detail-activity-tip.vue';
-	import { isEmpty } from 'lodash';
+	import {
+		isEmpty
+	} from 'lodash';
 
 	onPageScroll(() => {});
 
@@ -130,7 +143,7 @@
 		couponInfo: [], // 可领取的 Coupon 优惠劵的列表
 		showActivityModel: false, // 【满减送/限时折扣】是否展示 Activity 营销活动的弹窗
 		activityInfo: [], // 【满减送/限时折扣】可参与的 Activity 营销活动的列表
-    activityList: [], // 【秒杀/拼团/砍价】可参与的 Activity 营销活动的列表
+		activityList: [], // 【秒杀/拼团/砍价】可参与的 Activity 营销活动的列表
 	});
 
 	// 规格变更
@@ -179,7 +192,7 @@
 		}
 	}
 
-  //  TODO 芋艿：待测试
+	//  TODO 芋艿：待测试
 	const shareInfo = computed(() => {
 		if (isEmpty(state.goodsInfo)) return {};
 		return sheep.$platform.share.getShareInfo({
@@ -193,8 +206,9 @@
 		}, {
 			type: 'goods', // 商品海报
 			title: state.goodsInfo.name, // 商品标题
-			image: sheep.$url.cdn(state.goodsInfo.image), // 商品主图
-			price: state.goodsInfo.price[0], // 商品价格
+			// image: sheep.$url.cdn(state.goodsInfo.image), // 商品主图
+			image: sheep.$url.cdn(state.goodsInfo.picUrl), // 商品主图
+			price: state.goodsInfo.price, // 商品价格
 			original_price: state.goodsInfo.original_price, // 商品原价
 		}, );
 	});
@@ -208,31 +222,31 @@
 		state.goodsId = options.id;
 		// 1. 加载商品信息
 		sheep.$api.goods.detail(state.goodsId).then((res) => {
-      // 未找到商品
-      if (res.code !== 0 || !res.data) {
-        state.goodsInfo = null;
-        return;
-      }
+			// 未找到商品
+			if (res.code !== 0 || !res.data) {
+				state.goodsInfo = null;
+				return;
+			}
 			// 加载到商品
 			state.skeletonLoading = false;
-      state.goodsInfo = res.data;
+			state.goodsInfo = res.data;
 		});
 
-    // 2. 加载优惠劵信息
-    CouponApi.getCouponTemplateList(state.goodsId,2, 10).then((res) => {
-      if (res.code !== 0) {
-        return;
-      }
-      state.couponInfo = res.data;
-    });
+		// 2. 加载优惠劵信息
+		CouponApi.getCouponTemplateList(state.goodsId, 2, 10).then((res) => {
+			if (res.code !== 0) {
+				return;
+			}
+			state.couponInfo = res.data;
+		});
 
-    // 3. 加载营销活动信息
-    ActivityApi.getActivityListBySpuId(state.goodsId).then((res) => {
-      if (res.code !== 0) {
-        return;
-      }
-      state.activityList = res.data;
-    });
+		// 3. 加载营销活动信息
+		ActivityApi.getActivityListBySpuId(state.goodsId).then((res) => {
+			if (res.code !== 0) {
+				return;
+			}
+			state.activityList = res.data;
+		});
 	});
 </script>
 

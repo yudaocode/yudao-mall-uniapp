@@ -33,7 +33,7 @@
 		// #endif
 
 		// #ifdef MP-WEIXIN
-		// 确认收货回调结果
+		// 确认收货回调结果 
 		console.log(options, 'options');
 		// #endif
 
