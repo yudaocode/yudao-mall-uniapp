@@ -58,7 +58,7 @@
           >
 						<template #tool>
 							<view class="ss-flex">
-								<button class="ss-reset-button apply-btn" v-if="item.buttons.includes('aftersale')"
+								<button class="ss-reset-button apply-btn" v-if="[10, 20, 30].includes(state.orderInfo.status) && item.afterSaleStatus === 0"
 									@tap.stop="
                     sheep.$router.go('/pages/order/aftersale/apply', {
                       item: JSON.stringify(item),
@@ -66,30 +66,21 @@
                   ">
 									申请售后
 								</button>
-								<button class="ss-reset-button apply-btn" v-if="item.buttons.includes('re_aftersale')"
+								<button class="ss-reset-button apply-btn" v-if="item.afterSaleStatus === 10"
 									@tap.stop="
-                    sheep.$router.go('/pages/order/aftersale/apply', {
+                    sheep.$router.go('/pages/order/aftersale/detail', {
                       item: JSON.stringify(item),
                     })
                   ">
-									重新售后
+									退款中
 								</button>
-
-								<button class="ss-reset-button apply-btn" v-if="item.buttons.includes('aftersale_info')"
+								<button class="ss-reset-button apply-btn" v-if="item.afterSaleStatus === 20"
 									@tap.stop="
                     sheep.$router.go('/pages/order/aftersale/detail', {
                       id: item.ext.aftersale_id,
                     })
                   ">
-									售后详情
-								</button>
-								<button class="ss-reset-button apply-btn" v-if="item.buttons.includes('buy_again')"
-									@tap.stop="
-                    sheep.$router.go('/pages/goods/index', {
-                      id: item.goods_id,
-                    })
-                  ">
-									再次购买
+									退款成功
 								</button>
 							</view>
 						</template>
@@ -225,6 +216,7 @@
 		});
 	}
 
+  // 查看商品
 	function onGoodsDetail(id) {
 		sheep.$router.go('/pages/goods/index', {
 			id
@@ -244,25 +236,6 @@
         if (code === 0) {
           await getOrderDetail(orderId);
         }
-			},
-		});
-	}
-
-	// 申请退款
-	async function onRefund(orderId) {
-		uni.showModal({
-			title: '提示',
-			content: '确定要申请退款吗?',
-			success: async function(res) {
-				if (res.confirm) {
-					const {
-						error,
-						data
-					} = await sheep.$api.order.applyRefund(orderId);
-					if (error === 0) {
-						getOrderDetail(data.order_sn);
-					}
-				}
 			},
 		});
 	}

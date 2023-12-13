@@ -34,7 +34,6 @@
 				<view class="order-card-footer ss-flex ss-col-center ss-p-x-20"
               :class="order.buttons.length > 3 ? 'ss-row-between' : 'ss-row-right'">
 					<view class="ss-flex ss-col-center">
-            <!-- TODO 芋艿：再次购买 -->
 						<button v-if="order.buttons.includes('combination')" class="tool-btn ss-reset-button"
 							@tap.stop="onOrderGroupon(order)">
               拼团详情
@@ -80,15 +79,8 @@
 </template>
 
 <script setup>
-	import {
-		computed,
-		reactive
-	} from 'vue';
-	import {
-		onLoad,
-		onReachBottom,
-		onPullDownRefresh
-	} from '@dcloudio/uni-app';
+	import { reactive } from 'vue';
+	import { onLoad, onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
   import {
     fen2yuan,
     formatOrderColor, formatOrderStatus, handleOrderButtons,
