@@ -1,10 +1,11 @@
 import request from '@/sheep/request';
+import request2 from '@/sheep/request2';
 import $platform from '@/sheep/platform';
 
 export default {
 	getUnused: () =>
-		request({
-			url: '/app-api/promotion/coupon/get-unused-count',
+		request2({
+			url: 'promotion/coupon/get-unused-count',
 			method: 'GET',
 			custom: {
 				showLoading: false,
@@ -12,8 +13,8 @@ export default {
 			},
 		}),
 	profile: () =>
-		request({
-			url: '/app-api/member/user/get',
+		request2({
+			url: 'member/user/get',
 			method: 'GET',
 			custom: {
 				showLoading: false,
@@ -21,7 +22,7 @@ export default {
 			},
 		}),
 	balance: () =>
-		request({
+		request2({
 			url: '/app-api/pay/wallet/get',
 			method: 'GET',
 			custom: {
@@ -29,9 +30,28 @@ export default {
 				auth: true,
 			},
 		}),
+	// profile: () =>
+	//   request({
+	//     url: '/user/api/user/profile',
+	//     method: 'GET',
+	//     custom: {
+	//       showLoading: false,
+	//       auth: true,
+	//     },
+	//   }),
+	// update: (data) =>
+	//   request({
+	//     url: '/user/api/user/update',
+	//     method: 'POST',
+	//     custom: {
+	//       showSuccess: true,
+	//       auth: true,
+	//     },
+	//     data,
+	//   }),
 	update: (data) =>
-		request({
-			url: '/app-api/member/user/update',
+		request2({
+			url: 'member/user/update',
 			method: 'PUT',
 			custom: {
 				showSuccess: true,
@@ -176,48 +196,90 @@ export default {
 		}),
 
 	address: {
+		// default: () =>
+		// 	request({
+		// 		url: 'user/address/default',
+		// 		method: 'GET',
+		// 		custom: {
+		// 			showError: false,
+		// 		},
+		// 	}),
 		default: () =>
-			request({
-				url: '/app-api/member/address/get-default',
+			request2({
+				url: 'member/address/get-default',
 				method: 'GET',
 				custom: {
 					showError: false,
 				},
 			}),
 		list: () =>
-			request({
-				url: '/app-api/member/address/list',
+			request2({
+				url: 'member/address/list',
 				method: 'GET',
 				custom: {},
 			}),
+		// list: () =>
+		//   request({
+		//     url: 'user/address',
+		//     method: 'GET',
+		//     custom: {},
+		//   }),
 		create: (data) =>
-			request({
-				url: '/app-api/member/address/create',
+			request2({
+				url: 'member/address/create',
 				method: 'POST',
 				data,
 				custom: {
 					showSuccess: true,
 				},
 			}),
+		// create: (data) =>
+		//   request({
+		//     url: 'user/address',
+		//     method: 'POST',
+		//     data,
+		//     custom: {
+		//       showSuccess: true,
+		//     },
+		//   }),
 		update: (data) =>
-			request({
-				url: '/app-api/member/address/update',
+			request2({
+				url: 'member/address/update',
 				method: 'PUT',
 				data,
 				custom: {
 					showSuccess: true,
 				},
 			}),
+		// update: (id, data) =>
+		// 	request({
+		// 		url: 'user/address/' + id,
+		// 		method: 'PUT',
+		// 		data,
+		// 		custom: {
+		// 			showSuccess: true,
+		// 		},
+		// 	}),
 		detail: (id) =>
-			request({
-				url: '/app-api/member/address/get?id=' + id,
+			request2({
+				url: 'member/address/get?id=' + id,
 				method: 'GET',
 			}),
+		// detail: (id) =>
+		//   request({
+		//     url: 'user/address/' + id,
+		//     method: 'GET',
+		//   }),
 		delete: (id) =>
-			request({
-				url: '/app-api/member/address/delete?id=' + id,
+			request2({
+				url: 'member/address/delete?id=' + id,
 				method: 'DELETE',
 			}),
+		// delete: (id) =>
+		// 	request({
+		// 		url: 'user/address/' + id,
+		// 		method: 'DELETE',
+		// 	}),
 	},
 	invoice: {
 		list: () =>
@@ -257,29 +319,17 @@ export default {
 	},
 	favorite: {
 		list: (params) =>
-			request({
-				url: '/app-api/product/favorite/page',
+			request2({
+				url: 'product/favorite/page',
 				method: 'GET',
 				params,
 			}),
 		do: (id) =>
 			request({
-				url: '/app-api/product/favorite/create',
+				url: 'user/goodsLog/favorite',
 				method: 'POST',
 				data: {
-					spuId: id,
-				},
-				custom: {
-					showSuccess: true,
-					auth: true,
-				},
-			}),
-		dos: (id) =>
-			request({
-				url: '/app-api/product/favorite/delete',
-				method: 'DELETE',
-				data: {
-					spuId: id,
+					goods_id: id,
 				},
 				custom: {
 					showSuccess: true,
@@ -288,8 +338,8 @@ export default {
 			}),
 		// 取消收藏
 		cancel: (id) =>
-			request({
-				url: '/app-api/product/favorite/delete-list',
+			request2({
+				url: 'product/favorite/delete-list',
 				method: 'DELETE',
 				data: {
 					spuIds: id.split(',').map(item => item * 1),
@@ -300,6 +350,18 @@ export default {
 					auth: true,
 				},
 			}),
+		// cancel: (id) =>
+		//   request({
+		//     url: 'user/goodsLog/favorite',
+		//     method: 'POST',
+		//     data: {
+		//       goods_ids: id,
+		//     },
+		//     custom: {
+		//       showSuccess: true,
+		//       auth: true,
+		//     },
+		//   }),
 	},
 	view: {
 		list: (params) =>
@@ -321,21 +383,28 @@ export default {
 	},
 	wallet: {
 		log: (params) =>
-			request({
+			request2({
 				// url: 'member/point/record/page',
-				url: '/app-api/pay/wallet-transaction/page',
+				url: 'pay/wallet-transaction/page',
 				method: 'GET',
 				params,
 				custom: {},
 			}),
 		log2: (params) =>
-			request({
-				url: '/app-api/member/point/record/page',
+			request2({
+				url: 'member/point/record/page',
 				// url: 'pay/wallet-transaction/page',
 				method: 'GET',
 				params,
 				custom: {},
 			}),
+		// log: (params) =>
+		// request({
+		// 	url: '/user/api/walletLog',
+		// 	method: 'GET',
+		// 	params,
+		// 	custom: {},
+		// }),
 	},
 	account: {
 		info: (params) =>
@@ -360,9 +429,18 @@ export default {
 			}),
 	},
 	//数量接口
+	// data: () =>
+	//   request({
+	//     url: 'user/user/data',
+	//     method: 'GET',
+	//     custom: {
+	//       showLoading: false,
+	//       auth: true,
+	//     },
+	//   }),
 	data: () =>
-		request({
-			url: '/app-api/trade/order/get-count',
+		request2({
+			url: 'trade/order/get-count',
 			method: 'GET',
 			custom: {
 				showLoading: false,
@@ -370,8 +448,8 @@ export default {
 			},
 		}),
 	data2: () =>
-		request({
-			url: '/app-api/trade/after-sale/get-applying-count',
+		request2({
+			url: 'trade/after-sale/get-applying-count',
 			method: 'GET',
 			custom: {
 				showLoading: false,

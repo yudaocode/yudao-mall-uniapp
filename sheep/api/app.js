@@ -115,14 +115,12 @@ export default {
         formData: {
           group,
         },
-        // TODO 芋艿：临时写死
         header: {
           // Accept: 'text/json',
           // Authorization: token,
-          Accept : '*/*',
-          'tenant-id' :'1',
-          'terminal': 20,
-          Authorization:  'Bearer test247',
+		  Accept : '*/*',
+		  'tenant-id' :'1',
+		  Authorization:  'Bearer test247',
         },
         success: (uploadFileRes) => {
           let result = JSON.parse(uploadFileRes.data);

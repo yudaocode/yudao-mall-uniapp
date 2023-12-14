@@ -1,9 +1,10 @@
 import request from '@/sheep/request';
+import request2 from '@/sheep/request2';
 
 export default {
 	list: (data) =>
-		request({
-			url: '/app-api/trade/cart/list',
+		request2({
+			url: 'trade/cart/list',
 			method: 'GET',
 			custom: {
 				showLoading: false,
@@ -12,40 +13,26 @@ export default {
 		}),
 	append: (data) =>
 		request({
-			url: '/app-api/trade/cart/add',
+			url: 'cart',
 			method: 'POST',
-      // TODO 芋艿：这里没提示
 			custom: {
 				showSuccess: true,
 				successMsg: '已添加到购物车~',
 			},
 			data: {
 				...data,
-				// type: 'inc',
+				type: 'inc',
 			},
 		}),
-	// append: (data) =>
-	// 	request({
-	// 		url: 'cart',
-	// 		method: 'POST',
-	// 		custom: {
-	// 			showSuccess: true,
-	// 			successMsg: '已添加到购物车~',
-	// 		},
-	// 		data: {
-	// 			...data,
-	// 			type: 'inc',
-	// 		},
-	// 	}),
 	// 删除购物车
 	delete: (ids) =>
-		request({
-			url: '/app-api/trade/cart/delete?ids=' + ids,
+		request2({
+			url: 'trade/cart/delete?ids=' + ids,
 			method: 'DELETE',
 		}),
 	update: (data) =>
-		request({
-			url: '/app-api/trade/cart/update-count',
+		request2({
+			url: 'trade/cart/update-count',
 			method: 'PUT',
 			data: {
 				...data,

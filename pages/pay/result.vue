@@ -2,27 +2,34 @@
 <template>
   <s-layout title="支付结果" :bgStyle="{ color: '#FFF' }">
     <view class="pay-result-box ss-flex-col ss-row-center ss-col-center">
-      <!-- 信息展示 -->
-      <view class="pay-waiting ss-m-b-30" v-if="payResult === 'waiting'" />
+      <view class="pay-waiting ss-m-b-30" v-if="payResult === 'waiting'"> </view>
       <image
         class="pay-img ss-m-b-30"
         v-if="payResult === 'success'"
         :src="sheep.$url.static('/static/img/shop/order/order_pay_success.gif')"
-      />
+      ></image>
       <image
         class="pay-img ss-m-b-30"
         v-if="['failed', 'closed'].includes(payResult)"
         :src="sheep.$url.static('/static/img/shop/order/order_paty_fail.gif')"
-      />
-      <view class="tip-text ss-m-b-30" v-if="payResult === 'success'">支付成功</view>
-      <view class="tip-text ss-m-b-30" v-if="payResult === 'failed'">支付失败</view>
-      <view class="tip-text ss-m-b-30" v-if="payResult === 'closed'">该订单已关闭</view>
-      <view class="tip-text ss-m-b-30" v-if="payResult === 'waiting'">检测支付结果...</view>
+      ></image>
+      <view class="tip-text ss-m-b-30" v-if="payResult == 'success'">{{
+        state.orderInfo.pay_mode === 'offline' ? '下单成功' : '支付成功'
+      }}</view>
+      <view class="tip-text ss-m-b-30" v-if="payResult == 'failed'">支付失败</view>
+      <view class="tip-text ss-m-b-30" v-if="payResult == 'closed'">该订单已关闭</view>
+      <view class="tip-text ss-m-b-30" v-if="payResult == 'waiting'">检测支付结果...</view>
       <view class="pay-total-num ss-flex" v-if="payResult === 'success'">
-        <view>￥{{ fen2yuan(state.orderInfo.price) }}</view>
+        <view v-if="Number(state.orderInfo.pay_fee) > 0">￥{{ state.orderInfo.pay_fee }}</view>
+        <view v-if="state.orderInfo.score_amount && Number(state.orderInfo.pay_fee) > 0">+</view>
+        <view class="price-text ss-flex ss-col-center" v-if="state.orderInfo.score_amount">
+          <image
+            :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
+            class="score-img"
+          ></image>
+          <view>{{ state.orderInfo.score_amount }}</view>
+        </view>
       </view>
-
-      <!-- 操作区 -->
       <view class="btn-box ss-flex ss-row-center ss-m-t-50">
         <button class="back-btn ss-reset-button" @tap="sheep.$router.go('/pages/index/index')">
           返回首页
@@ -30,29 +37,30 @@
         <button
           class="check-btn ss-reset-button"
           v-if="payResult === 'failed'"
-          @tap="
-            sheep.$router.redirect('/pages/pay/index', { id: state.id, orderType: state.orderType })
-          "
+          @tap="sheep.$router.redirect('/pages/pay/index', { orderSN: state.orderId })"
         >
           重新支付
         </button>
         <button class="check-btn ss-reset-button" v-if="payResult === 'success'" @tap="onOrder">
           查看订单
         </button>
-        <!-- TODO 芋艿：拼团接入 -->
         <button
           class="check-btn ss-reset-button"
-          v-if="payResult === 'success' && state.tradeOrder.type === 3"
+          v-if="
+            payResult === 'success' &&
+            ['groupon', 'groupon_ladder'].includes(state.orderInfo.activity_type)
+          "
           @tap="sheep.$router.redirect('/pages/activity/groupon/order')"
         >
           我的拼团
         </button>
       </view>
-
-      <!-- TODO 芋艿：订阅 -->
       <!-- #ifdef MP -->
       <view class="subscribe-box ss-flex ss-m-t-44">
-        <image class="subscribe-img" :src="sheep.$url.static('/static/img/shop/order/cargo.png')" />
+        <image
+          class="subscribe-img"
+          :src="sheep.$url.static('/static/img/shop/order/cargo.png')"
+        ></image>
         <view class="subscribe-title ss-m-r-48 ss-m-l-16">获取实时发货信息与订单状态</view>
         <view class="subscribe-start" @tap="subscribeMessage">立即订阅</view>
       </view>
@@ -66,20 +74,15 @@
   import { reactive, computed } from 'vue';
   import { isEmpty } from 'lodash';
   import sheep from '@/sheep';
-  import PayOrderApi from '@/sheep/api/pay/order';
-  import { fen2yuan } from '../../sheep/hooks/useGoods';
-  import OrderApi from '@/sheep/api/trade/order';
 
   const state = reactive({
-    id: 0, // 支付单号
-    orderType: 'goods', // 订单类型
+    orderId: 0,
+    orderType: 'goods',
     result: 'unpaid', // 支付状态
-    orderInfo: {}, // 支付订单信息
-    tradeOrder: {}, // 商品订单信息，只有在 orderType 为 goods 才会请求。目的：【我的拼团】按钮的展示
+    orderInfo: {}, // 订单详情
     counter: 0, // 获取结果次数
   });
 
-  // 支付结果 result => payResult
   const payResult = computed(() => {
     if (state.result === 'unpaid') {
       return 'waiting';
@@ -90,65 +93,57 @@
     if (state.result === 'failed') {
       return 'failed';
     }
+
     if (state.result === 'closed') {
       return 'closed';
     }
   });
-
-  // 获得订单信息
-  async function getOrderInfo(id) {
+  async function getOrderInfo(orderId) {
+    let checkPayResult;
     state.counter++;
-    // 1. 加载订单信息
-    const { data, code } = await PayOrderApi.getOrder(id);
-    if (code === 0) {
+    if (state.orderType === 'recharge') {
+      checkPayResult = sheep.$api.trade.order;
+    } else {
+      checkPayResult = sheep.$api.order.detail;
+    }
+    const { data, error } = await checkPayResult(orderId);
+    if (error === 0) {
       state.orderInfo = data;
-      if (!state.orderInfo || state.orderInfo.status === 30) {
-        // 支付关闭
+      if (state.orderInfo.status === 'closed') {
         state.result = 'closed';
         return;
       }
-      if (state.orderInfo.status !== 0) {
-        // 非待支付，可能是已支付，可能是已退款
+      if (state.orderInfo.status !== 'unpaid') {
         state.result = 'paid';
         // #ifdef MP
         subscribeMessage();
         // #endif
-        // 特殊：获得商品订单信息
-        if (state.orderType === 'goods') {
-          const { data, code } = await OrderApi.getOrder(state.orderInfo.merchantOrderId);
-          if (code === 0) {
-            state.tradeOrder = data;
-          }
-        }
         return;
       }
     }
-    // 2.1 情况三一：未支付，且轮询次数小于三次，则继续轮询
     if (state.counter < 3 && state.result === 'unpaid') {
       setTimeout(() => {
-        getOrderInfo(id);
+        getOrderInfo(orderId);
       }, 1500);
     }
-    // 2.2 情况二：超过三次检测才判断为支付失败
+    // 超过三次检测才判断为支付失败
     if (state.counter >= 3) {
       state.result = 'failed';
     }
   }
 
   function onOrder() {
-    // TODO 芋艿：待测试
-    if (state.orderType === 'recharge') {
+    if ((state.orderType === 'recharge')) {
       sheep.$router.redirect('/pages/pay/recharge-log');
     } else {
       sheep.$router.redirect('/pages/order/list');
     }
   }
 
-  // TODO 芋艿：待测试
   // #ifdef MP
   function subscribeMessage() {
     let event = ['order_dispatched'];
-    if (state.tradeOrder.type === 3) {
+    if (['groupon', 'groupon_ladder'].includes(state.orderInfo.activity_type)) {
       event.push('groupon_finish');
       event.push('groupon_fail');
     }
@@ -157,13 +152,18 @@
   // #endif
 
   onLoad(async (options) => {
+    let id = '';
     // 支付订单号
-    if (options.id) {
-      state.id = options.id;
+    if (options.orderSN) {
+      id = options.orderSN;
     }
-    // 订单类型
-    if (options.orderType) {
-      state.orderType = options.orderType;
+    if (options.id) {
+      id = options.id;
+    }
+    state.orderId = id;
+
+    if (options.orderType === 'recharge') {
+      state.orderType = 'recharge';
     }
 
     // 支付结果传值过来是失败，则直接显示失败界面
@@ -171,16 +171,14 @@
       state.result = 'failed';
     } else {
       // 轮询三次检测订单支付结果
-      await getOrderInfo(state.id);
+      getOrderInfo(state.orderId);
     }
   });
 
   onShow(() => {
-    if (isEmpty(state.orderInfo)) {
-      return;
-    }
-    getOrderInfo(state.id);
-  });
+    if(isEmpty(state.orderInfo)) return;
+    getOrderInfo(state.orderId);
+  })
 
   onHide(() => {
     state.result = 'unpaid';

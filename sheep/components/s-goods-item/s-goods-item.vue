@@ -26,7 +26,7 @@
               :style="[{ color: priceColor }]"
               v-if="price && Number(price) > 0"
             >
-              ￥{{ fen2yuan(price) }}
+              ￥{{ price }}
             </view>
             <view v-if="score && Number(price) > 0">+</view>
             <view class="price-text ss-flex ss-col-center" v-if="score">
@@ -54,7 +54,6 @@
 <script setup>
   import sheep from '@/sheep';
   import { computed } from 'vue';
-  import { fen2yuan } from '../../hooks/useGoods';
   /**
    * 订单卡片
    *
