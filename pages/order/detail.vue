@@ -299,10 +299,10 @@
     });
   }
 
-  // 查看物流 TODO 芋艿：待测试
-  async function onExpress(orderId) {
-    sheep.$router.go('/pages/order/express/list', {
-      orderId,
+  // 查看物流
+  async function onExpress(id) {
+    sheep.$router.go('/pages/order/express/log', {
+      id,
     });
   }
 
@@ -376,7 +376,7 @@
         merchant_trade_no: state.merchantTradeNo,
       });
     } else {
-      res = await sheep.$api.order.detail(id);
+      res = await OrderApi.getOrder(id);
     }
     if (res.code === 0) {
       state.orderInfo = res.data;

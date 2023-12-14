@@ -70,34 +70,16 @@ const OrderApi = {
       },
     });
   },
-  // 取消订单
-  cancelOrder: (id) => {
+  // 获得交易订单的物流轨迹
+  getOrderExpressTrackList: (id) => {
     return request2({
-      url: `/app-api/trade/order/cancel`,
-      method: 'DELETE',
+      url: `/app-api/trade/order/get-express-track-list`,
+      method: 'GET',
       params: {
         id,
       },
     });
-  },
-  // 删除订单
-  deleteOrder: (id) => {
-    return request2({
-      url: `/app-api/trade/order/delete`,
-      method: 'DELETE',
-      params: {
-        id,
-      },
-    });
-  },
-  // 创建单个评论
-  createOrderItemComment: (data) => {
-    return request2({
-      url: `/app-api/trade/order/item/create-comment`,
-      method: 'POST',
-      data,
-    });
-  },
+  }
 };
 
 export default OrderApi;
