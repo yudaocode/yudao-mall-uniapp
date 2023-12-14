@@ -232,7 +232,7 @@
         <button
           class="ss-reset-button cancel-btn"
           v-if="state.orderInfo.buttons?.includes('comment')"
-          @tap="onComment(state.orderInfo.id, state.orderInfo)"
+          @tap="onComment(state.orderInfo.id)"
         >
           评价
         </button>
@@ -362,10 +362,9 @@
   // #endif
 
   // 评价
-  function onComment(orderSN, orderId) {
+  function onComment(id) {
     sheep.$router.go('/pages/goods/comment/add', {
-      orderSN,
-      orderId,
+      id
     });
   }
 

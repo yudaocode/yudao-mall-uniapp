@@ -55,7 +55,7 @@
 							取消订单
 						</button>
 						<button v-if="order.buttons.includes('comment')" class="tool-btn ss-reset-button"
-                    @tap.stop="onComment(order.order_sn)">
+                    @tap.stop="onComment(order.id)">
 							评价
 						</button>
 						<button v-if="order.buttons.includes('delete')" class="delete-btn ss-reset-button"
@@ -164,10 +164,10 @@
 		});
 	}
 
-	// 评价 TODO 芋艿：待测试
-	function onComment(orderSN) {
+	// 评价
+	function onComment(id) {
 		sheep.$router.go('/pages/goods/comment/add', {
-			orderSN,
+			id,
 		});
 	}
 

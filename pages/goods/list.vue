@@ -16,7 +16,7 @@
             :scrollable="false"
             @change="onTabsChange"
             :current="state.currentTab"
-          ></su-tabs>
+          />
         </view>
         <view class="list-icon" @tap="state.iconStatus = !state.iconStatus">
           <text v-if="state.iconStatus" class="sicon-goods-list"></text>

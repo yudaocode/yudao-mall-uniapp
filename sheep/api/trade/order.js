@@ -90,6 +90,14 @@ const OrderApi = {
       },
     });
   },
+  // 创建单个评论
+  createOrderItemComment: (data) => {
+    return request2({
+      url: `/app-api/trade/order/item/create-comment`,
+      method: 'POST',
+      data,
+    });
+  },
 };
 
 export default OrderApi;
