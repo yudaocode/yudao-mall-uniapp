@@ -28,7 +28,7 @@
     <!-- 基础组件：分割线 -->
     <s-line-block v-if="type === 'Divider'" :data="data" />
     <!-- 图文组件：热区 -->
-    <s-hotzone-block v-if="type === 'hotzone'" :data="data" :styles="styles" />
+    <s-hotzone-block v-if="type === 'HotZone'" :data="data" :styles="styles" />
 
     <!-- 商品组件：商品卡片 -->
     <s-goods-card v-if="type === 'ProductCard'" :data="data" :styles="styles" />
