@@ -7,12 +7,11 @@
 		<s-empty v-if="state.pagination.total === 0" icon="/static/coupon-empty.png" text="暂无优惠券"></s-empty>
 		<template v-if="state.currentTab == '0'">
 			<view v-for="item in state.pagination.list" :key="item.id">
-				<s-coupon-list :data="item">
-					<!-- 	@tap="
-					  sheep.$router.go('/pages/coupon/detail', {
-					    id: item.id,
-					  })
-					" -->
+				<s-coupon-list :data="item" @tap="
+					            sheep.$router.go('/pages/coupon/detail', {
+					              data: JSON.stringify(item),
+					            })">
+
 					<template #default>
 						<button class="ss-reset-button card-btn ss-flex ss-row-center ss-col-center"
 							:class="item.get_status != 'can_get' ? 'border-btn' : ''" @click.stop="getBuy(item.id)"
@@ -26,12 +25,12 @@
 		</template>
 		<template v-else>
 			<view v-for="item in state.pagination.list" :key="item.id">
-				<s-coupon-list :data="item" type="user">
-					<!-- 	@tap="
+				<s-coupon-list :data="item" type="user" @tap="
 					            sheep.$router.go('/pages/coupon/detail', {
-					              id: item.id,
+					              data: JSON.stringify(item),
 					            })
-					          " -->
+					          ">
+
 					<template #default>
 						<button class="ss-reset-button card-btn ss-flex ss-row-center ss-col-center" :class="
                 item.status == 'can_get' || item.status == 'can_use'
@@ -153,6 +152,10 @@
 				2: '已用',
 				3: '过期'
 			}
+			let obj2 = {
+				1: '满减',
+				2: '折扣'
+			}
 			res.data.list = res.data.list.map(item => {
 				return {
 					...item,
@@ -160,7 +163,8 @@
 					amount: (item.discountPrice / 100).toFixed(2),
 					use_start_time: sheep.$helper.timeFormat(item.validStartTime, 'yyyy-mm-dd hh:MM:ss'),
 					use_end_time: sheep.$helper.timeFormat(item.validEndTime, 'yyyy-mm-dd hh:MM:ss'),
-					status_text: obj[item.status]
+					status_text: obj[item.status],
+					type_text: obj2[item.discountType]
 				}
 			});
 			if (page >= 2) {

@@ -29,6 +29,16 @@ export default {
 			url: '/app-api/member/sign-in/record/create',
 			method: 'POST',
 		}),
+	configLise: () =>
+		request({
+			url: '/app-api/member/sign-in/config/list',
+			method: 'GET',
+		}),
+	recordPage: () =>
+		request({
+			url: '/app-api/member/sign-in/record/page',
+			method: 'GET',
+		}),
 	// signAdd: () =>
 	// 	request({
 	// 		url: 'activity/signin',
