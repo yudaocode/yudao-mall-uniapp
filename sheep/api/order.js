@@ -129,13 +129,6 @@ export default {
 		}),
 	// 售后
 	aftersale: {
-		// 申请售后
-		apply: (data) =>
-			request({
-				url: 'order/aftersale',
-				method: 'POST',
-				data,
-			}),
 		list: (params) =>
 			request({
 				url: '/app-api/trade/after-sale/page',
@@ -145,15 +138,6 @@ export default {
 					showLoading: false,
 				},
 			}),
-		// list: (params) =>
-		// 	request({
-		// 		url: 'order/aftersale',
-		// 		method: 'GET',
-		// 		params,
-		// 		custom: {
-		// 			showLoading: false,
-		// 		},
-		// 	}),
 		//取消售后
 		cancel: (id) =>
 			request({
@@ -166,7 +150,7 @@ export default {
 				url: 'order/aftersale/' + id,
 				method: 'DELETE',
 			}),
-		// 售后详情
+		// 售后详情 DONE
 		detail: (id) =>
 			request({
 				url: '/app-api/trade/after-sale/get?id=' + id,

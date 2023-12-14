@@ -10,6 +10,26 @@ const AfterSaleApi = {
       data,
     });
   },
+  // 获得售后
+  getAfterSale: (id) => {
+    return request2({
+      url: `/app-api/trade/after-sale/get`,
+      method: 'GET',
+      params: {
+        id,
+      },
+    });
+  },
+  // 取消售后
+  cancelAfterSale: (id) => {
+    return request2({
+      url: `/app-api/trade/after-sale/cancel`,
+      method: 'DELETE',
+      params: {
+        id,
+      },
+    });
+  }
 };
 
 export default AfterSaleApi;

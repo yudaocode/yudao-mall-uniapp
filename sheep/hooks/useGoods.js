@@ -183,6 +183,87 @@ export function handleOrderButtons(order) {
 }
 
 /**
+ * 格式化售后状态
+ *
+ * @param afterSale 售后
+ */
+export function formatAfterSaleStatus(afterSale) {
+  if (afterSale.status === 10) {
+    return '申请售后';
+  }
+  if (afterSale.status === 20) {
+    return '商品待退货';
+  }
+  if (afterSale.status === 30) {
+    return '商家待收货';
+  }
+  if (afterSale.status === 40) {
+    return '等待退款';
+  }
+  if (afterSale.status === 50) {
+    return '退款成功';
+  }
+  if (afterSale.status === 61) {
+    return '买家取消';
+  }
+  if (afterSale.status === 62) {
+    return '商家拒绝';
+  }
+  if (afterSale.status === 63) {
+    return '商家拒收货';
+  }
+  return '未知状态';
+}
+
+/**
+ * 格式化售后状态的描述
+ *
+ * @param afterSale 售后
+ */
+export function formatAfterSaleStatusDescription(afterSale) {
+  if (afterSale.status === 10) {
+    return '退款申请待商家处理';
+  }
+  if (afterSale.status === 20) {
+    return '请退货并填写物流信息';
+  }
+  if (afterSale.status === 30) {
+    return '退货退款申请待商家处理';
+  }
+  if (afterSale.status === 40) {
+    return '等待退款';
+  }
+  if (afterSale.status === 50) {
+    return '退款成功';
+  }
+  if (afterSale.status === 61) {
+    return '退款关闭';
+  }
+  if (afterSale.status === 62) {
+    return `商家不同意退款申请，拒绝原因：${afterSale.auditReason}`;
+  }
+  if (afterSale.status === 63) {
+    return `商家拒绝收货，不同意退款，拒绝原因：${afterSale.auditReason}`;
+  }
+  return '未知状态';
+}
+
+/**
+ * 处理售后的 button 操作按钮数组
+ *
+ * @param afterSale 售后
+ */
+export function handleAfterSaleButtons(afterSale) {
+  afterSale.buttons = [];
+  if ([10, 20, 30].includes(afterSale.status)) { // 取消订单
+    afterSale.buttons.push('cancel');
+  }
+  if (afterSale.status === 20) { // 退货信息
+    afterSale.buttons.push('delivery');
+  }
+}
+
+/**
  * 倒计时
  * @param toTime   截止时间
  * @param fromTime 起始时间，默认当前时间
