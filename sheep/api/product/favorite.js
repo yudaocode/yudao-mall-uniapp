@@ -9,6 +9,26 @@ const FavoriteApi = {
       params: data
     });
   },
+  // 检查是否收藏过商品
+  isFavoriteExists: (spuId) => {
+    return request({
+      url: '/app-api/product/favorite/exits',
+      method: 'GET',
+      params: {
+        spuId
+      }
+    });
+  },
+  // 添加商品收藏
+  createFavorite: (spuId) => {
+    return request({
+      url: '/app-api/product/favorite/create',
+      method: 'POST',
+      data: {
+        spuId
+      }
+    });
+  },
   // 取消商品收藏
   deleteFavorite: (spuId) => {
     return request({
