@@ -6,11 +6,11 @@
 			<view class="ss-flex">
 				<view class="ss-flex-1">
 					<su-tabs :list="state.tabList" :scrollable="false" @change="onTabsChange"
-						:current="state.currentTab"></su-tabs>
+                   :current="state.currentTab" />
 				</view>
 				<view class="list-icon" @tap="state.iconStatus = !state.iconStatus">
-					<text v-if="state.iconStatus" class="sicon-goods-list"></text>
-					<text v-else class="sicon-goods-card"></text>
+					<text v-if="state.iconStatus" class="sicon-goods-list" />
+					<text v-else class="sicon-goods-card" />
 				</view>
 			</view>
 		</su-sticky>
@@ -26,17 +26,31 @@
 				</view>
 			</view>
 		</su-popup>
+
+    <!-- 情况一：单列布局 -->
 		<view v-if="state.iconStatus && state.pagination.total > 0" class="goods-list ss-m-t-20">
-			<view class="ss-p-l-20 ss-p-r-20 ss-m-b-20" v-for="item in state.pagination.data" :key="item.id">
-				<s-goods-column class="" size="lg" :data="item" :topRadius="10" :bottomRadius="10"
-					@click="sheep.$router.go('/pages/goods/index', { id: item.id })"></s-goods-column>
+			<view class="ss-p-l-20 ss-p-r-20 ss-m-b-20" v-for="item in state.pagination.list" :key="item.id">
+				<s-goods-column
+          class=""
+          size="lg"
+          :data="item"
+          :topRadius="10"
+          :bottomRadius="10"
+					@click="sheep.$router.go('/pages/goods/index', { id: item.id })"
+        />
 			</view>
 		</view>
-		<view v-if="!state.iconStatus && state.pagination.total > 0"
+    <!-- 情况二：双列布局 -->
+    <view v-if="!state.iconStatus && state.pagination.total > 0"
 			class="ss-flex ss-flex-wrap ss-p-x-20 ss-m-t-20 ss-col-top">
 			<view class="goods-list-box">
 				<view class="left-list" v-for="item in state.leftGoodsList" :key="item.id">
-					<s-goods-column class="goods-md-box" size="md" :data="item" :topRadius="10" :bottomRadius="10"
+					<s-goods-column
+            class="goods-md-box"
+            size="md"
+            :data="item"
+            :topRadius="10"
+            :bottomRadius="10"
 						@click="sheep.$router.go('/pages/goods/index', { id: item.id })"
 						@getHeight="mountMasonry($event, 'left')">
 						<template v-slot:cart>
@@ -47,11 +61,16 @@
 			</view>
 			<view class="goods-list-box">
 				<view class="right-list" v-for="item in state.rightGoodsList" :key="item.id">
-					<s-goods-column class="goods-md-box" size="md" :topRadius="10" :bottomRadius="10" :data="item"
+					<s-goods-column
+            class="goods-md-box"
+            size="md"
+            :topRadius="10"
+            :bottomRadius="10"
+            :data="item"
 						@click="sheep.$router.go('/pages/goods/index', { id: item.id })"
 						@getHeight="mountMasonry($event, 'right')">
 						<template v-slot:cart>
-							<button class="ss-reset-button cart-btn"> </button>
+							<button class="ss-reset-button cart-btn" />
 						</template>
 					</s-goods-column>
 				</view>
@@ -59,46 +78,37 @@
 		</view>
 		<uni-load-more v-if="state.pagination.total > 0" :status="state.loadStatus" :content-text="{
         contentdown: '上拉加载更多',
-      }" @tap="loadmore" />
-		<s-empty v-if="state.pagination.total === 0" icon="/static/soldout-empty.png" text="暂无商品">
-		</s-empty>
+      }" @tap="loadMore" />
+		<s-empty v-if="state.pagination.total === 0" icon="/static/soldout-empty.png" text="暂无商品" />
 	</s-layout>
 </template>
 
 <script setup>
-	import {
-		reactive
-	} from 'vue';
+	import { reactive } from 'vue';
 	import {
 		onLoad,
 		onReachBottom
 	} from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
 	import _ from 'lodash';
+  import { resetPagination } from '@/sheep/util';
 
 	const sys_navBar = sheep.$platform.navbar;
 	const emits = defineEmits(['close', 'change']);
 
-	const pagination = {
-		data: [],
-		current_page: 1,
-		total: 1,
-		last_page: 1,
-	};
 	const state = reactive({
 		pagination: {
-			data: [],
-			current_page: 1,
-			total: 1,
-			last_page: 1,
+			list: [],
+      total: 0,
+      pageNo: 1,
+			pageSize: 6,
 		},
 		// currentSort: 'weigh',
 		// currentOrder: 'desc',
 		currentTab: 0,
-		filterParams: {},
 		curFilter: 0,
 		showFilter: false,
-		iconStatus: false,
+		iconStatus: false, // true - 单列布局；false - 双列布局
 		categoryId: 0,
 		tabList: [{
 				name: '综合推荐',
@@ -133,8 +143,8 @@
 		],
 		loadStatus: '',
 		keyword: '',
-		leftGoodsList: [],
-		rightGoodsList: [],
+		leftGoodsList: [], // 双列布局 - 左侧商品
+		rightGoodsList: [], // 双列布局 - 右侧商品
 	});
 
 	// 加载瀑布流
@@ -143,7 +153,9 @@
 	let rightHeight = 0;
 
 	function mountMasonry(height = 0, where = 'left') {
-		if (!state.pagination.data[count]) return;
+		if (!state.pagination.list[count]) {
+      return;
+    }
 
 		if (where === 'left') {
 			leftHeight += height;
@@ -151,26 +163,28 @@
 			rightHeight += height;
 		}
 		if (leftHeight <= rightHeight) {
-			state.leftGoodsList.push(state.pagination.data[count]);
+			state.leftGoodsList.push(state.pagination.list[count]);
 		} else {
-			state.rightGoodsList.push(state.pagination.data[count]);
+			state.rightGoodsList.push(state.pagination.list[count]);
 		}
 		count++;
 	}
 
+  // 清空列表
 	function emptyList() {
-		state.pagination = pagination
-		state.leftGoodsList = [];
+    resetPagination(state.pagination);
+    state.leftGoodsList = [];
 		state.rightGoodsList = [];
 		count = 0;
 		leftHeight = 0;
 		rightHeight = 0;
 	}
-	//搜索
+
+	// 搜索
 	function onSearch(e) {
 		state.keyword = e;
 		emptyList();
-		getList(state.currentSort, state.currentOrder, state.categoryId, e);
+		getList(state.currentSort, state.currentOrder);
 	}
 
 	// 点击
@@ -189,7 +203,7 @@
 		}
 		emptyList();
 		console.log(e, '6666')
-		getList(e.sort, e.order, state.categoryId, state.keyword);
+		getList(e.sort, e.order);
 	}
 
 	// 点击筛选项
@@ -207,54 +221,47 @@
 		state.currentSort = state.tabList[0].list[val].sort;
 		state.currentOrder = state.tabList[0].list[val].order;
 		emptyList();
-		getList(state.currentSort, state.currentOrder, state.categoryId, state.keyword);
+		getList(state.currentSort, state.currentOrder);
 		state.showFilter = false;
 	};
 
-	async function getList(Sort, Order, categoryId, keyword, page = 1, list_rows = 6) {
+	async function getList(Sort, Order) {
 		state.loadStatus = 'loading';
-		const res = await sheep.$api.goods.list({
+		const { code, data } = await sheep.$api.goods.list({
+      pageNo: state.pagination.pageNo,
+      pageSize: state.pagination.pageSize,
 			sortField: Sort,
 			sortAsc: Order,
-			category_id: !keyword ? categoryId : '',
-			pageSize: list_rows,
-			keyword: keyword,
-			pageNo: page,
+			categoryId: state.categoryId,
+			keyword: state.keyword,
 		});
-		if (res.code === 0) {
-			let couponList = _.concat(state.pagination.data, res.data.list);
-			state.pagination = {
-				...res.data,
-				data: couponList,
-			};
-			mountMasonry();
-			if (state.pagination.current_page < state.pagination.last_page) {
-				state.loadStatus = 'more';
-			} else {
-				state.loadStatus = 'noMore';
-			}
-		}
+    if (code !== 0) {
+      return;
+    }
+    state.pagination.list = _.concat(state.pagination.list, data.list)
+    state.pagination.total = data.total;
+    state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
+    mountMasonry();
 	}
+
 	// 加载更多
-	function loadmore() {
-		if (state.loadStatus !== 'noMore') {
-			getList(
-				state.currentSort,
-				state.currentOrder,
-				state.categoryId,
-				state.keyword,
-				state.pagination.current_page + 1,
-			);
-		}
+	function loadMore() {
+    if (state.loadStatus === 'noMore') {
+      return;
+    }
+    state.pagination.pageNo++;
+    getList(state.currentSort, state.currentOrder);
 	}
+
 	onLoad((options) => {
 		state.categoryId = options.categoryId;
 		state.keyword = options.keyword;
-		getList(state.currentSort, state.currentOrder, state.categoryId, state.keyword);
+		getList(state.currentSort, state.currentOrder);
 	});
+
 	// 上拉加载更多
 	onReachBottom(() => {
-		loadmore();
+		loadMore();
 	});
 </script>
 
