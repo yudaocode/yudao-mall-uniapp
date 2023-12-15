@@ -29,7 +29,7 @@
           :style="[{ color: goodsFields.price.color }]"
         >
           <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-          {{ isArray(data.price) ? data.price[0] : data.price }}
+          {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
         </view>
       </view>
     </view>
@@ -55,7 +55,7 @@
           :style="[{ color: goodsFields.price.color }]"
         >
           <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-          {{ isArray(data.price) ? data.price[0] : data.price }}
+          {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
         </view>
       </view>
     </view>
@@ -102,7 +102,7 @@
             :style="[{ color: goodsFields.price.color }]"
           >
             <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-            {{ isArray(data.price) ? data.price[0] : data.price }}
+            {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
           </view>
 
           <view
@@ -111,7 +111,7 @@
             :style="[{ color: originPriceColor }]"
           >
             <text class="price-unit ss-font-20">{{ priceUnit }}</text>
-            <view class="ss-m-l-8">{{ data.original_price||data.marketPrice }}</view>
+            <view class="ss-m-l-8">{{ fen2yuan(data.marketPrice) }}</view>
           </view>
         </view>
 
@@ -122,7 +122,7 @@
 
       <slot name="cart">
         <view class="cart-box ss-flex ss-col-center ss-row-center">
-          <image class="cart-icon" src="/static/img/shop/tabbar/category2.png" mode=""></image>
+          <image class="cart-icon" src="/static/img/shop/tabbar/category2.png" mode="" />
         </view>
       </slot>
     </view>
@@ -174,7 +174,7 @@
               :style="[{ color: goodsFields.price.color }]"
             >
               <text class="ss-font-24">{{ priceUnit }}</text>
-              {{ isArray(data.price) ? data.price[0] : data.price }}
+              {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
             </view>
             <view
               v-if="(goodsFields.original_price?.show||goodsFields.marketPrice?.show) &&( data.original_price > 0|| data.marketPrice > 0)"
@@ -182,7 +182,7 @@
               :style="[{ color: originPriceColor }]"
             >
               <text class="price-unit ss-font-20">{{ priceUnit }}</text>
-              <view class="ss-m-l-8">{{ data.original_price||data.marketPrice }}</view>
+              <view class="ss-m-l-8">{{ fen2yuan(data.marketPrice) }}</view>
             </view>
           </view>
           <view class="ss-m-t-8 ss-flex ss-col-center ss-flex-wrap">
@@ -191,11 +191,11 @@
         </view>
       </view>
 
-      <slot name="cart"
-        ><view class="buy-box ss-flex ss-col-center ss-row-center" v-if="buttonShow"
-          >去购买</view
-        ></slot
-      >
+      <slot name="cart">
+        <view class="buy-box ss-flex ss-col-center ss-row-center" v-if="buttonShow">
+          去购买
+        </view>
+      </slot>
     </view>
 
     <!-- sl卡片：竖向型，一行放一个，图片上内容下边 -->
@@ -238,7 +238,7 @@
           <view v-if="goodsFields.price?.show" class="ss-flex ss-col-bottom font-OPPOSANS">
             <view class="sl-goods-price ss-m-r-12" :style="[{ color: goodsFields.price.color }]">
               <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-              {{ isArray(data.price) ? data.price[0] : data.price }}
+              {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
             </view>
             <view
               v-if="(goodsFields.original_price?.show||goodsFields.marketPrice?.show) &&( data.original_price > 0|| data.marketPrice > 0)"
@@ -246,7 +246,7 @@
               :style="[{ color: originPriceColor }]"
             >
               <text class="price-unit ss-font-20">{{ priceUnit }}</text>
-              <view class="ss-m-l-8">{{ data.original_price||data.marketPrice }}</view>
+              <view class="ss-m-l-8">{{ fen2yuan(data.marketPrice) }}</view>
             </view>
           </view>
           <view class="ss-m-t-16 ss-flex ss-flex-wrap">
@@ -293,7 +293,7 @@
    */
   import { computed, reactive, getCurrentInstance, onMounted, nextTick } from 'vue';
   import sheep from '@/sheep';
-  import { formatSales } from '@/sheep/hooks/useGoods';
+  import { fen2yuan, formatSales } from '@/sheep/hooks/useGoods';
   import { formatStock } from '@/sheep/hooks/useGoods';
   import goodsCollectVue from '@/pages/user/goods-collect.vue';
   import { isArray } from 'lodash';
@@ -307,6 +307,7 @@
       type: [Array, Object],
       default() {
         return {
+          // TODO @疯狂：旧的要不剔除掉，后续都用新的
           // 商品名称（旧）
           title: { show: true },
           // 商品介绍（旧）
