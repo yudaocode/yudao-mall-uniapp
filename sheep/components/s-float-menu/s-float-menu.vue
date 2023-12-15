@@ -25,19 +25,7 @@
   const props = defineProps({
     data: {
       type: Object,
-      default() {
-        return {
-          // horizontal vertical
-          direction: 'vertical',
-          showText: true,
-          list: [{
-            imgUrl: 'http://localhost/logo.gif',
-            url: '',
-            text: '客服',
-            textColor: '',
-          }],
-        }
-      },
+      default() {},
     }
   })
 

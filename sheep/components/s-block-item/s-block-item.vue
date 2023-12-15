@@ -20,7 +20,7 @@
     <!-- 图文组件：图片轮播 -->
     <s-image-banner v-if="type === 'Carousel'" :data="data" :styles="styles" />
     <!-- 基础组件：标题栏 -->
-    <s-title-block v-if="type === 'titleBlock'" :data="data" :styles="styles" />
+    <s-title-block v-if="type === 'TitleBar'" :data="data" :styles="styles" />
     <!-- 图文组件：广告魔方 -->
     <s-image-cube v-if="type === 'MagicCube'" :data="data" :styles="styles" />
     <!-- 图文组件：视频播放 -->
@@ -28,7 +28,7 @@
     <!-- 基础组件：分割线 -->
     <s-line-block v-if="type === 'Divider'" :data="data" />
     <!-- 图文组件：热区 -->
-    <s-hotzone-block v-if="type === 'hotzone'" :data="data" :styles="styles" />
+    <s-hotzone-block v-if="type === 'HotZone'" :data="data" :styles="styles" />
 
     <!-- 商品组件：商品卡片 -->
     <s-goods-card v-if="type === 'ProductCard'" :data="data" :styles="styles" />
