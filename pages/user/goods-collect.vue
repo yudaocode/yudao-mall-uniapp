@@ -1,12 +1,11 @@
+<!-- 我的商品收藏 -->
 <template>
   <s-layout title="商品收藏">
     <view class="cart-box ss-flex ss-flex-col ss-row-between">
       <!-- 头部 -->
       <view class="cart-header ss-flex ss-col-center ss-row-between ss-p-x-30">
         <view class="header-left ss-flex ss-col-center ss-font-26">
-          共
-          <text class="goods-number ui-TC-Main ss-flex">{{ state.pagination.total }}</text>
-          件商品
+          共 <text class="goods-number ui-TC-Main ss-flex">{{ state.pagination.total }}</text> 件商品
         </view>
         <view class="header-right">
           <button
@@ -20,15 +19,16 @@
             v-if="!state.editMode && state.pagination.total"
             class="ss-reset-button ui-TC-Main"
             @tap="state.editMode = true"
-            >编辑</button
           >
+            编辑
+          </button>
         </view>
       </view>
       <!-- 内容 -->
       <view class="cart-content">
         <view
           class="goods-box ss-r-10 ss-m-b-14"
-          v-for="item in state.pagination.data"
+          v-for="item in state.pagination.list"
           :key="item.id"
         >
           <view class="ss-flex ss-col-center">
@@ -44,12 +44,10 @@
                 @tap.stop="onSelect(item.spuId)"
               />
             </label>
-			  <!-- :skuText="item.goods.subtitle" -->
             <s-goods-item
               :title="item.spuName"
               :img="item.picUrl"
               :price="item.price"
-            
               priceColor="#FF3000"
               :titleWidth="400"
               @tap="
@@ -57,11 +55,11 @@
                   id: item.spuId,
                 })
               "
-            >
-            </s-goods-item>
+            />
           </view>
         </view>
       </view>
+
       <!-- 底部 -->
       <su-fixed bottom :val="0" placeholder v-show="state.editMode">
         <view class="cart-footer ss-flex ss-col-center ss-row-between ss-p-x-30 border-bottom">
@@ -79,9 +77,9 @@
           <view class="footer-right">
             <button
               class="ss-reset-button ui-BG-Main-Gradient pay-btn ss-font-28 ui-Shadow-Main"
-              @tap="onCancel"
-              >取消收藏</button
-            >
+              @tap="onCancel">
+              取消收藏
+            </button>
           </view>
         </view>
       </su-fixed>
@@ -92,7 +90,7 @@
       :content-text="{
         contentdown: '上拉加载更多',
       }"
-      @tap="loadmore"
+      @tap="loadMore"
     />
     <s-empty v-if="state.pagination.total === 0" text="暂无收藏" icon="/static/collect-empty.png" />
   </s-layout>
@@ -103,98 +101,89 @@
   import { reactive } from 'vue';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import _ from 'lodash';
+  import FavoriteApi from '@/sheep/api/product/favorite';
+  import { resetPagination } from '@/sheep/util';
 
   const sys_navBar = sheep.$platform.navbar;
-  const pagination = {
-    data: [],
-    current_page: 1,
-    total: 1,
-    last_page: 1,
-  };
+
   const state = reactive({
     pagination: {
-      data: [],
-      current_page: 1,
-      total: 1,
-      last_page: 1,
+      list: [],
+      total: 0,
+      pageNo: 1,
+      pageSize: 6,
     },
     loadStatus: '',
+
     editMode: false,
-    selectedCollectList: [],
+    selectedCollectList: [], // 选中的 SPU 数组
     selectAll: false,
   });
 
-  async function getData(page = 1, list_rows = 6) {
+  async function getData() {
     state.loadStatus = 'loading';
-    let res = await sheep.$api.user.favorite.list({
-      pageSize:list_rows,
-      pageNo:page,
+    const { code, data } = await FavoriteApi.getFavoritePage({
+      pageNo: state.pagination.pageNo,
+      pageSize: state.pagination.pageSize,
     });
-    if (res.code === 0) {
-		console.log('yudao收藏列表',res)
-      let orderList = _.concat(state.pagination.data, res.data.list);
-      state.pagination = {
-        ...res.data,
-        data: orderList,
-      };
-	  // 没有原接口文档不太理解这字段意思
-      if (state.pagination.current_page < state.pagination.last_page) {
-        state.loadStatus = 'more';
-      } else {
-        state.loadStatus = 'noMore';
-      }
+    if (code !== 0) {
+      return;
     }
-  }
-  // 格式化价格
-  function formatPrice(e) {
-    return e.length === 1 ? e[0] : e.join('~');
+    state.pagination.list = _.concat(state.pagination.list, data.list)
+    state.pagination.total = data.total;
+    state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
   }
 
   // 单选选中
-  const onSelect = (id) => {
-    if (!state.selectedCollectList.includes(id)) {
-      state.selectedCollectList.push(id);
+  const onSelect = (spuId) => {
+    if (!state.selectedCollectList.includes(spuId)) {
+      state.selectedCollectList.push(spuId);
     } else {
-      state.selectedCollectList.splice(state.selectedCollectList.indexOf(id), 1);
+      state.selectedCollectList.splice(state.selectedCollectList.indexOf(spuId), 1);
     }
-    state.selectAll = state.selectedCollectList.length === state.pagination.data.length;
+    state.selectAll = state.selectedCollectList.length === state.pagination.list.length;
   };
+
   // 全选
   const onSelectAll = () => {
     state.selectAll = !state.selectAll;
     if (!state.selectAll) {
       state.selectedCollectList = [];
     } else {
-      state.pagination.data.forEach((item) => {
-        if (state.selectedCollectList.includes(item.goods_id)) {
-          state.selectedCollectList.splice(state.selectedCollectList.indexOf(item.goods_id), 1);
-        }
-        state.selectedCollectList.push(item.goods_id);
-      });
+      state.selectedCollectList = state.pagination.list.map((item) => item.spuId);
     }
   };
+
   async function onCancel() {
-    if (state.selectedCollectList) {
-      state.selectedCollectList = state.selectedCollectList.toString();
-      const { code } = await sheep.$api.user.favorite.cancel(state.selectedCollectList);
-      if (code === 0) {
-        state.editMode = false;
-        state.selectedCollectList = [];
-        state.selectAll = false;
-        state.pagination = pagination;
-        getData();
-      }
+    if (!state.selectedCollectList) {
+      return;
     }
+    // 取消收藏
+    for (const spuId of state.selectedCollectList) {
+      await FavoriteApi.deleteFavorite(spuId);
+    }
+
+    // 清空选择 + 重新加载
+    state.editMode = false;
+    state.selectedCollectList = [];
+    state.selectAll = false;
+    resetPagination(state.pagination);
+    await getData();
   }
+
   // 加载更多
-  function loadmore() {
-    if (state.loadStatus !== 'noMore') {
-      getData(state.pagination.current_page + 1);
+  function loadMore() {
+    if (state.loadStatus === 'noMore') {
+      return
     }
+    state.pagination.pageNo++;
+    getData();
   }
+
   onReachBottom(() => {
-    loadmore();
+    loadMore();
   });
+
   onLoad(() => {
     getData();
   });

@@ -1,4 +1,3 @@
-<!-- 订单确认的优惠劵选择弹窗 -->
 <template>
   <su-popup
     :show="show"
@@ -17,21 +16,20 @@
         :enable-back-to-top="true"
       >
         <view class="subtitle ss-m-l-20">可使用优惠券</view>
-        <view v-for="(item, index) in state.couponInfo" :key="index">
+        <view v-for="(item, index) in state.couponInfo.can_use" :key="index">
           <s-coupon-list :data="item" type="user" :disabled="false">
             <template #default>
               <label class="ss-flex ss-col-center" @tap="radioChange(item.id)">
                 <radio
                   color="var(--ui-BG-Main)"
                   style="transform: scale(0.8)"
-                  :checked="state.couponId === item.id"
+                  :checked="state.couponId == item.id"
                   @tap.stop="radioChange(item.id)"
                 />
               </label>
             </template>
           </s-coupon-list>
         </view>
-        <!-- TODO 芋艿：未来接口需要支持下
         <view class="subtitle ss-m-t-40 ss-m-l-20">不可使用优惠券</view>
         <view v-for="item in state.couponInfo.cannot_use" :key="item.id">
           <s-coupon-list :data="item" type="user" :disabled="true">
@@ -43,7 +41,6 @@
             </template>
           </s-coupon-list>
         </view>
-      -->
       </scroll-view>
     </view>
     <view class="modal-footer ss-flex">
@@ -53,9 +50,8 @@
 </template>
 <script setup>
   import { computed, reactive } from 'vue';
-
   const props = defineProps({
-    modelValue: { // 优惠劵列表
+    modelValue: {
       type: Object,
       default() {},
     },
@@ -64,27 +60,21 @@
       default: false,
     },
   });
-
   const emits = defineEmits(['confirm', 'close']);
-
   const state = reactive({
-    couponInfo: computed(() => props.modelValue), // 优惠劵列表
-    couponId: 0, // 选中的优惠劵编号
+    couponInfo: computed(() => props.modelValue),
+    couponId: 0,
   });
-
-  // 选中优惠劵
   function radioChange(couponId) {
-    if (state.couponId === couponId) {
+    if (state.couponId == couponId) {
       state.couponId = 0;
     } else {
       state.couponId = couponId;
     }
   }
-
-  // 确认优惠劵
   const onConfirm = () => {
     emits('confirm', state.couponId);
-  }
+  };
 </script>
 <style lang="scss" scoped>
   :deep() {

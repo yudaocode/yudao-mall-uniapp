@@ -232,7 +232,7 @@
         <button
           class="ss-reset-button cancel-btn"
           v-if="state.orderInfo.buttons?.includes('comment')"
-          @tap="onComment(state.orderInfo.id, state.orderInfo)"
+          @tap="onComment(state.orderInfo.id)"
         >
           评价
         </button>
@@ -299,10 +299,10 @@
     });
   }
 
-  // 查看物流 TODO 芋艿：待测试
-  async function onExpress(orderId) {
-    sheep.$router.go('/pages/order/express/list', {
-      orderId,
+  // 查看物流
+  async function onExpress(id) {
+    sheep.$router.go('/pages/order/express/log', {
+      id,
     });
   }
 
@@ -362,10 +362,9 @@
   // #endif
 
   // 评价
-  function onComment(orderSN, orderId) {
+  function onComment(id) {
     sheep.$router.go('/pages/goods/comment/add', {
-      orderSN,
-      orderId,
+      id
     });
   }
 
@@ -377,7 +376,7 @@
         merchant_trade_no: state.merchantTradeNo,
       });
     } else {
-      res = await sheep.$api.order.detail(id);
+      res = await OrderApi.getOrder(id);
     }
     if (res.code === 0) {
       state.orderInfo = res.data;

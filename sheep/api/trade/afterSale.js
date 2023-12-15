@@ -29,6 +29,16 @@ const AfterSaleApi = {
         id,
       },
     });
+  },
+  // 获得售后日志列表
+  getAfterSaleLogList: (afterSaleId) => {
+    return request2({
+      url: `/app-api/trade/after-sale-log/list`,
+      method: 'GET',
+      params: {
+        afterSaleId,
+      },
+    });
   }
 };
 

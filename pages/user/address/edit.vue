@@ -101,6 +101,7 @@
 		},
 	);
 	const onRegionConfirm = (e) => {
+		console.log(e);
 		state.model = {
 			...state.model,
 			...e,
@@ -186,7 +187,13 @@
 
 		if (options.data) {
 			let data = JSON.parse(options.data);
-			console.log(data)
+			const areaData = uni.getStorageSync('areaData');
+			let provinceArr = areaData.filter(item => item.name == data.province_name);
+			data.province_id = provinceArr[0].id;
+			let provinceArr2 = provinceArr[0].children.filter(item => item.name == data.city_name);
+			data.city_id = provinceArr2[0].id;
+			let provinceArr3 = provinceArr2[0].children.filter(item => item.name == data.district_name);
+			data.district_id = provinceArr3[0].id;
 			state.model = {
 				...state.model,
 				...data,

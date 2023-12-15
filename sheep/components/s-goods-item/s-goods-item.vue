@@ -54,7 +54,7 @@
 <script setup>
   import sheep from '@/sheep';
   import { computed } from 'vue';
-  import { fen2yuan } from '../../hooks/useGoods';
+  import { fen2yuan } from '@/sheep/hooks/useGoods';
   /**
    * 订单卡片
    *

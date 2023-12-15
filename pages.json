@@ -260,16 +260,6 @@
             "auth": true,
             "title": "物流轨迹"
           }
-        },
-        {
-          "path": "express/list",
-          "style": {
-            "navigationBarTitleText": "订单包裹"
-          },
-          "meta": {
-            "auth": true,
-            "title": "订单包裹"
-          }
         }
       ]
     },
