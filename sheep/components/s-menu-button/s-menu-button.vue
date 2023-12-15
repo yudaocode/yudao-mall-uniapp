@@ -197,7 +197,7 @@
     },
     iconSize: {
       type: Number,
-      default: 96,
+      default: 80,
     },
     color: {
       type: String,
@@ -264,13 +264,13 @@
 
     .menu-icon {
       transform: translate(0, 0);
-      width: 98rpx;
-      height: 98rpx;
+      width: 80rpx;
+      height: 80rpx;
       padding-bottom: 10rpx;
     }
 
     .menu-title {
-      font-size: 30rpx;
+      font-size: 24rpx;
       color: #333;
     }
   }

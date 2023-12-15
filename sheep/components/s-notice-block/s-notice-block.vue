@@ -32,7 +32,7 @@
 <style lang="scss" scoped>
   .notice-wrap {
     .icon-img {
-      height: 60rpx;
+      height: 56rpx;
     }
   }
 </style>
