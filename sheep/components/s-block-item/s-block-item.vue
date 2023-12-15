@@ -20,7 +20,7 @@
     <!-- 图文组件：图片轮播 -->
     <s-image-banner v-if="type === 'Carousel'" :data="data" :styles="styles" />
     <!-- 基础组件：标题栏 -->
-    <s-title-block v-if="type === 'titleBlock'" :data="data" :styles="styles" />
+    <s-title-block v-if="type === 'TitleBar'" :data="data" :styles="styles" />
     <!-- 图文组件：广告魔方 -->
     <s-image-cube v-if="type === 'MagicCube'" :data="data" :styles="styles" />
     <!-- 图文组件：视频播放 -->
