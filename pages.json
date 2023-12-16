@@ -473,18 +473,6 @@
           }
         },
         {
-          "path": "feedback",
-          "style": {
-            "navigationBarTitleText": "问题反馈"
-          },
-          "meta": {
-            "auth": true,
-            "sync": true,
-            "title": "问题反馈",
-            "group": "通用"
-          }
-        },
-        {
           "path": "richtext",
           "style": {
             "navigationBarTitleText": "富文本"

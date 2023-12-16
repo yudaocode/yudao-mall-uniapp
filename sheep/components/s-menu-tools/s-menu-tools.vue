@@ -64,11 +64,6 @@
       title: '我的收藏',
     },
     {
-      url: '/pages/public/feedback',
-      icon: '/static/img/shop/tools/feedback.png',
-      title: '意见反馈',
-    },
-    {
       url: '/pages/chat/index',
       icon: '/static/img/shop/tools/service.png',
       title: '客服',

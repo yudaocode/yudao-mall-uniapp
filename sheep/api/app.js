@@ -50,13 +50,6 @@ export default {
         loadingMsg: '发送中',
       },
     }),
-  //意见反馈
-  feedback: (data) =>
-    request({
-      url: 'feedback',
-      method: 'POST',
-      data,
-    }),
   // 自定义页面
   page: (id) =>
     request({

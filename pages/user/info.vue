@@ -1,3 +1,4 @@
+<!-- 用户信息 -->
 <template>
   <s-layout title="用户信息" class="set-userinfo-wrap">
     <uni-forms
@@ -18,7 +19,7 @@
             :width="160"
             :radius="80"
             mode="scaleToFill"
-          ></su-image>
+          />
           <view class="avatar-action">
             <!-- #ifdef MP -->
             <button
@@ -208,7 +209,7 @@
   import { showAuthModal } from '@/sheep/hooks/useModal';
 
   const state = reactive({
-    model: {},
+    model: {}, // 个人信息
     rules: {},
     thirdOauthInfo: null,
   });
@@ -232,26 +233,28 @@
 
   const userInfo = computed(() => sheep.$store('user').userInfo);
 
-  // 选择性别
+  // 选择性别 TODO
   function onChangeGender(e) {
     state.model.gender = e.detail.value;
   }
-  // 修改用户名
+
+  // 修改用户名 TODO
   const onChangeUsername = () => {
     !state.model.verification?.username && showAuthModal('changeUsername');
   };
 
-  // 修改手机号
+  // 修改手机号 TODO
   const onChangeMobile = () => {
     showAuthModal('changeMobile');
   };
 
+  // TODO 芋艿：
   function onChooseAvatar(e) {
     const tempUrl = e.detail.avatarUrl || '';
     uploadAvatar(tempUrl);
   }
 
-  //修改头像
+  // 修改头像 TODO
   function onChangeAvatar() {
     uni.chooseImage({
       success: async (chooseImageRes) => {
@@ -261,13 +264,14 @@
     });
   }
 
+  // TODO
   async function uploadAvatar(tempUrl) {
     if (!tempUrl) return;
     let { path } = await sheep.$api.app.upload(tempUrl, 'ugc');
     state.model.avatar = path;
   }
 
-  // 修改/设置密码
+  // 修改/设置密码 TODO
   function onSetPassword() {
     if (state.model.verification.password) {
       showAuthModal('changePassword');
@@ -276,7 +280,7 @@
     }
   }
 
-  // 绑定第三方账号
+  // 绑定第三方账号 TODO
   async function bindThirdOauth() {
     let result = await sheep.$platform.useProvider('wechat').bind();
     if (result) {
@@ -284,7 +288,7 @@
     }
   }
 
-  // 解绑第三方账号
+  // 解绑第三方账号 TODO
   function unBindThirdOauth() {
     uni.showModal({
       title: '解绑提醒',
@@ -302,7 +306,7 @@
     });
   }
 
-  // 保存信息
+  // 保存信息 TODO
   async function onSubmit() {
     // const { error, data } = await sheep.$api.user.update({
     //   avatar: state.model.avatar,
@@ -319,13 +323,14 @@
     }
   }
 
+  // TODO
   const getUserInfo = async () => {
     const userInfo = await sheep.$store('user').getInfo();
     state.model = clone(userInfo);
 
     if (sheep.$platform.name !== 'H5') {
-		return;
-		// 这个先注释,要不然小程序保存个人信息有问题,
+		  return;
+		  // 这个先注释,要不然小程序保存个人信息有问题,
       let { data, error } = await sheep.$api.user.thirdOauthInfo();
       if (error === 0) {
         state.thirdOauthInfo = data;
@@ -333,6 +338,7 @@
     }
   };
 
+  // TODO
   onBeforeMount(async () => {
     getUserInfo();
   });

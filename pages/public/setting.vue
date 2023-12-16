@@ -28,14 +28,6 @@
           class="list-border"
         ></uni-list-item>
         <uni-list-item
-          title="意见反馈"
-          showArrow
-          clickable
-          :border="false"
-          class="list-border"
-          @tap="sheep.$router.go('/pages/public/feedback')"
-        ></uni-list-item>
-        <uni-list-item
           title="关于我们"
           showArrow
           clickable
