@@ -111,7 +111,7 @@
     state.currentTab = e.index;
     state.type = e.value;
     resetPagination(state.pagination)
-    if (state.currentTab == 0) {
+    if (state.currentTab === 0) {
     	getData();
     } else {
       getCoupon();

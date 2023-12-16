@@ -186,18 +186,16 @@
 
 	// 立即领取  TODO 芋艿：待测试
 	async function onGet(id) {
-		const {
-			error,
-			msg
-		} = await sheep.$api.coupon.get(id);
-		if (error === 0) {
-			uni.showToast({
-				title: msg,
-			});
-			setTimeout(() => {
-				getCoupon();
-			}, 1000);
-		}
+    const { code } = await CouponApi.takeCoupon(id);
+    if (code !== 0) {
+      return;
+    }
+    uni.showToast({
+      title: '领取成功',
+    });
+    setTimeout(() => {
+      getCoupon();
+    }, 1000);
 	}
 
 	//  TODO 芋艿：待测试
@@ -221,7 +219,14 @@
 		}, );
 	});
 
-	onLoad(async (options) => {
+  async function getCoupon() {
+    const { code, data } = await CouponApi.getCouponTemplateList(state.goodsId, 2, 10);
+    if (code === 0) {
+      state.couponInfo = data;
+    }
+  }
+
+	onLoad((options) => {
 		// 非法参数
 		if (!options.id) {
 			state.goodsInfo = null;
@@ -249,12 +254,7 @@
 		});
 
 		// 2. 加载优惠劵信息
-		CouponApi.getCouponTemplateList(state.goodsId, 2, 10).then((res) => {
-			if (res.code !== 0) {
-				return;
-			}
-			state.couponInfo = res.data;
-		});
+    getCoupon();
 
 		// 3. 加载营销活动信息
 		ActivityApi.getActivityListBySpuId(state.goodsId).then((res) => {

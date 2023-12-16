@@ -209,18 +209,21 @@
     }
   }
 
+  // 领取优惠劵
   async function getCoupon() {
-    const { error, msg } = await sheep.$api.coupon.get(state.id);
-    if (error === 0) {
-      uni.showToast({
-        title: msg,
-      });
-      setTimeout(() => {
-        getCouponContent(state.id, state.couponId);
-      }, 1000);
+    const { code } = await CouponApi.takeCoupon(state.id);
+    if (code !== 0) {
+      return;
     }
+    uni.showToast({
+      title: '领取成功',
+    });
+    setTimeout(() => {
+      getCouponContent();
+    }, 1000);
   }
 
+  // 加载优惠劵信息
   async function getCouponContent() {
     const { code, data } = state.id > 0 ? await CouponApi.getCouponTemplate(state.id)
       : await CouponApi.getCoupon(state.couponId);
