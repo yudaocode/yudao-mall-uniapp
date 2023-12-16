@@ -25,6 +25,14 @@ const CouponApi = {
       params,
     });
   },
+  // 获得优惠劵模版
+  getCouponTemplate: (id) => {
+    return request({
+      url: '/app-api/promotion/coupon-template/get',
+      method: 'GET',
+      params: { id },
+    });
+  },
   // 我的优惠劵列表
   getCouponPage: (params) => {
     return request({
@@ -39,6 +47,14 @@ const CouponApi = {
       url: '/app-api/promotion/coupon/take',
       method: 'POST',
       data: { templateId },
+    });
+  },
+  // 获得优惠劵
+  getCoupon: (id) => {
+    return request({
+      url: '/app-api/promotion/coupon/get',
+      method: 'GET',
+      params: { id },
     });
   },
 };

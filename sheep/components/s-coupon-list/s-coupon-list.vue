@@ -80,12 +80,7 @@
   import { fen2yuan } from '../../hooks/useGoods';
   import sheep from '../../index';
 
-  const state = reactive({
-    stateMap: {
-      0: '立即领取',
-      1: '去使用',
-    },
-  });
+  const state = reactive({});
 
   const isDisable = computed(() => {
     if (props.type === 'coupon') {
