@@ -63,29 +63,30 @@
       <!-- 适用商品 -->
       <view
         class="all-user ss-flex ss-row-center ss-col-center"
-        v-if="state.list.use_scope == 'all_use'"
+        v-if="state.coupon.productScope === 1"
       >
-        {{ state.list.use_scope_text }}
+        全场通用
       </view>
 
       <su-sticky v-else bgColor="#fff">
-        <view class="goods-title ss-p-20">{{ state.list.use_scope_text }}</view>
+        <view class="goods-title ss-p-20">
+          {{ state.coupon.productScope === 2 ? '指定商品可用' : '指定分类可用' }}
+        </view>
         <su-tabs
           :scrollable="true"
           :list="state.tabMaps"
           @change="onTabsChange"
           :current="state.currentTab"
-          v-if="state.list.use_scope == 'category'"
-        ></su-tabs>
+          v-if="state.coupon.productScope === 3"
+        />
       </su-sticky>
-      <view v-if="state.list.use_scope == 'goods' || state.list.use_scope == 'disabled_goods'">
-        <view v-for="(item, index) in state.list.items_value" :key="index">
+      <!-- 指定商品 -->
+      <view v-if="state.coupon.productScope === 2">
+        <view v-for="(item, index) in state.pagination.list" :key="index">
           <s-goods-column
             class="ss-m-20"
             size="lg"
             :data="item"
-            :titleColor="props.goodsFieldsStyle?.title?.color"
-            :subTitleColor="props.goodsFieldsStyle?.subtitle?.color"
             @click="sheep.$router.go('/pages/goods/index', { id: item.id })"
             :goodsFields="{
               title: { show: true },
@@ -95,18 +96,16 @@
               sales: { show: true },
               stock: { show: false },
             }"
-            :buttonShow="state.list.use_scope != 'disabled_goods'"
           />
         </view>
       </view>
-      <view v-if="state.list.use_scope == 'category'">
-        <view v-for="(item, index) in state.pagination.data" :key="index">
+      <!-- 指定分类 -->
+      <view v-if="state.coupon.productScope === 3">
+        <view v-for="(item, index) in state.pagination.list" :key="index">
           <s-goods-column
             class="ss-m-20"
             size="lg"
             :data="item"
-            :titleColor="props.goodsFieldsStyle?.title?.color"
-            :subTitleColor="props.goodsFieldsStyle?.subtitle?.color"
             @click="sheep.$router.go('/pages/goods/index', { id: item.id })"
             :goodsFields="{
               title: { show: true },
@@ -116,12 +115,11 @@
               sales: { show: true },
               stock: { show: false },
             }"
-            :buttonShow="state.list.use_scope != 'disabled_goods'"
           ></s-goods-column>
         </view>
       </view>
       <uni-load-more
-        v-if="state.pagination.total > 0 && state.list.use_scope == 'category'"
+        v-if="state.pagination.total > 0 && state.coupon.productScope === 3"
         :status="state.loadStatus"
         :content-text="{
           contentdown: '上拉加载更多',
@@ -129,12 +127,11 @@
         @tap="loadMore"
       />
       <s-empty
-        v-if="state.list.use_scope == 'category' && state.pagination.total === 0"
+        v-if="state.coupon.productScope === 3 && state.pagination.total === 0"
         paddingTop="0"
         icon="/static/soldout-empty.png"
         text="暂无商品"
-      >
-      </s-empty>
+      />
     </view>
   </s-layout>
 </template>
@@ -146,64 +143,69 @@
   import _ from 'lodash';
   import CouponApi from '@/sheep/api/promotion/coupon';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
+  import SpuApi from '@/sheep/api/product/spu';
+  import CategoryApi from '@/sheep/api/product/category';
+  import { resetPagination } from '@/sheep/util';
 
-  const pagination = {
-    data: [],
-    current_page: 1,
-    total: 1,
-    last_page: 1,
-  };
   const state = reactive({
     id: 0, // 优惠劵模版编号 templateId
     couponId: 0, // 用户优惠劵编号 couponId
     coupon: {}, // 优惠劵信息
 
-    list: {},
     pagination: {
-      data: [],
-      current_page: 1,
-      total: 1,
-      last_page: 1,
+      list: [],
+      total: 0,
+      pageNo: 1,
+      pageSize: 1,
     },
-    tabMaps: [],
+    categoryId: 0, // 选中的商品分类编号
+    tabMaps: [], // 指定分类时，每个分类构成一个 tab
+    currentTab: 0, // 选中的 tabMaps 下标
     loadStatus: '',
-    categoryId: 0,
-  });
-
-  // 接收参数
-  const props = defineProps({
-    goodsFieldsStyle: {
-      type: Object,
-      default() {},
-    }
   });
 
   function onTabsChange(e) {
-    state.pagination = pagination;
+    resetPagination(state.pagination);
     state.currentTab = e.index;
     state.categoryId = e.value;
-    getGoodsList(state.categoryId);
+    getGoodsListByCategory();
   }
 
-  async function getGoodsList(categoryId, page = 1, list_rows = 5) {
+  async function getGoodsListByCategory() {
     state.loadStatus = 'loading';
-    const res = await sheep.$api.goods.list({
-      category_id: categoryId,
-      list_rows,
-      page,
-      is_category_deep: false,
+    const { code, data } = await SpuApi.getSpuPage({
+      categoryId: state.categoryId,
+      pageNo: state.pagination.pageNo,
+      pageSize: state.pagination.pageSize
     });
-    if (res.error === 0) {
-      let couponlist = _.concat(state.pagination.data, res.data.data);
-      state.pagination = {
-        ...res.data,
-        data: couponlist,
-      };
-      if (state.pagination.current_page < state.pagination.last_page) {
-        state.loadStatus = 'more';
-      } else {
-        state.loadStatus = 'noMore';
-      }
+    if (code !== 0) {
+      return;
+    }
+    state.pagination.list = _.concat(state.pagination.list, data.list);
+    state.pagination.total = data.total;
+    state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
+  }
+
+  // 获得商品列表，指定商品范围
+  async function getGoodsListById() {
+    const { data, code } = await SpuApi.getSpuListByIds(state.coupon.productScopeValues.join(','));
+    if (code !== 0) {
+      return;
+    }
+    state.pagination.list = data;
+  }
+
+  // 获得分类列表
+  async function getCategoryList() {
+    const { data, code } = await CategoryApi.getCategoryListByIds(state.coupon.productScopeValues.join(','));
+    if (code !== 0) {
+      return;
+    }
+    state.tabMaps = data.map((category) => ({ name: category.name, value: category.id }));
+    // 加载第一个分类的商品列表
+    if (state.tabMaps.length > 0) {
+      state.categoryId = state.tabMaps[0].value;
+      await getGoodsListByCategory();
     }
   }
 
@@ -226,24 +228,21 @@
       return;
     }
     state.coupon = data;
-    if (true) {
-      return;
-    }
-    state.list = data;
-    data.items_value.forEach((i) => {
-      state.tabMaps.push({ name: i.name, value: i.id });
-    });
-    state.pagination = pagination;
-    if (state.list.use_scope == 'category') {
-      getGoodsList(state.tabMaps[0].value);
+    // 不同指定范围，加载不同数据
+    if (state.coupon.productScope === 2) {
+      await getGoodsListById();
+    } else if (state.coupon.productScope === 3) {
+      await getCategoryList();
     }
   }
 
   // 加载更多
   function loadMore() {
-    if (state.loadStatus !== 'noMore') {
-      getGoodsList(state.categoryId, state.pagination.current_page + 1);
+    if (state.loadStatus === 'noMore') {
+      return;
     }
+    state.pagination.pageNo++;
+    getGoodsListByCategory();
   }
 
   onLoad((options) => {

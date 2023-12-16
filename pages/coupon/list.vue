@@ -15,15 +15,11 @@
       text="暂无优惠券"
     />
     <!-- 情况一：领劵中心 -->
-    <template v-if="state.currentTab == '0'">
+    <template v-if="state.currentTab === '0'">
       <view v-for="item in state.pagination.list" :key="item.id">
         <s-coupon-list
           :data="item"
-          @tap="
-            sheep.$router.go('/pages/coupon/detail', {
-              data: JSON.stringify(item),
-            })
-          "
+          @tap="sheep.$router.go('/pages/coupon/detail', { id: item.id })"
         >
           <template #default>
             <button
@@ -55,12 +51,7 @@
               class="ss-reset-button card-btn ss-flex ss-row-center ss-col-center"
               :class=" item.status !== 1 ? 'disabled-btn': ''"
               :disabled="item.status !== 1"
-              @click.stop="
-                sheep.$router.go('/pages/coupon/detail', {
-                  id: item.coupon_id,
-                  user_coupon_id: item.id,
-                })
-              "
+              @click.stop="sheep.$router.go('/pages/coupon/detail', { couponId: item.id })"
             >
               {{ item.status === 1 ? '立即使用' : item.status === 2 ? '已使用' : '已过期' }}
             </button>
