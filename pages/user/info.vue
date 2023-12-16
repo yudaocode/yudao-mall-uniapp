@@ -38,7 +38,7 @@
       </view>
 
       <view class="bg-white ss-p-x-30">
-
+        <!-- 昵称 + 性别 -->
         <uni-forms-item name="nickname" label="昵称">
           <uni-easyinput
             v-model="state.model.nickname"
@@ -48,24 +48,23 @@
             :placeholderStyle="placeholderStyle"
           />
         </uni-forms-item>
-
-<!--        <uni-forms-item name="gender" label="性别">
+        <uni-forms-item name="sex" label="性别">
           <view class="ss-flex ss-col-center ss-h-100">
             <radio-group @change="onChangeGender" class="ss-flex ss-col-center">
-              <label class="radio" v-for="item in genderRadioMap" :key="item.value">
+              <label class="radio" v-for="item in sexRadioMap" :key="item.value">
                 <view class="ss-flex ss-col-center ss-m-r-32">
                   <radio
                     :value="item.value"
                     color="var(--ui-BG-Main)"
                     style="transform: scale(0.8)"
-                    :checked="item.value == state.model.gender"
+                    :checked="parseInt(item.value) === state.model.sex"
                   />
                   <view class="gender-name">{{ item.name }}</view>
                 </view>
               </label>
             </radio-group>
           </view>
-        </uni-forms-item> -->
+        </uni-forms-item>
 
         <uni-forms-item name="mobile" label="手机号" @tap="onChangeMobile">
           <uni-easyinput
@@ -105,7 +104,6 @@
                   v-if="userInfo.verification?.password"
                   :modelValue="true"
                 />
-
                 <button v-else class="ss-reset-button ss-flex ss-col-center ss-row-center">
                   <text class="_icon-forward" style="color: #bbbbbb; font-size: 26rpx"></text>
                 </button>
@@ -185,11 +183,12 @@
 </template>
 
 <script setup>
-  import { computed, ref, reactive, onBeforeMount, unref } from 'vue';
+  import { computed, ref, reactive, onBeforeMount } from 'vue';
   import { mobile, password, username } from '@/sheep/validate/form';
   import sheep from '@/sheep';
   import { clone } from 'lodash';
   import { showAuthModal } from '@/sheep/hooks/useModal';
+  import FileApi from '@/sheep/api/infra/file';
 
   const state = reactive({
     model: {}, // 个人信息
@@ -199,59 +198,51 @@
 
   const placeholderStyle = 'color:#BBBBBB;font-size:28rpx;line-height:normal';
 
-  const genderRadioMap = [
-    {
+  const sexRadioMap = [{
       name: '男',
       value: '1',
     },
     {
       name: '女',
       value: '2',
-    },
-    {
-      name: '未知',
-      value: '0',
-    },
+    }
   ];
 
   const userInfo = computed(() => sheep.$store('user').userInfo);
 
   // 选择性别 TODO
   function onChangeGender(e) {
-    state.model.gender = e.detail.value;
+    state.model.sex = e.detail.value;
   }
-
-  // 修改用户名 TODO
-  const onChangeUsername = () => {
-    !state.model.verification?.username && showAuthModal('changeUsername');
-  };
 
   // 修改手机号 TODO
   const onChangeMobile = () => {
     showAuthModal('changeMobile');
   };
 
-  // TODO 芋艿：
+  // TODO 芋艿：微信公众号的处理，暂时忽略；后续再说
   function onChooseAvatar(e) {
     const tempUrl = e.detail.avatarUrl || '';
     uploadAvatar(tempUrl);
   }
 
-  // 修改头像 TODO
+  // 手动选择头像，进行上传
   function onChangeAvatar() {
     uni.chooseImage({
       success: async (chooseImageRes) => {
         const tempUrl = chooseImageRes.tempFilePaths[0];
-        uploadAvatar(tempUrl);
+        await uploadAvatar(tempUrl);
       },
     });
   }
 
-  // TODO
+  // 上传头像文件
   async function uploadAvatar(tempUrl) {
-    if (!tempUrl) return;
-    let { path } = await sheep.$api.app.upload(tempUrl, 'ugc');
-    state.model.avatar = path;
+    if (!tempUrl) {
+      return;
+    }
+    let { data } = await FileApi.uploadFile(tempUrl);
+    state.model.avatar = data;
   }
 
   // 修改/设置密码 TODO
@@ -289,28 +280,25 @@
     });
   }
 
-  // 保存信息 TODO
+  // 保存信息
   async function onSubmit() {
-    // const { error, data } = await sheep.$api.user.update({
-    //   avatar: state.model.avatar,
-    //   nickname: state.model.nickname,
-    //   gender: state.model.gender,
-    // });
-	 const { code, data } = await sheep.$api.user.update({
+	 const { code } = await sheep.$api.user.update({
       avatar: state.model.avatar,
       nickname: state.model.nickname,
-      // gender: state.model.gender,
+      sex: state.model.sex,
     });
     if (code === 0) {
-      getUserInfo();
+      await getUserInfo();
     }
   }
 
-  // TODO
+  // 获得用户信息
   const getUserInfo = async () => {
+    // 个人信息
     const userInfo = await sheep.$store('user').getInfo();
     state.model = clone(userInfo);
 
+    // TODO 芋艿：第三方授权信息，待搞
     if (sheep.$platform.name !== 'H5') {
 		  return;
 		  // 这个先注释,要不然小程序保存个人信息有问题,
@@ -321,8 +309,7 @@
     }
   };
 
-  // TODO
-  onBeforeMount(async () => {
+  onBeforeMount(() => {
     getUserInfo();
   });
 </script>

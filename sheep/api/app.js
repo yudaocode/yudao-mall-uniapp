@@ -72,48 +72,4 @@ export default {
         method: 'GET'
       }),
   },
-
-  //上传
-  upload: (file, group = 'ugc', callback) => {
-    const token = uni.getStorageSync('token');
-    uni.showLoading({
-      title: '上传中',
-    });
-    return new Promise((resolve, reject) => {
-		// 此处先换成yudao
-      uni.uploadFile({
-        url: 'http://api-dashboard.yudao.iocoder.cn' + '/app-api/infra/file/upload',
-        filePath: file,
-        name: 'file',
-        formData: {
-          group,
-        },
-        header: {
-          // Accept: 'text/json',
-          // Authorization: token,
-		  Accept : '*/*',
-		  'tenant-id' :'1',
-		  Authorization:  'Bearer test247',
-        },
-        success: (uploadFileRes) => {
-          let result = JSON.parse(uploadFileRes.data);
-          if (result.error === 1) {
-            uni.showToast({
-              icon: 'none',
-              title: result.msg,
-            });
-          } else {
-            return resolve(result.data);
-          }
-        },
-        fail: (error) => {
-          console.log('上传失败：', error);
-          return resolve(false);
-        },
-        complete: () => {
-          uni.hideLoading();
-        },
-      });
-    });
-  },
 };
