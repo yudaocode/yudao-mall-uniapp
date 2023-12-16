@@ -1,3 +1,4 @@
+<!-- 秒杀商品：抢购进度 -->
 <template>
   <view class="ss-flex ss-col-center">
     <view class="progress-title ss-m-r-10"> 已抢{{ percent }}% </view>

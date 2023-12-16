@@ -1,3 +1,4 @@
+<!-- 商品详情：描述卡片 -->
 <template>
   <view class="detail-content-card bg-white ss-m-x-20 ss-p-t-20">
     <view class="card-header ss-flex ss-col-center ss-m-b-30 ss-m-l-20">
@@ -5,7 +6,7 @@
       <view class="title ss-m-l-20 ss-m-r-20">详情</view>
     </view>
     <view class="card-content">
-      <mp-html :content="content"></mp-html>
+      <mp-html :content="content" />
     </view>
   </view>
 </template>

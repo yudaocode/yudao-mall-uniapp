@@ -1,3 +1,4 @@
+<!-- 全局 - 快捷入口 -->
 <template>
   <su-popup :show="show" type="top" round="20" backgroundColor="#F0F0F0" @close="closeMenuTools">
     <su-status-bar />
@@ -10,7 +11,7 @@
               class="ss-reset-button list-image ss-flex ss-row-center ss-col-center"
               @tap="onClick(item)"
             >
-              <image v-if="show" :src="sheep.$url.static(item.icon)" class="list-icon"></image>
+              <image v-if="show" :src="sheep.$url.static(item.icon)" class="list-icon" />
             </button>
             <view class="list-title ss-m-t-20">{{ item.title }}</view>
           </view>
