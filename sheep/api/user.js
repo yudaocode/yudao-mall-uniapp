@@ -218,12 +218,6 @@ export default {
 				method: 'GET',
 				custom: {},
 			}),
-		// list: () =>
-		//   request({
-		//     url: 'user/address',
-		//     method: 'GET',
-		//     custom: {},
-		//   }),
 		create: (data) =>
 			request2({
 				url: 'member/address/create',
@@ -233,15 +227,6 @@ export default {
 					showSuccess: true,
 				},
 			}),
-		// create: (data) =>
-		//   request({
-		//     url: 'user/address',
-		//     method: 'POST',
-		//     data,
-		//     custom: {
-		//       showSuccess: true,
-		//     },
-		//   }),
 		update: (data) =>
 			request2({
 				url: 'member/address/update',
@@ -251,35 +236,16 @@ export default {
 					showSuccess: true,
 				},
 			}),
-		// update: (id, data) =>
-		// 	request({
-		// 		url: 'user/address/' + id,
-		// 		method: 'PUT',
-		// 		data,
-		// 		custom: {
-		// 			showSuccess: true,
-		// 		},
-		// 	}),
 		detail: (id) =>
 			request2({
 				url: 'member/address/get?id=' + id,
 				method: 'GET',
 			}),
-		// detail: (id) =>
-		//   request({
-		//     url: 'user/address/' + id,
-		//     method: 'GET',
-		//   }),
 		delete: (id) =>
 			request2({
 				url: 'member/address/delete?id=' + id,
 				method: 'DELETE',
 			}),
-		// delete: (id) =>
-		// 	request({
-		// 		url: 'user/address/' + id,
-		// 		method: 'DELETE',
-		// 	}),
 	},
 	invoice: {
 		list: () =>

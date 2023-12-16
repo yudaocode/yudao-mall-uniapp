@@ -1,10 +1,11 @@
+<!-- 收货地址的新增/编辑 -->
 <template>
 	<s-layout :title="state.model.id ? '编辑地址' : '新增地址'">
-		<uni-forms ref="addressFormRef" v-model="state.model" :rules="state.rules" validateTrigger="bind"
+		<uni-forms ref="addressFormRef" v-model="state.model" :rules="rules" validateTrigger="bind"
 			labelWidth="160" labelAlign="left" border :labelStyle="{ fontWeight: 'bold' }">
 			<view class="bg-white form-box ss-p-x-30">
-				<uni-forms-item name="consignee" label="收货人" class="form-item">
-					<uni-easyinput v-model="state.model.consignee" placeholder="请填写收货人姓名" :inputBorder="false"
+				<uni-forms-item name="name" label="收货人" class="form-item">
+					<uni-easyinput v-model="state.model.name" placeholder="请填写收货人姓名" :inputBorder="false"
 						placeholderStyle="color:#BBBBBB;font-size:30rpx;font-weight:400;line-height:normal" />
 				</uni-forms-item>
 
@@ -13,178 +14,160 @@
 						placeholderStyle="color:#BBBBBB;font-size:30rpx;font-weight:400;line-height:normal">
 					</uni-easyinput>
 				</uni-forms-item>
-				<uni-forms-item name="region" label="省市区" @tap="state.showRegion = true" class="form-item">
-					<uni-easyinput v-model="state.model.region" disabled :inputBorder="false"
+				<uni-forms-item name="areaName" label="省市区" @tap="state.showRegion = true" class="form-item">
+					<uni-easyinput v-model="state.model.areaName" disabled :inputBorder="false"
 						:styles="{ disableColor: '#fff', color: '#333' }"
 						placeholderStyle="color:#BBBBBB;font-size:30rpx;font-weight:400;line-height:normal"
 						placeholder="请选择省市区">
 						<template v-slot:right>
-							<uni-icons type="right"></uni-icons>
+							<uni-icons type="right" />
 						</template>
 					</uni-easyinput>
 				</uni-forms-item>
-				<uni-forms-item name="address" label="详细地址" :formItemStyle="{ alignItems: 'flex-start' }"
+				<uni-forms-item name="detailAddress" label="详细地址" :formItemStyle="{ alignItems: 'flex-start' }"
 					:labelStyle="{ lineHeight: '5em' }" class="textarea-item">
-					<uni-easyinput :inputBorder="false" type="textarea" v-model="state.model.address"
+					<uni-easyinput :inputBorder="false" type="textarea" v-model="state.model.detailAddress"
 						placeholderStyle="color:#BBBBBB;font-size:30rpx;font-weight:400;line-height:normal"
-						placeholder="请输入详细地址" clearable></uni-easyinput>
+						placeholder="请输入详细地址" clearable />
 				</uni-forms-item>
 			</view>
-
 			<view class="ss-m-y-20 bg-white ss-p-x-30 ss-flex ss-row-between ss-col-center default-box">
 				<view class="default-box-title"> 设为默认地址 </view>
-				<su-switch style="transform: scale(0.8)" v-model="state.model.is_default"></su-switch>
+				<su-switch style="transform: scale(0.8)" v-model="state.model.defaultStatus" />
 			</view>
 		</uni-forms>
 		<su-fixed bottom :opacity="false" bg="" placeholder :noFixed="false" :index="10">
 			<view class="footer-box ss-flex-col ss-row-between ss-p-20">
-				<view class="ss-m-b-20"><button class="ss-reset-button save-btn ui-Shadow-Main"
-						@tap="onSave">保存</button></view>
+				<view class="ss-m-b-20">
+          <button class="ss-reset-button save-btn ui-Shadow-Main" @tap="onSave">保存</button>
+        </view>
 				<button v-if="state.model.id" class="ss-reset-button cancel-btn" @tap="onDelete">
 					删除
 				</button>
 			</view>
 		</su-fixed>
+
 		<!-- 省市区弹窗 -->
-		<su-region-picker :show="state.showRegion" @cancel="state.showRegion = false" @confirm="onRegionConfirm">
-		</su-region-picker>
+		<su-region-picker :show="state.showRegion" @cancel="state.showRegion = false" @confirm="onRegionConfirm" />
 	</s-layout>
 </template>
 
 <script setup>
-	import {
-		computed,
-		watch,
-		ref,
-		reactive,
-		unref
-	} from 'vue';
+	import { ref, reactive, unref } from 'vue';
 	import sheep from '@/sheep';
-	import {
-		onLoad,
-		onPageScroll
-	} from '@dcloudio/uni-app';
+	import { onLoad } from '@dcloudio/uni-app';
 	import _ from 'lodash';
-	import {
-		consignee,
-		mobile,
-		address,
-		region
-	} from '@/sheep/validate/form';
+	import { mobile } from '@/sheep/validate/form';
+  import AreaApi from '@/sheep/api/system/area';
+  import AddressApi from '@/sheep/api/member/address';
 
 	const addressFormRef = ref(null);
 	const state = reactive({
 		showRegion: false,
 		model: {
-			consignee: '',
+			name: '',
 			mobile: '',
-			address: '',
-			is_default: false,
-			region: '',
+      detailAddress: '',
+			defaultStatus: false,
+      areaName: '',
 		},
-		rules: {
-			consignee,
-			mobile,
-			address,
-			region,
-		},
+    rules: {},
 	});
-	watch(
-		() => state.model.province_name,
-		(newValue) => {
-			if (newValue) {
-				state.model.region =
-					`${state.model.province_name}-${state.model.city_name}-${state.model.district_name}`;
-			}
-		}, {
-			deep: true,
-		},
-	);
+
+  const rules = {
+    name: {
+      rules: [
+        {
+          required: true,
+          errorMessage: '请输入收货人姓名',
+        },
+      ],
+    },
+    mobile,
+    detailAddress: {
+      rules: [{
+        required: true,
+        errorMessage: '请输入详细地址',
+      }]
+    },
+    areaName: {
+      rules: [{
+        required: true,
+        errorMessage: '请选择您的位置'
+      }]
+    },
+  };
+
+  // 确认选择地区
 	const onRegionConfirm = (e) => {
-		console.log(e);
-		state.model = {
-			...state.model,
-			...e,
-		};
+    state.model.areaName = `${e.province_name} ${e.city_name} ${e.district_name}`
+    state.model.areaId = e.district_id;
 		state.showRegion = false;
 	};
+
+  // 获得地区数据
 	const getAreaData = () => {
 		if (_.isEmpty(uni.getStorageSync('areaData'))) {
-			sheep.$api.data.area().then((res) => {
-				if (res.code === 0) {
-					uni.setStorageSync('areaData', res.data);
-				}
-			});
+      AreaApi.getAreaTree().then((res) => {
+        if (res.code === 0) {
+          uni.setStorageSync('areaData', res.data);
+        }
+      });
 		}
 	};
+
+  // 保存收货地址
 	const onSave = async () => {
+    // 参数校验
 		const validate = await unref(addressFormRef)
 			.validate()
 			.catch((error) => {
 				console.log('error: ', error);
 			});
-		if (!validate) return;
+		if (!validate) {
+      return;
+    }
 
-		let res = null;
-		if (state.model.id) {
-			res = await sheep.$api.user.address.update({
-				id: state.model.id,
-				areaId: state.model.district_id,
-				defaultStatus: state.model.is_default,
-				detailAddress: state.model.address,
-				mobile: state.model.mobile,
-				name: state.model.consignee
-			});
-		} else {
-			res = await sheep.$api.user.address.create({
-				areaId: state.model.district_id,
-				defaultStatus: state.model.is_default,
-				detailAddress: state.model.address,
-				mobile: state.model.mobile,
-				name: state.model.consignee
-			});
-		}
-		if (res.code === 0) {
+    // 提交请求
+    const formData = {
+      ...state.model
+    }
+    const {code } = state.model.id > 0 ? await AddressApi.updateAddress(formData)
+      : await AddressApi.createAddress(formData);
+		if (code === 0) {
 			sheep.$router.back();
 		}
 	};
 
+  // 删除收货地址
 	const onDelete = () => {
 		uni.showModal({
 			title: '提示',
 			content: '确认删除此收货地址吗？',
 			success: async function(res) {
-				if (res.confirm) {
-					const {
-						code
-					} = await sheep.$api.user.address.delete(state.model.id);
-					if (code === 0) {
-						sheep.$router.back();
-					}
+				if (!res.confirm) {
+					return;
 				}
+        const { code } = await AddressApi.deleteAddress(state.model.id);
+        if (code === 0) {
+          sheep.$router.back();
+        }
 			},
 		});
 	};
-	onLoad(async (options) => {
-		getAreaData();
-		if (options.id) {
-			let res = await sheep.$api.user.address.detail(options.id);
-			if (res.code === 0) {
-				state.model = {
-					...state.model,
-					district_id: res.data.areaId,
-					is_default: res.data.defaultStatus,
-					address: res.data.detailAddress,
-					mobile: res.data.mobile,
-					consignee: res.data.name,
-					id: res.data.id,
-					province_name: res.data.areaName.split(' ')[0],
-					city_name: res.data.areaName.split(' ')[1],
-					district_name: res.data.areaName.split(' ')[2]
-				};
-			}
-		}
 
+	onLoad(async (options) => {
+    // 获得地区数据
+		getAreaData();
+    // 情况一：基于 id 获得收件地址
+		if (options.id) {
+			let { code, data} = await AddressApi.getAddress(options.id);
+      if (code !== 0) {
+        return;
+      }
+      state.model = data;
+		}
+    // 情况二：微信导入 TODO 芋艿：待接入
 		if (options.data) {
 			let data = JSON.parse(options.data);
 			const areaData = uni.getStorageSync('areaData');
