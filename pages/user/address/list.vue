@@ -1,9 +1,9 @@
+<!-- 收件地址列表 -->
 <template>
 	<s-layout title="收货地址" :bgStyle="{ color: '#FFF' }">
 		<view v-if="state.list.length">
 			<s-address-item hasBorderBottom v-for="item in state.list" :key="item.id" :item="item"
-				@tap="onSelect(item)">
-			</s-address-item>
+                      @tap="onSelect(item)" />
 		</view>
 
 		<su-fixed bottom placeholder>
@@ -26,20 +26,15 @@
 </template>
 
 <script setup>
-	import {
-		reactive,
-		onBeforeMount
-	} from 'vue';
-	import {
-		onShow
-	} from '@dcloudio/uni-app';
+	import { reactive, onBeforeMount } from 'vue';
+	import { onShow } from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
-	import {
-		isEmpty
-	} from 'lodash';
+	import { isEmpty } from 'lodash';
+  import AreaApi from '@/sheep/api/system/area';
+  import AddressApi from '@/sheep/api/member/address';
 
 	const state = reactive({
-		list: [],
+		list: [], // 地址列表
 		loading: true,
 	});
 
@@ -52,6 +47,7 @@
 	};
 
 	// 导入微信地址
+  // TODO 芋艿：未测试
 	function importWechatAddress() {
 		let wechatAddress = {};
 		// #ifdef MP
@@ -102,7 +98,7 @@
 	}
 
 	onShow(async () => {
-		state.list = (await sheep.$api.user.address.list()).data;
+		state.list = (await AddressApi.getAddressList()).data;
 		state.loading = false;
 	});
 
@@ -111,8 +107,8 @@
 			return;
 		}
 		// 提前加载省市区数据
-		sheep.$api.data.area().then((res) => {
-			if (res.error === 0) {
+    AreaApi.getAreaTree().then((res) => {
+			if (res.code === 0) {
 				uni.setStorageSync('areaData', res.data);
 			}
 		});

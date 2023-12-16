@@ -1,3 +1,4 @@
+<!-- 地址卡片 -->
 <template>
   <view
     class="address-item ss-flex ss-row-between ss-col-center"
@@ -11,18 +12,23 @@
           custom-style="background-color: var(--ui-BG-Main); border-color: var(--ui-BG-Main); color: #fff;"
           v-if="props.item.defaultStatus"
           text="默认"
-        ></uni-tag>
+        />
         {{ props.item.areaName }}
-		<!-- {{ props.item.city_name }} {{ props.item.district_name }} -->
       </view>
-      <view class="address-text">{{ props.item.detailAddress }}</view>
-      <view class="person-text">{{ props.item.name }} {{ props.item.mobile }}</view>
+      <view class="address-text">
+        {{ props.item.detailAddress }}
+      </view>
+      <view class="person-text">
+        {{ props.item.name }} {{ props.item.mobile }}
+      </view>
     </view>
-    <view v-else><view class="address-text ss-m-b-10">请选择收货地址</view></view>
+    <view v-else>
+      <view class="address-text ss-m-b-10">请选择收货地址</view>
+    </view>
     <slot>
       <button class="ss-reset-button edit-btn" @tap.stop="onEdit">
         <view class="edit-icon ss-flex ss-row-center ss-col-center">
-          <image :src="sheep.$url.static('/static/img/shop/user/address/edit.png')"></image>
+          <image :src="sheep.$url.static('/static/img/shop/user/address/edit.png')" />
         </view>
       </button>
     </slot>
