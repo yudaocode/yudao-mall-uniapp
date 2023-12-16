@@ -1,3 +1,4 @@
+<!-- 错误界面 -->
 <template>
   <view class="error-page">
     <s-empty
@@ -8,7 +9,7 @@
       actionText="重新连接"
       @clickAction="onReconnect"
       buttonColor="#ff3000"
-    ></s-empty>
+    />
     <s-empty
       v-else-if="errCode === 'TemplateError'"
       icon="/static/internet-empty.png"
@@ -17,7 +18,7 @@
       actionText="重新加载"
       @clickAction="onReconnect"
       buttonColor="#ff3000"
-    ></s-empty>
+    />
     <s-empty
       v-else-if="errCode !== ''"
       icon="/static/internet-empty.png"
@@ -26,7 +27,7 @@
       actionText="重新加载"
       @clickAction="onReconnect"
       buttonColor="#ff3000"
-    ></s-empty>
+    />
   </view>
 </template>
 
@@ -37,16 +38,18 @@
 
   const errCode = ref('');
   const errMsg = ref('');
+
   onLoad((options) => {
     errCode.value = options.errCode;
     errMsg.value = options.errMsg;
   });
+
   // 重新连接
   async function onReconnect() {
     uni.reLaunch({
       url: '/pages/index/index',
     });
-    ShoproInit();
+    await ShoproInit();
   }
 </script>
 

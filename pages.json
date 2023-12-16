@@ -200,16 +200,6 @@
           }
         },
         {
-          "path": "invoice",
-          "style": {
-            "navigationBarTitleText": "发票详情"
-          },
-          "meta": {
-            "auth": true,
-            "title": "发票详情"
-          }
-        },
-        {
           "path": "aftersale/apply",
           "style": {
             "navigationBarTitleText": "申请售后"
@@ -322,28 +312,6 @@
           "meta": {
             "auth": true,
             "title": "编辑地址"
-          }
-        },
-        {
-          "path": "invoice/list",
-          "style": {
-            "navigationBarTitleText": "发票管理"
-          },
-          "meta": {
-            "auth": true,
-            "sync": true,
-            "title": "发票管理",
-            "group": "用户中心"
-          }
-        },
-        {
-          "path": "invoice/edit",
-          "style": {
-            "navigationBarTitleText": "编辑发票"
-          },
-          "meta": {
-            "auth": true,
-            "title": "编辑发票"
           }
         },
         {

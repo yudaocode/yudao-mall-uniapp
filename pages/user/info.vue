@@ -140,15 +140,7 @@
             showArrow
             :border="false"
             class="list-border"
-          ></uni-list-item>
-          <uni-list-item
-            clickable
-            @tap="sheep.$router.go('/pages/user/invoice/list')"
-            title="发票管理"
-            showArrow
-            :border="false"
-            class="list-border"
-          ></uni-list-item>
+          />
         </uni-list>
       </view>
     </uni-forms>
@@ -316,7 +308,7 @@
     //   avatar: state.model.avatar,
     //   nickname: state.model.nickname,
     //   gender: state.model.gender,
-    // });  
+    // });
 	 const { code, data } = await sheep.$api.user.update({
       avatar: state.model.avatar,
       nickname: state.model.nickname,

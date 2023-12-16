@@ -247,42 +247,6 @@ export default {
 				method: 'DELETE',
 			}),
 	},
-	invoice: {
-		list: () =>
-			request({
-				url: 'user/invoice',
-				method: 'GET',
-				custom: {},
-			}),
-		create: (data) =>
-			request({
-				url: 'user/invoice',
-				method: 'POST',
-				data,
-				custom: {
-					showSuccess: true,
-				},
-			}),
-		update: (id, data) =>
-			request({
-				url: 'user/invoice/' + id,
-				method: 'PUT',
-				data,
-				custom: {
-					showSuccess: true,
-				},
-			}),
-		detail: (id) =>
-			request({
-				url: 'user/invoice/' + id,
-				method: 'GET',
-			}),
-		delete: (id) =>
-			request({
-				url: 'user/invoice/' + id,
-				method: 'DELETE',
-			}),
-	},
 	favorite: {
 		list: (params) =>
 			request2({
