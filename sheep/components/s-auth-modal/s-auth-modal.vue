@@ -28,9 +28,6 @@
       <!-- 6.修改密码 changePassword-->
       <change-passwrod v-if="authType === 'changePassword'" />
 
-      <!-- 7.修改用户名 changeUsername-->
-      <change-username v-if="authType === 'changeUsername'" />
-
       <!-- 8.微信小程序授权 changeUsername-->
       <mp-authorization v-if="authType === 'mpAuthorization'" />
 
@@ -130,7 +127,6 @@
   import resetPassword from './components/reset-password.vue';
   import changeMobile from './components/change-mobile.vue';
   import changePasswrod from './components/change-password.vue';
-  import changeUsername from './components/change-username.vue';
   import mpAuthorization from './components/mp-authorization.vue';
   import { closeAuthModal, showAuthModal } from '@/sheep/hooks/useModal';
 

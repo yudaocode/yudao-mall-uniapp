@@ -8,13 +8,14 @@
       border
       class="form-box"
     >
+      <!-- 头像 -->
       <view class="ss-flex ss-row-center ss-col-center ss-p-t-60 ss-p-b-0 bg-white">
         <view class="header-box-content">
           <su-image
             class="content-img"
             isPreview
             :current="0"
-            :src="sheep.$url.cdn(state.model.avatar)"
+            :src="state.model.avatar"
             :height="160"
             :width="160"
             :radius="80"
@@ -25,9 +26,9 @@
             <button
               class="ss-reset-button avatar-action-btn"
               open-type="chooseAvatar"
-              @chooseavatar="onChooseAvatar"
-              >修改</button
-            >
+              @chooseavatar="onChooseAvatar">
+              修改
+            </button>
             <!-- #endif -->
             <!-- #ifndef MP -->
             <button class="ss-reset-button avatar-action-btn" @tap="onChangeAvatar">修改</button>
@@ -37,24 +38,6 @@
       </view>
 
       <view class="bg-white ss-p-x-30">
-      <!--  <uni-forms-item name="username" label="用户名" @tap="onChangeUsername" class="label-box">
-          <uni-easyinput
-            v-model="userInfo.username"
-            disabled
-            :inputBorder="false"
-            :styles="{ disableColor: '#fff' }"
-            placeholder="设置用户名"
-            :clearable="false"
-            :placeholderStyle="placeholderStyle"
-          >
-            <template v-slot:right>
-              <su-radio class="ss-flex" v-if="userInfo.verification?.username" :modelValue="true" />
-              <button v-else class="ss-reset-button">
-                <text class="_icon-forward" style="color: #bbbbbb; font-size: 26rpx"></text>
-              </button>
-            </template>
-          </uni-easyinput>
-        </uni-forms-item> -->
 
         <uni-forms-item name="nickname" label="昵称">
           <uni-easyinput
