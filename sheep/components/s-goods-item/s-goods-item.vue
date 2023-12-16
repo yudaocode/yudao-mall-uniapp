@@ -28,14 +28,6 @@
             >
               ￥{{ fen2yuan(price) }}
             </view>
-            <view v-if="score && Number(price) > 0">+</view>
-            <view class="price-text ss-flex ss-col-center" v-if="score">
-              <image
-                :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
-                class="score-img"
-              ></image>
-              <view>{{ score }}</view>
-            </view>
             <view v-if="num" class="total-text ss-flex ss-col-center">x {{ num }}</view>
             <slot name="priceSuffix"></slot>
           </view>

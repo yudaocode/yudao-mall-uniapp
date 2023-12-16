@@ -123,18 +123,6 @@
             "group": "商品"
           }
         },
-
-        {
-          "path": "score",
-          "style": {
-            "navigationBarTitleText": "积分商品"
-          },
-          "meta": {
-            "sync": true,
-            "title": "积分商品",
-            "group": "商品"
-          }
-        },
         {
           "path": "list",
           "style": {
@@ -441,18 +429,6 @@
             "auth": true,
             "sync": true,
             "title": "签到中心",
-            "group": "应用"
-          }
-        },
-        {
-          "path": "score-shop",
-          "style": {
-            "navigationBarTitleText": "积分商城"
-          },
-          "meta": {
-            "auth": false,
-            "sync": true,
-            "title": "积分商城",
             "group": "应用"
           }
         }

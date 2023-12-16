@@ -56,26 +56,6 @@ export default {
       url: 'page/' + id,
       method: 'GET',
     }),
-  //积分商城
-  scoreShop: {
-    list: (params) =>
-      request({
-        url: 'app/scoreShop',
-        method: 'GET',
-        params,
-      }),
-    ids: (params = {}) =>
-      request({
-        url: 'app/scoreShop/ids',
-        method: 'GET',
-        params,
-      }),
-    detail: (id) =>
-      request({
-        url: 'app/scoreShop/' + id,
-        method: 'GET',
-      }),
-  },
   //小程序直播
   mplive: {
     getRoomList: (ids) =>
