@@ -73,8 +73,6 @@
             :skus="state.goodsInfo.skus"
             @tap="state.showSelectSku = true"
           />
-          <detail-cell-service v-model="state.goodsInfo.service" />
-          <detail-cell-params v-model="state.goodsInfo.params" />
         </view>
         <!-- 规格与数量弹框 -->
         <s-select-seckill-sku
@@ -145,8 +143,6 @@
   import { useDurationTime, formatGoodsSwiper, formatPrice } from '@/sheep/hooks/useGoods';
   import detailNavbar from './components/detail/detail-navbar.vue';
   import detailCellSku from './components/detail/detail-cell-sku.vue';
-  import detailCellService from './components/detail/detail-cell-service.vue';
-  import detailCellParams from './components/detail/detail-cell-params.vue';
   import detailTabbar from './components/detail/detail-tabbar.vue';
   import detailSkeleton from './components/detail/detail-skeleton.vue';
   import detailCommentCard from './components/detail/detail-comment-card.vue';

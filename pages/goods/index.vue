@@ -56,9 +56,6 @@
 					<view class="detail-cell-card detail-card ss-flex-col">
 						<detail-cell-sku v-model="state.selectedSku.goods_sku_text" :sku="state.selectedSku"
 							@tap="state.showSelectSku = true" />
-						<!-- TODO 芋艿：可能暂时不考虑使用 -->
-						<detail-cell-service v-if="state.goodsInfo.service" v-model="state.goodsInfo.service" />
-						<detail-cell-params v-if="state.goodsInfo.params" v-model="state.goodsInfo.params" />
 					</view>
 
 					<!-- 规格与数量弹框 -->
@@ -114,15 +111,9 @@
 	import CouponApi from '@/sheep/api/promotion/coupon';
 	import ActivityApi from '@/sheep/api/promotion/activity';
   import FavoriteApi from '@/sheep/api/product/favorite';
-  import {
-		formatSales,
-		formatGoodsSwiper,
-		fen2yuan,
-	} from '@/sheep/hooks/useGoods';
+  import { formatSales, formatGoodsSwiper, fen2yuan } from '@/sheep/hooks/useGoods';
 	import detailNavbar from './components/detail/detail-navbar.vue';
 	import detailCellSku from './components/detail/detail-cell-sku.vue';
-	import detailCellService from './components/detail/detail-cell-service.vue';
-	import detailCellParams from './components/detail/detail-cell-params.vue';
 	import detailTabbar from './components/detail/detail-tabbar.vue';
 	import detailSkeleton from './components/detail/detail-skeleton.vue';
 	import detailCommentCard from './components/detail/detail-comment-card.vue';
