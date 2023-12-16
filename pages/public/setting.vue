@@ -19,14 +19,15 @@
           :border="false"
           class="list-border"
           @tap="onCheckUpdate"
-        ></uni-list-item>
+        />
         <uni-list-item
           title="本地缓存"
           :rightText="storageSize"
           showArrow
           :border="false"
           class="list-border"
-        ></uni-list-item>
+        />
+        <!-- TODO 芋艿：统一的配置界面 -->
         <uni-list-item
           title="关于我们"
           showArrow
@@ -39,8 +40,8 @@
               title: appInfo.about_us.title,
             })
           "
-        ></uni-list-item>
-        <!-- 为了过审 只有iOS-App有注销账号功能 -->
+        />
+        <!-- 为了过审 只有 iOS-App 有注销账号功能 -->
         <uni-list-item
           v-if="isLogin && sheep.$platform.os === 'ios' && sheep.$platform.name === 'App'"
           title="注销账号"
@@ -50,10 +51,10 @@
           :border="false"
           class="list-border"
           @click="onLogoff"
-        ></uni-list-item>
+        />
       </uni-list>
     </view>
-
+    <!-- TODO 芋艿：统一的配置界面 -->
     <view class="set-footer ss-flex-col ss-row-center ss-col-center">
       <view class="agreement-box ss-flex ss-col-center ss-m-b-40">
         <view class="ss-flex ss-col-center ss-m-b-10">
@@ -116,32 +117,36 @@
     // H5实时更新无需检查
     // App 1.跳转应用市场更新 2.手动热更新 3.整包更新
   }
+
+  // 注销账号
   function onLogoff() {
     uni.showModal({
       title: '提示',
       content: '确认注销账号？',
       success: async function (res) {
-        if (res.confirm) {
-          const { error } = await sheep.$api.user.logoff();
-          if (error === 0) {
-            sheep.$store('user').logout();
-            sheep.$router.go('/pages/index/user');
-          }
+        if (!res.confirm) {
+          return;
+        }
+        const result = await sheep.$store('user').logout();
+        if (result) {
+          sheep.$router.go('/pages/index/user');
         }
       },
     });
   }
 
+  // 退出账号
   function onLogout() {
     uni.showModal({
       title: '提示',
       content: '确认退出账号？',
       success: async function (res) {
-        if (res.confirm) {
-          const result = await sheep.$store('user').logout();
-          if (result) {
-            sheep.$router.go('/pages/index/user');
-          }
+        if (!res.confirm) {
+          return;
+        }
+        const result = await sheep.$store('user').logout();
+        if (result) {
+          sheep.$router.go('/pages/index/user');
         }
       },
     });

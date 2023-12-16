@@ -14,6 +14,7 @@ import app from './app';
 import {
 	showAuthModal
 } from '@/sheep/hooks/useModal';
+import AuthUtil from '@/sheep/api/member/auth';
 
 // 默认用户信息
 const defaultUserInfo = {
@@ -58,7 +59,7 @@ const user = defineStore({
 			} = await userApi.profile();
 
 			// 为了兼容 获取用户余额 可能还会用到其他参数
-			// 优惠券数量,积分数量 应该在这里	
+			// 优惠券数量,积分数量 应该在这里
 			const {
 				code: code2,
 				data: data2
@@ -169,10 +170,8 @@ const user = defineStore({
 		// 登出
 		async logout(force = false) {
 			if (!force) {
-				const {
-					error
-				} = await userApi.logout();
-				if (error === 0) {
+				const { code } = AuthUtil.logout();
+				if (code === 0) {
 					this.resetUserData();
 				}
 			}
