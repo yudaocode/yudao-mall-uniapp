@@ -26,21 +26,6 @@ export default {
         showLoading: false,
       },
     }),
-  // 发送短信
-  // TODO 芋艿：直接在 useModal 引入 AuthUtil 会报错，所以继续用这个 API
-  sendSms: (mobile, scene) =>
-    request({
-      url: '/app-api/member/auth/send-sms-code',
-      method: 'POST',
-      data: {
-        mobile,
-        scene
-      },
-      custom: {
-        showSuccess: true,
-        loadingMsg: '发送中',
-      },
-    }),
   // 自定义页面
   page: (id) =>
     request({

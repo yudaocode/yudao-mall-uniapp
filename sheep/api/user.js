@@ -92,17 +92,6 @@ export default {
 				loadingMsg: '正在注册',
 			},
 		}),
-	// 重置密码
-	resetPassword: (data) =>
-		request({
-			url: '/user/api/user/resetPassword',
-			method: 'POST',
-			data,
-			custom: {
-				showSuccess: true,
-				loadingMsg: '验证中',
-			},
-		}),
 
 	// 修改密码
 	changePassword: (data) =>

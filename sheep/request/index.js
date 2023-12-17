@@ -124,9 +124,10 @@ http.interceptors.response.use(
 				});
 			return Promise.resolve(response.data);
 		}
+    // 成功时的提示
 		if (
-			response.data.error === 0 &&
-			response.data.msg !== '' &&
+			(response.data.error === 0 || response.data.code === 0) &&
+      ( response.data.msg !== '' || response.config.custom.successMsg !== '' ) &&
 			response.config.custom.showSuccess
 		) {
 			uni.showToast({

@@ -6,7 +6,12 @@ const UserApi = {
     return request({
       url: '/app-api/member/user/reset-password',
       method: 'PUT',
-      data
+      data,
+      custom: {
+        loadingMsg: '验证中',
+        showSuccess: true,
+        successMsg: '修改成功'
+      }
     });
   },
 };

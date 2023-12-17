@@ -83,7 +83,7 @@ export function getSmsCode(event, mobile = '') {
     case 'resetPassword':
       scene = 4;
   }
-  $api.app.sendSms(mobile, scene).then((res) => {
+  $api.AuthUtil.sendSmsCode(mobile, scene).then((res) => {
     if (res.code === 0) {
       modalStore.$patch((state) => {
         state.lastTimer[event] = dayjs().unix();
