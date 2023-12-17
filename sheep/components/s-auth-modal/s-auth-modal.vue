@@ -19,7 +19,7 @@
       <change-mobile v-if="authType === 'changeMobile'" />
 
       <!-- 6.修改密码 changePassword-->
-      <change-passwrod v-if="authType === 'changePassword'" />
+      <changePassword v-if="authType === 'changePassword'" />
 
       <!-- 8.微信小程序授权 changeUsername-->
       <mp-authorization v-if="authType === 'mpAuthorization'" />
@@ -109,7 +109,7 @@
   import smsLogin from './components/sms-login.vue';
   import resetPassword from './components/reset-password.vue';
   import changeMobile from './components/change-mobile.vue';
-  import changePasswrod from './components/change-password.vue';
+  import changePassword from './components/change-password.vue';
   import mpAuthorization from './components/mp-authorization.vue';
   import { closeAuthModal, showAuthModal } from '@/sheep/hooks/useModal';
 

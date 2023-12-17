@@ -6,7 +6,7 @@ import test from '@/sheep/helper/test.js';
 import $api from '@/sheep/api';
 
 // 打开授权弹框
-export function showAuthModal(type = 'accountLogin') {
+export function showAuthModal(type = 'smsLogin') {
   const modal = $store('modal');
   if (modal.auth !== '') {
     closeAuthModal();
@@ -86,6 +86,9 @@ export function getSmsCode(event, mobile) {
       break;
     case 'changePassword':
       scene = 3;
+      break;
+    case 'smsLogin':
+      scene = 1;
       break;
   }
   $api.AuthUtil.sendSmsCode(mobile, scene).then((res) => {
