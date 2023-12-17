@@ -293,13 +293,6 @@ export default {
 				params,
 				custom: {},
 			}),
-		// log: (params) =>
-		// request({
-		// 	url: '/user/api/walletLog',
-		// 	method: 'GET',
-		// 	params,
-		// 	custom: {},
-		// }),
 	},
 	account: {
 		info: (params) =>
