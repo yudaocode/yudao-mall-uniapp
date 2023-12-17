@@ -93,34 +93,10 @@ export default {
 			},
 		}),
 
-	// 修改密码
-	changePassword: (data) =>
-		request({
-			url: '/user/api/user/changePassword',
-			method: 'POST',
-			data,
-			custom: {
-				showSuccess: true,
-				loadingMsg: '验证中',
-			},
-		}),
-
 	// 绑定、更换手机号
 	changeMobile: (data) =>
 		request({
 			url: '/user/api/user/changeMobile',
-			method: 'POST',
-			data,
-			custom: {
-				showSuccess: true,
-				loadingMsg: '验证中',
-			},
-		}),
-
-	// 修改用户名
-	changeUsername: (data) =>
-		request({
-			url: '/user/api/user/changeUsername',
 			method: 'POST',
 			data,
 			custom: {

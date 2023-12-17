@@ -13,10 +13,11 @@ const modal = defineStore({
       smsRegister: 0,
       changeMobile: 0,
       resetPassword: 0,
+      changePassword: 0,
     }
   }),
   persist: {
-    enabled: true, 
+    enabled: true,
     strategies: [
       {
         key: 'modal-store',

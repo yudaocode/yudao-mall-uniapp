@@ -58,7 +58,7 @@ export function closeMenuTools() {
 }
 
 // 发送短信验证码  60秒
-export function getSmsCode(event, mobile = '') {
+export function getSmsCode(event, mobile) {
   const modalStore = $store('modal');
   const lastSendTimer = modalStore.lastTimer[event];
   if (typeof lastSendTimer === 'undefined') {
@@ -72,7 +72,8 @@ export function getSmsCode(event, mobile = '') {
     $helper.toast('请稍后再试');
     return;
   }
-  if (!test.mobile(mobile)) {
+  // 只有 mobile 非空时才校验。因为部分场景（修改密码），不需要输入手机
+  if (mobile && !test.mobile(mobile)) {
     $helper.toast('手机号码格式不正确');
     return;
   }
@@ -82,6 +83,10 @@ export function getSmsCode(event, mobile = '') {
   switch (event) {
     case 'resetPassword':
       scene = 4;
+      break;
+    case 'changePassword':
+      scene = 3;
+      break;
   }
   $api.AuthUtil.sendSmsCode(mobile, scene).then((res) => {
     if (res.code === 0) {

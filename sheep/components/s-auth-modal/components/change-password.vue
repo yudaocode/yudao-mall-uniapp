@@ -1,4 +1,4 @@
-<!-- 修改密码 - changePassword  -->
+<!-- 修改密码（登录时）  -->
 <template>
   <view>
     <!-- 标题栏 -->
@@ -16,29 +16,32 @@
       labelWidth="140"
       labelAlign="center"
     >
-      <uni-forms-item name="oldPassword" label="旧密码">
+      <uni-forms-item name="code" label="验证码">
         <uni-easyinput
-          placeholder="请输入旧密码"
-          v-model="state.model.oldPassword"
-          type="text"
+          placeholder="请输入验证码"
+          v-model="state.model.code"
+          type="number"
+          maxlength="4"
           :inputBorder="false"
-        />
+        >
+          <template v-slot:right>
+            <button
+              class="ss-reset-button code-btn code-btn-start"
+              :disabled="state.isMobileEnd"
+              :class="{ 'code-btn-end': state.isMobileEnd }"
+              @tap="getSmsCode('changePassword')"
+            >
+              {{ getSmsTimer('resetPassword') }}
+            </button>
+          </template>
+        </uni-easyinput>
       </uni-forms-item>
 
-      <uni-forms-item name="newPassword" label="新密码">
+      <uni-forms-item name="reNewPassword" label="密码">
         <uni-easyinput
           type="password"
-          placeholder="请输入新密码"
-          v-model="state.model.newPassword"
-          :inputBorder="false"
-        />
-      </uni-forms-item>
-
-      <uni-forms-item name="reNewPassword" label="确认密码">
-        <uni-easyinput
-          type="password"
-          placeholder="请重新输入您的新密码"
-          v-model="state.model.reNewPassword"
+          placeholder="请输入密码"
+          v-model="state.model.password"
           :inputBorder="false"
         >
           <template v-slot:right>
@@ -50,69 +53,51 @@
       </uni-forms-item>
     </uni-forms>
 
-    <view class="editPwd-btn-box ss-m-t-80">
-      <button class="ss-reset-button forgot-btn" @tap="showAuthModal('resetPassword')">
-        忘记密码
-      </button>
-    </view>
+    <button class="ss-reset-button type-btn" @tap="closeAuthModal">
+      取消修改
+    </button>
   </view>
 </template>
 
 <script setup>
-  import { computed, watch, ref, reactive, unref } from 'vue';
-  import sheep from '@/sheep';
-  import { password } from '@/sheep/validate/form';
-  import { showAuthModal, closeAuthModal } from '@/sheep/hooks/useModal';
+  import { ref, reactive, unref } from 'vue';
+  import { code, password } from '@/sheep/validate/form';
+  import { closeAuthModal, getSmsCode, getSmsTimer } from '@/sheep/hooks/useModal';
+  import UserApi from '@/sheep/api/member/user';
 
   const changePasswordRef = ref(null);
 
   // 数据
   const state = reactive({
-    isMobileEnd: false, // 手机号输入完毕
     model: {
-      oldPassword: '', //旧密码
-      newPassword: '', //新密码
-      reNewPassword: '', //确认密码
+      mobile: '', // 手机号
+      code: '', // 验证码
+      password: '', // 密码
     },
     rules: {
-      oldPassword: password,
-      newPassword: password,
-      reNewPassword: {
-        rules: [
-          {
-            required: true,
-            errorMessage: '请确认密码',
-          },
-          {
-            validateFunction: function (rule, value, data, callback) {
-              if (value !== state.model.newPassword) {
-                callback('两次输入的密码不一致');
-              }
-              if (value === state.model.oldPassword) {
-                callback('新密码不能与旧密码相同');
-              }
-              return true;
-            },
-          },
-        ],
-      },
+      code,
+      password,
     },
   });
 
-  // 6.更改密码
+  // 更改密码
   async function changePasswordSubmit() {
+    // 参数校验
     const validate = await unref(changePasswordRef)
       .validate()
       .catch((error) => {
         console.log('error: ', error);
       });
-    if (!validate) return;
-    sheep.$api.user.changePassword(state.model).then((res) => {
-      if (res.error === 0) {
-        sheep.$store('user').getInfo();
-        closeAuthModal();
-      }
-    });
+    if (!validate) {
+      return;
+    }
+    // 发起请求
+    const { code } = await UserApi.updateUserPassword(state.model);
+    if (code !== 0) {
+      return;
+    }
+    // 成功后，只需要关闭弹窗
+    closeAuthModal();
   }
 </script>
 
