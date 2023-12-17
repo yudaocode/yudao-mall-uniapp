@@ -61,7 +61,6 @@ export function closeMenuTools() {
 export function getSmsCode(event, mobile = '') {
   const modalStore = $store('modal');
   const lastSendTimer = modalStore.lastTimer[event];
-
   if (typeof lastSendTimer === 'undefined') {
     $helper.toast('短信发送事件错误');
     return;
@@ -69,26 +68,28 @@ export function getSmsCode(event, mobile = '') {
 
   const duration = dayjs().unix() - lastSendTimer;
   const canSend = duration >= 60;
-
   if (!canSend) {
     $helper.toast('请稍后再试');
     return;
   }
-
   if (!test.mobile(mobile)) {
     $helper.toast('手机号码格式不正确');
     return;
   }
 
   // 发送验证码 + 更新上次发送验证码时间
-  $api.app.sendSms({ mobile, event }).then((res) => {
-    if (res.error === 0) {
+  let scene = -1;
+  switch (event) {
+    case 'resetPassword':
+      scene = 4;
+  }
+  $api.app.sendSms(mobile, scene).then((res) => {
+    if (res.code === 0) {
       modalStore.$patch((state) => {
         state.lastTimer[event] = dayjs().unix();
       });
     }
   });
-
 }
 
 // 获取短信验证码倒计时 -- 60秒

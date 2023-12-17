@@ -115,7 +115,7 @@ http.interceptors.response.use(
 		}
 
 		response.config.custom.showLoading && closeLoading();
-		if (response.data.error !== 0) {
+		if (response.data.error !== 0 && response.data.code !== 0) {
 			if (response.config.custom.showError)
 				uni.showToast({
 					title: response.data.msg || '服务器开小差啦,请稍后再试~',

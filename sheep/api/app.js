@@ -1,19 +1,6 @@
 import request from '@/sheep/request';
-import { baseUrl } from '@/sheep/config';
 
 export default {
-  // TODO 芋艿：测试
-  test: () =>
-    request({
-      url: '/app-api/promotion/decorate/list',
-      params: {
-        page: 1
-      },
-      custom: {
-        showError: false,
-        showLoading: false,
-      },
-    }),
   // 系统初始化
   init: (templateId) =>
     request({
@@ -40,11 +27,15 @@ export default {
       },
     }),
   // 发送短信
-  sendSms: (data) =>
+  // TODO 芋艿：直接在 useModal 引入 AuthUtil 会报错，所以继续用这个 API
+  sendSms: (mobile, scene) =>
     request({
-      url: 'sendSms',
+      url: '/app-api/member/auth/send-sms-code',
       method: 'POST',
-      data,
+      data: {
+        mobile,
+        scene
+      },
       custom: {
         showSuccess: true,
         loadingMsg: '发送中',

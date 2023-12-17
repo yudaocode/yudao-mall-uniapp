@@ -43,7 +43,7 @@
           type="number"
           maxlength="4"
           :inputBorder="false"
-        ></uni-easyinput>
+        />
       </uni-forms-item>
 
       <uni-forms-item name="password" label="密码">
@@ -69,10 +69,11 @@
 </template>
 
 <script setup>
-  import { computed, watch, ref, reactive, unref } from 'vue';
+  import { computed, ref, reactive, unref } from 'vue';
   import sheep from '@/sheep';
   import { code, mobile, password } from '@/sheep/validate/form';
   import { showAuthModal, closeAuthModal, getSmsCode, getSmsTimer } from '@/sheep/hooks/useModal';
+  import UserApi from '@/sheep/api/member/user';
 
   const resetPasswordRef = ref(null);
   const isLogin = computed(() => sheep.$store('user').isLogin);
@@ -81,9 +82,9 @@
   const state = reactive({
     isMobileEnd: false, // 手机号输入完毕
     model: {
-      mobile: '', //手机号
-      code: '', //验证码
-      password: '', //密码
+      mobile: '', // 手机号
+      code: '', // 验证码
+      password: '', // 密码
     },
     rules: {
       code,
@@ -92,20 +93,24 @@
     },
   });
 
-  // 4.重置密码
+  // 重置密码
   const resetPasswordSubmit = async () => {
+    // 参数校验
     const validate = await unref(resetPasswordRef)
       .validate()
       .catch((error) => {
         console.log('error: ', error);
       });
-    if (!validate) return;
-    sheep.$api.user.resetPassword(state.model).then((res) => {
-      if (res.error === 0) {
-        sheep.$store('user').getInfo();
-        closeAuthModal();
-      }
-    });
+    if (!validate) {
+      return;
+    }
+    // 发起请求
+    const { code } = await UserApi.resetUserPassword(state.model);
+    if (code !== 0) {
+      return;
+    }
+    // 成功后，用户重新登录
+    showAuthModal('accountLogin')
   };
 </script>
 

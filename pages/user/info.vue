@@ -15,7 +15,7 @@
             class="content-img"
             isPreview
             :current="0"
-            :src="state.model.avatar"
+            :src="state.model?.avatar"
             :height="160"
             :width="160"
             :radius="80"
@@ -57,7 +57,7 @@
                     :value="item.value"
                     color="var(--ui-BG-Main)"
                     style="transform: scale(0.8)"
-                    :checked="parseInt(item.value) === state.model.sex"
+                    :checked="parseInt(item.value) === state.model?.sex"
                   />
                   <view class="gender-name">{{ item.name }}</view>
                 </view>
@@ -90,7 +90,7 @@
         <uni-forms-item name="password" label="登录密码" @tap="onSetPassword">
           <uni-easyinput
             v-model="userInfo.password"
-            :placeholder="userInfo.verification?.password ? '修改登录密码' : '点击设置登录密码'"
+            placeholder="点击修改登录密码"
             :inputBorder="false"
             :styles="{ disableColor: '#fff' }"
             disabled
@@ -105,7 +105,7 @@
                   :modelValue="true"
                 />
                 <button v-else class="ss-reset-button ss-flex ss-col-center ss-row-center">
-                  <text class="_icon-forward" style="color: #bbbbbb; font-size: 26rpx"></text>
+                  <text class="_icon-forward" style="color: #bbbbbb; font-size: 26rpx" />
                 </button>
               </view>
             </template>
@@ -245,13 +245,9 @@
     state.model.avatar = data;
   }
 
-  // 修改/设置密码 TODO
+  // 修改密码 TODO
   function onSetPassword() {
-    if (state.model.verification.password) {
-      showAuthModal('changePassword');
-    } else {
-      showAuthModal('resetPassword');
-    }
+    showAuthModal('changePassword');
   }
 
   // 绑定第三方账号 TODO
