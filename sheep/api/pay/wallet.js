@@ -39,7 +39,19 @@ const PayWalletApi = {
       method: 'POST',
       data,
     });
-  }
+  },
+  // 获得钱包充值记录分页
+  getWalletRechargePage: (params) => {
+    return request({
+      url: '/app-api/pay/wallet-recharge/page',
+      method: 'GET',
+      params,
+      custom: {
+        showError: false,
+        showLoading: false,
+      },
+    });
+  },
 };
 
 export default PayWalletApi;
