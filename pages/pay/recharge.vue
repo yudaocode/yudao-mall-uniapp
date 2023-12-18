@@ -1,3 +1,4 @@
+<!-- 充值界面 -->
 <template>
 	<s-layout title="充值" class="withdraw-wrap" navbar="inner">
 		<view class="wallet-num-box ss-flex ss-col-center ss-row-between" :style="[
@@ -8,96 +9,86 @@
     ]">
 			<view class="">
 				<view class="num-title">当前余额（元）</view>
-				<view class="wallet-num">{{ userInfo.money }}</view>
+				<view class="wallet-num">{{ fen2yuan(userInfo.money) }}</view>
 			</view>
-			<button class="ss-reset-button log-btn" @tap="sheep.$router.go('/pages/pay/recharge-log')">充值记录</button>
+			<button class="ss-reset-button log-btn" @tap="sheep.$router.go('/pages/pay/recharge-log')">
+        充值记录
+      </button>
 		</view>
 		<view class="recharge-box">
-			<view class="recharge-card-box" v-if="state.data.status">
+			<view class="recharge-card-box">
 				<view class="input-label ss-m-b-50">充值金额</view>
-				<view class="input-box ss-flex border-bottom ss-p-b-20" v-if="state.data.custom_status">
+				<view class="input-box ss-flex border-bottom ss-p-b-20">
 					<view class="unit">￥</view>
 					<uni-easyinput v-model="state.recharge_money" type="digit" placeholder="请输入充值金额"
-						:inputBorder="false">
-					</uni-easyinput>
+                         :inputBorder="false" />
 				</view>
 				<view class="face-value-box ss-flex ss-flex-wrap ss-m-y-40">
-					<button class="ss-reset-button face-value-btn" v-for="item in state.faceValueList" :key="item.money"
-						:class="[{ 'btn-active': state.recharge_money == parseFloat(item.money) }]"
-						@tap="onCard(item.payPrice/100)">
-						<text class="face-value-title">{{ item.payPrice/100 }}</text>
+					<button class="ss-reset-button face-value-btn" v-for="item in state.packageList" :key="item.money"
+						:class="[{ 'btn-active': state.recharge_money === fen2yuan(item.payPrice) }]"
+						@tap="onCard(item.payPrice)">
+						<text class="face-value-title">{{ fen2yuan(item.payPrice) }}</text>
 						<view v-if="item.bonusPrice" class="face-value-tag">
-							送{{ item.bonusPrice/100 }}{{ state.data.gift_type == 'money' ? '元' : '积分' }}</view>
+							送 {{ fen2yuan(item.bonusPrice) }} 元
+            </view>
 					</button>
 				</view>
 				<button class="ss-reset-button save-btn ui-BG-Main-Gradient ss-m-t-60 ui-Shadow-Main" @tap="onConfirm">
 					确认充值
 				</button>
 			</view>
-			<view class="" v-if="state.data.status === 0"> 关闭充值 </view>
 		</view>
 	</s-layout>
 </template>
 
 <script setup>
-	import {
-		computed,
-		reactive
-	} from 'vue';
+	import { computed, reactive } from 'vue';
 	import sheep from '@/sheep';
-	import {
-		onLoad
-	} from '@dcloudio/uni-app';
+	import { onLoad } from '@dcloudio/uni-app';
+  import { fen2yuan } from '@/sheep/hooks/useGoods';
+  import PayWalletApi from '@/sheep/api/pay/wallet';
 
 	const userInfo = computed(() => sheep.$store('user').userInfo);
 	const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
 	const headerBg = sheep.$url.css('/static/img/shop/user/withdraw_bg.png');
 
 	const state = reactive({
-		recharge_money: '',
-		data: {},
-		faceValueList: [],
+		recharge_money: '', // 输入的充值金额
+    packageList: [],
 	});
-	// 点击卡片
 
+	// 点击卡片，选择充值金额
 	function onCard(e) {
-		state.recharge_money = e;
+		state.recharge_money = fen2yuan(e);
 	}
+
+  // 获得钱包充值套餐列表
 	async function getRechargeTabs() {
-		const res = await sheep.$api.trade.rechargeRules();
-		const res2 = await sheep.$api.trade.rechargeRules2();
-		if (res.error === 0) {
-			state.data = res.data;
-			state.data.status = res.data.status;
-			console.log(res);
-			console.log(res2);
-			// state.faceValueList = res.data.quick_amounts;
-			state.faceValueList = res2.data;
-		}
+    const { code, data } = await PayWalletApi.getWalletRechargePackageList();
+    if (code !== 0) {
+      return;
+    }
+    state.packageList = data;
 	}
 
-	function onChange(e) {
-		state.data.gift_type = e.detail.value;
-	}
-
+  // 发起支付
 	async function onConfirm() {
-		const {
-			code,
-			data
-		} = await sheep.$api.trade.recharge({
-			packageId: 0,
+		const { code, data } = await PayWalletApi.createWalletRecharge({
+			packageId: state.packageList.find((item) => fen2yuan(item.payPrice) === state.recharge_money)?.id,
 			payPrice: state.recharge_money * 100
 		});
-		if (code === 0) {
-			// #ifdef MP
-			sheep.$platform.useProvider('wechat').subscribeMessage('money_change');
-			// #endif
-			sheep.$router.go('/pages/pay/index', {
-				orderSN: data.order_sn,
-				type: 'recharge'
-			});
+		if (code !== 0) {
+			return;
 		}
+    // #ifdef MP
+    sheep.$platform.useProvider('wechat').subscribeMessage('money_change');
+    // #endif
+    sheep.$router.go('/pages/pay/index', {
+      id: data.payOrderId,
+      type: 'recharge'
+    });
 	}
+
 	onLoad(() => {
 		getRechargeTabs();
 	});
