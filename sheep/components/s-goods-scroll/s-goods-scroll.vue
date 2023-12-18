@@ -1,3 +1,4 @@
+<!-- 商品组 - 横向滚动商品（目前暂时没用到） -->
 <template>
   <view class="goods-scroll-box">
     <scroll-view class="scroll-box" scroll-x scroll-anchoring>
@@ -8,7 +9,7 @@
             size="sm"
             :data="item"
             :titleWidth="200 - marginLeft - marginRight"
-          ></s-goods-column>
+          />
         </view>
       </view>
     </scroll-view>

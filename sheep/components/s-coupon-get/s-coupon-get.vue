@@ -1,3 +1,4 @@
+<!-- 商品详情 - 优惠劵领取 -->
 <template>
   <su-popup
     :show="show"
@@ -21,13 +22,11 @@
             <template #default>
               <button
                 class="ss-reset-button card-btn ss-flex ss-row-center ss-col-center"
-                :class="
-                  item.get_status != 'can_get' && item.get_status != 'can_use' ? 'boder-btn' : ''
-                "
+                :class="!item.canTake ? 'boder-btn' : ''"
                 @click.stop="getBuy(item.id)"
-                :disabled="item.get_status != 'can_get' && item.get_status != 'can_use'"
+                :disabled="!item.canTake"
               >
-                {{ item.get_status_text }}
+                {{ item.canTake ? '立即领取' : '已领取' }}
               </button>
             </template>
           </s-coupon-list>
@@ -38,6 +37,7 @@
 </template>
 <script setup>
   import { computed, reactive } from 'vue';
+
   const props = defineProps({
     modelValue: {
       type: Object,
@@ -48,16 +48,17 @@
       default: false,
     },
   });
+
   const emits = defineEmits(['get', 'close']);
+
   const state = reactive({
-    couponInfo: computed(() => props.modelValue),
-    currentValue: -1,
-    couponId: '',
+    couponInfo: computed(() => props.modelValue)
   });
+
+  // 领取优惠劵
   const getBuy = (id) => {
     emits('get', id);
   };
-  //立即领取
 </script>
 <style lang="scss" scoped>
   .model-box {

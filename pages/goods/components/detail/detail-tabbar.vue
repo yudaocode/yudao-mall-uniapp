@@ -1,3 +1,4 @@
+<!-- 商品详情的底部导航 -->
 <template>
   <su-fixed bottom placeholder bg="bg-white">
     <view class="ui-tabbar-box">
@@ -12,7 +13,7 @@
               class="item-icon"
               :src="sheep.$url.static('/static/img/shop/goods/collect_1.gif')"
               mode="aspectFit"
-            ></image>
+            />
             <view class="item-title">已收藏</view>
           </block>
           <block v-else>
@@ -20,7 +21,7 @@
               class="item-icon"
               :src="sheep.$url.static('/static/img/shop/goods/collect_0.png')"
               mode="aspectFit"
-            ></image>
+            />
             <view class="item-title">收藏</view>
           </block>
         </view>
@@ -33,7 +34,7 @@
             class="item-icon"
             :src="sheep.$url.static('/static/img/shop/goods/message.png')"
             mode="aspectFit"
-          ></image>
+          />
           <view class="item-title">客服</view>
         </view>
         <view
@@ -45,7 +46,7 @@
             class="item-icon"
             :src="sheep.$url.static('/static/img/shop/goods/share.png')"
             mode="aspectFit"
-          ></image>
+          />
           <view class="item-title">分享</view>
         </view>
         <slot></slot>
@@ -63,13 +64,11 @@
    * @property {String} ui 			 			- 自定义样式Class
    * @property {Boolean} noFixed 		 			- 是否定位
    * @property {Boolean} topRadius 		 		- 上圆角
-   *
-   *
    */
-
-  import { computed, reactive } from 'vue';
+  import { reactive } from 'vue';
   import sheep from '@/sheep';
   import { showShareModal } from '@/sheep/hooks/useModal';
+  import FavoriteApi from '@/sheep/api/product/favorite';
 
   // 数据
   const state = reactive({});
@@ -114,25 +113,24 @@
       default: true,
     },
   });
-  const elStyles = computed(() => {
-    return {
-      'border-top-left-radius': props.topRadius + 'rpx',
-      'border-top-right-radius': props.topRadius + 'rpx',
-      overflow: 'hidden',
-    };
-  });
 
-  const tabbarheight = (e) => {
-    uni.setStorageSync('tabbar', e);
-  };
   async function onFavorite() {
-    const { error } = await sheep.$api.user.favorite.do(props.modelValue.id);
-    if (error === 0) {
-      if (props.modelValue.favorite) {
-        props.modelValue.favorite = 0;
-      } else {
-        props.modelValue.favorite = 1;
+    // 情况一：取消收藏
+    if (props.modelValue.favorite) {
+      const { code } = await FavoriteApi.deleteFavorite(props.modelValue.id);
+      if (code !== 0) {
+        return
       }
+      sheep.$helper.toast('取消收藏');
+      props.modelValue.favorite = false;
+    // 情况二：添加收藏
+    } else {
+      const { code } = await FavoriteApi.createFavorite(props.modelValue.id);
+      if (code !== 0) {
+        return
+      }
+      sheep.$helper.toast('收藏成功');
+      props.modelValue.favorite = true;
     }
   }
 

@@ -94,6 +94,7 @@ http.interceptors.request.use(
 		if (config.url.indexOf('/app-api/') !== -1) {
 			config.header['Accept'] = '*/*'
 			config.header['tenant-id'] = '1';
+      config.header['terminal'] = '20';
 			config.header['Authorization'] = 'Bearer test247';
 		}
 		return config;
@@ -112,9 +113,10 @@ http.interceptors.response.use(
 		if (response.header.authorization || response.header.Authorization) {
 			$store('user').setToken(response.header.authorization || response.header.Authorization);
 		}
+    // TODO 芋艿：如果是登录的 API，则自动设置 token
 
 		response.config.custom.showLoading && closeLoading();
-		if (response.data.error !== 0) {
+		if (response.data.error !== 0 && response.data.code !== 0) {
 			if (response.config.custom.showError)
 				uni.showToast({
 					title: response.data.msg || '服务器开小差啦,请稍后再试~',
@@ -123,9 +125,10 @@ http.interceptors.response.use(
 				});
 			return Promise.resolve(response.data);
 		}
+    // 成功时的提示
 		if (
-			response.data.error === 0 &&
-			response.data.msg !== '' &&
+			(response.data.error === 0 || response.data.code === 0) &&
+      ( response.data.msg !== '' || response.config.custom.successMsg !== '' ) &&
 			response.config.custom.showSuccess
 		) {
 			uni.showToast({
@@ -212,8 +215,8 @@ const request = (config) => {
 	}
 	// TODO 芋艿：额外拼接
 	if (config.url.indexOf('/app-api/') >= 0) {
-		config.url = 'http://api-dashboard.yudao.iocoder.cn' + config.url; // 调用【云端】
-		// config.url = 'http://127.0.0.1:48080' + config.url; // 调用【本地】
+		// config.url = 'http://api-dashboard.yudao.iocoder.cn' + config.url; // 调用【云端】
+		config.url = 'http://127.0.0.1:48080' + config.url; // 调用【本地】
 	}
 	return http.middleware(config);
 };

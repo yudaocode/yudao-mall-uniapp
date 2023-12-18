@@ -1,5 +1,8 @@
+<!-- 网页加载 -->
 <template>
-  <view><web-view :src="url"></web-view></view>
+  <view>
+    <web-view :src="url" />
+  </view>
 </template>
 
 <script setup>

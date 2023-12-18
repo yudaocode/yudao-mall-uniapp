@@ -4,10 +4,10 @@
     <!-- 标题栏 -->
     <view class="head-box ss-m-b-60 ss-flex-col">
       <view class="ss-flex ss-m-b-20">
-        <view class="head-title ss-m-r-40 head-title-animation">账号登录</view>
         <view class="head-title-active head-title-line" @tap="showAuthModal('smsLogin')">
           短信登录
         </view>
+        <view class="head-title ss-m-r-40 head-title-animation">账号登录</view>
       </view>
       <view class="head-subtitle">如果未设置过密码，请点击忘记密码</view>
     </view>

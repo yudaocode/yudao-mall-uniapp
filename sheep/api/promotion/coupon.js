@@ -1,6 +1,6 @@
 import request from '@/sheep/request';
 
-export default {
+const CouponApi = {
   // 获得优惠劵模板列表
   getCouponTemplateListByIds: (ids) => {
     return request({
@@ -17,4 +17,46 @@ export default {
       params: { spuId, productScope, count },
     });
   },
+  // 获得优惠劵模版分页
+  getCouponTemplatePage: (params) => {
+    return request({
+      url: '/app-api/promotion/coupon-template/page',
+      method: 'GET',
+      params,
+    });
+  },
+  // 获得优惠劵模版
+  getCouponTemplate: (id) => {
+    return request({
+      url: '/app-api/promotion/coupon-template/get',
+      method: 'GET',
+      params: { id },
+    });
+  },
+  // 我的优惠劵列表
+  getCouponPage: (params) => {
+    return request({
+      url: '/app-api/promotion/coupon/page',
+      method: 'GET',
+      params,
+    });
+  },
+  // 领取优惠券
+  takeCoupon: (templateId) => {
+    return request({
+      url: '/app-api/promotion/coupon/take',
+      method: 'POST',
+      data: { templateId },
+    });
+  },
+  // 获得优惠劵
+  getCoupon: (id) => {
+    return request({
+      url: '/app-api/promotion/coupon/get',
+      method: 'GET',
+      params: { id },
+    });
+  },
 };
+
+export default CouponApi;

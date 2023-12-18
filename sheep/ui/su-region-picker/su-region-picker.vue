@@ -1,3 +1,4 @@
+<!-- 省市区选择弹窗 -->
 <template>
   <su-popup :show="show" @close="onCancel" round="20">
     <view class="ui-region-picker">
@@ -9,7 +10,7 @@
         title="选择区域"
         @cancel="onCancel"
         @confirm="onConfirm('confirm')"
-      ></su-toolbar>
+      />
       <view class="ui-picker-body">
         <picker-view
           :value="state.currentIndex"

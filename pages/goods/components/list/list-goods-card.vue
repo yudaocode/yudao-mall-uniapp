@@ -1,4 +1,4 @@
-<!-- 页面  -->
+<!-- 页面；暂时没用到  -->
 <template>
   <view class="list-goods-card ss-flex-col" @tap="onClick">
     <view class="md-img-box">

@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import dayjs from 'dayjs';
 import $url from '@/sheep/url';
+import { formatDate } from '@/sheep/util';
 
 /**
  * 格式化销量
@@ -9,7 +10,7 @@ import $url from '@/sheep/url';
  * @return {string} 格式化后的销量字符串
  */
 export function formatSales(type, num) {
-  let prefix = type!=='exact' && num<10 ? '销量': '已售';
+  let prefix = type !== 'exact' && num < 10 ? '销量' : '已售';
   return formatNum(prefix, type, num)
 }
 
@@ -65,6 +66,7 @@ export function formatPrice(e) {
 
 // 视频格式后缀列表
 const VIDEO_SUFFIX_LIST = ['.avi', '.mp4']
+
 /**
  * 转换商品轮播的链接列表：根据链接的后缀，判断是视频链接还是图片链接
  *
@@ -74,7 +76,7 @@ const VIDEO_SUFFIX_LIST = ['.avi', '.mp4']
 export function formatGoodsSwiper(urlList) {
   return urlList.map((url, key) => {
     const isVideo = VIDEO_SUFFIX_LIST.some(suffix => url.includes(suffix));
-    const type = isVideo ? 'video' :'image'
+    const type = isVideo ? 'video' : 'image'
     const src = $url.cdn(url);
     return { type, src }
   });
@@ -82,26 +84,182 @@ export function formatGoodsSwiper(urlList) {
 
 /**
  * 格式化订单状态的颜色
- * @param type 订单类型
+ *
+ * @param order 订单
  * @return {string} 颜色的 class 名称
  */
-export function formatOrderColor(type) {
-  switch (type) {
-    case 'apply_refund':
-    case 'groupon_ing':
-    case 'nocomment':
-    case 'noget':
-    case 'nosend':
-      return 'warning-color';
-    case 'closed':
-    case 'groupon_invalid':
-    case 'cancel':
-    case 'refund_agree':
-      return 'danger-color';
-    case 'completed':
-      return 'success-color';
-    case 'unpaid':
-      return 'info-color';
+export function formatOrderColor(order) {
+  if (order.status === 0) {
+    return 'info-color';
+  }
+  if (order.status === 10
+    || order.status === 20
+    || (order.status === 30 && !order.commentStatus)) {
+    return 'warning-color';
+  }
+  if (order.status === 30 && order.commentStatus) {
+    return 'success-color';
+  }
+  return 'danger-color';
+}
+
+/**
+ * 格式化订单状态
+ *
+ * @param order 订单
+ */
+export function formatOrderStatus(order) {
+  if (order.status === 0) {
+    return '待付款';
+  }
+  if (order.status === 10 && order.deliveryType === 1) {
+    return '待发货';
+  }
+  if (order.status === 10 && order.deliveryType === 2) {
+    return '待核销';
+  }
+  if (order.status === 20) {
+    return '待收货';
+  }
+  if (order.status === 30 && !order.commentStatus) {
+    return '待评价';
+  }
+  if (order.status === 30 && order.commentStatus) {
+    return '已完成';
+  }
+  return '已关闭';
+}
+
+/**
+ * 格式化订单状态的描述
+ *
+ * @param order 订单
+ */
+export function formatOrderStatusDescription(order) {
+  if (order.status === 0) {
+    return `请在 ${ formatDate(orderInfo.payExpireTime) } 前完成支付`;
+  }
+  if (order.status === 10) {
+    return '商家未发货，请耐心等待';
+  }
+  if (order.status === 20) {
+    return '商家已发货，请耐心等待';
+  }
+  if (order.status === 30 && !order.commentStatus) {
+    return '已收货，快去评价一下吧';
+  }
+  if (order.status === 30 && order.commentStatus) {
+    return '交易完成，感谢您的支持';
+  }
+  return '交易关闭';
+}
+
+/**
+ * 处理订单的 button 操作按钮数组
+ *
+ * @param order 订单
+ */
+export function handleOrderButtons(order) {
+  order.buttons = []
+  if (order.type === 3) { // 查看拼团
+    order.buttons.push('combination');
+  }
+  if (order.status === 20) { // 确认收货
+    order.buttons.push('confirm');
+  }
+  if (order.logisticsId > 0) { // 查看物流
+    order.buttons.push('express');
+  }
+  if (order.status === 0) { // 取消订单 / 发起支付
+    order.buttons.push('cancel');
+    order.buttons.push('pay');
+  }
+  if (order.status === 30 && !order.commentStatus) { // 发起评价
+    order.buttons.push('comment');
+  }
+  if (order.status === 40) { // 删除订单
+    order.buttons.push('delete');
+  }
+}
+
+/**
+ * 格式化售后状态
+ *
+ * @param afterSale 售后
+ */
+export function formatAfterSaleStatus(afterSale) {
+  if (afterSale.status === 10) {
+    return '申请售后';
+  }
+  if (afterSale.status === 20) {
+    return '商品待退货';
+  }
+  if (afterSale.status === 30) {
+    return '商家待收货';
+  }
+  if (afterSale.status === 40) {
+    return '等待退款';
+  }
+  if (afterSale.status === 50) {
+    return '退款成功';
+  }
+  if (afterSale.status === 61) {
+    return '买家取消';
+  }
+  if (afterSale.status === 62) {
+    return '商家拒绝';
+  }
+  if (afterSale.status === 63) {
+    return '商家拒收货';
+  }
+  return '未知状态';
+}
+
+/**
+ * 格式化售后状态的描述
+ *
+ * @param afterSale 售后
+ */
+export function formatAfterSaleStatusDescription(afterSale) {
+  if (afterSale.status === 10) {
+    return '退款申请待商家处理';
+  }
+  if (afterSale.status === 20) {
+    return '请退货并填写物流信息';
+  }
+  if (afterSale.status === 30) {
+    return '退货退款申请待商家处理';
+  }
+  if (afterSale.status === 40) {
+    return '等待退款';
+  }
+  if (afterSale.status === 50) {
+    return '退款成功';
+  }
+  if (afterSale.status === 61) {
+    return '退款关闭';
+  }
+  if (afterSale.status === 62) {
+    return `商家不同意退款申请，拒绝原因：${afterSale.auditReason}`;
+  }
+  if (afterSale.status === 63) {
+    return `商家拒绝收货，不同意退款，拒绝原因：${afterSale.auditReason}`;
+  }
+  return '未知状态';
+}
+
+/**
+ * 处理售后的 button 操作按钮数组
+ *
+ * @param afterSale 售后
+ */
+export function handleAfterSaleButtons(afterSale) {
+  afterSale.buttons = [];
+  if ([10, 20, 30].includes(afterSale.status)) { // 取消订单
+    afterSale.buttons.push('cancel');
+  }
+  if (afterSale.status === 20) { // 退货信息
+    afterSale.buttons.push('delivery');
   }
 }
 

@@ -92,46 +92,11 @@ export default {
 				loadingMsg: '正在注册',
 			},
 		}),
-	// 重置密码
-	resetPassword: (data) =>
-		request({
-			url: '/user/api/user/resetPassword',
-			method: 'POST',
-			data,
-			custom: {
-				showSuccess: true,
-				loadingMsg: '验证中',
-			},
-		}),
-
-	// 修改密码
-	changePassword: (data) =>
-		request({
-			url: '/user/api/user/changePassword',
-			method: 'POST',
-			data,
-			custom: {
-				showSuccess: true,
-				loadingMsg: '验证中',
-			},
-		}),
 
 	// 绑定、更换手机号
 	changeMobile: (data) =>
 		request({
 			url: '/user/api/user/changeMobile',
-			method: 'POST',
-			data,
-			custom: {
-				showSuccess: true,
-				loadingMsg: '验证中',
-			},
-		}),
-
-	// 修改用户名
-	changeUsername: (data) =>
-		request({
-			url: '/user/api/user/changeUsername',
 			method: 'POST',
 			data,
 			custom: {
@@ -218,12 +183,6 @@ export default {
 				method: 'GET',
 				custom: {},
 			}),
-		// list: () =>
-		//   request({
-		//     url: 'user/address',
-		//     method: 'GET',
-		//     custom: {},
-		//   }),
 		create: (data) =>
 			request2({
 				url: 'member/address/create',
@@ -233,15 +192,6 @@ export default {
 					showSuccess: true,
 				},
 			}),
-		// create: (data) =>
-		//   request({
-		//     url: 'user/address',
-		//     method: 'POST',
-		//     data,
-		//     custom: {
-		//       showSuccess: true,
-		//     },
-		//   }),
 		update: (data) =>
 			request2({
 				url: 'member/address/update',
@@ -251,69 +201,14 @@ export default {
 					showSuccess: true,
 				},
 			}),
-		// update: (id, data) =>
-		// 	request({
-		// 		url: 'user/address/' + id,
-		// 		method: 'PUT',
-		// 		data,
-		// 		custom: {
-		// 			showSuccess: true,
-		// 		},
-		// 	}),
 		detail: (id) =>
 			request2({
 				url: 'member/address/get?id=' + id,
 				method: 'GET',
 			}),
-		// detail: (id) =>
-		//   request({
-		//     url: 'user/address/' + id,
-		//     method: 'GET',
-		//   }),
 		delete: (id) =>
 			request2({
 				url: 'member/address/delete?id=' + id,
-				method: 'DELETE',
-			}),
-		// delete: (id) =>
-		// 	request({
-		// 		url: 'user/address/' + id,
-		// 		method: 'DELETE',
-		// 	}),
-	},
-	invoice: {
-		list: () =>
-			request({
-				url: 'user/invoice',
-				method: 'GET',
-				custom: {},
-			}),
-		create: (data) =>
-			request({
-				url: 'user/invoice',
-				method: 'POST',
-				data,
-				custom: {
-					showSuccess: true,
-				},
-			}),
-		update: (id, data) =>
-			request({
-				url: 'user/invoice/' + id,
-				method: 'PUT',
-				data,
-				custom: {
-					showSuccess: true,
-				},
-			}),
-		detail: (id) =>
-			request({
-				url: 'user/invoice/' + id,
-				method: 'GET',
-			}),
-		delete: (id) =>
-			request({
-				url: 'user/invoice/' + id,
 				method: 'DELETE',
 			}),
 	},
@@ -398,13 +293,6 @@ export default {
 				params,
 				custom: {},
 			}),
-		// log: (params) =>
-		// request({
-		// 	url: '/user/api/walletLog',
-		// 	method: 'GET',
-		// 	params,
-		// 	custom: {},
-		// }),
 	},
 	account: {
 		info: (params) =>

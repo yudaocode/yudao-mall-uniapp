@@ -1,3 +1,4 @@
+<!-- 商品详情：商品/评价/详情的 nav -->
 <template>
   <su-fixed alway :bgStyles="{ background: '#fff' }" :val="0" noNav opacity :placeholder="false">
     <su-status-bar />

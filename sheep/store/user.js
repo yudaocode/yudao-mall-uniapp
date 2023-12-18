@@ -14,6 +14,7 @@ import app from './app';
 import {
 	showAuthModal
 } from '@/sheep/hooks/useModal';
+import AuthUtil from '@/sheep/api/member/auth';
 
 // 默认用户信息
 const defaultUserInfo = {
@@ -51,6 +52,7 @@ const user = defineStore({
 
 	actions: {
 		// 获取个人信息
+    // TODO 芋艿：整理下；
 		async getInfo() {
 			const {
 				code,
@@ -58,20 +60,21 @@ const user = defineStore({
 			} = await userApi.profile();
 
 			// 为了兼容 获取用户余额 可能还会用到其他参数
-			// 优惠券数量,积分数量 应该在这里	
+			// 优惠券数量,积分数量 应该在这里
 			const {
 				code: code2,
 				data: data2
 			} = await userApi.balance();
 			if (code !== 0 || code2 != 0) return;
-			data.money = data2.balance / 100;
+			data.money = data2.balance;
 			this.userInfo = data;
 			console.log(data2, '信息')
 			return Promise.resolve(data);
 		},
 
 		// 获取分销商信息
-		async getAgentInfo() {
+    // TODO 芋艿：整理下；
+    async getAgentInfo() {
 			const res = await commissionApi.agent();
 			if (res.error === 0) {
 				this.agentInfo = res.data;
@@ -80,7 +83,8 @@ const user = defineStore({
 		},
 
 		// 获取订单、优惠券等其他资产信息
-		async getNumData() {
+    // TODO 芋艿：整理下；
+    async getNumData() {
 			const {
 				code,
 				data
@@ -103,7 +107,8 @@ const user = defineStore({
 		},
 
 		// 添加分享记录
-		async addShareLog(params) {
+    // TODO 芋艿：整理下；
+    async addShareLog(params) {
 			const {
 				error
 			} = await userApi.addShareLog(params);
@@ -111,7 +116,8 @@ const user = defineStore({
 		},
 
 		// 设置token
-		setToken(token = '') {
+    // TODO 芋艿：整理下；
+    setToken(token = '') {
 			if (token === '') {
 				this.isLogin = false;
 				uni.removeStorageSync('token');
@@ -124,7 +130,8 @@ const user = defineStore({
 		},
 
 		// 更新用户相关信息 (手动限流 5秒之内不刷新)
-		async updateUserData() {
+    // TODO 芋艿：整理下；
+    async updateUserData() {
 			if (!this.isLogin) {
 				this.resetUserData();
 				return;
@@ -138,7 +145,8 @@ const user = defineStore({
 		},
 
 		// 重置用户默认数据
-		resetUserData() {
+    // TODO 芋艿：整理下；
+    resetUserData() {
 			this.setToken();
 			this.userInfo = clone(defaultUserInfo);
 			this.numData = cloneDeep(defaultNumData);
@@ -147,7 +155,8 @@ const user = defineStore({
 		},
 
 		// 登录后
-		async loginAfter() {
+    // TODO 芋艿：整理下；
+    async loginAfter() {
 			await this.updateUserData();
 			cart().getList();
 			// 登录后设置全局分享参数
@@ -158,7 +167,8 @@ const user = defineStore({
 			// }
 
 			// 添加分享记录
-			const shareLog = uni.getStorageSync('shareLog');
+      // TODO 芋艿：整理下；
+      const shareLog = uni.getStorageSync('shareLog');
 			if (!isEmpty(shareLog)) {
 				this.addShareLog({
 					...shareLog,
@@ -167,12 +177,11 @@ const user = defineStore({
 		},
 
 		// 登出
-		async logout(force = false) {
+    // TODO 芋艿：整理下；
+    async logout(force = false) {
 			if (!force) {
-				const {
-					error
-				} = await userApi.logout();
-				if (error === 0) {
+				const { code } = AuthUtil.logout();
+				if (code === 0) {
 					this.resetUserData();
 				}
 			}

@@ -1,16 +1,16 @@
 <template>
   <view class="hotzone-wrap">
-    <image :src="sheep.$url.cdn(data.src)" style="width: 100%" mode="widthFix"></image>
+    <image :src="sheep.$url.cdn(data.imgUrl)" style="width: 100%" mode="widthFix"></image>
     <view
       class="hotzone-box"
-      v-for="item in data.list"
-      :key="item.width"
+      v-for="(item, index) in data.list"
+      :key="index"
       :style="[
         {
-          top: item.top + 'rpx',
-          left: item.left + 'rpx',
-          width: item.width + 'rpx',
-          height: item.height + 'rpx',
+          top: `${item.top}px`,
+          left: `${item.left}px`,
+          width: `${item.width}px`,
+          height: `${item.height}px`,
         },
       ]"
       @tap.stop="sheep.$router.go(item.url)"

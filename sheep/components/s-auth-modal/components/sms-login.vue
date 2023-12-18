@@ -4,12 +4,12 @@
     <!-- 标题栏 -->
     <view class="head-box ss-m-b-60">
       <view class="ss-flex ss-m-b-20">
-        <view class="head-title-active ss-m-r-40" @tap="showAuthModal('accountLogin')"
-          >账号登录</view
-        >
         <view class="head-title head-title-line head-title-animation">短信登录</view>
+        <view class="head-title-active ss-m-r-40" @tap="showAuthModal('accountLogin')">
+          账号登录
+        </view>
       </view>
-      <view class="head-subtitle">未注册手机号请先点击下方立即注册</view>
+      <view class="head-subtitle">未注册的手机号，验证后自动注册账号</view>
     </view>
 
     <!-- 表单项 -->
@@ -59,10 +59,11 @@
 </template>
 
 <script setup>
-  import { computed, watch, ref, reactive, unref } from 'vue';
+  import { ref, reactive, unref } from 'vue';
   import sheep from '@/sheep';
   import { code, mobile } from '@/sheep/validate/form';
   import { showAuthModal, closeAuthModal, getSmsCode, getSmsTimer } from '@/sheep/hooks/useModal';
+  import AuthUtil from '@/sheep/api/member/auth';
 
   const smsLoginRef = ref(null);
 
@@ -89,22 +90,25 @@
     },
   });
 
-  // 2.短信登录
+  // 短信登录
   async function smsLoginSubmit() {
+    // 参数校验
     const validate = await unref(smsLoginRef)
       .validate()
       .catch((error) => {
         console.log('error: ', error);
       });
-    if (!validate) return;
-
+    if (!validate) {
+      return;
+    }
     if (!props.agreeStatus) {
       emits('onConfirm', true)
       sheep.$helper.toast('请勾选同意');
       return;
     }
-    const { error } = await sheep.$api.user.smsLogin(state.model);
-    if (error === 0) {
+    // 提交数据
+    const { code } = await AuthUtil.smsLogin(state.model);
+    if (code === 0) {
       closeAuthModal();
     }
   }

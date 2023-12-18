@@ -86,10 +86,6 @@
             :skus="state.goodsInfo.skus"
             @tap="state.showSelectSku = true"
           />
-          <!-- 服务 -->
-          <detail-cell-service v-model="state.goodsInfo.service" />
-          <!-- 参数 -->
-          <detail-cell-params v-model="state.goodsInfo.params" />
           <!-- 玩法 -->
           <detail-cell
             v-if="state.goodsInfo.activity.richtext_id > 0"
@@ -173,15 +169,13 @@
 </template>
 
 <script setup>
-  import { reactive, getCurrentInstance, computed, ref } from 'vue';
+  import { reactive, computed, ref } from 'vue';
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import { isEmpty } from 'lodash';
   import detailNavbar from './components/detail/detail-navbar.vue';
   import detailCell from './components/detail/detail-cell.vue';
   import detailCellSku from './components/detail/detail-cell-sku.vue';
-  import detailCellService from './components/detail/detail-cell-service.vue';
-  import detailCellParams from './components/detail/detail-cell-params.vue';
   import detailTabbar from './components/detail/detail-tabbar.vue';
   import detailSkeleton from './components/detail/detail-skeleton.vue';
   import detailCommentCard from './components/detail/detail-comment-card.vue';
@@ -209,7 +203,7 @@
     grouponId: 0,           // 团购ID
     grouponType: '',        // 团购类型
     grouponNum: 0,          // 团购人数
-    grouponAction: 'create',  // 团购操作  
+    grouponAction: 'create',  // 团购操作
   });
 
   // 商品主价格

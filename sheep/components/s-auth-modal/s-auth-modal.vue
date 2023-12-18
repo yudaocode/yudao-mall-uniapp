@@ -12,13 +12,6 @@
       <!-- 2.短信登录  smsLogin -->
       <sms-login v-if="authType === 'smsLogin'" :agreeStatus="state.protocol" @onConfirm="onConfirm" />
 
-      <!-- 3.短信注册 smsRegister-->
-      <sms-register
-        v-if="authType === 'smsRegister'"
-        :agreeStatus="state.protocol"
-        @onConfirm="onConfirm"
-      />
-
       <!-- 4.忘记密码 resetPassword-->
       <reset-password v-if="authType === 'resetPassword'" />
 
@@ -26,10 +19,7 @@
       <change-mobile v-if="authType === 'changeMobile'" />
 
       <!-- 6.修改密码 changePassword-->
-      <change-passwrod v-if="authType === 'changePassword'" />
-
-      <!-- 7.修改用户名 changeUsername-->
-      <change-username v-if="authType === 'changeUsername'" />
+      <changePassword v-if="authType === 'changePassword'" />
 
       <!-- 8.微信小程序授权 changeUsername-->
       <mp-authorization v-if="authType === 'mpAuthorization'" />
@@ -42,21 +32,12 @@
         <!-- 立即注册&快捷登录 TextButton -->
         <view v-if="sheep.$platform.name === 'WechatMiniProgram'" class="ss-flex register-box">
           <view class="register-title">还没有账号?</view>
-          <button class="ss-reset-button register-btn" @tap="showAuthModal('smsRegister')"
-            >立即注册</button
+          <button class="ss-reset-button register-btn" @tap="showAuthModal('smsRegister')">立即注册</button
           >
           <view class="or-title">或</view>
           <button class="ss-reset-button login-btn" @tap="thirdLogin('wechat')">快捷登录</button>
           <view class="circle"></view>
         </view>
-
-        <button
-          v-if="sheep.$platform.name !== 'WechatMiniProgram'"
-          class="ss-reset-button type-btn"
-          @tap="showAuthModal('smsRegister')"
-        >
-          立即注册
-        </button>
 
         <!-- 公众号|App微信登录 -->
         <button
@@ -126,11 +107,9 @@
   import sheep from '@/sheep';
   import accountLogin from './components/account-login.vue';
   import smsLogin from './components/sms-login.vue';
-  import smsRegister from './components/sms-register.vue';
   import resetPassword from './components/reset-password.vue';
   import changeMobile from './components/change-mobile.vue';
-  import changePasswrod from './components/change-password.vue';
-  import changeUsername from './components/change-username.vue';
+  import changePassword from './components/change-password.vue';
   import mpAuthorization from './components/mp-authorization.vue';
   import { closeAuthModal, showAuthModal } from '@/sheep/hooks/useModal';
 

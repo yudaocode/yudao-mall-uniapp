@@ -6,7 +6,7 @@ import test from '@/sheep/helper/test.js';
 import $api from '@/sheep/api';
 
 // 打开授权弹框
-export function showAuthModal(type = 'accountLogin') {
+export function showAuthModal(type = 'smsLogin') {
   const modal = $store('modal');
   if (modal.auth !== '') {
     closeAuthModal();
@@ -58,10 +58,9 @@ export function closeMenuTools() {
 }
 
 // 发送短信验证码  60秒
-export function getSmsCode(event, mobile = '') {
+export function getSmsCode(event, mobile) {
   const modalStore = $store('modal');
   const lastSendTimer = modalStore.lastTimer[event];
-
   if (typeof lastSendTimer === 'undefined') {
     $helper.toast('短信发送事件错误');
     return;
@@ -69,26 +68,36 @@ export function getSmsCode(event, mobile = '') {
 
   const duration = dayjs().unix() - lastSendTimer;
   const canSend = duration >= 60;
-
   if (!canSend) {
     $helper.toast('请稍后再试');
     return;
   }
-
-  if (!test.mobile(mobile)) {
+  // 只有 mobile 非空时才校验。因为部分场景（修改密码），不需要输入手机
+  if (mobile && !test.mobile(mobile)) {
     $helper.toast('手机号码格式不正确');
     return;
   }
 
   // 发送验证码 + 更新上次发送验证码时间
-  $api.app.sendSms({ mobile, event }).then((res) => {
-    if (res.error === 0) {
+  let scene = -1;
+  switch (event) {
+    case 'resetPassword':
+      scene = 4;
+      break;
+    case 'changePassword':
+      scene = 3;
+      break;
+    case 'smsLogin':
+      scene = 1;
+      break;
+  }
+  $api.AuthUtil.sendSmsCode(mobile, scene).then((res) => {
+    if (res.code === 0) {
       modalStore.$patch((state) => {
         state.lastTimer[event] = dayjs().unix();
       });
     }
   });
-
 }
 
 // 获取短信验证码倒计时 -- 60秒

@@ -1,3 +1,4 @@
+<!-- 搜索界面 -->
 <template>
   <s-layout class="set-wrap" title="搜索" :bgStyle="{ color: '#FFF' }">
     <view class="ss-p-x-24">
@@ -33,14 +34,18 @@
   import { reactive } from 'vue';
   import sheep from '@/sheep';
   import { onLoad } from '@dcloudio/uni-app';
+
   const state = reactive({
     historyList: [],
   });
 
   // 搜索
   function onSearch(keyword) {
-    if (!keyword) return;
+    if (!keyword) {
+      return;
+    }
     saveSearchHistory(keyword);
+    // 前往商品列表（带搜索条件）
     sheep.$router.go('/pages/goods/list', { keyword });
   }
 
@@ -53,7 +58,7 @@
     // 置顶关键词
     state.historyList.unshift(keyword);
 
-    // 最多保留10条记录
+    // 最多保留 10 条记录
     if (state.historyList.length >= 10) {
       state.historyList.length = 10;
     }
@@ -72,6 +77,7 @@
       },
     });
   }
+
   onLoad(() => {
     state.historyList = uni.getStorageSync('searchHistory') || [];
   });

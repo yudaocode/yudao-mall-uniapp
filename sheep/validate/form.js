@@ -187,32 +187,6 @@ export const alipayAccount = {
   ],
 };
 
-export const consignee = {
-  rules: [
-    {
-      required: true,
-      errorMessage: '请输入收货人姓名',
-    },
-  ],
-};
-
-export const region = {
-  rules: [
-    {
-      required: true,
-      errorMessage: '请选择您的位置',
-    },
-  ],
-};
-export const address = {
-  rules: [
-    {
-      required: true,
-      errorMessage: '请输入详细地址',
-    },
-  ],
-};
-
 export default {
   mobile,
   alipayAccount,
@@ -222,9 +196,6 @@ export default {
   password,
   code,
   account,
-  consignee,
-  address,
-  region,
   taxNo,
   taxName,
 };

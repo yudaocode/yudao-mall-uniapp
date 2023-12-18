@@ -15,12 +15,6 @@ export default {
 	// 		method: 'GET',
 	// 		params,
 	// 	}),
-	// 发票详情
-	invoice: (id) =>
-		request({
-			url: 'order/invoice/' + id,
-			method: 'GET',
-		}),
 	// 获取支付结果
 	payResult: (id) =>
 		request({

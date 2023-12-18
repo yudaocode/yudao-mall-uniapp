@@ -1,3 +1,4 @@
+<!-- 用户信息 -->
 <template>
   <s-layout title="用户信息" class="set-userinfo-wrap">
     <uni-forms
@@ -7,26 +8,27 @@
       border
       class="form-box"
     >
+      <!-- 头像 -->
       <view class="ss-flex ss-row-center ss-col-center ss-p-t-60 ss-p-b-0 bg-white">
         <view class="header-box-content">
           <su-image
             class="content-img"
             isPreview
             :current="0"
-            :src="sheep.$url.cdn(state.model.avatar)"
+            :src="state.model?.avatar"
             :height="160"
             :width="160"
             :radius="80"
             mode="scaleToFill"
-          ></su-image>
+          />
           <view class="avatar-action">
             <!-- #ifdef MP -->
             <button
               class="ss-reset-button avatar-action-btn"
               open-type="chooseAvatar"
-              @chooseavatar="onChooseAvatar"
-              >修改</button
-            >
+              @chooseavatar="onChooseAvatar">
+              修改
+            </button>
             <!-- #endif -->
             <!-- #ifndef MP -->
             <button class="ss-reset-button avatar-action-btn" @tap="onChangeAvatar">修改</button>
@@ -36,25 +38,7 @@
       </view>
 
       <view class="bg-white ss-p-x-30">
-      <!--  <uni-forms-item name="username" label="用户名" @tap="onChangeUsername" class="label-box">
-          <uni-easyinput
-            v-model="userInfo.username"
-            disabled
-            :inputBorder="false"
-            :styles="{ disableColor: '#fff' }"
-            placeholder="设置用户名"
-            :clearable="false"
-            :placeholderStyle="placeholderStyle"
-          >
-            <template v-slot:right>
-              <su-radio class="ss-flex" v-if="userInfo.verification?.username" :modelValue="true" />
-              <button v-else class="ss-reset-button">
-                <text class="_icon-forward" style="color: #bbbbbb; font-size: 26rpx"></text>
-              </button>
-            </template>
-          </uni-easyinput>
-        </uni-forms-item> -->
-
+        <!-- 昵称 + 性别 -->
         <uni-forms-item name="nickname" label="昵称">
           <uni-easyinput
             v-model="state.model.nickname"
@@ -64,24 +48,23 @@
             :placeholderStyle="placeholderStyle"
           />
         </uni-forms-item>
-
-<!--        <uni-forms-item name="gender" label="性别">
+        <uni-forms-item name="sex" label="性别">
           <view class="ss-flex ss-col-center ss-h-100">
             <radio-group @change="onChangeGender" class="ss-flex ss-col-center">
-              <label class="radio" v-for="item in genderRadioMap" :key="item.value">
+              <label class="radio" v-for="item in sexRadioMap" :key="item.value">
                 <view class="ss-flex ss-col-center ss-m-r-32">
                   <radio
                     :value="item.value"
                     color="var(--ui-BG-Main)"
                     style="transform: scale(0.8)"
-                    :checked="item.value == state.model.gender"
+                    :checked="parseInt(item.value) === state.model?.sex"
                   />
                   <view class="gender-name">{{ item.name }}</view>
                 </view>
               </label>
             </radio-group>
           </view>
-        </uni-forms-item> -->
+        </uni-forms-item>
 
         <uni-forms-item name="mobile" label="手机号" @tap="onChangeMobile">
           <uni-easyinput
@@ -107,7 +90,7 @@
         <uni-forms-item name="password" label="登录密码" @tap="onSetPassword">
           <uni-easyinput
             v-model="userInfo.password"
-            :placeholder="userInfo.verification?.password ? '修改登录密码' : '点击设置登录密码'"
+            placeholder="点击修改登录密码"
             :inputBorder="false"
             :styles="{ disableColor: '#fff' }"
             disabled
@@ -121,9 +104,8 @@
                   v-if="userInfo.verification?.password"
                   :modelValue="true"
                 />
-
                 <button v-else class="ss-reset-button ss-flex ss-col-center ss-row-center">
-                  <text class="_icon-forward" style="color: #bbbbbb; font-size: 26rpx"></text>
+                  <text class="_icon-forward" style="color: #bbbbbb; font-size: 26rpx" />
                 </button>
               </view>
             </template>
@@ -140,15 +122,7 @@
             showArrow
             :border="false"
             class="list-border"
-          ></uni-list-item>
-          <uni-list-item
-            clickable
-            @tap="sheep.$router.go('/pages/user/invoice/list')"
-            title="发票管理"
-            showArrow
-            :border="false"
-            class="list-border"
-          ></uni-list-item>
+          />
         </uni-list>
       </view>
     </uni-forms>
@@ -209,82 +183,74 @@
 </template>
 
 <script setup>
-  import { computed, ref, reactive, onBeforeMount, unref } from 'vue';
+  import { computed, ref, reactive, onBeforeMount } from 'vue';
   import { mobile, password, username } from '@/sheep/validate/form';
   import sheep from '@/sheep';
   import { clone } from 'lodash';
   import { showAuthModal } from '@/sheep/hooks/useModal';
+  import FileApi from '@/sheep/api/infra/file';
 
   const state = reactive({
-    model: {},
+    model: {}, // 个人信息
     rules: {},
     thirdOauthInfo: null,
   });
 
   const placeholderStyle = 'color:#BBBBBB;font-size:28rpx;line-height:normal';
 
-  const genderRadioMap = [
-    {
+  const sexRadioMap = [{
       name: '男',
       value: '1',
     },
     {
       name: '女',
       value: '2',
-    },
-    {
-      name: '未知',
-      value: '0',
-    },
+    }
   ];
 
   const userInfo = computed(() => sheep.$store('user').userInfo);
 
-  // 选择性别
+  // 选择性别 TODO
   function onChangeGender(e) {
-    state.model.gender = e.detail.value;
+    state.model.sex = e.detail.value;
   }
-  // 修改用户名
-  const onChangeUsername = () => {
-    !state.model.verification?.username && showAuthModal('changeUsername');
-  };
 
-  // 修改手机号
+  // 修改手机号 TODO
   const onChangeMobile = () => {
     showAuthModal('changeMobile');
   };
 
+  // TODO 芋艿：微信公众号的处理，暂时忽略；后续再说
   function onChooseAvatar(e) {
     const tempUrl = e.detail.avatarUrl || '';
     uploadAvatar(tempUrl);
   }
 
-  //修改头像
+  // 手动选择头像，进行上传
   function onChangeAvatar() {
     uni.chooseImage({
       success: async (chooseImageRes) => {
         const tempUrl = chooseImageRes.tempFilePaths[0];
-        uploadAvatar(tempUrl);
+        await uploadAvatar(tempUrl);
       },
     });
   }
 
+  // 上传头像文件
   async function uploadAvatar(tempUrl) {
-    if (!tempUrl) return;
-    let { path } = await sheep.$api.app.upload(tempUrl, 'ugc');
-    state.model.avatar = path;
-  }
-
-  // 修改/设置密码
-  function onSetPassword() {
-    if (state.model.verification.password) {
-      showAuthModal('changePassword');
-    } else {
-      showAuthModal('resetPassword');
+    if (!tempUrl) {
+      return;
     }
+    let { data } = await FileApi.uploadFile(tempUrl);
+    state.model.avatar = data;
   }
 
-  // 绑定第三方账号
+  // 修改密码 TODO
+  function onSetPassword() {
+    showAuthModal('changePassword');
+  }
+
+  // 绑定第三方账号 TODO
   async function bindThirdOauth() {
     let result = await sheep.$platform.useProvider('wechat').bind();
     if (result) {
@@ -292,7 +258,7 @@
     }
   }
 
-  // 解绑第三方账号
+  // 解绑第三方账号 TODO
   function unBindThirdOauth() {
     uni.showModal({
       title: '解绑提醒',
@@ -312,28 +278,26 @@
 
   // 保存信息
   async function onSubmit() {
-    // const { error, data } = await sheep.$api.user.update({
-    //   avatar: state.model.avatar,
-    //   nickname: state.model.nickname,
-    //   gender: state.model.gender,
-    // });  
-	 const { code, data } = await sheep.$api.user.update({
+	 const { code } = await sheep.$api.user.update({
       avatar: state.model.avatar,
       nickname: state.model.nickname,
-      // gender: state.model.gender,
+      sex: state.model.sex,
     });
     if (code === 0) {
-      getUserInfo();
+      await getUserInfo();
     }
   }
 
+  // 获得用户信息
   const getUserInfo = async () => {
+    // 个人信息
     const userInfo = await sheep.$store('user').getInfo();
     state.model = clone(userInfo);
 
+    // TODO 芋艿：第三方授权信息，待搞
     if (sheep.$platform.name !== 'H5') {
-		return;
-		// 这个先注释,要不然小程序保存个人信息有问题,
+		  return;
+		  // 这个先注释,要不然小程序保存个人信息有问题,
       let { data, error } = await sheep.$api.user.thirdOauthInfo();
       if (error === 0) {
         state.thirdOauthInfo = data;
@@ -341,7 +305,7 @@
     }
   };
 
-  onBeforeMount(async () => {
+  onBeforeMount(() => {
     getUserInfo();
   });
 </script>

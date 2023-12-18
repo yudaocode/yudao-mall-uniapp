@@ -1,3 +1,4 @@
+<!-- 商品详情：cell 组件 -->
 <template>
   <view class="detail-cell-wrap ss-flex ss-col-center ss-row-between" @tap="onClick">
     <view class="label-text">{{ label }}</view>
@@ -13,7 +14,6 @@
    * 详情 cell
    *
    */
-
   const props = defineProps({
     label: {
       type: String,
