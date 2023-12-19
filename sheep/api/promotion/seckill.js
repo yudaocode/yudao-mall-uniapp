@@ -12,8 +12,8 @@ const SeckillApi = {
   },
 
   // 获得秒杀活动分页
-  getSeckillActivityPage: () => {
-    return request2({ url: 'promotion/seckill-activity/page', method: 'GET' });
+  getSeckillActivityPage: (params) => {
+    return request2({ url: 'promotion/seckill-activity/page', method: 'GET', params });
   },
 
   /**

@@ -25,7 +25,7 @@
           v-if="isAnimate"
         >
           <view class="textInside flex a-center j-center" v-if="textInside && !noData">
-            <view>{{ percentage }}%</view>
+            <view class="text">{{ percentage }}%</view>
           </view>
         </view>
         <view
@@ -80,7 +80,7 @@
       // 背景颜色
       bgColor: {
         type: String,
-        default: '#409eff',
+        default: 'linear-gradient(90deg, var(--ui-BG-Main) 0%, var(--ui-BG-Main-gradient) 100%)',
       },
       // 是否不显示数据
       noData: {
@@ -168,6 +168,9 @@
 
   .text {
     margin-left: 10rpx;
+    font-size: 16rpx;
+    width: 100rpx;
+    color: #FFB9B9;
   }
 
   .percentage {
