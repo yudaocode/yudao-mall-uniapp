@@ -95,8 +95,8 @@ http.interceptors.request.use(
 		if (config.url.indexOf('/app-api/') !== -1) {
 			config.header['Accept'] = '*/*'
 			config.header['tenant-id'] = '1';
-      config.header['terminal'] = '20';
-      config.header['Authorization'] = 'Bearer test247';
+			config.header['terminal'] = '20';
+			config.header['Authorization'] = 'Bearer test247';
 		}
 		return config;
 	},
