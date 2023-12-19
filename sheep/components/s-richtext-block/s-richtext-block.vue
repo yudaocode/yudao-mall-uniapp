@@ -1,3 +1,4 @@
+<!-- 装修营销组件：营销文章 -->
 <template>
   <view
     :style="[
@@ -16,6 +17,7 @@
 <script setup>
   import { reactive, onMounted } from 'vue';
   import ArticleApi from '@/sheep/api/promotion/article';
+
   const props = defineProps({
     data: {
       type: Object,
@@ -26,9 +28,11 @@
       default() {},
     },
   });
+
   const state = reactive({
     content: '',
   });
+
   onMounted(async () => {
     const { data } = await ArticleApi.getArticle(props.data.id);
     state.content = data.content;

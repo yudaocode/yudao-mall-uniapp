@@ -8,12 +8,11 @@
         },
       ]">
 			<view class="header-bg">
-				<view class="bg"></view>
+				<view class="bg" />
 			</view>
 			<view class="score-box ss-flex-col ss-row-center ss-col-center">
 				<view class="ss-m-b-30">
 					<text class="all-title ss-m-r-8">当前积分</text>
-					<!-- <text class="cicon-help-o"></text> -->
 				</view>
 				<text class="all-num">{{ userInfo.point || 0 }}</text>
 			</view>
@@ -100,7 +99,6 @@
 			name: '全部',
 			value: 'all',
 		},
-
 		// {
 		// 	name: '收入',
 		// 	value: 'income',
@@ -147,6 +145,7 @@
 			// }
 		}
 	}
+
 	onLoad(async (options) => {
 		state.today = dayjs().format('YYYY-MM-DD');
 		state.date = [state.today, state.today];
@@ -164,10 +163,6 @@
 		state.date[1] = e[e.length - 1];
 		state.pagination = pagination;
 		getLogList();
-	}
-
-	function appendTimeHMS(arr) {
-		return [arr[0] + ' 00:00:00', arr[1] + ' 23:59:59'];
 	}
 
 	function onLoadMore() {

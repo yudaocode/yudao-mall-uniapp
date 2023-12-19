@@ -1,3 +1,4 @@
+<!-- 装修图文组件：图片轮播 -->
 <template>
   <su-swiper
     :list="imgList"

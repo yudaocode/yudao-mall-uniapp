@@ -1,3 +1,4 @@
+<!-- 装修图文组件：热区 -->
 <template>
   <view class="hotzone-wrap">
     <image :src="sheep.$url.cdn(data.imgUrl)" style="width: 100%" mode="widthFix"></image>

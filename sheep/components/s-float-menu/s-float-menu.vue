@@ -1,3 +1,4 @@
+<!-- 装修基础组件：悬浮按钮 -->
 <template>
   <!-- 模态背景：展开时显示，点击后折叠 -->
   <view class="modal-bg" v-if="fabRef?.isShow" @click="handleCollapseFab"></view>

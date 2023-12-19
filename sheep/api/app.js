@@ -13,19 +13,6 @@ export default {
         showLoading: false,
       },
     }),
-  // 同步客户端页面到后端
-  pageSync: (pages) =>
-    request({
-      url: 'pageSync',
-      method: 'POST',
-      data: {
-        pages,
-      },
-      custom: {
-        showError: false,
-        showLoading: false,
-      },
-    }),
   // 自定义页面
   page: (id) =>
     request({

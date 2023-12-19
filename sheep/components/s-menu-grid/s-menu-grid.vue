@@ -1,3 +1,4 @@
+<!-- 装修基础组件：宫格导航 -->
 <template>
   <uni-grid :showBorder="Boolean(data.border)" :column="data.column">
     <uni-grid-item

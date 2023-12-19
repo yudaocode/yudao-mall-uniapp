@@ -1,4 +1,4 @@
-<!--  -->
+<!-- 装修图文组件：视频播放 -->
 <template>
   <su-video
     class="sss"

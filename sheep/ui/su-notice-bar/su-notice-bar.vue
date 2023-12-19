@@ -1,3 +1,4 @@
+<!-- 公告栏组件 -->
 <template>
   <view
     v-if="show"

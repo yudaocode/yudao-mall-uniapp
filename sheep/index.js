@@ -46,8 +46,9 @@ function ShoproDebug() {
   // });
   // #endif
 
+  // TODO 芋艿：可以打印路由
   // 同步前端页面到后端
-  $api.app.pageSync(ROUTES);
+  // console.log(ROUTES)
 }
 
 export default sheep;

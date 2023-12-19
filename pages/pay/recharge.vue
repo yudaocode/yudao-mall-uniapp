@@ -85,7 +85,7 @@
     // #endif
     sheep.$router.go('/pages/pay/index', {
       id: data.payOrderId,
-      type: 'recharge'
+      orderType: 'recharge'
     });
 	}
 
