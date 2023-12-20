@@ -1,3 +1,4 @@
+<!-- 首页，支持店铺装修 -->
 <template>
 	<view v-if="template">
 		<s-layout title="首页" navbar="custom" tabbar="/pages/index/index" :bgStyle="template.page"
@@ -20,7 +21,6 @@
 	} from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
 	import $share from '@/sheep/platform/share';
-  import index2Api from '@/sheep/api/index2';
 	// 隐藏原生tabBar
 	uni.hideTabBar();
 

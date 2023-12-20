@@ -1,3 +1,4 @@
+<!-- 自定义页面：支持装修 -->
 <template>
   <s-layout
     :title="page.name"
@@ -38,6 +39,7 @@
     }
     // #endif
 
+    // TODO @疯狂：貌似这里还没接上哈
     const { error, data } = await sheep.$api.app.page(id);
     if (error === 0) {
       page.name = data.name;

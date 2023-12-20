@@ -1,10 +1,10 @@
+<!-- 自定义状态栏 -->
 <template>
   <view :style="{ height: statusBarHeight }" class="uni-status-bar"><slot /></view>
 </template>
 
 <script setup>
   import sheep from '@/sheep';
-  import { computed } from 'vue';
 
   const statusBarHeight = sheep.$platform.device.statusBarHeight + 'px';
 </script>

@@ -1,3 +1,4 @@
+<!-- 个人中心：支持装修 -->
 <template>
   <s-layout
     title="我的"

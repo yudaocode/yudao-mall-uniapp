@@ -61,18 +61,21 @@ const app = defineStore({
         $router.error('NetworkError');
       }
 
+      // 加载装修配置
       await adaptTemplate(this.template, templateId)
       const res = await appApi.init(templateId);
       if (res.error === 0) {
         this.info = res.data.app;
         this.platform = res.data.platform;
 
+        // TODO 芋艿：未接入
         // this.template = res.data.template;
-        this.has_wechat_trade_managed = res.data.has_wechat_trade_managed;
+        // this.has_wechat_trade_managed = res.data.has_wechat_trade_managed;
         // if (!res.data.template) {
         //   $router.error('TemplateError');
         // }
-        this.chat = res.data.chat;
+        // TODO 芋艿：未接入
+        // this.chat = res.data.chat;
 
         // 加载主题
         const sysStore = sys();
