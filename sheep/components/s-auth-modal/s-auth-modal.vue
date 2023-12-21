@@ -51,7 +51,7 @@
           <image
             class="auto-login-img"
             :src="sheep.$url.static('/static/img/shop/platform/wechat.png')"
-          ></image>
+          />
         </button>
 
         <!-- iOS登录 -->

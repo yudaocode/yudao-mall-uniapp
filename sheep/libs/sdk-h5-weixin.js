@@ -3,70 +3,67 @@
  * 更多微信网页开发sdk方法,详见:https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/JS-SDK.html
  */
 
-import jweixin from 'weixin-js-sdk';
+import jweixin, { ready } from 'weixin-js-sdk';
 import $helper from '@/sheep/helper';
 import third from '@/sheep/api/third';
+import AuthUtil from '@/sheep/api/member/auth';
 
 let configSuccess = false;
 
 export default {
-  //判断是否在微信中
+  // 判断是否在微信中
   isWechat() {
     const ua = window.navigator.userAgent.toLowerCase();
-    if (ua.match(/micromessenger/i) == 'micromessenger') {
-      return true;
-    } else {
-      return false;
-    }
+    // noinspection EqualityComparisonWithCoercionJS
+    return ua.match(/micromessenger/i) == 'micromessenger';
   },
 
   isReady(api) {
     jweixin.ready(api);
   },
 
-  // 初始化JSSDK
+  // 初始化 JSSDK
   async init(callback) {
     if (!this.isWechat()) {
       $helper.toast('请使用微信网页浏览器打开');
       return;
     }
 
+    // 调用后端接口，获得 JSSDK 初始化所需的签名
     const url = location.href.split('#')[0];
-
-    const { error, data } = await third.wechat.jssdk({
-      platform: 'officialAccount',
-      payload: encodeURIComponent(
-        JSON.stringify({
-          url,
-        }),
-      ),
-    });
-
-    if (error === 0) {
+    const { code, data } = await AuthUtil.createWeixinMpJsapiSignature(url);
+    if (code === 0) {
       jweixin.config({
         debug: false,
         appId: data.appId,
         timestamp: data.timestamp,
         nonceStr: data.nonceStr,
         signature: data.signature,
-        jsApiList: data.jsApiList,
-        openTagList: data.openTagList,
+        jsApiList: ['chooseWXPay'], // TODO 芋艿：后续可以设置更多权限；
+        openTagList: data.openTagList
       });
     }
 
+    // 监听结果
     configSuccess = true;
-
     jweixin.error((err) => {
       configSuccess = false;
+      console.error('微信 JSSDK 初始化失败', err);
       // $helper.toast('微信JSSDK:' + err.errMsg);
     });
+    jweixin.ready(() => {
+      if (configSuccess) {
+        console.log('微信 JSSDK 初始化成功');
+      }
+    })
 
+    // 回调
     if (callback) {
       callback(data);
     }
   },
 
-  //在需要定位页面调用
+  //在需要定位页面调用 TODO 芋艿：未测试
   getLocation(callback) {
     this.isReady(() => {
       jweixin.getLocation({
@@ -81,7 +78,7 @@ export default {
     });
   },
 
-  //获取微信收货地址
+  //获取微信收货地址 TODO 芋艿：未测试
   openAddress(callback) {
     this.isReady(() => {
       jweixin.openAddress({
@@ -97,7 +94,7 @@ export default {
     });
   },
 
-  // 微信扫码
+  // 微信扫码 TODO 芋艿：未测试
   scanQRCode(callback) {
     this.isReady(() => {
       jweixin.scanQRCode({
@@ -113,7 +110,7 @@ export default {
     });
   },
 
-  // 更新微信分享信息
+  // 更新微信分享信息 TODO 芋艿：未测试
   updateShareInfo(data, callback = null) {
     this.isReady(() => {
       const shareData = {
@@ -137,7 +134,7 @@ export default {
     });
   },
 
-  // 打开坐标位置
+  // 打开坐标位置 TODO 芋艿：未测试
   openLocation(data, callback) {
     this.isReady(() => {
       jweixin.openLocation({
@@ -148,7 +145,7 @@ export default {
     });
   },
 
-  // 选择图片
+  // 选择图片 TODO 芋艿：未测试
   chooseImage(callback) {
     this.isReady(() => {
       jweixin.chooseImage({
@@ -162,7 +159,7 @@ export default {
     });
   },
 
-  //微信支付
+  //微信支付 TODO 芋艿：未测试
   wxpay(data, callback) {
     this.isReady(() => {
       jweixin.chooseWXPay({

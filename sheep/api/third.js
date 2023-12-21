@@ -75,18 +75,6 @@ export default {
         },
       }),
 
-    // 网页jssdk
-    jssdk: (data) =>
-      request({
-        url: 'third/wechat/jssdk',
-        method: 'GET',
-        data,
-        custom: {
-          showError: false,
-          showLoading: false,
-        },
-      }),
-
     // 小程序订阅消息
     subscribeTemplate: (params) =>
       request({
