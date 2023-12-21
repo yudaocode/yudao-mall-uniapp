@@ -37,7 +37,7 @@ export default {
 	// 分销订单
 	order: (params) =>
 		request({
-			url: 'commission/order',
+			url: '/app-api/trade/brokerage-record/page',
 			method: 'GET',
 			params,
 		}),
@@ -52,7 +52,7 @@ export default {
 	// 我的团队
 	team: (params) =>
 		request({
-			url: 'commission/agent/team',
+			url: '/app-api/trade/brokerage-user/child-summary-page',
 			method: 'GET',
 			params,
 		}),
@@ -67,5 +67,23 @@ export default {
 		request({
 			url: '/app-api/trade/brokerage-user/get-summary',
 			method: 'GET',
+		}),
+	getBrokerageRankNumber: (params) =>
+		request({
+			url: '/app-api/trade/brokerage-user/get-rank-by-price',
+			method: 'GET',
+			params
+		}),
+	getBrokerageRankList: (params) =>
+		request({
+			url: '/app-api/trade/brokerage-user/rank-page-by-price',
+			method: 'GET',
+			params
+		}),
+	getRanklist: (params) =>
+		request({
+			url: '/app-api/trade/brokerage-user/rank-page-by-user-count',
+			method: 'GET',
+			params
 		}),
 };

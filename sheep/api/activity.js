@@ -60,5 +60,21 @@ export default {
 			url: '/app-api/member/sign-in/record/get-summary',
 			method: 'GET',
 		}),
+	getBargainRecordSummary: () =>
+		request({
+			url: '/app-api/promotion/bargain-record/get-summary',
+			method: 'GET',
+		}),
+	getBargainActivityPage: () =>
+		request({
+			url: '/app-api/promotion/bargain-activity/page',
+			method: 'GET',
+		}),
+	getBargainActivityDetail: (params) =>
+		request({
+			url: '/app-api/promotion/bargain-activity/get-detail',
+			method: 'GET',
+			params
+		}),
 
 };
