@@ -37,6 +37,38 @@ const AuthUtil = {
       method: 'POST',
     });
   },
+  // 社交授权的跳转
+  socialAuthRedirect: (type, redirectUri) => {
+    return request({
+      url: '/app-api/member/auth/social-auth-redirect',
+      method: 'GET',
+      params: {
+        type,
+        redirectUri,
+      },
+      custom: {
+        showSuccess: true,
+        loadingMsg: '登陆中',
+      },
+    });
+  },
+  // 社交快捷登录
+  socialLogin: (type, code, state) => {
+    return request({
+      url: '/app-api/member/auth/social-login',
+      method: 'POST',
+      data: {
+        type,
+        code,
+        state,
+      },
+      custom: {
+        showSuccess: true,
+        loadingMsg: '登陆中',
+        // TODO 芋艿：登录成功？？？
+      },
+    });
+  },
   // 创建微信 JS SDK 初始化所需的签名
   createWeixinMpJsapiSignature: (url) => {
     return request({

@@ -30,25 +30,6 @@ export default {
 				auth: true,
 			},
 		}),
-	// profile: () =>
-	//   request({
-	//     url: '/user/api/user/profile',
-	//     method: 'GET',
-	//     custom: {
-	//       showLoading: false,
-	//       auth: true,
-	//     },
-	//   }),
-	// update: (data) =>
-	//   request({
-	//     url: '/user/api/user/update',
-	//     method: 'POST',
-	//     custom: {
-	//       showSuccess: true,
-	//       auth: true,
-	//     },
-	//     data,
-	//   }),
 	update: (data) =>
 		request2({
 			url: 'member/user/update',

@@ -1,6 +1,8 @@
-import { isEmpty } from 'lodash';
 import third from '@/sheep/api/third';
 import $store from '@/sheep/store';
+import AuthUtil from '@/sheep/api/member/auth';
+
+const socialType = 34; // 社交类型 - 微信小程序
 
 let sessionId = uni.getStorageSync('sessionId');
 let subscribeEventList = [];
@@ -17,29 +19,31 @@ function load() {
   getSubscribeTemplate();
 }
 
-// 微信小程序静默授权登陆 TODO-ldh: code > 0 问题 改为error
+// 微信小程序静默授权登陆
 const login = async () => {
   return new Promise(async (resolve, reject) => {
-    const { error } = await third.wechat.login({
-      platform: 'miniProgram',
-      shareInfo: uni.getStorageSync('shareLog') || {},
-      payload: encodeURIComponent(
-        JSON.stringify({
-          sessionId: uni.getStorageSync('sessionId'),
-        }),
-      ),
-    });
+    // 1. 获得微信 code
+    const codeResult = await uni.login();
+    if (codeResult.errMsg !== 'login:ok') {
+      resolve(false);
+    }
 
-    if (error === 0) {
+    // 2. 社交登录
+    const loginResult = await loginByCode(codeResult.code);
+    if (loginResult.code === 0) {
+      setOpenid(loginResult.data.openid);
       resolve(true);
+    } else {
+      resolve(false);
     }
-
-    if (error === -1) {
-      getSessionId(false);
-    }
-    resolve(false);
+    return loginResult.code === 0 ? resolve(true) : resolve(false);
   });
 };
+
+function loginByCode(code) {
+  return AuthUtil.socialLogin(socialType, code, 'default');
+  // TODO 芋艿：shareLog
+}
 
 // 微信小程序手机号授权登陆
 const mobileLogin = async (e) => {
@@ -238,6 +242,11 @@ function subscribeMessage(event) {
       console.log(err);
     },
   });
+}
+
+// 设置 openid 到本地存储，目前只有 pay 支付时会使用
+function setOpenid(openid) {
+  uni.setStorageSync('openid', openid);
 }
 
 export default {

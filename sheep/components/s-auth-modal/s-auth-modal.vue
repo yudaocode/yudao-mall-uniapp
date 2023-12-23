@@ -32,8 +32,9 @@
         <!-- 立即注册&快捷登录 TextButton -->
         <view v-if="sheep.$platform.name === 'WechatMiniProgram'" class="ss-flex register-box">
           <view class="register-title">还没有账号?</view>
-          <button class="ss-reset-button register-btn" @tap="showAuthModal('smsRegister')">立即注册</button
-          >
+          <button class="ss-reset-button register-btn" @tap="showAuthModal('smsRegister')">
+            立即注册
+          </button>
           <view class="or-title">或</view>
           <button class="ss-reset-button login-btn" @tap="thirdLogin('wechat')">快捷登录</button>
           <view class="circle"></view>
@@ -147,7 +148,7 @@
     }, 1000);
   }
 
-  // 第三方授权登陆
+  // 第三方授权登陆（微信小程序、Apple）
   const thirdLogin = async (provider) => {
     if (!state.protocol) {
       currentProtocol.value = true;
@@ -160,17 +161,9 @@
     const loginRes = await sheep.$platform.useProvider(provider).login();
     if (loginRes) {
       closeAuthModal();
-      const userInfo = await sheep.$store('user').getInfo();
       // 触发小程序授权信息弹框
       // #ifdef MP-WEIXIN
-      if (userInfo.third_oauth.length > 0) {
-        const mpThirdOauthInfo = userInfo.third_oauth.find(
-          (item) => item.platform === 'miniProgram',
-        );
-        if (mpThirdOauthInfo && !mpThirdOauthInfo.nickname) {
-          showAuthModal('mpAuthorization');
-        }
-      }
+      showAuthModal('mpAuthorization');
       // #endif
     }
   };

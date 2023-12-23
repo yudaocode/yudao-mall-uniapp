@@ -18,6 +18,7 @@
       labelWidth="140"
       labelAlign="center"
     >
+      <!-- 获取头像昵称：https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/userProfile.html -->
       <uni-forms-item name="avatar" label="头像">
         <button
           class="ss-reset-button avatar-btn"
@@ -29,8 +30,8 @@
             :src="sheep.$url.cdn(state.model.avatar)"
             mode="aspectFill"
             @tap="sheep.$router.go('/pages/user/info')"
-          ></image>
-          <text class="cicon-forward"></text>
+          />
+          <text class="cicon-forward" />
         </button>
       </uni-forms-item>
       <uni-forms-item name="nickname" label="昵称">
@@ -39,10 +40,8 @@
           placeholder="请输入昵称"
           v-model="state.model.nickname"
           :inputBorder="false"
-        >
-        </uni-easyinput>
+        />
       </uni-forms-item>
-
       <view class="foot-box">
         <button class="ss-reset-button authorization-btn" @tap="onConfirm"> 确认授权 </button>
       </view>
@@ -51,9 +50,11 @@
 </template>
 
 <script setup>
-  import { computed, watch, ref, reactive, unref } from 'vue';
+  import { computed, ref, reactive } from 'vue';
   import sheep from '@/sheep';
-  import { showAuthModal, closeAuthModal } from '@/sheep/hooks/useModal';
+  import { closeAuthModal } from '@/sheep/hooks/useModal';
+  import FileApi from '@/sheep/api/infra/file';
+  import UserApi from '@/sheep/api/member/user';
 
   const props = defineProps({
     agreeStatus: {
@@ -72,23 +73,26 @@
       nickname: userInfo.value.nickname,
       avatar: userInfo.value.avatar,
     },
-    rules: {
-
-    },
+    rules: {},
     disabledStyle: {
       color: '#999',
       disableColor: '#fff',
     },
   });
-  // 选择头像
+
+  // 选择头像（来自微信）
   function onChooseAvatar(e) {
     const tempUrl = e.detail.avatarUrl || '';
     uploadAvatar(tempUrl);
   }
+
+  // 选择头像（来自文件系统）
   async function uploadAvatar(tempUrl) {
-    if (!tempUrl) return;
-    let { path } = await sheep.$api.app.upload(tempUrl, 'ugc');
-    state.model.avatar = path;
+    if (!tempUrl) {
+      return;
+    }
+    let { data } = await FileApi.uploadFile(tempUrl);
+    state.model.avatar = data;
   }
 
   // 确认授权
@@ -103,13 +107,16 @@
       sheep.$helper.toast('请选择头像');
       return;
     }
-    const { error, msg } = await sheep.$api.user.updateMpUserInfo(model);
-    if (error === 0) {
+    // 发起更新
+    const { code } = await UserApi.updateUser({
+      avatar: state.model.avatar,
+      nickname: state.model.nickname,
+    });
+    // 更新成功
+    if (code === 0) {
       sheep.$helper.toast('授权成功');
       await sheep.$store('user').getInfo();
       closeAuthModal();
-    }else {
-      sheep.$helper.toast(msg);
     }
   }
 </script>

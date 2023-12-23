@@ -114,6 +114,10 @@ http.interceptors.response.use(
 			$store('user').setToken(response.header.authorization || response.header.Authorization);
 		}
     // TODO 芋艿：如果是登录的 API，则自动设置 token
+    if (response.data?.data?.accessToken) {
+      debugger
+      $store('user').setToken(response.data.data.accessToken);
+    }
 
 		response.config.custom.showLoading && closeLoading();
 		if (response.data.error !== 0 && response.data.code !== 0) {
