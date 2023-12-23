@@ -66,12 +66,7 @@
             :data="{ ...activity, price: activity.seckillPrice }"
             :goodsFields="goodsFields"
             :seckillTag="true"
-            @click="
-              sheep.$router.go('/pages/goods/seckill', {
-                id: activity.spuId,
-                activityId: activity.id
-              })
-            "
+            @click="sheep.$router.go('/pages/goods/seckill', { id: activity.id })"
           >
             <!-- 抢购进度 -->
             <template #activity>

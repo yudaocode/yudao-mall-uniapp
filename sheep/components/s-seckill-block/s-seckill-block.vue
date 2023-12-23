@@ -28,8 +28,7 @@
           :bottomRadius="data.borderRadiusBottom"
           @click="
             sheep.$router.go('/pages/goods/seckill', {
-              id: product.id,
-              activity_id: props.data.activityId,
+              id: props.data.activityId,
             })
           "
         ></s-goods-column>
@@ -55,8 +54,7 @@
           :bottomRadius="data.borderRadiusBottom"
           @click="
             sheep.$router.go('/pages/goods/seckill', {
-              id: product.id,
-              activity_id: props.data.activityId,
+              id: props.data.activityId,
             })
           "
         >

@@ -74,7 +74,7 @@ const VIDEO_SUFFIX_LIST = ['.avi', '.mp4']
  * @return {{src: string, type: 'video' | 'image' }[]}  转换后的链接列表
  */
 export function formatGoodsSwiper(urlList) {
-  return urlList.map((url, key) => {
+  return urlList.filter(url => url).map((url, key) => {
     const isVideo = VIDEO_SUFFIX_LIST.some(suffix => url.includes(suffix));
     const type = isVideo ? 'video' : 'image'
     const src = $url.cdn(url);
