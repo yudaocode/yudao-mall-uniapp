@@ -11,9 +11,12 @@
   onLoad(async (options) => {
     // #ifdef H5
     let event = '';
-    if (options.login_code) {
+    new URLSearchParams(location.search).forEach((value, key) => {
+      options[key] = value;
+    });
+    if (options.code) {
       event = 'login';
-      const { error } = await sheep.$platform.useProvider().login(options.login_code);
+      const { error } = await sheep.$platform.useProvider().login(options.code, options.state);
       if (error === 0) {
         sheep.$store('user').getInfo();
       }
