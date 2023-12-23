@@ -1,6 +1,6 @@
 import third from '@/sheep/api/third';
-import $store from '@/sheep/store';
 import AuthUtil from '@/sheep/api/member/auth';
+import SocialApi from '@/sheep/api/member/social';
 
 const socialType = 34; // 社交类型 - 微信小程序
 
@@ -83,11 +83,9 @@ const bind = () => {
 };
 
 // 微信小程序解除绑定
-const unbind = async () => {
-  const { error } = await third.wechat.unbind({
-    platform: 'miniProgram',
-  });
-  return !error;
+const unbind = async (openid) => {
+  const { code } = await SocialApi.socialUnbind(socialType, openid);
+  return code === 0;
 };
 
 // 小程序更新
@@ -183,13 +181,22 @@ function setOpenid(openid) {
   uni.setStorageSync('openid', openid);
 }
 
+// 获得社交信息
+async function getInfo() {
+  const { code, data } = await SocialApi.getSocialUser(socialType);
+  if (code !== 0) {
+    return undefined;
+  }
+  return data;
+}
+
 export default {
   load,
   login,
   bind,
   unbind,
-  checkUpdate,
   bindUserPhoneNumber,
   mobileLogin,
+  getInfo,
   subscribeMessage,
 };

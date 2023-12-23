@@ -28,18 +28,6 @@ export default {
         },
       }),
 
-    // 解除绑定微信
-    unbind: (data) =>
-      request({
-        url: 'third/wechat/unbind',
-        method: 'POST',
-        data,
-        custom: {
-          showSuccess: true,
-          loadingMsg: '解除绑定',
-        },
-      }),
-
     // 公众号授权
     oauthLogin: (data) =>
       request({

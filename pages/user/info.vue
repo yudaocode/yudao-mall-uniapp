@@ -127,9 +127,9 @@
       </view>
     </uni-forms>
 
+    <!-- 当前社交平台的绑定关系，只处理 wechat 微信场景 -->
     <view v-if="sheep.$platform.name !== 'H5'">
       <view class="title-box ss-p-l-30">第三方账号绑定</view>
-
       <view class="account-list ss-flex ss-row-between">
         <view v-if="'WechatOfficialAccount' === sheep.$platform.name" class="ss-flex ss-col-center">
           <image
@@ -153,16 +153,16 @@
           <text class="list-name">微信开放平台</text>
         </view>
         <view class="ss-flex ss-col-center">
-          <view class="info ss-flex ss-col-center" v-if="state.thirdOauthInfo">
+          <view class="info ss-flex ss-col-center" v-if="state.thirdInfo">
             <image
               class="avatar ss-m-r-20"
-              :src="sheep.$url.cdn(state.thirdOauthInfo.avatar)"
-            ></image>
-            <text class="name">{{ state.thirdOauthInfo.nickname }}</text>
+              :src="sheep.$url.cdn(state.thirdInfo.avatar)"
+            />
+            <text class="name">{{ state.thirdInfo.nickname }}</text>
           </view>
           <view class="bind-box ss-m-l-20">
             <button
-              v-if="state.thirdOauthInfo"
+              v-if="state.thirdInfo.openid"
               class="ss-reset-button relieve-btn"
               @tap="unBindThirdOauth"
             >
@@ -193,7 +193,7 @@
   const state = reactive({
     model: {}, // 个人信息
     rules: {},
-    thirdOauthInfo: null,
+    thirdInfo: {}, // 社交用户的信息
   });
 
   const placeholderStyle = 'color:#BBBBBB;font-size:28rpx;line-height:normal';
@@ -210,17 +210,17 @@
 
   const userInfo = computed(() => sheep.$store('user').userInfo);
 
-  // 选择性别 TODO
+  // 选择性别
   function onChangeGender(e) {
     state.model.sex = e.detail.value;
   }
 
-  // 修改手机号 TODO
+  // 修改手机号
   const onChangeMobile = () => {
     showAuthModal('changeMobile');
   };
 
-  // TODO 芋艿：微信公众号的处理，暂时忽略；后续再说
+  // 选择微信的头像，进行上传
   function onChooseAvatar(e) {
     const tempUrl = e.detail.avatarUrl || '';
     uploadAvatar(tempUrl);
@@ -258,7 +258,7 @@
     }
   }
 
-  // 解绑第三方账号 TODO
+  // 解绑第三方账号
   function unBindThirdOauth() {
     uni.showModal({
       title: '解绑提醒',
@@ -266,11 +266,12 @@
       cancelText: '再想想',
       confirmText: '确定',
       success: async function (res) {
-        if (res.confirm) {
-          const result = await sheep.$platform.useProvider('wechat').unbind();
-          if (result) {
-            getUserInfo();
-          }
+        if (!res.confirm) {
+          return;
+        }
+        const result = await sheep.$platform.useProvider('wechat').unbind(state.thirdInfo.openid);
+        if (result) {
+          await getUserInfo();
         }
       },
     });
@@ -294,14 +295,10 @@
     const userInfo = await sheep.$store('user').getInfo();
     state.model = clone(userInfo);
 
-    // TODO 芋艿：第三方授权信息，待搞
+    // 获得社交用户的信息
     if (sheep.$platform.name !== 'H5') {
-		  return;
-		  // 这个先注释,要不然小程序保存个人信息有问题,
-      let { data, error } = await sheep.$api.user.thirdOauthInfo();
-      if (error === 0) {
-        state.thirdOauthInfo = data;
-      }
+      const result = await sheep.$platform.useProvider('wechat').getInfo();
+      state.thirdInfo = result || {};
     }
   };
 

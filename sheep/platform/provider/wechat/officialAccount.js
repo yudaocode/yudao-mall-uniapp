@@ -2,6 +2,7 @@ import third from '@/sheep/api/third';
 import $wxsdk from '@/sheep/libs/sdk-h5-weixin';
 import { getRootUrl } from '@/sheep/helper';
 import AuthUtil from '@/sheep/api/member/auth';
+import SocialApi from '@/sheep/api/member/social';
 
 const socialType = 31; // 社交类型 - 微信公众号
 
@@ -51,13 +52,10 @@ async function bind(code = '') {
 }
 
 // 微信公众号解除绑定
-async function unbind() {
-  debugger
-  const { error } = await third.wechat.unbind({
-    platform: 'officialAccount',
-  });
-  return Promise.resolve(!error);
-}
+const unbind = async (openid) => {
+  const { code } = await SocialApi.socialUnbind(socialType, openid);
+  return code === 0;
+};
 
 // 获取公众号登陆地址
 async function getLoginUrl(event = 'login') {
@@ -104,10 +102,20 @@ function setOpenid(openid) {
   uni.setStorageSync('openid', openid);
 }
 
+// 获得社交信息
+async function getInfo() {
+  const { code, data } = await SocialApi.getSocialUser(socialType);
+  if (code !== 0) {
+    return undefined;
+  }
+  return data;
+}
+
 export default {
   load,
   login,
   bind,
   unbind,
+  getInfo,
   jssdk: $wxsdk,
 };

@@ -1,7 +1,9 @@
 // 登录
 import third from '@/sheep/api/third';
+import SocialApi from '@/sheep/api/member/social';
 
 // TODO 芋艿：等后面搞 App 再弄
+const socialType = 32; // 社交类型 - 微信开放平台
 
 const load = async () => {};
 
@@ -37,7 +39,23 @@ const login = () => {
   });
 };
 
+// 微信 App 解除绑定
+const unbind = async (openid) => {
+  const { code } = await SocialApi.socialUnbind(socialType, openid);
+  return code === 0;
+};
+
+// 获得社交信息
+async function getInfo() {
+  const { code, data } = await SocialApi.getSocialUser(socialType);
+  if (code !== 0) {
+    return undefined;
+  }
+  return data;
+}
+
 export default {
   load,
   login,
+  getInfo
 };
