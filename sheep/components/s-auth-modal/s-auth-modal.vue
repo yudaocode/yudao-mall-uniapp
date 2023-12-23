@@ -9,27 +9,27 @@
         @onConfirm="onConfirm"
       />
 
-      <!-- 2.短信登录  smsLogin -->
+      <!-- 2. 短信登录  smsLogin -->
       <sms-login v-if="authType === 'smsLogin'" :agreeStatus="state.protocol" @onConfirm="onConfirm" />
 
-      <!-- 4.忘记密码 resetPassword-->
+      <!-- 3. 忘记密码 resetPassword-->
       <reset-password v-if="authType === 'resetPassword'" />
 
-      <!-- 5.绑定手机号 changeMobile -->
+      <!-- 4. 绑定手机号 changeMobile -->
       <change-mobile v-if="authType === 'changeMobile'" />
 
-      <!-- 6.修改密码 changePassword-->
+      <!-- 5. 修改密码 changePassword-->
       <changePassword v-if="authType === 'changePassword'" />
 
-      <!-- 8.微信小程序授权 changeUsername-->
+      <!-- 6. 微信小程序授权 -->
       <mp-authorization v-if="authType === 'mpAuthorization'" />
 
-      <!-- 第三方登录+注册 -->
+      <!-- 7. 第三方登录 -->
       <view
         v-if="['accountLogin', 'smsLogin'].includes(authType)"
         class="auto-login-box ss-flex ss-flex-col ss-row-center ss-col-center"
       >
-        <!-- 立即注册&快捷登录 TextButton -->
+        <!-- 7.1 微信小程序的快捷登录 -->
         <view v-if="sheep.$platform.name === 'WechatMiniProgram'" class="ss-flex register-box">
           <view class="register-title">还没有账号?</view>
           <button class="ss-reset-button login-btn" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">
@@ -38,7 +38,7 @@
           <view class="circle" />
         </view>
 
-        <!-- 微信的公众号、App、小程序的登录，基于 openid + code -->
+        <!-- 7.2 微信的公众号、App、小程序的登录，基于 openid + code -->
         <button
           v-if="
             ['WechatOfficialAccount', 'WechatMiniProgram', 'App'].includes(sheep.$platform.name) &&
@@ -53,7 +53,7 @@
           />
         </button>
 
-        <!-- iOS 登录 -->
+        <!-- 7.3 iOS 登录 TODO 芋艿：等后面搞 App 再弄 -->
         <button
           v-if="sheep.$platform.os === 'ios' && sheep.$platform.name === 'App'"
           @tap="thirdLogin('apple')"
@@ -66,6 +66,7 @@
         </button>
       </view>
 
+      <!-- 用户协议的勾选 -->
       <view
         v-if="['accountLogin', 'smsLogin'].includes(authType)"
         class="agreement-box ss-flex ss-row-center"
@@ -124,7 +125,7 @@
 
   const currentProtocol = ref(false);
 
-  // 勾选协议 TODO 芋艿：协议
+  // 勾选协议
   function onChange() {
     state.protocol = !state.protocol;
   }

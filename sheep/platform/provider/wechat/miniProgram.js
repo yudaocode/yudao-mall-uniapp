@@ -4,18 +4,11 @@ import AuthUtil from '@/sheep/api/member/auth';
 
 const socialType = 34; // 社交类型 - 微信小程序
 
-let sessionId = uni.getStorageSync('sessionId');
 let subscribeEventList = [];
 
 // 加载微信小程序
 function load() {
   checkUpdate();
-  // const sessionStatus = await checkSession();
-  // 小程序的接口改动太频繁了 强制每次进入都重新获取
-  const sessionStatus = false;
-  if (!sessionStatus) {
-    getSessionId();
-  }
   getSubscribeTemplate();
 }
 
@@ -95,55 +88,6 @@ const unbind = async () => {
     platform: 'miniProgram',
   });
   return !error;
-};
-
-// 获取最新sessionId
-const getSessionId = async (auto_login = null) => {
-  // 获取code
-  let codeStr = '';
-  const loginResult = await uni.login();
-  if (loginResult.errMsg === 'login:ok') {
-    codeStr = loginResult.code;
-  } else {
-    getSessionId(auto_login);
-    return false;
-  }
-  if(auto_login === null) {
-    auto_login = !!($store('app').platform.auto_login && !$store('user').isLogin);
-  }
-
-  const { error, data } = await third.wechat.getSessionId({
-    platform: 'miniProgram',
-    payload: encodeURIComponent(
-      JSON.stringify({
-        code: codeStr,
-        auto_login,
-      }),
-    ),
-  });
-  if (error === 0) {
-    uni.setStorageSync('sessionId', data.session_id);
-    return true;
-  }
-  return false;
-};
-
-// 检查sessionId是否可用
-const checkSession = () => {
-  return new Promise((resolve, reject) => {
-    if (!sessionId) {
-      return resolve(false);
-    }
-    uni.checkSession({
-      success() {
-        return resolve(true);
-      },
-      fail() {
-        uni.removeStorageSync('sessionId');
-        return resolve(false);
-      },
-    });
-  });
 };
 
 // 小程序更新

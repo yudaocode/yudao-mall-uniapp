@@ -1,6 +1,8 @@
 // 登录
 import third from '@/sheep/api/third';
 
+// TODO 芋艿：等后面搞 App 再弄
+
 const load = async () => {};
 
 // 微信开放平台移动应用授权登陆
