@@ -1,4 +1,4 @@
-<!-- 页面 -->
+<!-- 装修用户组件：用户卡片 -->
 <template>
 	<view class="ss-user-info-wrap ss-p-t-50">
 		<view class="ss-flex ss-col-center ss-row-between ss-m-b-20">
@@ -23,7 +23,7 @@
 			</view>
 		</view>
 
-
+    <!-- TODO @芋艿：用户接入 -->
 		<!-- 提示绑定手机号 先隐藏 yudao 需要再修改 -->
 		<!--    <view
       class="bind-mobile-box ss-flex ss-row-between ss-col-center"

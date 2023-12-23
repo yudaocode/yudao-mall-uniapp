@@ -1,3 +1,4 @@
+<!-- 自定义底部导航项 -->
 <template>
   <view class="u-tabbar-item" :style="[addStyle(customStyle)]">
     <view v-if="isCenter" class="tabbar-center-item">

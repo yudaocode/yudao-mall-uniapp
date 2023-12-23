@@ -1,4 +1,4 @@
-<!-- 页面 -->
+<!-- 装修商品组件：标题栏 -->
 <template>
   <view
     class="ss-title-wrap ss-flex ss-col-center"

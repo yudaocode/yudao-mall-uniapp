@@ -1,4 +1,4 @@
-<!-- 优惠券组  -->
+<!-- 装修营销组件：优惠券  -->
 <template>
   <scroll-view class="scroll-box" scroll-x scroll-anchoring>
     <view class="coupon-box ss-flex">

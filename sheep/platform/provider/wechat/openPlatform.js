@@ -1,5 +1,4 @@
 // 登录
-import { isEmpty } from 'lodash';
 import third from '@/sheep/api/third';
 
 const load = async () => {};
@@ -11,6 +10,7 @@ const login = () => {
       provider: 'weixin',
       onlyAuthorize: true,
     });
+    debugger
     if (loginRes.errMsg == 'login:ok') {
       const res = await third.wechat.login({
         platform: 'openPlatform',

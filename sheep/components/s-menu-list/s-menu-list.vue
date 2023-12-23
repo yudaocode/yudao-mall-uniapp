@@ -1,3 +1,4 @@
+<!-- 装修基础组件：列表导航 -->
 <template>
   <view class="menu-list-wrap">
     <uni-list :border="true">

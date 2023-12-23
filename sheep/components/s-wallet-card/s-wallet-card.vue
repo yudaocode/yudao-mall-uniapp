@@ -1,3 +1,4 @@
+<!-- 装修用户组件：用户资产 -->
 <template>
   <!-- TODO @惠智造：代码合并有问题，可以看看 -->
 	<view class="ss-wallet-menu-wrap ss-flex ss-col-center">

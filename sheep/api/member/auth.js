@@ -37,6 +37,20 @@ const AuthUtil = {
       method: 'POST',
     });
   },
+  // 创建微信 JS SDK 初始化所需的签名
+  createWeixinMpJsapiSignature: (url) => {
+    return request({
+      url: '/app-api/member/auth/create-weixin-jsapi-signature',
+      method: 'POST',
+      params: {
+        url
+      },
+      custom: {
+        showError: false,
+        showLoading: false,
+      },
+    })
+  },
 };
 
 export default AuthUtil;

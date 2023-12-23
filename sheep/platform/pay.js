@@ -8,7 +8,7 @@ import PayOrderApi from '@/sheep/api/pay/order';
 /**
  * 支付
  *
- * @param {String} payment = ['wechat','alipay','wallet','offline']  	- 支付方式
+ * @param {String} payment = ['wechat','alipay','wallet','mock']  	- 支付方式
  * @param {String} orderType = ['goods','recharge','groupon']  	- 订单类型
  * @param {String} id					- 订单号
  */
@@ -33,8 +33,8 @@ export default class SheepPay {
         wallet: () => {
           this.walletPay();
         },
-        offline: () => {
-          this.offlinePay();
+        mock: () => {
+          this.mockPay();
         }
       },
       WechatMiniProgram: {
@@ -47,8 +47,8 @@ export default class SheepPay {
         wallet: () => {
           this.walletPay();
         },
-        offline: () => {
-          this.offlinePay();
+        mock: () => {
+          this.mockPay();
         }
       },
       App: {
@@ -61,8 +61,8 @@ export default class SheepPay {
         wallet: () => {
           this.walletPay();
         },
-        offline: () => {
-          this.offlinePay();
+        mock: () => {
+          this.mockPay();
         }
       },
       H5: {
@@ -75,8 +75,8 @@ export default class SheepPay {
         wallet: () => {
           this.walletPay();
         },
-        offline: () => {
-          this.offlinePay();
+        mock: () => {
+          this.mockPay();
         }
       },
     };
@@ -182,10 +182,10 @@ export default class SheepPay {
     code === 0 && this.payResult('success');
   }
 
-  // 货到付款  TODO 芋艿：待接入
-  async offlinePay() {
-    const { error } = await this.prepay();
-    error === 0 && this.payResult('success');
+  // 模拟支付
+  async mockPay() {
+    const { code } = await this.prepay('mock');
+    code === 0 && this.payResult('success');
   }
 
   // 支付宝复制链接支付  TODO 芋艿：待接入

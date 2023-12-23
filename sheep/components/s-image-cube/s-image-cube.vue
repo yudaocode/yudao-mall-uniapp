@@ -1,3 +1,4 @@
+<!-- 装修图文组件：广告魔方 -->
 <template>
   <view class="ss-cube-wrap" :style="[parseAdWrap]">
     <view v-for="(item, index) in data.list" :key="index">

@@ -1,3 +1,4 @@
+<!-- 装修用户组件：用户卡券 -->
 <template>
 	<view class="ss-coupon-menu-wrap ss-flex ss-col-center">
 		<view class="menu-item ss-flex-col ss-row-center ss-col-center" v-for="item in props.list" :key="item.title"
@@ -41,13 +42,13 @@
 						path: '/pages/coupon/list',
 						type: 'expired',
 					},
-					// {
-					//   title: '领券中心',
-					//   value: '0',
-					//   icon: '/static/img/shop/order/all_coupon.png',
-					//   path: '/pages/coupon/list',
-					//   type: 'all',
-					// },
+					{
+					  title: '领券中心',
+					  value: '0',
+					  icon: '/static/img/shop/order/all_coupon.png',
+					  path: '/pages/coupon/list',
+					  type: 'all',
+					},
 				];
 			},
 		},

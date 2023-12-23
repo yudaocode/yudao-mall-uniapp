@@ -1,3 +1,4 @@
+<!-- 装修商品组件：商品栏 -->
 <template>
   <view>
     <!-- 布局1. 两列商品，图片左文案右 -->
@@ -27,7 +28,7 @@
           :bottomRadius="data.borderRadiusBottom"
           :titleWidth="(454 - marginRight * 2 - data.space * 2 - marginLeft * 2) / 2"
           @click="sheep.$router.go('/pages/goods/index', { id: item.id })"
-        ></s-goods-column>
+        />
       </view>
     </view>
     <!-- 布局. 三列商品：图片上文案下 -->
@@ -56,7 +57,7 @@
           :topRadius="data.borderRadiusTop"
           :bottomRadius="data.borderRadiusBottom"
           @click="sheep.$router.go('/pages/goods/index', { id: item.id })"
-        ></s-goods-column>
+        />
       </view>
     </view>
 
@@ -79,7 +80,7 @@
               :titleColor="data.fields.name?.color"
               :titleWidth="(750 - marginRight * 2 - data.space * 4 - marginLeft * 2) / 3"
               @click="sheep.$router.go('/pages/goods/index', { id: item.id })"
-            ></s-goods-column>
+            />
           </view>
         </view>
       </scroll-view>

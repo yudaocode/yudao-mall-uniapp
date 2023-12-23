@@ -1,3 +1,4 @@
+<!-- 装修组件容器 -->
 <template>
   <view :style="[elStyles, elBackground]"><slot /></view>
 </template>

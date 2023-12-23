@@ -11,7 +11,7 @@
       :speed="50"
       :color="data.textColor"
       @tap="sheep.$router.go(data.contents[0].url)"
-    ></su-notice-bar>
+    />
   </view>
 </template>
 

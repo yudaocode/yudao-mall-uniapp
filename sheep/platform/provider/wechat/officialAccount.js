@@ -20,6 +20,7 @@ async function load() {
 // 微信公众号登陆
 async function login(code = '') {
   // 获取登陆地址
+  debugger
   if (!code) {
     const loginResult = await getLoginUrl();
     if (loginResult.error === 0 && loginResult.data.login_url) {
@@ -38,6 +39,7 @@ async function login(code = '') {
 
 // 微信公众号绑定
 async function bind(code = '') {
+  debugger
   // 获取绑定地址
   if (code === '') {
     const loginResult = await getLoginUrl('bind');
@@ -57,6 +59,7 @@ async function bind(code = '') {
 
 // 微信公众号解除绑定
 async function unbind() {
+  debugger
   const { error } = await third.wechat.unbind({
     platform: 'officialAccount',
   });
@@ -65,6 +68,7 @@ async function unbind() {
 
 // 获取公众号登陆地址
 function getLoginUrl(event = 'login') {
+  debugger
   let page = getRootUrl() + 'pages/index/login';
 
   return third.wechat.oauthLogin({
@@ -80,6 +84,7 @@ function getLoginUrl(event = 'login') {
 
 // 此处使用前端发送code在后端解密，防止用户在后端过长时间停留
 function loginByCode(code) {
+  debugger
   return third.wechat.login({
     platform: 'officialAccount',
     shareInfo: uni.getStorageSync('shareLog') || {},
@@ -93,6 +98,7 @@ function loginByCode(code) {
 
 // 此处使用前端发送code在后端解密，防止用户在后端过长时间停留
 function bindByCode(code) {
+  debugger
   return third.wechat.bind({
     platform: 'officialAccount',
     payload: encodeURIComponent(
