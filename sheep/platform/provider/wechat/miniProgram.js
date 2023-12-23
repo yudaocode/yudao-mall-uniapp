@@ -23,7 +23,6 @@ const login = async () => {
 
     // 2. 社交登录
     const loginResult = await AuthUtil.socialLogin(socialType, codeResult.code, 'default');
-    debugger
     if (loginResult.code === 0) {
       setOpenid(loginResult.data.openid);
       return resolve(true);
@@ -36,7 +35,6 @@ const login = async () => {
 // 微信小程序手机号授权登陆
 const mobileLogin = async (e) => {
   return new Promise(async (resolve, reject) => {
-    console.log(e.errMsg)
     if (e.errMsg !== 'getPhoneNumber:ok') {
       return resolve(false);
     }
@@ -48,7 +46,6 @@ const mobileLogin = async (e) => {
     }
 
     // 2. 一键登录
-    debugger
     const loginResult = await AuthUtil.weixinMiniAppLogin(e.code, codeResult.code, 'default');
     if (loginResult.code === 0) {
       setOpenid(loginResult.data.openid);
@@ -63,21 +60,19 @@ const mobileLogin = async (e) => {
 // 微信小程序绑定
 const bind = () => {
   return new Promise(async (resolve, reject) => {
-    const loginRes = await third.wechat.bind({
-      platform: 'miniProgram',
-      payload: encodeURIComponent(
-        JSON.stringify({
-          sessionId: uni.getStorageSync('sessionId'),
-        }),
-      ),
-    });
+    // 1. 获得微信 code
+    const codeResult = await uni.login();
+    if (codeResult.errMsg !== 'login:ok') {
+      return resolve(false);
+    }
 
-    if (loginRes.error === -1) {
-      getSessionId(false);
-    } else if (loginRes.error === 0) {
-      resolve(true);
+    // 2. 绑定账号
+    const bindResult = await SocialApi.socialBind(socialType, codeResult.code, 'default');
+    if (bindResult.code === 0) {
+      setOpenid(bindResult.data);
+      return resolve(true);
     } else {
-      reject(false);
+      return resolve(false);
     }
   });
 };
@@ -87,6 +82,43 @@ const unbind = async (openid) => {
   const { code } = await SocialApi.socialUnbind(socialType, openid);
   return code === 0;
 };
+
+// 绑定用户手机号
+const bindUserPhoneNumber = (e) => {
+  return new Promise(async (resolve, reject) => {
+    const { error } = await third.wechat.bindUserPhoneNumber({
+      platform: 'miniProgram',
+      payload: encodeURIComponent(
+        JSON.stringify({
+          sessionId: uni.getStorageSync('sessionId'),
+          iv: e.iv,
+          encryptedData: e.encryptedData,
+          code: e.code,
+        }),
+      ),
+    });
+    if (error === 0) {
+      resolve(true);
+    }
+    resolve(false);
+  });
+};
+
+// 设置 openid 到本地存储，目前只有 pay 支付时会使用
+function setOpenid(openid) {
+  uni.setStorageSync('openid', openid);
+}
+
+// 获得社交信息
+async function getInfo() {
+  const { code, data } = await SocialApi.getSocialUser(socialType);
+  if (code !== 0) {
+    return undefined;
+  }
+  return data;
+}
+
+// ========== 非登录相关的逻辑 ==========
 
 // 小程序更新
 const checkUpdate = async (silence = true) => {
@@ -126,27 +158,6 @@ const checkUpdate = async (silence = true) => {
   }
 };
 
-// 绑定用户手机号
-const bindUserPhoneNumber = (e) => {
-  return new Promise(async (resolve, reject) => {
-    const { error } = await third.wechat.bindUserPhoneNumber({
-      platform: 'miniProgram',
-      payload: encodeURIComponent(
-        JSON.stringify({
-          sessionId: uni.getStorageSync('sessionId'),
-          iv: e.iv,
-          encryptedData: e.encryptedData,
-          code: e.code,
-        }),
-      ),
-    });
-    if (error === 0) {
-      resolve(true);
-    }
-    resolve(false);
-  });
-};
-
 // 获取订阅消息模板
 async function getSubscribeTemplate() {
   const { error, data } = await third.wechat.subscribeTemplate();
@@ -174,20 +185,6 @@ function subscribeMessage(event) {
       console.log(err);
     },
   });
-}
-
-// 设置 openid 到本地存储，目前只有 pay 支付时会使用
-function setOpenid(openid) {
-  uni.setStorageSync('openid', openid);
-}
-
-// 获得社交信息
-async function getInfo() {
-  const { code, data } = await SocialApi.getSocialUser(socialType);
-  if (code !== 0) {
-    return undefined;
-  }
-  return data;
 }
 
 export default {
