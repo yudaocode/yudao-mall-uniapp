@@ -1,32 +1,29 @@
+<!-- 微信公众号的登录回调页 -->
 <template>
   <!-- 空登陆页 -->
-  <view></view>
+  <view />
 </template>
 
 <script setup>
-  import { isEmpty } from 'lodash';
   import sheep from '@/sheep';
-  import { onLoad, onShow } from '@dcloudio/uni-app';
+  import { onLoad } from '@dcloudio/uni-app';
 
   onLoad(async (options) => {
     // #ifdef H5
-    let event = '';
+    // 将 search 参数赋值到 options 中，方便下面解析
     new URLSearchParams(location.search).forEach((value, key) => {
       options[key] = value;
     });
-    if (options.code) {
-      event = 'login';
-      const { error } = await sheep.$platform.useProvider().login(options.code, options.state);
-      if (error === 0) {
-        sheep.$store('user').getInfo();
-      }
-    }
-    if (options.bind_code) {
-      event = 'bind';
-      const { error } = await sheep.$platform.useProvider().bind(options.bind_code);
+    const event = options.event;
+    const code = options.code;
+    const state = options.state;
+    if (event === 'login') { // 场景一：登录
+      const res = await sheep.$platform.useProvider().login(code, state);
+    } else if (event === 'bind') { // 场景二：绑定
+      sheep.$platform.useProvider().bind(code, state);
     }
 
-    // 检测H5登录回调
+    // 检测 H5 登录回调
     let returnUrl = uni.getStorageSync('returnUrl');
     if (returnUrl) {
       uni.removeStorage('returnUrl');
@@ -36,7 +33,6 @@
         url: '/',
       });
     }
-
     // #endif
   });
 </script>

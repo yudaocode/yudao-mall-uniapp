@@ -23,8 +23,9 @@ async function login(code = '', state = '') {
   // 情况二：有 code 时，使用 code 去自动登录
   } else {
     // 解密 code 发起登陆
-    const loginResult = await loginByCode(code, state);
+    const loginResult = await AuthUtil.socialLogin(socialType, code, state);
     if (loginResult.code === 0) {
+      // TODO 芋艿：shareLog
       setOpenid(loginResult.data.openid);
       return loginResult;
     }
@@ -33,8 +34,8 @@ async function login(code = '', state = '') {
 }
 
 // 微信公众号绑定
-async function bind(code = '') {
-  // 获取绑定地址
+async function bind(code = '', state = '') {
+  // 情况一：没有 code 时，去获取 code
   if (code === '') {
     const loginUrl = await getLoginUrl('bind');
     if (loginUrl) {
@@ -42,9 +43,10 @@ async function bind(code = '') {
       window.location = loginUrl;
     }
   } else {
-    // 解密code发起登陆
-    const loginResult = await bindByCode(code);
-    if (loginResult.error === 0) {
+    // 情况二：有 code 时，使用 code 去自动绑定
+    const loginResult = await SocialApi.socialBind(socialType, code, state);
+    if (loginResult.code === 0) {
+      setOpenid(loginResult.data);
       return loginResult;
     }
   }
@@ -59,42 +61,13 @@ const unbind = async (openid) => {
 
 // 获取公众号登陆地址
 async function getLoginUrl(event = 'login') {
-  const page = getRootUrl() + 'pages/index/login';
+  const page = getRootUrl() + 'pages/index/login'
+    + '?event=' + event; // event 目的，区分是 login 还是 bind
   const { code, data } = await AuthUtil.socialAuthRedirect(socialType, page);
   if (code !== 0) {
     return undefined;
   }
   return data;
-}
-
-// 此处使用前端发送code在后端解密，防止用户在后端过长时间停留
-function loginByCode(code, state) {
-  if (true) {
-    return AuthUtil.socialLogin(socialType, code, state);
-  }
-  // TODO 芋艿：shareLog
-  return third.wechat.login({
-    platform: 'officialAccount',
-    shareInfo: uni.getStorageSync('shareLog') || {},
-    payload: encodeURIComponent(
-      JSON.stringify({
-        code,
-      }),
-    ),
-  });
-}
-
-// 此处使用前端发送code在后端解密，防止用户在后端过长时间停留
-function bindByCode(code) {
-  debugger
-  return third.wechat.bind({
-    platform: 'officialAccount',
-    payload: encodeURIComponent(
-      JSON.stringify({
-        code,
-      }),
-    ),
-  });
 }
 
 // 设置 openid 到本地存储，目前只有 pay 支付时会使用
