@@ -85,56 +85,55 @@ export default class SheepPay {
 
   // 预支付
   prepay(channel) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       let data = {
         id: this.id,
         channelCode: channel,
         channelExtras: {}
       };
-      if (uni.getStorageSync('openid')) {
-        data.openid = uni.getStorageSync('openid');
+      // 特殊逻辑：微信公众号、小程序支付时，必须传入 openid
+      if (['wx_pub'].includes(channel)) {
+        const openid = await sheep.$platform.useProvider('wechat').getOpenid();
+        // 如果获取不到 openid，微信无法发起支付，此时需要引导
+        if (!openid) {
+          this.bindWeixin();
+          return;
+        }
+        data.channelExtras.openid = openid;
       }
       PayOrderApi.submitOrder(data).then((res) => {
         // 成功时
         res.code === 0 && resolve(res);
         // 失败时
+        // TODO 芋艿：这块需要在测试下哈；
         if (res.code !== 0 && res.msg === 'miss_openid') {
-          uni.showModal({
-            title: '微信支付',
-            content: '请先绑定微信再使用微信支付',
-            success: function (res) {
-              if (res.confirm) {
-                sheep.$platform.useProvider('wechat').bind();
-              }
-            },
-          });
+          this.bindWeixin();
         }
       });
     });
   }
   // #ifdef H5
-  // 微信公众号JSSDK支付 TODO 芋艿：待接入
+  // 微信公众号 JSSDK 支付
   async wechatOfficialAccountPay() {
-    let that = this;
-    let { error, data, msg } = await this.prepay();
-    if (error !== 0) {
-      console.log('支付错误', msg);
+    let { code, data } = await this.prepay('wx_pub');
+    if (code !== 0) {
       return;
     }
-    $wxsdk.wxpay(data.pay_data, {
+    // let that = this;
+    $wxsdk.wxpay(data, {
       success: () => {
-        that.payResult('success');
+        this.payResult('success');
       },
       cancel: () => {
-        sheep.$helper.toast('支付已手动取消');
+        this.$helper.toast('支付已手动取消');
       },
       fail: () => {
-        that.payResult('fail');
+        this.payResult('fail');
       },
     });
   }
 
-  //浏览器微信H5支付 TODO 芋艿：待接入
+  // 浏览器微信H5支付 TODO 芋艿：待接入
   async wechatWapPay() {
     const { error, data } = await this.prepay();
     if (error === 0) {
@@ -255,6 +254,20 @@ export default class SheepPay {
       payState: resultType
     });
   }
+
+  // 引导绑定微信
+  bindWeixin() {
+    uni.showModal({
+      title: '微信支付',
+      content: '请先绑定微信再使用微信支付',
+      success: function (res) {
+        if (res.confirm) {
+          sheep.$platform.useProvider('wechat').bind();
+        }
+      },
+    });
+  }
+
 }
 
 export function getPayMethods(channels) {
@@ -295,10 +308,12 @@ export function getPayMethods(channels) {
   // 1. 处理【微信支付】
   const wechatMethod = payMethods[0];
   if ((platform === 'WechatOfficialAccount' && channels.includes('wx_pub'))
-    || platform === 'WechatMiniProgram' && channels.includes('wx_lite')
-    || platform === 'App' && channels.includes('wx_app')) {
+    || (platform === 'WechatMiniProgram' && channels.includes('wx_lite'))
+    || (platform === 'App' && channels.includes('wx_app'))) {
     wechatMethod.disabled = false;
   }
+  wechatMethod.disabled = false; // TODO 芋艿：临时测试
+
   // 2. 处理【支付宝支付】
   const alipayMethod = payMethods[1];
   if ((platform === 'WechatOfficialAccount' && channels.includes('alipay_wap'))

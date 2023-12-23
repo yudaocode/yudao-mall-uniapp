@@ -75,6 +75,19 @@ function setOpenid(openid) {
   uni.setStorageSync('openid', openid);
 }
 
+// 获得 openid
+async function getOpenid(force = false) {
+  let openid = uni.getStorageSync('openid');
+  if (!openid && force) {
+    const info = await getInfo();
+    if (info && info.openid) {
+      openid = info.openid;
+      setOpenid(openid);
+    }
+  }
+  return openid;
+}
+
 // 获得社交信息
 async function getInfo() {
   const { code, data } = await SocialApi.getSocialUser(socialType);
@@ -90,5 +103,6 @@ export default {
   bind,
   unbind,
   getInfo,
+  getOpenid,
   jssdk: $wxsdk,
 };
