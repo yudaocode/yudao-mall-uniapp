@@ -183,12 +183,12 @@
 </template>
 
 <script setup>
-  import { computed, ref, reactive, onBeforeMount } from 'vue';
-  import { mobile, password, username } from '@/sheep/validate/form';
+  import { computed, reactive, onBeforeMount } from 'vue';
   import sheep from '@/sheep';
   import { clone } from 'lodash';
   import { showAuthModal } from '@/sheep/hooks/useModal';
   import FileApi from '@/sheep/api/infra/file';
+  import UserApi from '@/sheep/api/member/user';
 
   const state = reactive({
     model: {}, // 个人信息
@@ -278,7 +278,7 @@
 
   // 保存信息
   async function onSubmit() {
-	 const { code } = await sheep.$api.user.update({
+	 const { code } = await UserApi.updateUser({
       avatar: state.model.avatar,
       nickname: state.model.nickname,
       sex: state.model.sex,

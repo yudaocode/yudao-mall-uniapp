@@ -65,7 +65,24 @@ const AuthUtil = {
       custom: {
         showSuccess: true,
         loadingMsg: '登陆中',
-        // TODO 芋艿：登录成功？？？
+      },
+    });
+  },
+  // 微信小程序的一键登录
+  weixinMiniAppLogin: (phoneCode, loginCode, state) => {
+    debugger
+    return request({
+      url: '/app-api/member/auth/weixin-mini-app-login',
+      method: 'POST',
+      data: {
+        phoneCode,
+        loginCode,
+        state
+      },
+      custom: {
+        showSuccess: true,
+        loadingMsg: '登陆中',
+        successMsg: '登录成功',
       },
     });
   },

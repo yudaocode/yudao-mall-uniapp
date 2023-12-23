@@ -30,16 +30,6 @@ export default {
 				auth: true,
 			},
 		}),
-	update: (data) =>
-		request2({
-			url: 'member/user/update',
-			method: 'PUT',
-			custom: {
-				showSuccess: true,
-				auth: true,
-			},
-			data,
-		}),
 	// 账号登录
 	accountLogin: (data) =>
 		request({

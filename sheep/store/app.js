@@ -31,7 +31,6 @@ const app = defineStore({
         posterInfo: {}, // 海报信息
         linkAddress: '', // 复制链接地址
       },
-      auto_login: 0, // 自动登陆
       bind_mobile: 0, // 登陆后绑定手机号提醒 (弱提醒，可手动关闭)
     },
     chat: {},

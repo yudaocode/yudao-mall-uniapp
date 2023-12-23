@@ -25,55 +25,45 @@ const login = async () => {
     // 1. 获得微信 code
     const codeResult = await uni.login();
     if (codeResult.errMsg !== 'login:ok') {
-      resolve(false);
+      return resolve(false);
     }
 
     // 2. 社交登录
-    const loginResult = await loginByCode(codeResult.code);
+    const loginResult = await AuthUtil.socialLogin(socialType, codeResult.code, 'default');
+    debugger
     if (loginResult.code === 0) {
       setOpenid(loginResult.data.openid);
-      resolve(true);
+      return resolve(true);
     } else {
-      resolve(false);
+      return resolve(false);
     }
-    return loginResult.code === 0 ? resolve(true) : resolve(false);
   });
 };
-
-function loginByCode(code) {
-  return AuthUtil.socialLogin(socialType, code, 'default');
-  // TODO 芋艿：shareLog
-}
 
 // 微信小程序手机号授权登陆
 const mobileLogin = async (e) => {
   return new Promise(async (resolve, reject) => {
+    console.log(e.errMsg)
     if (e.errMsg !== 'getPhoneNumber:ok') {
-      resolve(false);
-      return;
+      return resolve(false);
     }
 
-    const { error } = await third.wechat.login({
-      platform: 'miniProgram',
-      shareInfo: uni.getStorageSync('shareLog') || {},
-      payload: encodeURIComponent(
-        JSON.stringify({
-          sessionId: uni.getStorageSync('sessionId'),
-          code: e.code,
-          iv: e.iv,
-          encryptedData: e.encryptedData,
-        }),
-      ),
-    });
-
-    if (error === 0) {
-      resolve(true);
+    // 1. 获得微信 code
+    const codeResult = await uni.login();
+    if (codeResult.errMsg !== 'login:ok') {
+      return resolve(false);
     }
 
-    if (error === -1) {
-      getSessionId(false);
+    // 2. 一键登录
+    debugger
+    const loginResult = await AuthUtil.weixinMiniAppLogin(e.code, codeResult.code, 'default');
+    if (loginResult.code === 0) {
+      setOpenid(loginResult.data.openid);
+      return resolve(true);
+    } else {
+      return resolve(false);
     }
-    resolve(false);
+    // TODO 芋艿：shareInfo: uni.getStorageSync('shareLog') || {},
   });
 };
 
@@ -256,5 +246,6 @@ export default {
   unbind,
   checkUpdate,
   bindUserPhoneNumber,
+  mobileLogin,
   subscribeMessage,
 };

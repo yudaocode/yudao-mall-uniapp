@@ -32,18 +32,16 @@
         <!-- 立即注册&快捷登录 TextButton -->
         <view v-if="sheep.$platform.name === 'WechatMiniProgram'" class="ss-flex register-box">
           <view class="register-title">还没有账号?</view>
-          <button class="ss-reset-button register-btn" @tap="showAuthModal('smsRegister')">
-            立即注册
+          <button class="ss-reset-button login-btn" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">
+            快捷登录
           </button>
-          <view class="or-title">或</view>
-          <button class="ss-reset-button login-btn" @tap="thirdLogin('wechat')">快捷登录</button>
-          <view class="circle"></view>
+          <view class="circle" />
         </view>
 
-        <!-- 公众号|App微信登录 -->
+        <!-- 微信的公众号、App、小程序的登录，基于 openid + code -->
         <button
           v-if="
-            ['WechatOfficialAccount', 'App'].includes(sheep.$platform.name) &&
+            ['WechatOfficialAccount', 'WechatMiniProgram', 'App'].includes(sheep.$platform.name) &&
             sheep.$platform.isWechatInstalled
           "
           @tap="thirdLogin('wechat')"
@@ -55,7 +53,7 @@
           />
         </button>
 
-        <!-- iOS登录 -->
+        <!-- iOS 登录 -->
         <button
           v-if="sheep.$platform.os === 'ios' && sheep.$platform.name === 'App'"
           @tap="thirdLogin('apple')"
@@ -64,12 +62,12 @@
           <image
             class="auto-login-img"
             :src="sheep.$url.static('/static/img/shop/platform/apple.png')"
-          ></image>
+          />
         </button>
       </view>
 
       <view
-        v-if="['accountLogin', 'smsLogin', 'smsRegister'].includes(authType)"
+        v-if="['accountLogin', 'smsLogin'].includes(authType)"
         class="agreement-box ss-flex ss-row-center"
         :class="{ shake: currentProtocol }"
       >
@@ -98,7 +96,7 @@
           </view>
         </label>
       </view>
-      <view class="safe-box"></view>
+      <view class="safe-box"/>
     </view>
   </su-popup>
 </template>
@@ -126,12 +124,12 @@
 
   const currentProtocol = ref(false);
 
-  //勾选协议
+  // 勾选协议 TODO 芋艿：协议
   function onChange() {
     state.protocol = !state.protocol;
   }
 
-  // 查看协议
+  // 查看协议 TODO 芋艿：协议
   function onProtocol(id, title) {
     closeAuthModal();
     sheep.$router.go('/pages/public/richtext', {
@@ -140,7 +138,7 @@
     });
   }
 
-  // 点击登录/注册事件
+  // 点击登录 / 注册事件
   function onConfirm(e) {
     currentProtocol.value = e;
     setTimeout(() => {
@@ -165,6 +163,19 @@
       // #ifdef MP-WEIXIN
       showAuthModal('mpAuthorization');
       // #endif
+    }
+  };
+
+  // 微信小程序的“手机号快速验证”：https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/getPhoneNumber.html
+  const getPhoneNumber = async (e) => {
+    if (e.detail.errMsg !== 'getPhoneNumber:ok') {
+      sheep.$helper.toast('快捷登录失败');
+      return;
+    }
+    let result = await sheep.$platform.useProvider().mobileLogin(e.detail);
+    if (result) {
+      debugger
+      closeAuthModal();
     }
   };
 </script>
