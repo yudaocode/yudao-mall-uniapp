@@ -115,7 +115,6 @@ http.interceptors.response.use(
 		}
     // TODO 芋艿：如果是登录的 API，则自动设置 token
     if (response.data?.data?.accessToken) {
-      debugger
       $store('user').setToken(response.data.data.accessToken);
     }
 
