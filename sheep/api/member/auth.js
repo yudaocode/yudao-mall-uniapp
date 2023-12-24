@@ -70,7 +70,6 @@ const AuthUtil = {
   },
   // 微信小程序的一键登录
   weixinMiniAppLogin: (phoneCode, loginCode, state) => {
-    debugger
     return request({
       url: '/app-api/member/auth/weixin-mini-app-login',
       method: 'POST',

@@ -92,7 +92,7 @@ export default class SheepPay {
         channelExtras: {}
       };
       // 特殊逻辑：微信公众号、小程序支付时，必须传入 openid
-      if (['wx_pub'].includes(channel)) {
+      if (['wx_pub', 'wx_lite'].includes(channel)) {
         const openid = await sheep.$platform.useProvider('wechat').getOpenid();
         // 如果获取不到 openid，微信无法发起支付，此时需要引导
         if (!openid) {
@@ -101,6 +101,7 @@ export default class SheepPay {
         }
         data.channelExtras.openid = openid;
       }
+      // 发起预支付 API 调用
       PayOrderApi.submitOrder(data).then((res) => {
         // 成功时
         res.code === 0 && resolve(res);
@@ -140,12 +141,11 @@ export default class SheepPay {
     });
   }
 
-  // 浏览器微信H5支付 TODO 芋艿：待接入
+  // 浏览器微信 H5 支付 TODO 芋艿：待接入
   async wechatWapPay() {
     const { error, data } = await this.prepay();
     if (error === 0) {
-      const redirect_url = `${getRootUrl()}pages/pay/result?id=${this.id}&payment=${this.payment
-        }&orderType=${this.orderType}`;
+      const redirect_url = `${getRootUrl()}pages/pay/result?id=${this.id}&payment=${this.payment}&orderType=${this.orderType}`;
       location.href = `${data.pay_data.h5_url}&redirect_url=${encodeURIComponent(redirect_url)}`;
     }
   }
@@ -154,29 +154,37 @@ export default class SheepPay {
   async redirectPay() {
     let { error, data } = await this.prepay();
     if (error === 0) {
-      const redirect_url = `${getRootUrl()}pages/pay/result?id=${this.id}&payment=${this.payment
-        }&orderType=${this.orderType}`;
+      const redirect_url = `${getRootUrl()}pages/pay/result?id=${this.id}&payment=${this.payment}&orderType=${this.orderType}`;
       location.href = data.pay_data + encodeURIComponent(redirect_url);
     }
   }
 
   // #endif
 
-  // 微信小程序支付  TODO 芋艿：待接入
+  // 微信小程序支付
   async wechatMiniProgramPay() {
-    let that = this;
-    let result = await this.prepay();
+    // let that = this;
+    let { code, data } = await this.prepay('wx_lite');
+    if (code !== 0) {
+      return;
+    }
+    // 调用微信小程序支付
+    const payConfig = JSON.parse(data.displayContent);
     uni.requestPayment({
       provider: 'wxpay',
-      ...result.data.pay_data,
+      timeStamp: payConfig.timeStamp,
+      nonceStr: payConfig.nonceStr,
+      package: payConfig.packageValue,
+      signType: payConfig.signType,
+      paySign: payConfig.paySign,
       success: (res) => {
-        that.payResult('success');
+        this.payResult('success');
       },
       fail: (err) => {
         if (err.errMsg === 'requestPayment:fail cancel') {
           sheep.$helper.toast('支付已手动取消');
         } else {
-          that.payResult('fail');
+          this.payResult('fail');
         }
       },
     });

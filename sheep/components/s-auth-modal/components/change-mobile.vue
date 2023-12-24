@@ -4,7 +4,7 @@
     <!-- 标题栏 -->
     <view class="head-box ss-m-b-60">
       <view class="head-title ss-m-b-20">
-        {{ userInfo.verification.mobile ? '更换手机号' : '绑定手机号' }}
+        {{ userInfo.mobile ? '更换手机号' : '绑定手机号' }}
       </view>
       <view class="head-subtitle">为了您的账号安全，请使用本人手机号码</view>
     </view>
@@ -54,6 +54,8 @@
         </uni-easyinput>
       </uni-forms-item>
     </uni-forms>
+
+    <!-- 微信独有：读取手机号 -->
     <button
       v-if="'WechatMiniProgram' === sheep.$platform.name"
       class="ss-reset-button type-btn"
@@ -66,13 +68,15 @@
 </template>
 
 <script setup>
-  import { computed, watch, ref, reactive, unref } from 'vue';
+  import { computed, ref, reactive, unref } from 'vue';
   import sheep from '@/sheep';
   import { code, mobile } from '@/sheep/validate/form';
-  import { showAuthModal, closeAuthModal, getSmsCode, getSmsTimer } from '@/sheep/hooks/useModal';
+  import { closeAuthModal, getSmsCode, getSmsTimer } from '@/sheep/hooks/useModal';
+  import UserApi from '@/sheep/api/member/user';
 
   const changeMobileRef = ref(null);
   const userInfo = computed(() => sheep.$store('user').userInfo);
+
   // 数据
   const state = reactive({
     isMobileEnd: false, // 手机号输入完毕
@@ -86,31 +90,34 @@
     },
   });
 
-  // 5.绑定手机号
+  // 绑定手机号
   async function changeMobileSubmit() {
     const validate = await unref(changeMobileRef)
       .validate()
       .catch((error) => {
         console.log('error: ', error);
       });
-    if (!validate) return;
-    sheep.$api.user.changeMobile(state.model).then((res) => {
-      if (res.error === 0) {
-        sheep.$store('user').getInfo();
-        closeAuthModal();
-      }
-    });
+    if (!validate) {
+      return;
+    }
+    // 提交更新请求
+    const { code } = await UserApi.updateUserMobile(state.model);
+    if (code !== 0) {
+      return;
+    }
+    sheep.$store('user').getInfo();
+    closeAuthModal();
   }
 
   // 使用微信手机号
   async function getPhoneNumber(e) {
     if (e.detail.errMsg !== 'getPhoneNumber:ok') {
-    } else {
-      let result = await sheep.$platform.useProvider().bindUserPhoneNumber(e.detail);
-      if (result) {
-        sheep.$store('user').getInfo();
-        closeAuthModal();
-      }
+      return;
+    }
+    const result = await sheep.$platform.useProvider().bindUserPhoneNumber(e.detail);
+    if (result) {
+      sheep.$store('user').getInfo();
+      closeAuthModal();
     }
   }
 </script>

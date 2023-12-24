@@ -1,6 +1,7 @@
 import third from '@/sheep/api/third';
 import AuthUtil from '@/sheep/api/member/auth';
 import SocialApi from '@/sheep/api/member/social';
+import UserApi from '@/sheep/api/member/user';
 
 const socialType = 34; // 社交类型 - 微信小程序
 
@@ -86,18 +87,8 @@ const unbind = async (openid) => {
 // 绑定用户手机号
 const bindUserPhoneNumber = (e) => {
   return new Promise(async (resolve, reject) => {
-    const { error } = await third.wechat.bindUserPhoneNumber({
-      platform: 'miniProgram',
-      payload: encodeURIComponent(
-        JSON.stringify({
-          sessionId: uni.getStorageSync('sessionId'),
-          iv: e.iv,
-          encryptedData: e.encryptedData,
-          code: e.code,
-        }),
-      ),
-    });
-    if (error === 0) {
+    const { code } = await UserApi.updateUserMobileByWeixin(e.code);
+    if (code === 0) {
       resolve(true);
     }
     resolve(false);

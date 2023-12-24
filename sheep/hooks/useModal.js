@@ -87,6 +87,9 @@ export function getSmsCode(event, mobile) {
     case 'changePassword':
       scene = 3;
       break;
+    case 'changeMobile':
+      scene = 2;
+      break;
     case 'smsLogin':
       scene = 1;
       break;

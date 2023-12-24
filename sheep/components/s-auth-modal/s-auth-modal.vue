@@ -175,7 +175,6 @@
     }
     let result = await sheep.$platform.useProvider().mobileLogin(e.detail);
     if (result) {
-      debugger
       closeAuthModal();
     }
   };
