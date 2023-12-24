@@ -217,7 +217,8 @@ const request = (config) => {
 		// 设置接口地址
 		// config.url = 'http://api-dashboard.yudao.iocoder.cn' + config.url; // 调用【云端】
 		// config.url = 'https://app.test.huizhizao.vip/prod-api' + config.url; // 调用【云端】
-		config.url = 'http://127.0.0.1:48080' + config.url; // 调用【本地】
+		// config.url = 'http://127.0.0.1:48080' + config.url; // 调用【本地】
+    config.url = 'http://yunai.natapp1.cc' + config.url; // 调用【natapp】
 	}
 	return http.middleware(config);
 };

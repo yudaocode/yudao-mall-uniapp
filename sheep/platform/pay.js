@@ -105,9 +105,12 @@ export default class SheepPay {
         // 成功时
         res.code === 0 && resolve(res);
         // 失败时
-        // TODO 芋艿：这块需要在测试下哈；
-        if (res.code !== 0 && res.msg === 'miss_openid') {
-          this.bindWeixin();
+        if (res.code !== 0 && res.msg.indexOf('无效的openid') >= 0) {
+          // 特殊逻辑：微信公众号、小程序支付时，必须传入 openid 不正确的情况
+          if (res.msg.indexOf('无效的openid') >= 0 // 获取的 openid 不正确时，或者随便输入了个 openid
+            || res.msg.indexOf('下单账号与支付账号不一致') >= 0) { // https://developers.weixin.qq.com/community/develop/doc/00008c53c347804beec82aed051c00
+            this.bindWeixin();
+          }
         }
       });
     });
@@ -119,15 +122,19 @@ export default class SheepPay {
     if (code !== 0) {
       return;
     }
-    // let that = this;
-    $wxsdk.wxpay(data, {
+    const payConfig = JSON.parse(data.displayContent);
+    $wxsdk.wxpay(payConfig, {
       success: () => {
         this.payResult('success');
       },
       cancel: () => {
-        this.$helper.toast('支付已手动取消');
+        sheep.$helper.toast('支付已手动取消');
       },
-      fail: () => {
+      fail: (error) => {
+        if (error.errMsg.indexOf('chooseWXPay:没有此SDK或暂不支持此SDK模拟') >= 0) {
+          sheep.$helper.toast('发起微信支付失败，原因：可能是微信开发者工具不支持，建议使用微信打开网页后支付');
+          return
+        }
         this.payResult('fail');
       },
     });
