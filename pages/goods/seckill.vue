@@ -31,7 +31,7 @@
           <view class="price-box ss-flex ss-row-between ss-m-b-18">
             <view class="ss-flex">
               <view class="price-text ss-m-r-16">
-                {{ state.selectedSkuPrice.price || formatPrice(state.goodsInfo.price) }}
+                {{ fen2yuan(state.selectedSku.price || state.goodsInfo.price) }}
               </view>
               <view class="tig ss-flex ss-col-center">
                 <view class="tig-icon ss-flex ss-col-center ss-row-center">
@@ -53,24 +53,24 @@
             <view class="countdown-title" v-else> 活动已结束 </view>
           </view>
           <view class="ss-flex ss-row-between ss-m-b-60">
-            <view class="origin-price ss-flex ss-col-center" v-if="state.goodsInfo.original_price">
+            <view class="origin-price ss-flex ss-col-center" v-if="state.goodsInfo.marketPrice">
               原价
               <view class="origin-price-text">
-                {{ state.selectedSkuPrice.original_price || state.goodsInfo.original_price }}
+                {{ fen2yuan(state.selectedSku.marketPrice || state.goodsInfo.marketPrice) }}
               </view>
             </view>
             <detail-progress :percent="state.percent" />
           </view>
 
-          <view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo.title }}</view>
-          <view class="subtitle-text ss-line-1">{{ state.goodsInfo.subtitle }}</view>
+          <view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo.name }}</view>
+          <view class="subtitle-text ss-line-1">{{ state.goodsInfo.introduction }}</view>
         </view>
 
         <!-- 功能卡片 -->
         <view class="detail-cell-card detail-card ss-flex-col">
           <detail-cell-sku
-            v-model="state.selectedSkuPrice.goods_sku_text"
-            :skus="state.goodsInfo.skus"
+            v-model="state.selectedSku.goods_sku_text"
+            :sku="state.selectedSku"
             @tap="state.showSelectSku = true"
           />
         </view>
@@ -78,6 +78,7 @@
         <s-select-seckill-sku
           v-model="state.goodsInfo"
           :show="state.showSelectSku"
+          :single-limit-count="activity.singleLimitCount"
           @buy="onBuy"
           @change="onSkuChange"
           @close="state.showSelectSku = false"
@@ -85,9 +86,9 @@
       </view>
 
       <!-- 评价 -->
-      <detail-comment-card class="detail-comment-selector" :goodsId="state.goodsId" />
+      <detail-comment-card class="detail-comment-selector" :goodsId="state.goodsInfo.id" />
       <!-- 详情 -->
-      <detail-content-card class="detail-content-selector" :content="state.goodsInfo.content" />
+      <detail-content-card class="detail-content-selector" :content="state.goodsInfo.description" />
 
       <!-- 详情tabbar -->
       <detail-tabbar v-model="state.goodsInfo">
@@ -95,11 +96,11 @@
         <view class="buy-box ss-flex ss-col-center ss-p-r-20">
           <button
             class="ss-reset-button origin-price-btn ss-flex-col"
-            v-if="state.goodsInfo.original_price"
+            v-if="state.goodsInfo.marketPrice"
             @tap="sheep.$router.go('/pages/goods/index', { id: state.goodsInfo.id })"
           >
             <view>
-              <view class="btn-price">{{ state.goodsInfo.original_price }}</view>
+              <view class="btn-price">{{ fen2yuan(state.goodsInfo.marketPrice) }}</view>
               <view>原价购买</view>
             </view>
           </button>
@@ -107,7 +108,7 @@
             <view
               class="no-original"
               :class="
-                state.goodsInfo.stock === 0 || state.goodsInfo.activity.status != 'ing' ? '' : ''
+                state.goodsInfo.stock === 0 || activity.status != 'ing' ? '' : ''
               "
               >秒杀价</view
             >
@@ -116,18 +117,18 @@
             class="ss-reset-button btn-box ss-flex-col"
             @tap="state.showSelectSku = true"
             :class="
-              state.goodsInfo.activity.status === 'ing' && state.goodsInfo.stock != 0
+              activity.status === 'ing' && state.goodsInfo.stock != 0
                 ? 'check-btn-box'
                 : 'disabled-btn-box'
             "
-            :disabled="state.goodsInfo.stock === 0 || state.goodsInfo.activity.status != 'ing'"
+            :disabled="state.goodsInfo.stock === 0 || activity.status != 'ing'"
           >
-            <view class="btn-price">{{ state.goodsInfo.price[0] }}</view>
-            <view v-if="state.goodsInfo.activity.status === 'ing'">
+            <view class="btn-price">{{ fen2yuan(state.goodsInfo.price) }}</view>
+            <view v-if="activity.status === 'ing'">
               <view v-if="state.goodsInfo.stock === 0">已售罄</view>
               <view v-else>立即秒杀</view>
             </view>
-            <view v-else>{{ state.goodsInfo.activity.status_text }}</view>
+            <view v-else>{{ activity.status_text }}</view>
           </button>
         </view>
       </detail-tabbar>
@@ -136,11 +137,11 @@
 </template>
 
 <script setup>
-  import { reactive, computed } from 'vue';
+  import {reactive, computed, ref} from 'vue';
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import { isEmpty } from 'lodash';
-  import { useDurationTime, formatGoodsSwiper, formatPrice } from '@/sheep/hooks/useGoods';
+  import {isEmpty, min} from 'lodash';
+  import {useDurationTime, formatGoodsSwiper, fen2yuan} from '@/sheep/hooks/useGoods';
   import detailNavbar from './components/detail/detail-navbar.vue';
   import detailCellSku from './components/detail/detail-cell-sku.vue';
   import detailTabbar from './components/detail/detail-tabbar.vue';
@@ -148,6 +149,8 @@
   import detailCommentCard from './components/detail/detail-comment-card.vue';
   import detailContentCard from './components/detail/detail-content-card.vue';
   import detailProgress from './components/detail/detail-progress.vue';
+  import SeckillApi from "@/sheep/api/promotion/seckill";
+  import SpuApi from "@/sheep/api/product/spu";
 
   const headerBg = sheep.$url.css('/static/img/shop/goods/seckill-bg.png');
   const btnBg = sheep.$url.css('/static/img/shop/goods/seckill-btn.png');
@@ -159,26 +162,24 @@
 
   onPageScroll(() => {});
   const state = reactive({
-    goodsId: 0,
     skeletonLoading: true,
     goodsInfo: {},
     showSelectSku: false,
     goodsSwiper: [],
-    selectedSkuPrice: {},
+    selectedSku: {},
     showModel: false,
     total: 0,
     percent: 0,
     price: '',
   });
 
-  // 倒计时
   const endTime = computed(() => {
-    return useDurationTime(state.goodsInfo.activity.end_time);
+    return useDurationTime(activity.value.endTime);
   });
 
   // 规格变更
   function onSkuChange(e) {
-    state.selectedSkuPrice = e;
+    state.selectedSku = e;
   }
 
   // 立即购买
@@ -187,7 +188,7 @@
       data: JSON.stringify({
         order_type: 'goods',
         buy_type: 'seckill',
-        activity_id: state.goodsInfo.activity.id,
+        activityId: activity.value.id,
         goods_list: [
           {
             goods_id: e.goods_id,
@@ -203,22 +204,66 @@
     if (isEmpty(state.goodsInfo?.activity)) return {};
     return sheep.$platform.share.getShareInfo(
       {
-        title: state.goodsInfo.title,
-        image: sheep.$url.cdn(state.goodsInfo.image),
+        title: state.goodsInfo.name,
+        image: sheep.$url.cdn(state.goodsInfo.picUrl),
         params: {
           page: '4',
-          query: state.goodsInfo.id + ',' + state.goodsInfo.activity.id,
+          query: state.goodsInfo.id + ',' + activity.value.id,
         },
       },
       {
         type: 'goods', // 商品海报
-        title: state.goodsInfo.title, // 商品标题
-        image: sheep.$url.cdn(state.goodsInfo.image), // 商品主图
+        title: state.goodsInfo.name, // 商品标题
+        image: sheep.$url.cdn(state.goodsInfo.picUrl), // 商品主图
         price: state.goodsInfo.price[0], // 商品价格
-        original_price: state.goodsInfo.original_price, // 商品原价
+        marketPrice: state.goodsInfo.marketPrice, // 商品原价
       },
     );
   });
+
+  const activity = ref()
+  // 查询活动
+  const getActivity = async (id) => {
+    const { data } = await SeckillApi.getSeckillActivity(id)
+    activity.value = data
+
+    // 查询商品
+    await getSpu(data.spuId)
+  }
+
+  const getSpu = async (id) => {
+    const { data } = await SpuApi.getSpuDetail(id)
+    // 模拟
+    data.activity_type = 'seckill'
+    state.goodsInfo = data
+    // 处理轮播图
+    state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.sliderPicUrls);
+
+    // 默认显示最低价
+    state.goodsInfo.price = min([state.goodsInfo.price, ...activity.value.products.map(spu => spu.seckillPrice)])
+
+    // 价格、库存使用活动的
+    data.skus.forEach(sku => {
+      debugger
+      const product = activity.value.products.find(product => product.skuId === sku.id);
+      if (product) {
+        sku.price = product.seckillPrice;
+        sku.stock = Math.min(sku.stock, product.stock);
+      } else { // 找不到可能是没配置，则不能发起秒杀
+        sku.stock = 0;
+      }
+      // 设置限购数量
+      if (activity.value.totalLimitCount > 0 && activity.value.singleLimitCount > 0) {
+        sku.limitCount = Math.min(activity.value.totalLimitCount, activity.value.singleLimitCount);
+      } else if (activity.value.totalLimitCount > 0) {
+        sku.limitCount = activity.value.totalLimitCount;
+      } else if (activity.value.singleLimitCount > 0) {
+        sku.limitCount = activity.value.singleLimitCount;
+      }
+    });
+
+    state.skeletonLoading = false;
+  }
 
   onLoad((options) => {
     // 非法参数
@@ -226,30 +271,9 @@
       state.goodsInfo = null;
       return;
     }
-    state.goodsId = options.id;
-    // 加载商品信息
-    sheep.$api.goods
-      .detail(options.id, {
-        activity_id: options.activity_id,
-      })
-      .then((res) => {
-        state.skeletonLoading = false;
-        if (res.error === 0) {
-          state.goodsInfo = res.data;
-          state.percent =
-            state.goodsInfo.stock + state.goodsInfo.sales > 0
-              ? (
-                  (state.goodsInfo.sales / (state.goodsInfo.sales + state.goodsInfo.stock)) *
-                  100
-                ).toFixed(2)
-              : 0;
-          state.percent = Number(state.percent);
-          state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.images);
-        } else {
-          // 未找到商品
-          state.goodsInfo = null;
-        }
-      });
+
+    // 查询活动
+    getActivity(options.id)
   });
 </script>
 
