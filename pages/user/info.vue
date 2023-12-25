@@ -245,16 +245,16 @@
     state.model.avatar = data;
   }
 
-  // 修改密码 TODO
+  // 修改密码
   function onSetPassword() {
     showAuthModal('changePassword');
   }
 
-  // 绑定第三方账号 TODO
+  // 绑定第三方账号
   async function bindThirdOauth() {
     let result = await sheep.$platform.useProvider('wechat').bind();
     if (result) {
-      getUserInfo();
+      await getUserInfo();
     }
   }
 

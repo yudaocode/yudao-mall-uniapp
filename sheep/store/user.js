@@ -68,7 +68,7 @@ const user = defineStore({
 			if (code !== 0 || code2 != 0) return;
 			data.money = data2.balance;
 			this.userInfo = data;
-			console.log(data2, '信息')
+			// console.log(data2, '信息')
 			return Promise.resolve(data);
 		},
 
@@ -91,9 +91,9 @@ const user = defineStore({
 			} = await userApi.data();
 			const data2 = await userApi.data2();
 			let data3 = await userApi.getUnused();
-			console.log(data3.data, '优惠券')
+			// console.log(data3.data, '优惠券')
 			if (code === 0 && data2.code === 0) {
-				console.log('订单数据', data);
+				// console.log('订单数据', data);
 				this.numData = {
 					coupons_num: data3.data,
 					order_num: {
