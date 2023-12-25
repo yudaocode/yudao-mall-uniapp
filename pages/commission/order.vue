@@ -8,15 +8,15 @@
         },
       ]">
 			<!-- 团队数据总览 -->
-			<view class="team-data-box ss-flex ss-col-center ss-row-between">
-				<view class="data-card">
-					<view class="total-item">
-						<view class="item-title">团队订单数量（单）</view>
-						<view class="total-num">
-							{{ state.agentInfo.child_order_count_all || 0 }}
+			<view class="team-data-box ss-flex ss-col-center ss-row-between" style="width:100%">
+				<view class="data-card" style="width:100%">
+					<view class="total-item" style="width:100%">
+						<view class="item-title" style='text-align: center;'>累计推广订单（单）</view>
+						<view class="total-num" style='text-align: center;'>
+							{{ state.totals||state.pagination.total|| 0 }}
 						</view>
 					</view>
-					<view class="category-item ss-flex">
+					<!-- 		<view class="category-item ss-flex">
 						<view class="ss-flex-1">
 							<view class="item-title">一级订单</view>
 							<view class="category-num">
@@ -29,9 +29,9 @@
 								{{ state.agentInfo.child_order_count_2 || 0 }}
 							</view>
 						</view>
-					</view>
+					</view> -->
 				</view>
-				<view class="data-card">
+				<!-- 			<view class="data-card">
 					<view class="total-item">
 						<view class="item-title">团队订单金额（元）</view>
 						<view class="total-num">
@@ -52,10 +52,10 @@
 							</view>
 						</view>
 					</view>
-				</view>
+				</view> -->
 			</view>
 			<!-- 自购 -->
-			<view class="direct-box ss-flex ss-row-between">
+			<!-- 		<view class="direct-box ss-flex ss-row-between">
 				<view class="direct-item">
 					<view class="item-title">自购分销订单数量（单）</view>
 					<view class="item-value">
@@ -68,7 +68,7 @@
 						{{ state.agentInfo.child_order_money_0 || '0.00' }}
 					</view>
 				</view>
-			</view>
+			</view> -->
 		</view>
 
 		<!-- tab -->
@@ -131,7 +131,7 @@
 	} from '@dcloudio/uni-app';
 	import {
 		computed,
-		reactive
+		reactive,
 	} from 'vue';
 	import _ from 'lodash';
 	import {
@@ -149,10 +149,11 @@
 	});
 
 	const state = reactive({
+		totals: 0,
 		pagination: {
 			data: [],
 			current_page: 1,
-			total: 1,
+			total: '',
 			last_page: 1,
 		},
 		loadStatus: '',
@@ -170,24 +171,24 @@
 		// 	value: 'no'
 		// },
 		{
-			name: '已计入',
+			name: '待结算',
 			value: 'yes',
 		},
 		{
-			name: '已扣除',
+			name: '已结算',
 			value: 'back',
 		},
-		{
-			name: '已取消',
-			value: 'cancel',
-		},
+		// {
+		// 	name: '已取消',
+		// 	value: 'cancel',
+		// },
 	];
 	// 切换选项卡
 	function onTabsChange(e) {
 		state.pagination = {
 			data: [],
 			current_page: 1,
-			total: 1,
+			total: 0,
 			last_page: 1,
 		};
 		state.currentTab = e.index;
@@ -196,19 +197,24 @@
 
 	// 获取订单列表
 	async function getOrderList(page = 1, list_rows = 5) {
+		// todo @芋艿：没有测试数据,还需对接请求参数,和返回的数据字段
 		state.loadStatus = 'loading';
 		let res = await sheep.$api.commission.order({
-			type: tabMaps[state.currentTab].value,
-			list_rows,
-			page,
+			// type: tabMaps[state.currentTab].value,
+			pageSize: list_rows,
+			pageNo: page,
+			// status
+			// bizType
 		});
-		if (res.error === 0) {
-			let orderList = _.concat(state.pagination.data, res.data.data);
+		if (res.code === 0) {
+			let orderList = _.concat(state.pagination.data, res.data.list);
 			state.pagination = {
 				...res.data,
 				data: orderList,
 			};
-			if (state.pagination.current_page < state.pagination.last_page) {
+			state.totals = res.data.total;
+			console.log(state)
+			if (state.pagination.data.length < state.totals) {
 				state.loadStatus = 'more';
 			} else {
 				state.loadStatus = 'noMore';
@@ -228,7 +234,7 @@
 	}
 
 	onLoad(() => {
-		getAgentInfo();
+		// getAgentInfo();
 		getOrderList();
 	});
 
