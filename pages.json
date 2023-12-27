@@ -350,18 +350,6 @@
 					}
 				},
 				{
-					"path": "apply",
-					"style": {
-						"navigationBarTitleText": "申请分销商"
-					},
-					"meta": {
-						"auth": true,
-						"sync": true,
-						"title": "申请分销商",
-						"group": "分销商城"
-					}
-				},
-				{
 					"path": "goods",
 					"style": {
 						"navigationBarTitleText": "推广商品"
@@ -382,18 +370,6 @@
 						"auth": true,
 						"sync": true,
 						"title": "分销订单",
-						"group": "分销商城"
-					}
-				},
-				{
-					"path": "share-log",
-					"style": {
-						"navigationBarTitleText": "分享记录"
-					},
-					"meta": {
-						"auth": true,
-						"sync": true,
-						"title": "分享记录",
 						"group": "分销商城"
 					}
 				},

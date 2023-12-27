@@ -1,30 +1,25 @@
-<!-- 分销明细  -->
+<!-- 分销首页：明细列表  -->
 <template>
 	<view class="distribution-log-wrap">
 		<view class="header-box">
 			<image class="header-bg" :src="sheep.$url.static('/static/img/shop/commission/title2.png')" />
 			<view class="ss-flex header-title">
 				<view class="title">实时动态</view>
-				<text class="cicon-forward"></text>
+				<text class="cicon-forward" />
 			</view>
 		</view>
 		<scroll-view scroll-y="true" @scrolltolower="loadmore" class="scroll-box log-scroll"
 			scroll-with-animation="true">
-			<view v-if="state.pagination.data">
-				<view class="log-item-box ss-flex ss-row-between" v-for="item in state.pagination.data" :key="item.id">
+			<view v-if="state.pagination.list">
+				<view class="log-item-box ss-flex ss-row-between" v-for="item in state.pagination.list" :key="item.id">
 					<view class="log-item-wrap">
 						<view class="log-item ss-flex ss-ellipsis-1 ss-col-center">
 							<view class="ss-flex ss-col-center">
-								<image v-if="item.oper_type === 'user'" class="log-img"
-									:src="sheep.$url.cdn(item.oper?.avatar)" mode="aspectFill"></image>
-								<image v-else-if="item.oper_type === 'admin'" class="log-img"
-									:src="sheep.$url.static('/static/img/shop/avatar/default_user.png')"
-									mode="aspectFill"></image>
-								<image v-else class="log-img"
-									:src="sheep.$url.static('/static/img/shop/avatar/notice.png')" mode="aspectFill">
-								</image>
+								<image class="log-img" :src="sheep.$url.static('/static/img/shop/avatar/notice.png')" mode="aspectFill" />
 							</view>
-							<view class="log-text ss-ellipsis-1">{{ item.title }} {{item.price/100}}元</view>
+							<view class="log-text ss-ellipsis-1">
+                {{ item.title }} {{ fen2yuan(item.price) }} 元
+              </view>
 						</view>
 					</view>
 					<text class="log-time">{{ dayjs(item.createTime).fromNow() }}</text>
@@ -40,50 +35,46 @@
 
 <script setup>
 	import sheep from '@/sheep';
-	import {
-		computed,
-		reactive
-	} from 'vue';
+	import { reactive } from 'vue';
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
+  import BrokerageApi from '@/sheep/api/trade/brokerage';
+  import { fen2yuan } from '../../../sheep/hooks/useGoods';
 
 	const state = reactive({
 		loadStatus: '',
 		pagination: {
-			data: [],
-			current_page: 1,
-			total: 1,
-			last_page: 1,
+      list: [],
+      total: 0,
+      pageNo: 1,
+      pageSize: 1,
 		},
 	});
 
-	async function getLog(page = 1) {
-		state.pagination.current_page = page
-		const res = await sheep.$api.commission.order({
-			page,
+	async function getLog() {
+    state.loadStatus = 'loading';
+    const { code, data } = await BrokerageApi.getBrokerageRecordPage({
+      pageNo: state.pagination.pageNo,
+      pageSize: state.pagination.pageSize
 		});
-		console.log(res, '下面的数据')
-		if (res.code === 0) {
-			let list = _.concat(state.pagination.data, res.data.list);
-			state.pagination = {
-				...res.data,
-				data: list,
-			};
-			if (state.pagination.data.length < state.pagination.total) {
-				state.loadStatus = 'more';
-			} else {
-				state.loadStatus = 'noMore';
-			}
-		}
+    if (code !== 0) {
+      return;
+    }
+    state.pagination.list = _.concat(state.pagination.list, data.list);
+    state.pagination.total = data.total;
+    state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
 	}
+
 	getLog();
 
 	// 加载更多
 	function loadmore() {
-		if (state.loadStatus !== 'noMore') {
-			getLog(state.pagination.current_page + 1);
-		}
-	}
+    if (state.loadStatus === 'noMore') {
+      return;
+    }
+    state.pagination.pageNo++;
+    getLog();
+  }
 </script>
 
 <style lang="scss" scoped>

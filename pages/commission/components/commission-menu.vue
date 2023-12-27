@@ -1,4 +1,4 @@
-<!-- 分销商菜单栏 -->
+<!-- 分销：商菜单栏 -->
 <template>
 	<view class="menu-box ss-flex-col">
 		<view class="header-box">
@@ -15,36 +15,12 @@
 				<view>{{ item.title }}</view>
 			</view>
 		</view>
-
-		<!-- <uni-grid :column="4" :showBorder="false" :highlight="false">
-      <uni-grid-item
-        v-for="(item, index) in state.menuList"
-        :index="index"
-        :key="index"
-        @tap="sheep.$router.go(item.path)"
-      >
-        <view class="grid-item-box ss-flex ss-flex-col ss-row-center ss-col-center">
-          <image
-            class="menu-icon ss-m-b-10"
-            :src="sheep.$url.static(item.img)"
-            mode="aspectFill"
-          ></image>
-          <text class="menu-title">{{ item.title }}</text>
-        </view>
-      </uni-grid-item>
-    </uni-grid> -->
 	</view>
 </template>
 
 <script setup>
 	import sheep from '@/sheep';
-	import {
-		onLoad
-	} from '@dcloudio/uni-app';
-	import {
-		computed,
-		reactive
-	} from 'vue';
+	import { reactive } from 'vue';
 
 	const state = reactive({
 		menuList: [{
@@ -78,20 +54,18 @@
 				img: '/static/img/shop/commission/commission_icon7.png',
 				title: '邀请海报',
 				path: 'action:showShareModal',
-			}, {
-				// img: '/static/img/shop/commission/commission_icon7.png',
-				title: '推广人排行榜',
-				path: '/pages/commission/promoter',
-			}, {
-				// img: '/static/img/shop/commission/commission_icon7.png',
-				title: '佣金排行榜',
-				path: '/pages/commission/commission-ranking',
 			},
-			// {
-			// 	img: '/static/img/shop/commission/commission_icon8.png',
-			// 	title: '分享记录',
-			// 	path: '/pages/commission/share-log',
-			// },
+      // TODO @芋艿：缺少 icon
+      {
+				// img: '/static/img/shop/commission/commission_icon7.png',
+				title: '推广排行',
+				path: '/pages/commission/promoter',
+			},
+      {
+				// img: '/static/img/shop/commission/commission_icon7.png',
+				title: '佣金排行',
+				path: '/pages/commission/commission-ranking',
+			}
 		],
 	});
 </script>

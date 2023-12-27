@@ -34,13 +34,6 @@ export default {
 			method: 'GET',
 			params,
 		}),
-	// 分销订单
-	order: (params) =>
-		request({
-			url: '/app-api/trade/brokerage-record/page',
-			method: 'GET',
-			params,
-		}),
 
 	// 分销商品
 	goods: (params) =>

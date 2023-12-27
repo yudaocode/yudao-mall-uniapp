@@ -1,4 +1,4 @@
-<!-- 页面  -->
+<!-- 分销权限弹窗：再没有权限时，进行提示  -->
 <template>
   <su-popup
     :show="state.show"
@@ -12,17 +12,17 @@
       <view class="img-wrap">
         <image
           class="notice-img"
-          :src="sheep.$url.static(state.event.image)"
+          :src="sheep.$url.static('/static/img/shop/commission/forbidden.png')"
           mode="aspectFill"
-        ></image>
+        />
       </view>
-      <view class="notice-title">{{ state.event.title }}</view>
-      <view class="notice-detail">{{ state.event.subtitle }}</view>
+      <view class="notice-title"> 抱歉！您没有分销权限 </view>
+      <view class="notice-detail"> 该功能暂不可用 </view>
       <button
         class="ss-reset-button notice-btn ui-Shadow-Main ui-BG-Main-Gradient"
-        @tap="onTap(state.event.action)"
+        @tap="sheep.$router.back()"
       >
-        {{ state.event.button }}
+        知道了
       </button>
       <button class="ss-reset-button back-btn" @tap="sheep.$router.back()"> 返回 </button>
     </view>
@@ -30,105 +30,22 @@
 </template>
 
 <script setup>
+  import { onShow } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import { reactive, watch } from 'vue';
+  import { reactive } from 'vue';
+  import BrokerageApi from '@/sheep/api/trade/brokerage';
 
-  const props = defineProps({
-    error: {
-      type: Number,
-      default: 0,
-    },
-  });
-  const emits = defineEmits(['getAgentInfo']);
   const state = reactive({
-    event: {},
     show: false,
   });
 
-  watch(
-    () => props.error,
-    (error) => {
-      if (error !== 0 && error !== 100) {
-        state.event = eventMap[error];
-        state.show = true;
-      }
-    },
-  );
-
-  async function onTap(eventName) {
-    switch (eventName) {
-      case 'back': // 返回
-        sheep.$router.back();
-        break;
-      case 'apply': // 需提交资料
-        sheep.$router.go('/pages/commission/apply');
-        break;
-      case 'reApply': // 直接重新申请
-        let { error } = await sheep.$api.commission.apply();
-        if (error === 0) {
-          emits('getAgentInfo');
-        }
-        break;
+  onShow(async () => {
+    // 读取是否有分销权限
+    const { code, data } = await BrokerageApi.getBrokerageUser();
+    if (code === 0 && !data?.brokerageEnabled) {
+      state.show = true;
     }
-  }
-  const eventMap = {
-    // 关闭
-    101: {
-      image: '/static/img/shop/commission/close.png',
-      title: '分销中心已关闭',
-      subtitle: '该功能暂不可用',
-      button: '知道了',
-      action: 'back',
-    },
-    // 禁用
-    102: {
-      image: '/static/img/shop/commission/forbidden.png',
-      title: '账户已被禁用',
-      subtitle: '该功能暂不可用',
-      button: '知道了',
-      action: 'back',
-    },
-    // 补充信息
-    103: {
-      image: '/static/img/shop/commission/apply.png',
-      title: '待完善信息',
-      subtitle: '请补充您的信息后提交审核',
-      button: '完善信息',
-      action: 'apply',
-    },
-    // 审核中
-    104: {
-      image: '/static/img/shop/commission/pending.png',
-      title: '正在审核中',
-      subtitle: '请耐心等候结果',
-      button: '知道了',
-      action: 'back',
-    },
-    // 重新提交
-    105: {
-      image: '/static/img/shop/commission/reject.png',
-      title: '抱歉!您的申请信息未通过',
-      subtitle: '请尝试修改后重新提交',
-      button: '重新申请',
-      action: 'apply',
-    },
-    // 直接重新申请
-    106: {
-      image: '/static/img/shop/commission/reject.png',
-      title: '抱歉!您的申请未通过',
-      subtitle: '请尝试重新申请',
-      button: '重新申请',
-      action: 'reApply',
-    },
-    // 冻结
-    107: {
-      image: '/static/img/shop/commission/freeze.png',
-      title: '抱歉!您的账户已被冻结',
-      subtitle: '如有疑问请联系客服',
-      button: '联系客服',
-      action: 'chat',
-    },
-  };
+  });
 </script>
 
 <style lang="scss" scoped>

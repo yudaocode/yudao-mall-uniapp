@@ -39,11 +39,6 @@ export default {
 			url: '/app-api/member/sign-in/record/page',
 			method: 'GET',
 		}),
-	// signAdd: () =>
-	// 	request({
-	// 		url: 'activity/signin',
-	// 		method: 'POST',
-	// 	}),
 	replenish: (data) =>
 		request({
 			url: 'activity/signin/replenish',
@@ -53,11 +48,6 @@ export default {
 	activity: (id) =>
 		request({
 			url: 'activity/activity/' + id,
-			method: 'GET',
-		}),
-	getSummary: () =>
-		request({
-			url: '/app-api/member/sign-in/record/get-summary',
 			method: 'GET',
 		}),
 	getBargainRecordSummary: () =>

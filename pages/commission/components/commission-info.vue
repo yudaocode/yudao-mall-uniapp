@@ -27,18 +27,16 @@
 
 <script setup>
 	import sheep from '@/sheep';
-	import {
-		computed,
-		reactive
-	} from 'vue';
+	import { computed, reactive } from 'vue';
 
 	const userInfo = computed(() => sheep.$store('user').userInfo);
 	const agentInfo = computed(() => sheep.$store('user').agentInfo);
 	const headerBg = sheep.$url.css('/static/img/shop/commission/background.png');
-	console.log(userInfo);
+
 	const state = reactive({
 		showMoney: false,
 	});
+
 </script>
 
 <style lang="scss" scoped>

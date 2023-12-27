@@ -2,7 +2,6 @@ import {
 	defineStore
 } from 'pinia';
 import userApi from '@/sheep/api/user';
-import commissionApi from '@/sheep/api/commission';
 import $share from '@/sheep/platform/share';
 import {
 	isEmpty,
@@ -15,6 +14,7 @@ import {
 	showAuthModal
 } from '@/sheep/hooks/useModal';
 import AuthUtil from '@/sheep/api/member/auth';
+import BrokerageApi from '@/sheep/api/trade/brokerage';
 
 // 默认用户信息
 const defaultUserInfo = {
@@ -23,7 +23,7 @@ const defaultUserInfo = {
 	gender: 0, // 性别
 	mobile: '', // 手机号
 	money: '--', // 余额
-	commission: '--', // 佣金
+	commission: '--', // 佣金 TODO 芋艿：干掉
 	score: '--', // 积分
 	verification: {}, // 认证字段
 };
@@ -46,7 +46,6 @@ const user = defineStore({
 		userInfo: clone(defaultUserInfo), // 用户信息
 		isLogin: !!uni.getStorageSync('token'), // 登录状态
 		numData: cloneDeep(defaultNumData), // 用户其他数据
-		agentInfo: {}, // 分销商信息
 		lastUpdateTime: 0, // 上次更新时间
 	}),
 
@@ -70,16 +69,6 @@ const user = defineStore({
 			this.userInfo = data;
 			// console.log(data2, '信息')
 			return Promise.resolve(data);
-		},
-
-		// 获取分销商信息
-    // TODO 芋艿：整理下；
-    async getAgentInfo() {
-			const res = await commissionApi.agent();
-			if (res.error === 0) {
-				this.agentInfo = res.data;
-			}
-			return Promise.resolve(res);
 		},
 
 		// 获取订单、优惠券等其他资产信息
