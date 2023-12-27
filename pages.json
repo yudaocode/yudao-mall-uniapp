@@ -564,18 +564,6 @@
 						"title": "申请提现",
 						"group": "支付"
 					}
-				},
-				{
-					"path": "withdraw-log",
-					"style": {
-						"navigationBarTitleText": "提现记录"
-					},
-					"meta": {
-						"auth": true,
-						"sync": true,
-						"title": "提现记录",
-						"group": "支付"
-					}
 				}
 			]
 		},
