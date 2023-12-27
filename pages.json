@@ -310,18 +310,6 @@
 					}
 				},
 				{
-					"path": "wallet/commission",
-					"style": {
-						"navigationBarTitleText": "我的佣金"
-					},
-					"meta": {
-						"auth": true,
-						"sync": true,
-						"title": "用户佣金",
-						"group": "分销中心"
-					}
-				},
-				{
 					"path": "wallet/score",
 					"style": {
 						"navigationBarTitleText": "我的积分"
@@ -349,6 +337,18 @@
 						"group": "分销商城"
 					}
 				},
+                {
+                  "path": "wallet",
+                  "style": {
+                    "navigationBarTitleText": "我的佣金"
+                  },
+                  "meta": {
+                    "auth": true,
+                    "sync": true,
+                    "title": "用户佣金",
+                    "group": "分销中心"
+                  }
+                },
 				{
 					"path": "goods",
 					"style": {

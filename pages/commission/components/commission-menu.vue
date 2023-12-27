@@ -31,7 +31,7 @@
 			{
 				img: '/static/img/shop/commission/commission_icon2.png',
 				title: '佣金明细',
-				path: '/pages/user/wallet/commission',
+				path: '/pages/commission/wallet',
 			},
 			{
 				img: '/static/img/shop/commission/commission_icon3.png',

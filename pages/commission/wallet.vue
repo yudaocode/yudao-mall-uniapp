@@ -1,3 +1,4 @@
+<!-- 分销 - 佣金明细 -->
 <template>
 	<s-layout class="wallet-wrap" title="佣金">
 		<!-- 钱包卡片 -->
@@ -6,10 +7,10 @@
 				<view class="card-head ss-flex ss-col-center">
 					<view class="card-title ss-m-r-10">当前佣金（元）</view>
 					<view @tap="state.showMoney = !state.showMoney" class="ss-eye-icon"
-						:class="state.showMoney ? 'cicon-eye' : 'cicon-eye-off'"></view>
+						:class="state.showMoney ? 'cicon-eye' : 'cicon-eye-off'" />
 				</view>
 				<view class="ss-flex ss-row-between ss-col-center ss-m-t-30">
-					<view class="money-num">{{ state.showMoney ? state.userInfo.withdrawPrice : '*****' }}</view>
+					<view class="money-num">{{ state.showMoney ? fen2yuan(state.summary.withdrawPrice || 0) : '*****' }}</view>
 					<view class="ss-flex">
 						<view class="ss-m-r-20">
 							<button class="ss-reset-button withdraw-btn" @tap="sheep.$router.go('/pages/pay/withdraw')">
@@ -25,62 +26,65 @@
 				<view class="ss-flex">
 					<view class="loading-money">
 						<view class="loading-money-title">冻结佣金</view>
-						<view class="loading-money-num">{{
-              state.showMoney ? state.userInfo.frozenPrice || '0.00' : '*****'
-            }}</view>
+						<view class="loading-money-num">
+              {{ state.showMoney ? fen2yuan(state.summary.frozenPrice || 0) : '*****' }}
+            </view>
 					</view>
 					<view class="loading-money ss-m-l-100">
 						<view class="loading-money-title">可提现佣金</view>
-						<view class="loading-money-num">{{
-              state.showMoney ? state.userInfo.brokeragePrice || '0.00' : '*****'
-            }}</view>
+						<view class="loading-money-num">
+              {{ state.showMoney ? fen2yuan(state.summary.brokeragePrice || 0) : '*****' }}
+            </view>
 					</view>
 				</view>
 			</view>
 		</view>
+
 		<su-sticky>
 			<!-- 统计 -->
 			<view class="filter-box ss-p-x-30 ss-flex ss-col-center ss-row-between">
-				<uni-datetime-picker v-model="state.data" type="daterange" @change="onChangeTime" :end="state.today">
+				<uni-datetime-picker v-model="state.date" type="daterange" @change="onChangeTime" :end="state.today">
 					<button class="ss-reset-button date-btn">
 						<text>{{ dateFilterText }}</text>
-						<text class="cicon-drop-down ss-seldate-icon"></text>
+						<text class="cicon-drop-down ss-seldate-icon" />
 					</button>
 				</uni-datetime-picker>
 
 				<view class="total-box">
+          <!-- TODO 芋艿：这里暂时不考虑做 -->
 					<!-- <view class="ss-m-b-10">总收入￥{{ state.pagination.income.toFixed(2) }}</view> -->
 					<!-- <view>总支出￥{{ (-state.pagination.expense).toFixed(2) }}</view> -->
 				</view>
 			</view>
-			<su-tabs :list="tabMaps" @change="onChangeTab" :scrollable="false" :current="state.currentTab"></su-tabs>
+			<su-tabs :list="tabMaps" @change="onChangeTab" :scrollable="false" :current="state.currentTab" />
 		</su-sticky>
 		<s-empty v-if="state.pagination.total === 0" icon="/static/data-empty.png" text="暂无数据"></s-empty>
-		<!-- 转余额弹框 -->
+
+    <!-- 转余额弹框 -->
 		<su-popup :show="state.showModal" type="bottom" round="20" @close="state.showModal = false" showClose>
 			<view class="ss-p-x-20 ss-p-y-30">
 				<view class="model-title ss-m-b-30 ss-m-l-20">转余额</view>
 				<view class="model-subtitle ss-m-b-100 ss-m-l-20">将您的佣金转到余额中继续消费</view>
 				<view class="input-box ss-flex ss-col-center border-bottom ss-m-b-70 ss-m-x-20">
 					<view class="unit">￥</view>
-					<uni-easyinput :inputBorder="false" class="ss-flex-1 ss-p-l-10" v-model="state.amount" type="number"
-						placeholder="请输入金额" />
+					<uni-easyinput :inputBorder="false" class="ss-flex-1 ss-p-l-10" v-model="state.price" type="number"
+                         placeholder="请输入金额" />
 				</view>
 				<button class="ss-reset-button model-btn ui-BG-Main-Gradient ui-Shadow-Main" @tap="onConfirm">
 					确定
 				</button>
 			</view>
 		</su-popup>
+
 		<!-- 钱包记录 -->
 		<view v-if="state.pagination.total > 0">
-			<view class="wallet-list ss-flex border-bottom" v-for="item in state.pagination.data" :key="item.id">
+			<view class="wallet-list ss-flex border-bottom" v-for="item in state.pagination.list" :key="item.id">
 				<view class="list-content">
 					<view class="title-box ss-flex ss-row-between ss-m-b-20">
-						<!-- {{ item.memo ? '-' + item.memo : '' }} -->
 						<text class="title ss-line-1">{{ item.title }}</text>
 						<view class="money">
-							<text v-if="item.amount >= 0" class="add">+{{ item.price }}</text>
-							<text v-else class="minus">{{ item.price }}</text>
+							<text v-if="item.price >= 0" class="add">+{{ fen2yuan(item.price) }}</text>
+							<text v-else class="minus">{{ fen2yuan(item.price) }}</text>
 						</view>
 					</view>
 					<text class="time">{{ sheep.$helper.timeFormat(item.createTime, 'yyyy-mm-dd hh:MM:ss') }}</text>
@@ -96,56 +100,45 @@
 </template>
 
 <script setup>
-	import {
-		computed,
-		reactive
-	} from 'vue';
-	import {
-		onLoad,
-		onReachBottom
-	} from '@dcloudio/uni-app';
+	import { computed, reactive } from 'vue';
+	import { onLoad, onReachBottom } from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
 	import dayjs from 'dayjs';
 	import _ from 'lodash';
+  import BrokerageApi from '@/sheep/api/trade/brokerage';
+  import { fen2yuan } from '@/sheep/hooks/useGoods';
+  import { resetPagination } from '@/sheep/util';
 
 	const headerBg = sheep.$url.css('/static/img/shop/user/wallet_card_bg.png');
 
-	// 数据
-	const pagination = {
-		data: [],
-		current_page: 1,
-		total: 1,
-		last_page: 1,
-		expense: 0,
-		income: 0,
-	};
 	const state = reactive({
-		userInfo: {},
-		showMoney: false,
-		date: [],
+    showMoney: false,
+    summary: {}, // 分销信息
+
+    today: '',
+    date: [],
 		currentTab: 0,
-		pagination,
+		pagination: {
+      list: [],
+      total: 0,
+      pageNo: 1,
+      pageSize: 1,
+    },
 		loadStatus: '',
+
+    price: undefined,
 		showModal: false,
-		today: '',
 	});
 
 	const tabMaps = [{
 			name: '分佣',
-			value: 'all',
+			value: '1', // BrokerageRecordBizTypeEnum.ORDER
 		},
 		{
 			name: '提现',
-			value: 'income',
+			value: '2', // BrokerageRecordBizTypeEnum.WITHDRAW
 		}
-		// {
-		// 	name: '支出',
-		// 	value: 'expense',
-		// },
 	];
-	const userInfo = computed(() => sheep.$store('user').userInfo);
-
-	const agentInfo = computed(() => sheep.$store('user').agentInfo);
 
 	const dateFilterText = computed(() => {
 		if (state.date[0] === state.date[1]) {
@@ -155,36 +148,25 @@
 		}
 	});
 
-	async function getLogList(page = 1, list_rows = 4) {
+	async function getLogList() {
 		state.loadStatus = 'loading';
-		let ress = await sheep.$api.commission.getSummary();
-		state.userInfo = ress.data;
-		let res = await sheep.$api.user.wallet.log3({
-			// type: 'commission',
-			// tab: tabMaps[state.currentTab].value,
-			pageSize: list_rows,
-			pageNo: page,
-			// date: appendTimeHMS(state.date),
+		let { code, data } = await BrokerageApi.getBrokerageRecordPage({
+			pageSize: state.pagination.pageSize,
+			pageNo: state.pagination.pageNo,
+      bizType: tabMaps[state.currentTab].value,
+      'createTime[0]': state.date[0] + ' 00:00:00',
+      'createTime[1]': state.date[1] + ' 23:59:59',
 		});
-		if (res.code === 0) {
-			let list = _.concat(state.pagination.data, res.data.list);
-			state.pagination = {
-				current_page: page,
-				...res.data,
-				data: list,
-				// income: res.data.income,
-				// expense: res.data.expense,
-			};
-			if (state.pagination.data.length < state.pagination.total) {
-				state.loadStatus = 'more';
-			} else {
-				state.loadStatus = 'noMore';
-			}
+		if (code !== 0) {
+      return;
 		}
+    state.pagination.list = _.concat(state.pagination.list, data.list);
+    state.pagination.total = data.total;
+    state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
 	}
 
 	function onChangeTab(e) {
-		state.pagination = pagination;
+		resetPagination(state.pagination);
 		state.currentTab = e.index;
 		getLogList();
 	}
@@ -192,17 +174,13 @@
 	function onChangeTime(e) {
 		state.date[0] = e[0];
 		state.date[1] = e[e.length - 1];
-		state.pagination = pagination;
+    resetPagination(state.pagination);
 		getLogList();
 	}
 
-	function appendTimeHMS(arr) {
-		return [arr[0] + ' 00:00:00', arr[1] + ' 23:59:59'];
-	}
-
-	// 确认操作
+	// 确认操作（转账到余额）
 	async function onConfirm() {
-		if (state.amount <= 0) {
+		if (state.price <= 0) {
 			sheep.$helper.toast('请输入正确的金额');
 			return;
 		}
@@ -210,30 +188,33 @@
 			title: '提示',
 			content: '确认把您的佣金转入到余额钱包中？',
 			success: async function(res) {
-				if (res.confirm) {
-					const {
-						error
-					} = await sheep.$api.commission.transfer({
-						amount: state.amount,
-					});
-					if (error === 0) {
-						state.showModal = false;
-						sheep.$store('user').getInfo();
-						onChangeTab({
-							index: 0
-						});
-					}
+				if (!res.confirm) {
+          return;
 				}
-			},
+        const { code } = await BrokerageApi.createBrokerageWithdraw({
+          type: 1, // 钱包
+          price: state.price * 100,
+        });
+        if (code === 0) {
+          state.showModal = false;
+          await getAgentInfo();
+          onChangeTab({
+            index: 1
+          });
+        }
+			}
 		});
 	}
+
 	async function getAgentInfo() {
-		const {
-			code,
-			data
-		} = await sheep.$store('user').getAgentInfo();
+		const { code, data } = await BrokerageApi.getBrokerageUserSummary();
+    if (code !== 0) {
+      return;
+    }
+    state.summary = data;
 	}
-	onLoad(async (options) => {
+
+	onLoad(async () => {
 		state.today = dayjs().format('YYYY-MM-DD');
 		state.date = [state.today, state.today];
 		getLogList();
@@ -241,9 +222,11 @@
 	});
 
 	onReachBottom(() => {
-		if (state.loadStatus !== 'noMore') {
-			getLogList(state.pagination.current_page + 1);
+		if (state.loadStatus === 'noMore') {
+			return;
 		}
+    state.pagination.pageNo++;
+    getLogList();
 	});
 </script>
 

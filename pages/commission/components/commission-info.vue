@@ -9,16 +9,6 @@
 				</view>
 				<view class="ss-flex-col">
 					<view class="user-name">{{ userInfo.nickname }}</view>
-					<view class="user-info-box ss-flex">
-						<view class="tag-box ss-flex" v-if="agentInfo.level_info">
-							<image v-if="agentInfo.level_info?.image" class="tag-img"
-								:src="sheep.$url.cdn(agentInfo.level_info?.image)" mode="aspectFill">
-							</image>
-							<text class="tag-title">{{ agentInfo.level_info?.name }}</text>
-						</view>
-						<view class="ss-iconfont uicon-arrow-right" style="color: #fff; font-size: 28rpx">
-						</view>
-					</view>
 				</view>
 			</view>
 		</view>
@@ -30,7 +20,6 @@
 	import { computed, reactive } from 'vue';
 
 	const userInfo = computed(() => sheep.$store('user').userInfo);
-	const agentInfo = computed(() => sheep.$store('user').agentInfo);
 	const headerBg = sheep.$url.css('/static/img/shop/commission/background.png');
 
 	const state = reactive({

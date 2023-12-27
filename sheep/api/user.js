@@ -264,13 +264,6 @@ export default {
 				params,
 				custom: {},
 			}),
-		log3: (params) =>
-			request({
-				url: '/app-api/trade/brokerage-record/page',
-				// url: 'pay/wallet-transaction/page',
-				method: 'GET',
-				params,
-			}),
 	},
 	account: {
 		info: (params) =>

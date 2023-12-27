@@ -4,33 +4,33 @@
 			<view class="redBg bg-color">
 				<view class="header">
 					<view class="nav acea-row row-center-wrapper" style='display:flex'>
-						<view class="item" :class="state.active === index ? 'font-color' : ''"
-							v-for="(item, index) in state.navList" :key="index" @click="switchTap(index)">
+						<view class="item" :class="state.currentTab === index ? 'font-color' : ''"
+							v-for="(item, index) in tabMaps" :key="index" @click="switchTap(index)">
 							{{ item }}
 						</view>
 					</view>
 					<!-- top3 排名 -->
 					<view class="rank acea-row row-bottom row-around">
-						<view class="item" v-show="state.Two.id">
+						<view class="item" v-show="state.two.id">
 							<view class="pictrue">
-								<image :src="state.Two.avatar"></image>
+								<image :src="state.two.avatar"></image>
 							</view>
-							<view class="name line1">{{state.Two.nickname}}</view>
-							<view class="num">{{ state.Two.brokerageUserCount }}人</view>
+							<view class="name line1">{{state.two.nickname}}</view>
+							<view class="num">{{ state.two.brokerageUserCount }}人</view>
 						</view>
-						<view class="item" v-show="state.One.id">
+						<view class="item" v-show="state.one.id">
 							<view class="pictrue">
-								<image :src="state.One.avatar"></image>
+								<image :src="state.one.avatar"></image>
 							</view>
-							<view class="name line1">{{state.One.nickname}}</view>
-							<view class="num">{{ state.One.brokerageUserCount }}人</view>
+							<view class="name line1">{{state.one.nickname}}</view>
+							<view class="num">{{ state.one.brokerageUserCount }}人</view>
 						</view>
-						<view class="item" v-show="state.Three.id">
+						<view class="item" v-show="state.three.id">
 							<view class="pictrue">
-								<image :src="state.Three.avatar"></image>
+								<image :src="state.three.avatar"></image>
 							</view>
-							<view class="name line1">{{state.Three.nickname}}</view>
-							<view class="num">{{ state.Three.brokerageUserCount }}人</view>
+							<view class="name line1">{{state.three.nickname}}</view>
+							<view class="num">{{ state.three.brokerageUserCount }}人</view>
 						</view>
 					</view>
 				</view>
@@ -54,66 +54,57 @@
 
 <script setup>
 	import sheep from '@/sheep';
-	import $share from '@/sheep/platform/share';
-	import {
-		onLoad,
-		onReachBottom
-	} from '@dcloudio/uni-app';
-	import {
-		computed,
-		reactive
-	} from 'vue';
-	import _ from 'lodash';
+  import { onLoad } from '@dcloudio/uni-app';
+  import { reactive } from 'vue';
+  import BrokerageApi from '@/sheep/api/trade/brokerage';
 
-	const state = reactive({
-		navList: ["周榜", "月榜"],
-		active: 0,
-		page: 1,
-		limit: 10,
-		type: 'week',
-		loading: false,
-		loadend: false,
+  const tabMaps = ['周排行', '月排行'];
+
+  const state = reactive({
+    currentTab: 0,
+
 		rankList: [],
 		times: [],
-		One: {}, // 排名第一
-		Two: {}, // 排名第二
-		Three: {}, // 排名第三
+
+		one: {}, // 排名第一
+		two: {}, // 排名第二
+		three: {}, // 排名第三
 	});
 
 	function switchTap(index) {
-		if (state.active === index) {
+		if (state.currentTab === index) {
 			return;
 		}
-		state.active = index;
-		// week
-		state.type = index ? 'month' : 'week';
-		// this.page = 1;
-		// this.loadend = false;
-		// this.$set(this, 'rankList', []);
-		// this.Two = {};
-		// this.One = {};
-		// this.Three = {};
+		state.currentTab = index;
 		calculateTimes();
-		getRanklist();
+		getRankList();
 	}
 
-
-	function getRanklist() {
-		// todo @芋艿：编码传参
-		sheep.$api.commission.getBrokerageRankNumber({
-			pageNo: state.page,
-			pageSize: state.limit,
-			'times[0]': state.times[0],
-			'times[1]': state.times[1],
-		}).then(res => {
-			console.log(res)
-		})
-	}
-
+	async function getRankList() {
+    // 重置数据
+    state.one = {};
+    state.two = {};
+    state.three = {};
+    state.rankList = [];
+    // 查询
+    const { code, data } = await BrokerageApi.getBrokerageUserRankPageByUserCount({
+      pageNo: 1,
+      pageSize: 10,
+      'times[0]': state.times[0],
+      'times[1]': state.times[1],
+    });
+    if (code !== 0) {
+      return;
+    }
+    state.rankList = data.list;
+    state.one = state.rankList.shift() || {};
+    state.two = state.rankList.shift() || {};
+    state.trhee = state.rankList.shift() || {};
+  }
 
 	function calculateTimes() {
 		let times;
-		if (state.type === 'week') {
+		if (state.currentTab === 0) {
 			times = getWeekTimes();
 		} else {
 			times = getMonthTimes();
@@ -121,10 +112,17 @@
 		state.times = [formatDate(times[0]), formatDate(times[1])]
 	}
 
+  onLoad(function () {
+    calculateTimes();
+    getRankList();
+  });
+
 	function formatDate(date) {
 		return sheep.$helper.timeFormat(date, 'yyyy-mm-dd hh:MM:ss');
 	}
-	// 此处可考虑抽离
+
+  // TODO 芋艿：此处可考虑抽离
+  // 此处可考虑抽离
 	/**
 	 * 获得当前周的开始和结束时间
 	 */
@@ -149,6 +147,7 @@
 		const endDate = new Date(nextMonth.getTime() - 1);
 		return [startDate, endDate]
 	}
+  // TODO 芋艿：css 需要优化下；并且展示样式有问题
 </script>
 
 <style lang='scss' scoped>
