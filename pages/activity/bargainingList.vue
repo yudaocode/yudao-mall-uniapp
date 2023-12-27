@@ -1,5 +1,7 @@
+<!-- 砍价列表 TODO @科举：新建一个 bargain 包，然后这个页面挪进去，改成 list.vue。写的时候，要思考怎么更好的融入到当前项目 -->
 <template>
-	<s-layout title='砍价列表'>
+  <!-- TODO @科举：参考 groupon/list.vue 和 seckill/list.vue 界面，调整下头部，就是从 5 到 11 行的  -->
+	<s-layout navbar="inner" title='砍价列表'>
 		<view style='background-color: red;height:100vh;'>
 			<view class='bargain-list'>
 				<!-- #ifdef H5 -->
@@ -12,7 +14,7 @@
 				<view class='header'>
 					<view class="pic">
 						<view class='swipers'>
-							<swiper :indicator-dots="state.indicatorDots" :autoplay="state.autoplay" interval="2500"
+							<swiper indicator-dots="true" autoplay="true" interval="2500"
 								duration="500" vertical="true" circular="true">
 								<block v-for="(item,index) in state.bargainSuccessList" :key='index'>
 									<swiper-item>
@@ -69,25 +71,11 @@
 </template>
 
 <script setup>
-	import {
-		computed,
-		reactive
-	} from 'vue';
+	import { reactive } from 'vue';
 	import sheep from '@/sheep';
 	import _ from 'lodash';
-	import {
-		onLoad,
-		onReachBottom
-	} from '@dcloudio/uni-app';
-	import {
-		useDurationTime
-	} from '@/sheep/hooks/useGoods';
-	import {
-		showShareModal
-	} from '@/sheep/hooks/useModal';
-	import {
-		isEmpty
-	} from 'lodash';
+	import { onLoad, onReachBottom } from '@dcloudio/uni-app';
+  import { fen2yuan } from '@/sheep/hooks/useGoods';
 
 	const state = reactive({
 		navH: '',
@@ -96,8 +84,6 @@
 		// ========== 砍价记录概要的相关变量 ==========
 		bargainTotal: 0,
 		bargainSuccessList: [],
-		autoplay: true,
-		indicatorDots: false,
 
 		// ========== 砍价活动的相关变量 ==========
 		bargainList: [],
@@ -116,6 +102,7 @@
 	});
 
 	function getBargainHeader() {
+    // TODO @科举：这个改成 BargainApi.getBargainRecordSummary，使用 await 操作；代码风格要统一
 		sheep.$api.activity.getBargainRecordSummary().then(res => {
 			state.bargainTotal = res.data.successUserCount;
 			state.bargainSuccessList = res.data.successList;
@@ -127,12 +114,14 @@
 	}
 
 	function getBargainList() {
-		if (state.loadend || state.loading) {
+    // TODO @科举：loading 和 loadTitle 改成现在这个项目的风格，包括组件使用 uni-load-more
+    if (state.loadend || state.loading) {
 			return;
 		}
 		state.loading = true;
 		state.loadTitle = '';
-		sheep.$api.activity.getBargainActivityPage({
+    // TODO @科举：这个改成 BargainApi.getBargainRecordSummary，使用 await 操作；代码风格要统一
+    sheep.$api.activity.getBargainActivityPage({
 			pageNo: state.page,
 			pageSize: state.limit
 		}).then(res => {
@@ -154,6 +143,8 @@
 
 	function openSubscribe(e) {
 		console.log(e)
+    // TODO @科举：参考 pages/pay/result.vue 页面的 subscribeMessage 方法，写订阅逻辑。
+    // TODO @科举：navigateTo 在项目里，应该是 sheep.$router.go，参考写下
 		uni.navigateTo({
 			url: page,
 		});
@@ -176,6 +167,7 @@
 		});
 		// #endif
 	}
+
 	onLoad(function() {
 		getBargainHeader();
 		getBargainList();
@@ -184,11 +176,6 @@
 	onReachBottom(() => {
 		getBargainList();
 	});
-
-	// 工具函数
-	function fen2yuan(price) {
-		return (price / 100.0).toFixed(2)
-	}
 </script>
 
 <style lang='scss' scoped>

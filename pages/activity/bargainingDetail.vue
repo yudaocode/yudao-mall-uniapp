@@ -1,4 +1,8 @@
+<!-- 砍价详情 -->
 <template>
+  <!-- TODO @科举：按照项目的代码风格，调整下这个界面 -->
+  <!-- TODO @科举：挪到 bargain/detail.vue 里 -->
+  <!-- TODO @科举：尽量都迁移完；依赖数据的部分，通过直接在 state 写死状态，不用后端返回，跑通整个界面；不追求 100% 对，但是至少自己观感是 ok 的 -->
 	<s-layout title='砍价详情'>
 		<view class='bargain'>
 			<!-- :class="startBargainUid !== userInfo.uid ? 'on' : ''" -->
