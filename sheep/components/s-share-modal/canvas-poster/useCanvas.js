@@ -5,8 +5,6 @@
  * @param {Object} options - 海报参数
  * @param {Object} vm - 自定义组件实例
  */
-
-import sheep from '@/sheep';
 import QSCanvas from 'qs-canvas';
 import { getPosterData } from './poster';
 

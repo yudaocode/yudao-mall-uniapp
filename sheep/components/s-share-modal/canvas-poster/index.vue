@@ -1,4 +1,4 @@
-<!-- 页面 -->
+<!-- 海报弹窗 -->
 <template>
   <su-popup :show="show" round="10" @close="onClosePoster" type="center" class="popup-box">
     <view class="ss-flex-col ss-col-center ss-row-center">
@@ -20,8 +20,8 @@
           height: poster.height + 'px',
           width: poster.width + 'px',
         }"
-		:show-menu-by-longpress="true"
-      ></image>
+        :show-menu-by-longpress="true"
+      />
       <canvas
         class="hideCanvas"
         :canvas-id="poster.canvasId"
@@ -33,7 +33,7 @@
       />
       <view
         class="poster-btn-box ss-m-t-20 ss-flex ss-row-between ss-col-center"
-        v-if="poster.src != ''"
+        v-if="poster.src !== ''"
       >
         <button class="cancel-btn ss-reset-button" @tap="onClosePoster">取消</button>
         <button class="save-btn ss-reset-button ui-BG-Main" @tap="onSavePoster">
@@ -73,9 +73,12 @@
 
   const emits = defineEmits(['success', 'close']);
   const vm = getCurrentInstance();
+
   const onClosePoster = () => {
     emits('close');
   };
+
+  // 保存海报图片
   const onSavePoster = () => {
     if (['WechatOfficialAccount', 'H5'].includes(sheep.$platform.name)) {
       sheep.$helper.toast('请长按图片保存');
@@ -95,6 +98,7 @@
     });
   };
 
+  // 使用 canvas 生成海报
   async function getPoster(params) {
     poster.src = '';
 
