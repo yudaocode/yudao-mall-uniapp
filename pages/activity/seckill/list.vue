@@ -1,3 +1,4 @@
+<!-- 秒杀活动列表 -->
 <template>
   <s-layout navbar="inner" :bgStyle="{ color: 'rgb(245,28,19)' }">
     <!--顶部背景图-->
@@ -20,7 +21,8 @@
     <view class="flex align-center justify-between ss-p-25">
       <!-- 左侧图标 -->
       <view class="time-icon">
-        <image class="ss-w-100 ss-h-100" src="http://mall.yudao.iocoder.cn/static/images/priceTag.png"></image>
+        <!-- TODO 芋艿：图片统一维护 -->
+        <image class="ss-w-100 ss-h-100" src="http://mall.yudao.iocoder.cn/static/images/priceTag.png" />
       </view>
       <scroll-view class="time-list" :scroll-into-view="activeTimeElId" scroll-x scroll-with-animation>
         <view v-for="(config, index) in timeConfigList" :key="index"
@@ -34,6 +36,7 @@
         </view>
       </scroll-view>
     </view>
+
     <!-- 内容区 -->
     <view class="list-content">
       <!-- 活动倒计时 -->
@@ -52,6 +55,7 @@
           <view v-else> {{ activeTimeConfig?.status }} </view>
         </view>
       </view>
+
       <!-- 活动列表 -->
       <scroll-view
         class="scroll-box"
@@ -118,13 +122,9 @@
 
   // 商品控件显示的字段（不显示库存、销量。改为显示自定义的进度条）
   const goodsFields = {
-    // 商品名称
     name: { show: true },
-    // 商品介绍
     introduction: { show: true },
-    // 商品价格
     price: { show: true },
-    // 市场价
     marketPrice: { show: true },
   };
 
@@ -156,18 +156,15 @@
     scrollToTimeConfig(activeTimeIndex.value)
   }
 
-  // 当前选中的时间段的元素ID
-  const activeTimeElId = ref('')
   // 滚动到指定时间段
+  const activeTimeElId = ref('') // 当前选中的时间段的元素ID
   const scrollToTimeConfig = (index) => {
     nextTick(() => activeTimeElId.value = `timeItem${index}`)
   }
 
-  // 当前选中的时间段的索引
-  const activeTimeIndex = ref(0)
-  // 当前选中的时间段
-  const activeTimeConfig = computed(() => timeConfigList.value[activeTimeIndex.value])
   // 切换时间段
+  const activeTimeIndex = ref(0) // 当前选中的时间段的索引
+  const activeTimeConfig = computed(() => timeConfigList.value[activeTimeIndex.value]) // 当前选中的时间段
   const handleChangeTimeConfig = (index) => {
     activeTimeIndex.value = index
 
@@ -189,22 +186,15 @@
 
   //#region 分页查询活动列表
 
-  // 活动分页查询参数
-  const activityPageParams = reactive({
-    // 时间段ID
-    id: 0,
-    // 页码
-    pageNo: 1,
-    // 每页数量
-    pageSize: 5,
-  })
-  // 活动总数
-  const activityTotal = ref(0)
-  // 活动列表
-  const activityList = ref([])
-  // 页面加载状态
-  const loadStatus = ref('')
   // 查询活动列表
+  const activityPageParams = reactive({
+    id: 0, // 时间段 ID
+    pageNo: 1, // 页码
+    pageSize: 5, // 每页数量
+  })
+  const activityTotal = ref(0) // 活动总数
+  const activityList = ref([]) // 活动列表
+  const loadStatus = ref('') // 页面加载状态
   async function getActivityList() {
     loadStatus.value = 'loading';
     const { data } = await SeckillApi.getSeckillActivityPage(activityPageParams)
@@ -227,6 +217,7 @@
   }
   // 上拉加载更多
   onReachBottom(() => loadMore());
+
   //#endregion
 
   // 页面初始化

@@ -1,3 +1,4 @@
+<!-- 秒杀商品的 SKU 选择，和 s-select-sku.vue 类似 -->
 <template>
 	<!-- 规格弹窗 -->
 	<su-popup :show="show" round="10" @close="emits('close')">
@@ -157,6 +158,7 @@
       state.selectedSku.count = buyCount;
     }
   }
+
   // 改变禁用状态
   const changeDisabled = (isChecked = false, propertyId = 0, valueId = 0) => {
     let newSkus = []; // 所有可以选择的 sku 数组
@@ -230,6 +232,7 @@
       }
     }
   };
+
   // 获取可用的（有库存的）SKU 列表
   const getCanUseSkuList = () => {
     let newSkus = [];
@@ -250,6 +253,7 @@
     }
     return newSkus;
   };
+
   // 选择规格
   const onSelectSku = (propertyId, valueId) => {
     // 清空已选择

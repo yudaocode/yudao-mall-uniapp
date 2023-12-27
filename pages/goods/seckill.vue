@@ -1,3 +1,4 @@
+<!-- 秒杀商品详情 -->
 <template>
   <s-layout :onShareAppMessage="shareInfo" navbar="goods">
     <!-- 标题栏 -->
@@ -110,9 +111,11 @@
               :class="
                 state.goodsInfo.stock === 0 || activity.status != 'ing' ? '' : ''
               "
-              >秒杀价</view
             >
+              秒杀价
+            </view>
           </button>
+          <!-- TODO @疯狂：status 判断不太对 -->
           <button
             class="ss-reset-button btn-box ss-flex-col"
             @tap="state.showSelectSku = true"
