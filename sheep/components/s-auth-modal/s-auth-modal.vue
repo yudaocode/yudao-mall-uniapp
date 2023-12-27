@@ -81,18 +81,12 @@
           />
           <view class="agreement-text ss-flex ss-col-center ss-m-l-8">
             我已阅读并遵守
-            <view
-              class="tcp-text"
-              @tap.stop="onProtocol(appInfo.user_protocol.id, appInfo.user_protocol.title)"
-            >
-              《{{ appInfo.user_protocol.title }}》
+            <view class="tcp-text" @tap.stop="onProtocol('用户协议')">
+              《用户协议》
             </view>
             <view class="agreement-text">与</view>
-            <view
-              class="tcp-text"
-              @tap.stop="onProtocol(appInfo.privacy_protocol.id, appInfo.privacy_protocol.title)"
-            >
-              《{{ appInfo.privacy_protocol.title }}》
+            <view class="tcp-text" @tap.stop="onProtocol('隐私协议')">
+              《隐私协议》
             </view>
           </view>
         </label>
@@ -130,11 +124,10 @@
     state.protocol = !state.protocol;
   }
 
-  // 查看协议 TODO 芋艿：协议
-  function onProtocol(id, title) {
+  // 查看协议
+  function onProtocol(title) {
     closeAuthModal();
     sheep.$router.go('/pages/public/richtext', {
-      id,
       title,
     });
   }

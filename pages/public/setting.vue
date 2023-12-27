@@ -27,7 +27,6 @@
           :border="false"
           class="list-border"
         />
-        <!-- TODO 芋艿：统一的配置界面 -->
         <uni-list-item
           title="关于我们"
           showArrow
@@ -36,8 +35,7 @@
           class="list-border"
           @tap="
             sheep.$router.go('/pages/public/richtext', {
-              id: appInfo.about_us.id,
-              title: appInfo.about_us.title,
+              title: '关于我们'
             })
           "
         />
@@ -62,24 +60,22 @@
             class="tcp-text"
             @tap="
               sheep.$router.go('/pages/public/richtext', {
-                id: appInfo.user_protocol.id,
-                title: appInfo.user_protocol.title,
+                title: '用户协议'
               })
             "
           >
-            《{{ appInfo.user_protocol.title }}》
+            《用户协议》
           </view>
           <view class="agreement-text">与</view>
           <view
             class="tcp-text"
             @tap="
               sheep.$router.go('/pages/public/richtext', {
-                id: appInfo.privacy_protocol.id,
-                title: appInfo.privacy_protocol.title,
+                title: '隐私协议'
               })
             "
           >
-            《{{ appInfo.privacy_protocol.title }}》
+            《隐私协议》
           </view>
         </view>
       </view>
