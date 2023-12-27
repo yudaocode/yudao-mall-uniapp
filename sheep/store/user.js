@@ -23,7 +23,7 @@ const defaultUserInfo = {
 	gender: 0, // 性别
 	mobile: '', // 手机号
 	money: '--', // 余额
-	score: '--', // 积分
+	score: '--', // 积分  TODO 芋艿：改成 point
 	verification: {}, // 认证字段
 };
 

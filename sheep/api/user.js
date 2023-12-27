@@ -256,14 +256,6 @@ export default {
 				params,
 				custom: {},
 			}),
-		log2: (params) =>
-			request2({
-				url: 'member/point/record/page',
-				// url: 'pay/wallet-transaction/page',
-				method: 'GET',
-				params,
-				custom: {},
-			}),
 	},
 	account: {
 		info: (params) =>
