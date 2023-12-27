@@ -1,3 +1,4 @@
+<!-- FAQ 常见问题 -->
 <template>
   <s-layout class="set-wrap" title="常见问题" :bgStyle="{ color: '#FFF' }">
     <uni-collapse>
@@ -48,6 +49,13 @@
     }
   }
   onLoad(() => {
+    // TODO 芋艿：目前简单做，使用营销文章，作为 faq
+    if (true) {
+      sheep.$router.go('/pages/public/richtext', {
+        title: '常见问题',
+      })
+      return;
+    }
     getFaqList();
   });
 </script>
