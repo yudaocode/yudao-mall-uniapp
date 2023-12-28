@@ -27,8 +27,6 @@ const defaultUserInfo = {
 	gender: 0, // 性别
 	mobile: '', // 手机号
   point: 0, // 积分
-  money: 0, // 余额
-	verification: {}, // 认证字段
 };
 
 // 默认钱包信息
@@ -103,7 +101,7 @@ const user = defineStore({
 		},
 
 		// 设置 token
-    // TODO 芋艿：整理下；
+    // TODO 芋艿：后续要支持访问令牌的刷新！！！
     setToken(token = '') {
 			if (token === '') {
 				this.isLogin = false;
@@ -159,9 +157,9 @@ const user = defineStore({
 			$share.getShareInfo();
 
 			// 提醒绑定手机号
-			// if (app().platform.bind_mobile && !this.userInfo.verification?.mobile) {
-			// 	showAuthModal('changeMobile');
-			// }
+			if (app().platform.bind_mobile && !this.userInfo.mobile) {
+				showAuthModal('changeMobile');
+			}
 
 			// 添加分享记录
       // TODO 芋艿：整理下；
