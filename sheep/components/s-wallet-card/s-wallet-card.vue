@@ -12,7 +12,7 @@
 		<view class="menu-item ss-flex-1 ss-flex-col ss-row-center ss-col-center"
 			@tap="sheep.$router.go('/pages/user/wallet/score')">
 			<view class="value-box ss-flex ss-col-bottom">
-				<view class="value-text">{{ userInfo.point || '0.00' }}</view>
+				<view class="value-text">{{ userInfo.point || 0 }}</view>
 				<view class="unit-text ss-m-l-6">个</view>
 			</view>
 			<view class="menu-title ss-m-t-28">积分</view>

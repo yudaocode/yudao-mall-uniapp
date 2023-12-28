@@ -95,7 +95,6 @@ http.interceptors.request.use(
 			config.header['Accept'] = '*/*'
 			config.header['tenant-id'] = '1';
       config.header['terminal'] = '20';
-			config.header['Authorization'] = 'Bearer test247';
 		}
 		return config;
 	},
@@ -109,12 +108,8 @@ http.interceptors.request.use(
  */
 http.interceptors.response.use(
 	(response) => {
-		// 自动设置登陆令牌
-		if (response.header.authorization || response.header.Authorization) {
-			$store('user').setToken(response.header.authorization || response.header.Authorization);
-		}
-    // TODO 芋艿：如果是登录的 API，则自动设置 token
-    if (response.data?.data?.accessToken) {
+    // 约定：如果是 /auth/ 下的 URL 地址，并且返回了 accessToken 说明是登录相关的接口，则自动设置登陆令牌
+    if (response.config.url.indexOf('/member/auth/') >= 0 && response.data?.data?.accessToken) {
       $store('user').setToken(response.data.data.accessToken);
     }
 

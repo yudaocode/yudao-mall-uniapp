@@ -152,7 +152,7 @@ http.interceptors.response.use(
 					} else {
 						errorMessage = '请先登录';
 					}
-					userStore.logout(true);
+					userStore.logout();
 					showAuthModal();
 					break;
 				case 403:

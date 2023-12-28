@@ -102,7 +102,7 @@ const user = defineStore({
 			if (error === 0) uni.removeStorageSync('shareLog');
 		},
 
-		// 设置token
+		// 设置 token
     // TODO 芋艿：整理下；
     setToken(token = '') {
 			if (token === '') {
@@ -137,22 +137,27 @@ const user = defineStore({
 		},
 
 		// 重置用户默认数据
-    // TODO 芋艿：整理下；
     resetUserData() {
+      // 清空 token
 			this.setToken();
+      // 清空用户相关的缓存
 			this.userInfo = clone(defaultUserInfo);
       this.userWallet = clone(defaultUserWallet);
 			this.numData = cloneDeep(defaultNumData);
+      // 清空购物车的缓存
 			cart().emptyList();
 		},
 
-		// 登录后
+		// 登录后，加载各种信息
     // TODO 芋艿：整理下；
     async loginAfter() {
 			await this.updateUserData();
+
+      // 加载购物车
 			cart().getList();
 			// 登录后设置全局分享参数
 			$share.getShareInfo();
+
 			// 提醒绑定手机号
 			// if (app().platform.bind_mobile && !this.userInfo.verification?.mobile) {
 			// 	showAuthModal('changeMobile');
@@ -168,21 +173,11 @@ const user = defineStore({
 			}
 		},
 
-		// 登出
-    // TODO 芋艿：整理下；
-    async logout(force = false) {
-			if (!force) {
-				const { code } = AuthUtil.logout();
-				if (code === 0) {
-					this.resetUserData();
-				}
-			}
-			if (force) {
-				this.resetUserData();
-			}
-
+		// 登出系统
+    async logout() {
+      this.resetUserData();
 			return !this.isLogin;
-		},
+		}
 	},
 	persist: {
 		enabled: true,
