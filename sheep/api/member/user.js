@@ -1,6 +1,17 @@
 import request from '@/sheep/request';
 
 const UserApi = {
+  // 获得基本信息
+  getUserInfo: () => {
+    return request({
+      url: '/app-api/member/user/get',
+      method: 'GET',
+      custom: {
+        showLoading: false,
+        auth: true,
+      },
+    });
+  },
   // 修改基本信息
   updateUser: (data) => {
     return request({

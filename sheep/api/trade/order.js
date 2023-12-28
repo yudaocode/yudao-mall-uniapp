@@ -90,6 +90,17 @@ const OrderApi = {
       },
     });
   },
+  // 获得交易订单数量
+  getOrderCount: () => {
+    return request2({
+      url: '/app-api/trade/order/get-count',
+      method: 'GET',
+      custom: {
+        showLoading: false,
+        auth: true,
+      },
+    });
+  },
   // 创建单个评论
   createOrderItemComment: (data) => {
     return request2({

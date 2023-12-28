@@ -38,7 +38,7 @@
               </view>
               <view class="check-box ss-flex ss-col-center ss-p-l-10">
                 <view class="userInfo-money ss-m-r-10" v-if="item.value === 'wallet'">
-                  余额: {{ fen2yuan(userInfo.money) }}元
+                  余额: {{ fen2yuan(userWallet.money) }}元
                 </view>
                 <radio
                   :value="item.value"
@@ -83,7 +83,7 @@
   import PayChannelApi from '@/sheep/api/pay/channel';
   import { getPayMethods } from '@/sheep/platform/pay';
 
-  const userInfo = computed(() => sheep.$store('user').userInfo);
+  const userWallet = computed(() => sheep.$store('user').userWallet);
 
   // 检测支付环境
   const state = reactive({
@@ -189,6 +189,8 @@
       state.orderType = options.orderType;
     }
     setOrder(id);
+    // 刷新钱包的缓存
+    sheep.$store('user').getWallet();
   });
 </script>
 
