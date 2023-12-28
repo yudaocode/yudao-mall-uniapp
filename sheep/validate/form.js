@@ -22,24 +22,6 @@ export const mobile = {
   ],
 };
 
-// 账户
-export const account = {
-  rules: [
-    {
-      required: true,
-      errorMessage: '请输入账号',
-    },
-    {
-      validateFunction: function (rule, value, data, callback) {
-        if (value.length < 5) {
-          callback('账号长度不能小于5位');
-        }
-        return true;
-      },
-    },
-  ],
-};
-
 // 密码
 export const password = {
   rules: [
@@ -51,24 +33,6 @@ export const password = {
       validateFunction: function (rule, value, data, callback) {
         if (!/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]+\S{5,12}$/.test(value)) {
           callback('需包含字母和数字,长度在6-12之间');
-        }
-        return true;
-      },
-    },
-  ],
-};
-
-// 昵称
-export const username = {
-  rules: [
-    {
-      required: true,
-      errorMessage: '请输入用户名',
-    },
-    {
-      validateFunction: function (rule, value, data, callback) {
-        if (value.length < 5) {
-          callback('用户名长度不能小于5位');
         }
         return true;
       },
@@ -195,7 +159,6 @@ export default {
   realName,
   password,
   code,
-  account,
   taxNo,
   taxName,
 };

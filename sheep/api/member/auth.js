@@ -1,6 +1,19 @@
 import request from '@/sheep/request';
 
 const AuthUtil = {
+  // 使用手机 + 密码登录
+  login: (data) => {
+    return request({
+      url: '/app-api/member/auth/login',
+      method: 'POST',
+      data,
+      custom: {
+        showSuccess: true,
+        loadingMsg: '登录中',
+        successMsg: '登录成功',
+      },
+    });
+  },
   // 使用手机 + 验证码登录
   smsLogin: (data) => {
     return request({

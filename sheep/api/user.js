@@ -3,38 +3,8 @@ import request2 from '@/sheep/request2';
 import $platform from '@/sheep/platform';
 
 export default {
-	getUnused: () =>
-		request2({
-			url: 'promotion/coupon/get-unused-count',
-			method: 'GET',
-			custom: {
-				showLoading: false,
-				auth: true,
-			},
-		}),
-	// 账号登录
-	accountLogin: (data) =>
-		request({
-			url: '/user/api/user/accountLogin',
-			method: 'POST',
-			data,
-			custom: {
-				showSuccess: true,
-				loadingMsg: '登录中',
-			},
-		}),
 
-	// 绑定、更换手机号
-	changeMobile: (data) =>
-		request({
-			url: '/user/api/user/changeMobile',
-			method: 'POST',
-			data,
-			custom: {
-				showSuccess: true,
-				loadingMsg: '验证中',
-			},
-		}),
+
 
 	// 添加分享记录
 	addShareLog: (data) =>
@@ -54,20 +24,6 @@ export default {
 				params,
 			}),
 	},
-	// 账号登出
-	logout: (data) =>
-		request({
-			url: '/user/api/user/logout',
-			method: 'POST',
-			data,
-		}),
-	// 账号注销
-	logoff: (data) =>
-		request({
-			url: '/user/api/user/logoff',
-			method: 'POST',
-			data,
-		}),
 
 	address: {
 		default: () =>
