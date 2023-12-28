@@ -50,7 +50,7 @@ const app = defineStore({
   actions: {
     // 获取Shopro应用配置和模板
     async init(templateId = null) {
-      //检查网络
+      // 检查网络
       const networkStatus = await $platform.checkNetwork();
       if (!networkStatus) {
         $router.error('NetworkError');
@@ -58,19 +58,36 @@ const app = defineStore({
 
       // 加载装修配置
       await adaptTemplate(this.template, templateId)
-      const res = await appApi.init(templateId);
-      if (res.error === 0) {
-        this.info = res.data.app;
-        this.platform = res.data.platform;
 
-        // TODO 芋艿：未接入
-        // this.template = res.data.template;
-        // this.has_wechat_trade_managed = res.data.has_wechat_trade_managed;
-        // if (!res.data.template) {
-        //   $router.error('TemplateError');
-        // }
-        // TODO 芋艿：未接入
-        // this.chat = res.data.chat;
+      // TODO 芋艿：未来支持管理后台可配；对应 https://api.shopro.sheepjs.com/shop/api/init
+      if (true) {
+        this.info = {
+          name: '芋道商城',
+          logo: 'https://static.iocoder.cn/ruoyi-vue-pro-logo.png',
+          version: '1.1.13',
+          copyright: '全部开源，个人与企业可 100% 免费使用',
+          copytime: 'Copyright© 2018-2024',
+
+          cdnurl: 'https://file.sheepjs.com', // 云存储域名
+          filesystem: 'qcloud', // 云存储平台
+        };
+        this.platform = {
+          share: {
+            methods: [ "poster", "link" ],
+            linkAddress: "https://shopro.sheepjs.com/#/",
+            posterInfo: {
+              "user_bg": "/static/img/shop/config/user-poster-bg.png",
+              "goods_bg": "/static/img/shop/config/goods-poster-bg.png",
+              "groupon_bg": "/static/img/shop/config/groupon-poster-bg.png"
+            }
+          },
+          bind_mobile: 0
+        };
+        this.chat = {
+          chat_domain: "https://api.shopro.sheepjs.com/chat",
+          room_id: "admin"
+        }
+        this.has_wechat_trade_managed = 0;
 
         // 加载主题
         const sysStore = sys();
