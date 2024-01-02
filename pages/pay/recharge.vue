@@ -9,7 +9,7 @@
     ]">
 			<view class="">
 				<view class="num-title">当前余额（元）</view>
-				<view class="wallet-num">{{ fen2yuan(userInfo.money) }}</view>
+				<view class="wallet-num">{{ fen2yuan(userWallet.balance) }}</view>
 			</view>
 			<button class="ss-reset-button log-btn" @tap="sheep.$router.go('/pages/pay/recharge-log')">
         充值记录
@@ -48,7 +48,7 @@
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import PayWalletApi from '@/sheep/api/pay/wallet';
 
-	const userInfo = computed(() => sheep.$store('user').userInfo);
+	const userWallet = computed(() => sheep.$store('user').userWallet);
 	const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
 	const headerBg = sheep.$url.css('/static/img/shop/user/withdraw_bg.png');
 

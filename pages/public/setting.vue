@@ -52,7 +52,6 @@
         />
       </uni-list>
     </view>
-    <!-- TODO 芋艿：统一的配置界面 -->
     <view class="set-footer ss-flex-col ss-row-center ss-col-center">
       <view class="agreement-box ss-flex ss-col-center ss-m-b-40">
         <view class="ss-flex ss-col-center ss-m-b-10">
@@ -99,6 +98,7 @@
 <script setup>
   import sheep from '@/sheep';
   import { computed, reactive } from 'vue';
+  import AuthUtil from '@/sheep/api/member/auth';
 
   const appInfo = computed(() => sheep.$store('app').info);
   const isLogin = computed(() => sheep.$store('user').isLogin);
@@ -123,10 +123,12 @@
         if (!res.confirm) {
           return;
         }
-        const result = await sheep.$store('user').logout();
-        if (result) {
-          sheep.$router.go('/pages/index/user');
+        const { code } = await AuthUtil.logout();
+        if (code !== 0) {
+          return;
         }
+        sheep.$store('user').logout();
+        sheep.$router.go('/pages/index/user');
       },
     });
   }
@@ -140,10 +142,12 @@
         if (!res.confirm) {
           return;
         }
-        const result = await sheep.$store('user').logout();
-        if (result) {
-          sheep.$router.go('/pages/index/user');
+        const { code } = await AuthUtil.logout();
+        if (code !== 0) {
+          return;
         }
+        sheep.$store('user').logout();
+        sheep.$router.go('/pages/index/user');
       },
     });
   }

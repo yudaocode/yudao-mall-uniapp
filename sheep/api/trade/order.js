@@ -1,4 +1,3 @@
-import request2 from '@/sheep/request2';
 import request from '@/sheep/request';
 
 const OrderApi = {
@@ -26,14 +25,14 @@ const OrderApi = {
     const queryString = Object.keys(data2)
       .map((key) => key + '=' + data2[key])
       .join('&');
-    return request2({
+    return request({
       url: `trade/order/settlement?${queryString}`,
       method: 'GET',
     });
   },
   // 创建订单
   createOrder: (data) => {
-    return request2({
+    return request({
       url: `trade/order/create`,
       method: 'POST',
       data,
@@ -41,7 +40,7 @@ const OrderApi = {
   },
   // 获得订单
   getOrder: (id) => {
-    return request2({
+    return request({
       url: `trade/order/get-detail`,
       method: 'GET',
       params: {
@@ -62,7 +61,7 @@ const OrderApi = {
   },
   // 确认收货
   receiveOrder: (id) => {
-    return request2({
+    return request({
       url: `/app-api/trade/order/receive`,
       method: 'PUT',
       params: {
@@ -72,7 +71,7 @@ const OrderApi = {
   },
   // 取消订单
   cancelOrder: (id) => {
-    return request2({
+    return request({
       url: `/app-api/trade/order/cancel`,
       method: 'DELETE',
       params: {
@@ -82,7 +81,7 @@ const OrderApi = {
   },
   // 删除订单
   deleteOrder: (id) => {
-    return request2({
+    return request({
       url: `/app-api/trade/order/delete`,
       method: 'DELETE',
       params: {
@@ -90,9 +89,20 @@ const OrderApi = {
       },
     });
   },
+  // 获得交易订单数量
+  getOrderCount: () => {
+    return request({
+      url: '/app-api/trade/order/get-count',
+      method: 'GET',
+      custom: {
+        showLoading: false,
+        auth: true,
+      },
+    });
+  },
   // 创建单个评论
   createOrderItemComment: (data) => {
-    return request2({
+    return request({
       url: `/app-api/trade/order/item/create-comment`,
       method: 'POST',
       data,

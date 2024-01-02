@@ -23,18 +23,17 @@
 			</view>
 		</view>
 
-    <!-- TODO @芋艿：用户接入 -->
 		<!-- 提示绑定手机号 先隐藏 yudao 需要再修改 -->
-		<!--    <view
+		<view
       class="bind-mobile-box ss-flex ss-row-between ss-col-center"
-      v-if="isLogin && !userInfo.verification?.mobile"
+      v-if="isLogin && !userInfo.mobile"
     >
       <view class="ss-flex">
-        <text class="cicon-mobile-o"></text>
+        <text class="cicon-mobile-o" />
         <view class="mobile-title ss-m-l-20"> 点击绑定手机号确保账户安全 </view>
       </view>
       <button class="ss-reset-button bind-btn" @tap="onBind">去绑定</button>
-    </view> -->
+    </view>
 	</view>
 </template>
 

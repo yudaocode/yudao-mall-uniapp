@@ -1,16 +1,6 @@
 import request from '@/sheep/request';
 
 export default {
-	// 预支付
-	prepay: (data) =>
-		request({
-			url: 'pay/prepay',
-			method: 'POST',
-			data,
-			custom: {
-				loadingMsg: '支付中',
-			},
-		}),
 	// 发起提现
 	withdraw: {
 		list: (params) =>

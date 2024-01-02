@@ -9,11 +9,11 @@
     >
       <uni-badge
         class="uni-badge-left-margin"
-        :text="numData.order_num[item.type]"
+        :text="numData.orderCount[item.count]"
         absolute="rightTop"
         size="small"
       >
-        <image class="item-icon" :src="sheep.$url.static(item.icon)" mode="aspectFit"></image>
+        <image class="item-icon" :src="sheep.$url.static(item.icon)" mode="aspectFit" />
       </uni-badge>
       <view class="menu-title ss-m-t-28">{{ item.title }}</view>
     </view>
@@ -34,6 +34,7 @@
       icon: '/static/img/shop/order/no_pay.png',
       path: '/pages/order/list',
       type: 'unpaid',
+      count: 'unpaidCount',
     },
     {
       title: '待收货',
@@ -41,6 +42,7 @@
       icon: '/static/img/shop/order/no_take.png',
       path: '/pages/order/list',
       type: 'noget',
+      count: 'deliveredCount',
     },
     {
       title: '待评价',
@@ -48,6 +50,7 @@
       icon: '/static/img/shop/order/no_comment.png',
       path: '/pages/order/list',
       type: 'nocomment',
+      count: 'uncommentedCount',
     },
     {
       title: '售后单',
@@ -55,6 +58,7 @@
       icon: '/static/img/shop/order/change_order.png',
       path: '/pages/order/aftersale/list',
       type: 'aftersale',
+      count: 'afterSaleCount',
     },
     {
       title: '全部订单',
@@ -65,7 +69,6 @@
   ];
 
   const numData = computed(() => sheep.$store('user').numData);
-  console.log('更换后的yuda订单数量',numData)
 </script>
 
 <style lang="scss" scoped>

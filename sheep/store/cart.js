@@ -85,9 +85,12 @@ const cart = defineStore({
       }
     },
 
-    // 清空购物车
-    async emptyList() {
-      await this.delete(this.list.map((item) => item.id));
+    // 清空购物车。注意，仅用于用户退出时，重置数据
+    emptyList() {
+      this.list = [];
+      this.selectedIds = [];
+      this.isAllSelected = true;
+      this.totalPriceSelected = 0;
     },
   },
   persist: {

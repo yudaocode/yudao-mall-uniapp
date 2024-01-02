@@ -4,7 +4,7 @@
 		<view class="menu-item ss-flex-1 ss-flex-col ss-row-center ss-col-center"
 			@tap="sheep.$router.go('/pages/user/wallet/money')">
 			<view class="value-box ss-flex ss-col-bottom">
-				<view class="value-text ss-line-1">{{ fen2yuan(userInfo.money) || '0.00' }}</view>
+				<view class="value-text ss-line-1">{{ fen2yuan(userWallet.balance) || '0.00' }}</view>
 				<view class="unit-text ss-m-l-6">元</view>
 			</view>
 			<view class="menu-title ss-m-t-28">账户余额</view>
@@ -12,7 +12,7 @@
 		<view class="menu-item ss-flex-1 ss-flex-col ss-row-center ss-col-center"
 			@tap="sheep.$router.go('/pages/user/wallet/score')">
 			<view class="value-box ss-flex ss-col-bottom">
-				<view class="value-text">{{ userInfo.point || '0.00' }}</view>
+				<view class="value-text">{{ userInfo.point || 0 }}</view>
 				<view class="unit-text ss-m-l-6">个</view>
 			</view>
 			<view class="menu-title ss-m-t-28">积分</view>
@@ -23,15 +23,14 @@
         })
       ">
 			<view class="value-box ss-flex ss-col-bottom">
-				<view class="value-text">{{ numData.coupons_num || '0.00' }}</view>
+				<view class="value-text">{{ numData.unusedCouponCount }}</view>
 				<view class="unit-text ss-m-l-6">张</view>
 			</view>
 			<view class="menu-title ss-m-t-28">优惠券</view>
 		</view>
 		<view class="menu-item ss-flex-col ss-row-center ss-col-center menu-wallet"
-			@tap="sheep.$router.go('/pages/user/wallet/money')">
-			<image class="item-icon" :src="sheep.$url.static('/static/img/shop/user/wallet_icon.png')" mode="aspectFit">
-			</image>
+          @tap="sheep.$router.go('/pages/user/wallet/money')">
+			<image class="item-icon" :src="sheep.$url.static('/static/img/shop/user/wallet_icon.png')" mode="aspectFit" />
 			<view class="menu-title ss-m-t-30">我的钱包</view>
 		</view>
 	</view>
@@ -41,13 +40,11 @@
 	/**
 	 * 装修组件 - 订单菜单组
 	 */
-	import {
-		computed,
-		ref
-	} from 'vue';
+	import { computed } from 'vue';
 	import sheep from '@/sheep';
   import { fen2yuan } from '../../hooks/useGoods';
 
+	const userWallet = computed(() => sheep.$store('user').userWallet);
 	const userInfo = computed(() => sheep.$store('user').userInfo);
 	const numData = computed(() => sheep.$store('user').numData);
 </script>

@@ -1,18 +1,6 @@
 import request from '@/sheep/request';
 
 export default {
-  // 系统初始化
-  init: (templateId) =>
-    request({
-      url: 'init',
-      params: {
-        templateId,
-      },
-      custom: {
-        showError: false,
-        showLoading: false,
-      },
-    }),
   // 自定义页面
   page: (id) =>
     request({

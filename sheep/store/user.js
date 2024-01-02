@@ -15,6 +15,10 @@ import {
 } from '@/sheep/hooks/useModal';
 import AuthUtil from '@/sheep/api/member/auth';
 import BrokerageApi from '@/sheep/api/trade/brokerage';
+import UserApi from '@/sheep/api/member/user';
+import PayWalletApi from '@/sheep/api/pay/wallet';
+import OrderApi from '@/sheep/api/trade/order';
+import CouponApi from '@/sheep/api/promotion/coupon';
 
 // 默认用户信息
 const defaultUserInfo = {
@@ -22,20 +26,24 @@ const defaultUserInfo = {
 	nickname: '', // 昵称
 	gender: 0, // 性别
 	mobile: '', // 手机号
-	money: '--', // 余额
-	score: '--', // 积分  TODO 芋艿：改成 point
-	verification: {}, // 认证字段
+  point: 0, // 积分
 };
+
+// 默认钱包信息
+const defaultUserWallet = {
+  balance: 0, // 余额
+}
 
 // 默认订单、优惠券等其他资产信息
 const defaultNumData = {
-	coupons_num: '--',
-	order_num: {
-		aftersale: 0,
-		nocomment: 0,
-		noget: 0,
-		nosend: 0,
-		unpaid: 0,
+  unusedCouponCount: 0,
+  orderCount: {
+    allCount: 0,
+    unpaidCount: 0,
+    undeliveredCount: 0,
+    deliveredCount: 0,
+    uncommentedCount: 0,
+    afterSaleCount: 0,
 	},
 };
 
@@ -43,55 +51,44 @@ const user = defineStore({
 	id: 'user',
 	state: () => ({
 		userInfo: clone(defaultUserInfo), // 用户信息
+    userWallet: clone(defaultUserWallet), // 用户钱包信息
 		isLogin: !!uni.getStorageSync('token'), // 登录状态
 		numData: cloneDeep(defaultNumData), // 用户其他数据
 		lastUpdateTime: 0, // 上次更新时间
 	}),
 
 	actions: {
-		// 获取个人信息
-    // TODO 芋艿：整理下；
+		// 获取用户信息
 		async getInfo() {
-			const {
-				code,
-				data
-			} = await userApi.profile();
-
-			// 为了兼容 获取用户余额 可能还会用到其他参数
-			// 优惠券数量,积分数量 应该在这里
-			const {
-				code: code2,
-				data: data2
-			} = await userApi.balance();
-			if (code !== 0 || code2 != 0) return;
-			data.money = data2.balance;
-			this.userInfo = data;
-			// console.log(data2, '信息')
+			const { code, data } = await UserApi.getUserInfo();
+      if (code !== 0) {
+        return;
+      }
+      this.userInfo = data;
 			return Promise.resolve(data);
 		},
 
+    // 获得用户钱包
+    async getWallet() {
+      const { code, data } = await PayWalletApi.getPayWallet();
+      if (code !== 0) {
+        return;
+      }
+      this.userWallet = data;
+    },
+
 		// 获取订单、优惠券等其他资产信息
-    // TODO 芋艿：整理下；
-    async getNumData() {
-			const {
-				code,
-				data
-			} = await userApi.data();
-			const data2 = await userApi.data2();
-			let data3 = await userApi.getUnused();
-			// console.log(data3.data, '优惠券')
-			if (code === 0 && data2.code === 0) {
-				// console.log('订单数据', data);
-				this.numData = {
-					coupons_num: data3.data,
-					order_num: {
-						noget: data.deliveredCount,
-						unpaid: data.unpaidCount,
-						nocomment: data.uncommentedCount,
-						aftersale: data2.data
-					}
-				};
-			}
+    getNumData() {
+      OrderApi.getOrderCount().then(res => {
+        if (res.code === 0) {
+          this.numData.orderCount = res.data;
+        }
+      });
+      CouponApi.getUnusedCouponCount().then(res => {
+        if (res.code === 0) {
+          this.numData.unusedCouponCount = res.data;
+        }
+      });
 		},
 
 		// 添加分享记录
@@ -103,8 +100,8 @@ const user = defineStore({
 			if (error === 0) uni.removeStorageSync('shareLog');
 		},
 
-		// 设置token
-    // TODO 芋艿：整理下；
+		// 设置 token
+    // TODO 芋艿：后续要支持访问令牌的刷新！！！
     setToken(token = '') {
 			if (token === '') {
 				this.isLogin = false;
@@ -117,42 +114,52 @@ const user = defineStore({
 			return this.isLogin;
 		},
 
-		// 更新用户相关信息 (手动限流 5秒之内不刷新)
-    // TODO 芋艿：整理下；
+		// 更新用户相关信息 (手动限流，5 秒之内不刷新)
     async updateUserData() {
 			if (!this.isLogin) {
 				this.resetUserData();
 				return;
 			}
+      // 防抖，5 秒之内不刷新
 			const nowTime = new Date().getTime();
-			if (this.lastUpdateTime + 5000 > nowTime) return;
+      if (this.lastUpdateTime + 5000 > nowTime) {
+        return;
+      }
+      this.lastUpdateTime = nowTime;
+
+      // 获取最新信息
 			await this.getInfo();
+      this.getWallet();
 			this.getNumData();
-			this.lastUpdateTime = nowTime;
 			return this.userInfo;
 		},
 
 		// 重置用户默认数据
-    // TODO 芋艿：整理下；
     resetUserData() {
+      // 清空 token
 			this.setToken();
+      // 清空用户相关的缓存
 			this.userInfo = clone(defaultUserInfo);
+      this.userWallet = clone(defaultUserWallet);
 			this.numData = cloneDeep(defaultNumData);
-			this.agentInfo = {};
+      // 清空购物车的缓存
 			cart().emptyList();
 		},
 
-		// 登录后
+		// 登录后，加载各种信息
     // TODO 芋艿：整理下；
     async loginAfter() {
 			await this.updateUserData();
+
+      // 加载购物车
 			cart().getList();
 			// 登录后设置全局分享参数
 			$share.getShareInfo();
+
 			// 提醒绑定手机号
-			// if (app().platform.bind_mobile && !this.userInfo.verification?.mobile) {
-			// 	showAuthModal('changeMobile');
-			// }
+			if (app().platform.bind_mobile && !this.userInfo.mobile) {
+				showAuthModal('changeMobile');
+			}
 
 			// 添加分享记录
       // TODO 芋艿：整理下；
@@ -164,21 +171,11 @@ const user = defineStore({
 			}
 		},
 
-		// 登出
-    // TODO 芋艿：整理下；
-    async logout(force = false) {
-			if (!force) {
-				const { code } = AuthUtil.logout();
-				if (code === 0) {
-					this.resetUserData();
-				}
-			}
-			if (force) {
-				this.resetUserData();
-			}
-
+		// 登出系统
+    async logout() {
+      this.resetUserData();
 			return !this.isLogin;
-		},
+		}
 	},
 	persist: {
 		enabled: true,

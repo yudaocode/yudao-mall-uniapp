@@ -13,7 +13,7 @@
           />
         </view>
         <view class="ss-flex ss-row-between ss-col-center ss-m-t-64">
-          <view class="money-num">{{ state.showMoney ? fen2yuan(userInfo.money) : '*****' }}</view>
+          <view class="money-num">{{ state.showMoney ? fen2yuan(userWallet.balance) : '*****' }}</view>
           <button class="ss-reset-button topup-btn" @tap="sheep.$router.go('/pages/pay/recharge')">
             充值
           </button>
@@ -122,7 +122,8 @@
       value: '2',
     },
   ];
-  const userInfo = computed(() => sheep.$store('user').userInfo);
+
+  const userWallet = computed(() => sheep.$store('user').userWallet);
 
   // 格式化时间段
   const dateFilterText = computed(() => {
@@ -167,6 +168,8 @@
     state.date = [state.today, state.today];
     getLogList();
     getSummary();
+    // 刷新钱包的缓存
+    sheep.$store('user').getWallet();
   });
 
   // 处理 tab 切换

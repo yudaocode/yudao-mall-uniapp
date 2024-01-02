@@ -1,6 +1,17 @@
 import request from '@/sheep/request';
 
 const PayWalletApi = {
+  // 获取钱包
+  getPayWallet() {
+    return request({
+      url: '/app-api/pay/wallet/get',
+      method: 'GET',
+      custom: {
+        showLoading: false,
+        auth: true,
+      },
+    });
+  },
   // 获得钱包流水分页
   getWalletTransactionPage: (params) => {
     const queryString = Object.keys(params)

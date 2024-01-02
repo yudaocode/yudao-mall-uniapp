@@ -3,100 +3,8 @@ import request2 from '@/sheep/request2';
 import $platform from '@/sheep/platform';
 
 export default {
-	getUnused: () =>
-		request2({
-			url: 'promotion/coupon/get-unused-count',
-			method: 'GET',
-			custom: {
-				showLoading: false,
-				auth: true,
-			},
-		}),
-	profile: () =>
-		request2({
-			url: 'member/user/get',
-			method: 'GET',
-			custom: {
-				showLoading: false,
-				auth: true,
-			},
-		}),
-	balance: () =>
-		request2({
-			url: '/app-api/pay/wallet/get',
-			method: 'GET',
-			custom: {
-				showLoading: false,
-				auth: true,
-			},
-		}),
-	// 账号登录
-	accountLogin: (data) =>
-		request({
-			url: '/user/api/user/accountLogin',
-			method: 'POST',
-			data,
-			custom: {
-				showSuccess: true,
-				loadingMsg: '登录中',
-			},
-		}),
-	// 短信登录
-	smsLogin: (data) =>
-		request({
-			url: '/user/api/user/smsLogin',
-			method: 'POST',
-			data,
-			custom: {
-				showSuccess: true,
-				loadingMsg: '登录中',
-			},
-		}),
-	// 短信注册
-	smsRegister: (data) =>
-		request({
-			url: '/user/api/user/smsRegister',
-			method: 'POST',
-			data,
-			custom: {
-				showSuccess: true,
-				loadingMsg: '正在注册',
-			},
-		}),
 
-	// 绑定、更换手机号
-	changeMobile: (data) =>
-		request({
-			url: '/user/api/user/changeMobile',
-			method: 'POST',
-			data,
-			custom: {
-				showSuccess: true,
-				loadingMsg: '验证中',
-			},
-		}),
 
-	// 更新小程序信息
-	updateMpUserInfo: (data) =>
-		request({
-			url: '/user/api/user/updateMpUserInfo',
-			method: 'POST',
-			data,
-		}),
-
-	// 第三方授权信息
-	thirdOauthInfo: () =>
-		request({
-			url: '/user/api/user/thirdOauth',
-			method: 'GET',
-			params: {
-				provider: $platform.provider,
-				platform: $platform.platform,
-			},
-			custom: {
-				showLoading: false,
-			},
-		}),
 
 	// 添加分享记录
 	addShareLog: (data) =>
@@ -116,30 +24,8 @@ export default {
 				params,
 			}),
 	},
-	// 账号登出
-	logout: (data) =>
-		request({
-			url: '/user/api/user/logout',
-			method: 'POST',
-			data,
-		}),
-	// 账号注销
-	logoff: (data) =>
-		request({
-			url: '/user/api/user/logoff',
-			method: 'POST',
-			data,
-		}),
 
 	address: {
-		// default: () =>
-		// 	request({
-		// 		url: 'user/address/default',
-		// 		method: 'GET',
-		// 		custom: {
-		// 			showError: false,
-		// 		},
-		// 	}),
 		default: () =>
 			request2({
 				url: 'member/address/get-default',
@@ -278,33 +164,5 @@ export default {
 					auth: true,
 				},
 			}),
-	},
-	//数量接口
-	// data: () =>
-	//   request({
-	//     url: 'user/user/data',
-	//     method: 'GET',
-	//     custom: {
-	//       showLoading: false,
-	//       auth: true,
-	//     },
-	//   }),
-	data: () =>
-		request2({
-			url: 'trade/order/get-count',
-			method: 'GET',
-			custom: {
-				showLoading: false,
-				auth: true,
-			},
-		}),
-	data2: () =>
-		request2({
-			url: 'trade/after-sale/get-applying-count',
-			method: 'GET',
-			custom: {
-				showLoading: false,
-				auth: true,
-			},
-		}),
+	}
 };

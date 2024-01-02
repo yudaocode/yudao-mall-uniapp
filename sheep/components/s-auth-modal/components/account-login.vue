@@ -21,8 +21,8 @@
       labelWidth="140"
       labelAlign="center"
     >
-      <uni-forms-item name="account" label="账号">
-        <uni-easyinput placeholder="请输入账号" v-model="state.model.account" :inputBorder="false">
+      <uni-forms-item name="mobile" label="账号">
+        <uni-easyinput placeholder="请输入账号" v-model="state.model.mobile" :inputBorder="false">
           <template v-slot:right>
             <button class="ss-reset-button forgot-btn" @tap="showAuthModal('resetPassword')">
               忘记密码
@@ -48,10 +48,11 @@
 </template>
 
 <script setup>
-  import { computed, watch, ref, reactive, unref } from 'vue';
+  import { ref, reactive, unref } from 'vue';
   import sheep from '@/sheep';
-  import { account, password } from '@/sheep/validate/form';
+  import { mobile, password } from '@/sheep/validate/form';
   import { showAuthModal, closeAuthModal } from '@/sheep/hooks/useModal';
+  import AuthUtil from '@/sheep/api/member/auth';
 
   const accountLoginRef = ref(null);
 
@@ -63,19 +64,20 @@
       default: false,
     },
   });
+
   // 数据
   const state = reactive({
     model: {
-      account: '', // 账号
+      mobile: '', // 账号
       password: '', // 密码
     },
     rules: {
-      account,
+      mobile,
       password,
     },
   });
 
-  // 1.账号登录
+  // 账号登录
   async function accountLoginSubmit() {
     // 表单验证
     const validate = await unref(accountLoginRef)
@@ -93,12 +95,10 @@
     }
 
     // 提交数据
-    sheep.$api.user.accountLogin(state.model).then((res) => {
-      if (res.error === 0) {
-        // sheep.$store('user').getInfo();
-        closeAuthModal();
-      }
-    });
+    const { code, data } = await AuthUtil.login(state.model);
+    if (code === 0) {
+      closeAuthModal();
+    }
   }
 </script>
 
