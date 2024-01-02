@@ -1,6 +1,5 @@
-<!-- 砍价列表 TODO @科举：新建一个 bargain 包，然后这个页面挪进去，改成 list.vue。写的时候，要思考怎么更好的融入到当前项目 -->
 <template>
-  <!-- TODO @科举：参考 groupon/list.vue 和 seckill/list.vue 界面，调整下头部，就是从 5 到 11 行的  -->
+	<!-- TODO @科举：参考 groupon/list.vue 和 seckill/list.vue 界面，调整下头部，就是从 5 到 11 行的  -->
 	<s-layout navbar="inner" title='砍价列表'>
 		<view style='background-color: red;height:100vh;'>
 			<view class='bargain-list'>
@@ -14,8 +13,8 @@
 				<view class='header'>
 					<view class="pic">
 						<view class='swipers'>
-							<swiper indicator-dots="true" autoplay="true" interval="2500"
-								duration="500" vertical="true" circular="true">
+							<swiper indicator-dots="true" autoplay="true" interval="2500" duration="500" vertical="true"
+								circular="true">
 								<block v-for="(item,index) in state.bargainSuccessList" :key='index'>
 									<swiper-item>
 										<view class="acea-row row-middle" style='display:flex'>
@@ -36,7 +35,7 @@
 				<view class='list'>
 					<block v-for="(item,index) in state.bargainList" :key="index">
 						<view style='display:flex' class='item acea-row row-between-wrapper'
-							@tap="openSubscribe('/pages/activity/bargainingDetail?id='+ item.id)">
+							@tap="openSubscribe('/pages/activity/bargain/detail?id='+ item.id)">
 							<view class='pictrue'>
 								<image :src='item.picUrl'></image>
 							</view>
@@ -71,12 +70,19 @@
 </template>
 
 <script setup>
-	import { reactive } from 'vue';
+	import {
+		reactive
+	} from 'vue';
 	import sheep from '@/sheep';
 	import _ from 'lodash';
-	import { onLoad, onReachBottom } from '@dcloudio/uni-app';
-  import { fen2yuan } from '@/sheep/hooks/useGoods';
-
+	import {
+		onLoad,
+		onReachBottom
+	} from '@dcloudio/uni-app';
+	import {
+		fen2yuan
+	} from '@/sheep/hooks/useGoods';
+	import BargainApi from '@/sheep/api/activity'
 	const state = reactive({
 		navH: '',
 		returnShow: true,
@@ -101,53 +107,58 @@
 		loadTitle: '加载更多',
 	});
 
-	function getBargainHeader() {
-    // TODO @科举：这个改成 BargainApi.getBargainRecordSummary，使用 await 操作；代码风格要统一
-		sheep.$api.activity.getBargainRecordSummary().then(res => {
-			state.bargainTotal = res.data.successUserCount;
-			state.bargainSuccessList = res.data.successList;
-		}).catch(err => {
-			return state.$util.Tips({
-				title: err
+	async function getBargainHeader() {
+		let {
+			code,
+			data
+		} = await BargainApi.getBargainRecordSummary()
+		if (code == 0) {
+			state.bargainTotal = data.successUserCount;
+			state.bargainSuccessList = data.successList;
+		} else {
+			state.$util.Tips({
+				title: data
 			});
-		})
+		}
 	}
 
-	function getBargainList() {
-    // TODO @科举：loading 和 loadTitle 改成现在这个项目的风格，包括组件使用 uni-load-more
-    if (state.loadend || state.loading) {
+	async function getBargainList() {
+		// TODO @科举：loading 和 loadTitle 改成现在这个项目的风格，包括组件使用 uni-load-more
+		if (state.loadend || state.loading) {
 			return;
 		}
 		state.loading = true;
 		state.loadTitle = '';
-    // TODO @科举：这个改成 BargainApi.getBargainRecordSummary，使用 await 操作；代码风格要统一
-    sheep.$api.activity.getBargainActivityPage({
+		let {
+			data,
+			code
+		} = await BargainApi.getBargainActivityPage({
 			pageNo: state.page,
 			pageSize: state.limit
-		}).then(res => {
-			const list = res.data.list;
+		})
+		if (code == 0) {
+			const list = data.list;
 			const bargainList = _.concat(state.bargainList, list);
 			const loadend = list.length < state.limit;
 			state.loadend = loadend;
 			state.loading = false;
 			state.loadTitle = loadend ? '已全部加载' : '加载更多';
 			// this.$set(this, 'bargainList', bargainList);
-			state.bargainList = res.data.list
+			state.bargainList = data.list
 			// this.$set(this, 'page', this.page + 1);
 			state.page = state.page + 1;
-		}).catch(res => {
+
+		} else {
 			state.loading = false;
 			state.loadTitle = '加载更多';
-		});
+		}
 	}
 
 	function openSubscribe(e) {
+		console.log('跳转')
 		console.log(e)
-    // TODO @科举：参考 pages/pay/result.vue 页面的 subscribeMessage 方法，写订阅逻辑。
-    // TODO @科举：navigateTo 在项目里，应该是 sheep.$router.go，参考写下
-		uni.navigateTo({
-			url: page,
-		});
+		// TODO @科举：参考 pages/pay/result.vue 页面的 subscribeMessage 方法，写订阅逻辑。
+		sheep.$router.go(e)
 		return;
 		let page = e;
 		// #ifndef MP
