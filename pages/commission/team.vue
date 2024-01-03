@@ -15,21 +15,20 @@
 			</view>
 			<view style='padding: 0 30rpx;'>
 				<view class='nav acea-row row-around l1'>
-					<view :class="state.level === 1 ? 'item on' : 'item'" @click='setType(1)'>
+					<view :class="state.level == 1 ? 'item on' : 'item'" @click='setType(1)'>
 						一级({{state.getSummary.firstBrokerageUserCount || 0 }})</view>
-					<view :class="state.level === 2 ? 'item on' : 'item'" @click='setType(2)'>
+					<view :class="state.level == 2 ? 'item on' : 'item'" @click='setType(2)'>
 						二级({{state.getSummary.secondBrokerageUserCount || 0 }})
 					</view>
 				</view>
 				<view class='search acea-row row-between-wrapper'
 					style="display: flex;height: 100rpx;align-items: center;">
 					<view class='input'>
-						<!-- placeholder-class='placeholder' -->
-						<input placeholder='点击搜索会员名称' v-model="state.nickname" confirm-type='search' name="search" />
-						<!-- @confirm="submitForm" -->
-					</view>
-					<button class='iconfont icon-sousuo2'></button>
-					<!-- @click="submitForm" -->
+						<input placeholder='点击搜索会员名称' v-model="state.nickname" confirm-type='search' name="search"
+							@confirm="submitForm" />
+
+					</view> 
+					<image src="/static/images/search.png" mode="" style='width: 60rpx;height: 64rpx;' @click="submitForm"></image>
 				</view>
 				<view class='list'>
 					<view class="sortNav acea-row row-middle" style="display: flex;align-items: center;">
@@ -67,29 +66,28 @@
 							<image src='/static/images/sort2.png'></image>
 						</view>
 					</view>
-					<!-- 			<block v-for="(item,index) in recordList" :key="index">
-						<view class='item acea-row row-between-wrapper'>
-							<view class="picTxt acea-row row-between-wrapper">
+								<block v-for="(item,index) in  state.pagination.data" :key="index">
+						<view class='item acea-row row-between-wrapper' style="display: flex;">
+							<view class="picTxt acea-row row-between-wrapper" style="display: flex;align-items: center;">
 								<view class='pictrue'>
 									<image :src='item.avatar'></image>
 								</view>
 								<view class='text'>
 									<view class='name line1'>{{item.nickname}}</view>
-									<view>加入时间: {{ formatDate(item.brokerageTime) }}</view>
+									<view>加入时间: {{  sheep.$helper.timeFormat(item.brokerageTime, 'yyyy-mm-dd hh:MM:ss') }}</view>
 								</view>
 							</view>
-							<view class="right">
+							<view class="right" style='justify-content:center;flex-direction:  column;display: flex;margin-left: auto;'>
 								<view><text class='num font-color'>{{ item.brokerageUserCount || 0}}</text>人
 								</view>
 								<view><text class="num">{{ item.orderCount|| 0}}</text>单</view>
-								<view><text class="num">{{ fen2yuan(item.brokeragePrice || 0) }}</text>元</view>
+								<view><text class="num">{{ item.brokeragePrice || 0 }}</text>元</view>
 							</view>
 						</view>
 					</block>
-					<Loading :loaded="status" :loading="loadingList"></Loading>
-					<block v-if="recordList.length === 0 && isShow">
-						<emptyPage title="暂无推广人数～"></emptyPage>
-					</block> -->
+					<block v-if="state.pagination.data.length == 0">
+						<view style='text-align: center;'>暂无推广人数</view>
+					</block>
 				</view>
 			</view>
 		</view>
@@ -199,6 +197,7 @@
 			state.scrollTop = true;
 		}
 	});
+	let sort=ref();
 	const state = reactive({
 		getSummary: {},
 		pagination: {
@@ -210,7 +209,9 @@
 		loadStatus: '',
 		// ↓新ui逻辑
 		level: 1,
-		nickname: ref('')
+		nickname: ref(''),
+		sortKey:'',
+		isAsc:''
 	});
 
 
@@ -221,6 +222,10 @@
 		return `下级团队${num}人`;
 	}
 
+	function submitForm() {
+		state.pagination.data = []
+		getTeamList();
+	}
 	async function getTeamList(page = 1, list_rows = 8) {
 		state.loadStatus = 'loading';
 		// 	nickname: this.nickname,
@@ -229,10 +234,10 @@
 		let res = await sheep.$api.commission.team({
 			pageSize: list_rows,
 			pageNo: page,
-			level: '1',
+			level: state.level,
 			'sortingField.order': 'desc',
 			'sortingField.field': 'userCount',
-			nickname: ''
+			nickname: state.nickname
 		});
 		console.log(res, '分销团队列表');
 		if (res.code === 0) {
@@ -249,6 +254,19 @@
 		}
 	}
 
+	function setType(e) {
+		state.pagination.data = []
+		state.level = e + '';
+		getTeamList( )
+	}
+
+	function setSort(sortKey, isAsc) {
+		state.pagination.data = []
+		sort = sortKey + isAsc.toUpperCase();	
+		state.isAsc=isAsc;
+		state.sortKey=sortKey;
+		getTeamList();
+	}
 	onLoad(async () => {
 		getTeamList();
 		let res = await sheep.$api.commission.getSummary();
