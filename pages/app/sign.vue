@@ -22,11 +22,10 @@
             align-items: center;
           "
         >
-          <!-- TODO @科举：1）这里已签到的样式不太对；2）最后一天（第 7 天）的大奖样式不太对 -->
           <view class="item" v-for="(item, index) in state.signConfigList" :key="index">
             <view
               :class="
-                (index + 1 === state.signConfigList.length ? 'reward' : '') +
+                (index  === state.signConfigList.length ? 'reward' : '') +
                 ' ' +
                 (state.signInfo.continuousDay >= item.day ? 'rewardTxt' : '')
               "
@@ -66,7 +65,7 @@
       <!-- 签到说明 TODO @科举：这里改成【已累计签到】 -->
       <view class="bg-white ss-m-t-16 ss-p-t-30 ss-p-b-60 ss-p-x-40">
         <view class="activity-title ss-m-b-30">签到说明</view>
-        <view class="activity-des">1、每天签到，可获得积分或经验</view>
+        <view class="activity-des">1、已累计签到{{state.signInfo.totalDay}}天</view>
         <view class="activity-des">
           2、据说连续签到第 {{ state.maxDay }} 天可获得超额积分，一定要坚持签到哦~~~
         </view>
@@ -111,7 +110,7 @@
     signInfo: {}, // 签到信息
 
     signConfigList: [], // 签到配置列表
-    maxDay: 0, // 最大的签到天数
+    maxDay: 0, // 最大的签到天数 
 
     showModel: false, // 签到弹框
     signResult: {}, // 签到结果

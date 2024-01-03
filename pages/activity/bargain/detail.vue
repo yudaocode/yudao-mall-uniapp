@@ -1,8 +1,8 @@
 <!-- 砍价详情 -->
 <template>
-  <!-- TODO @科举：按照项目的代码风格，调整下这个界面 -->
-  <!-- TODO @科举：挪到 bargain/detail.vue 里 -->
-  <!-- TODO @科举：尽量都迁移完；依赖数据的部分，通过直接在 state 写死状态，不用后端返回，跑通整个界面；不追求 100% 对，但是至少自己观感是 ok 的 -->
+	<!-- TODO @科举：按照项目的代码风格，调整下这个界面 -->
+	<!-- TODO @科举：挪到 bargain/detail.vue 里 -->
+	<!-- TODO @科举：尽量都迁移完；依赖数据的部分，通过直接在 state 写死状态，不用后端返回，跑通整个界面；不追求 100% 对，但是至少自己观感是 ok 的 -->
 	<s-layout title='砍价详情'>
 		<view class='bargain'>
 			<!-- :class="startBargainUid !== userInfo.uid ? 'on' : ''" -->
@@ -138,28 +138,18 @@
 	});
 
 
-	function getBargainDetails() {
-		sheep.$api.activity.getBargainActivityDetail({
+	async function getBargainDetails() {
+		let {
+			data,
+			code
+		} = await sheep.$api.activity.getBargainActivityDetail({
 			id: state.id
-		}).then(res => {
-			state.bargainInfo = res.data;
-			state.buyPrice = state.bargainInfo.bargainFirstPrice;
-			// state.pages = '/pages/activity/goods_bargain_details/index?id=' + state.id +
-			// 	'&startBargainUid=' + state.uid + '&scene=' + state.uid + '&storeBargainId=' + state
-			// 	.storeBargainId;
-			// uni.setNavigationBarTitle({
-			// 	title: bargainInfo.name.substring(0, 13) + '...'
-			// })
-
-			// 获得拼团记录
-			// this.gobargainUserInfo();
-
-			//#ifdef H5
-			// this.getImageBase64(bargainInfo.picUrl);
-			//#endif
-		}).catch(function(err) {
-			// 错误了可以跳转回上个页面
 		})
+		if (code == 0) {
+			state.bargainInfo = data;
+			state.buyPrice = state.bargainInfo.bargainFirstPrice;
+		}
+
 	}
 	onLoad(function(options) {
 		if (options.hasOwnProperty('id')) {

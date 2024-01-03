@@ -30,7 +30,8 @@
 	import {
 		reactive,
 		onBeforeMount,
-		nextTick
+		nextTick,
+		ref
 	} from 'vue';
 	import sheep from '@/sheep';
 
@@ -52,7 +53,7 @@
 	const state = reactive({
 		currentValue: '0',
 	});
-	const typeList = [{
+	const typeList = reactive([{
 			// icon: '/static/img/shop/pay/wechat.png',
 			title: '工商银行',
 			value: '0',
@@ -67,7 +68,7 @@
 			title: '农业',
 			value: '2',
 		},
-	];
+	])
 	const getWalletAccountInfo = async () => {
 		return new Promise(async (resolve, reject) => {
 			let res = await sheep.$api.user.account.info({

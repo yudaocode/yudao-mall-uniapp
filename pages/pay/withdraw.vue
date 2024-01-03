@@ -21,29 +21,44 @@
 				<uni-easyinput :inputBorder="false" class="ss-flex-1 ss-p-l-10" v-model="state.amount" type="number"
 					placeholder="请输入提现金额" />
 			</view>
-			<view class="card-title">持卡人</view>
-			<view class="input-box ss-flex ss-col-center border-bottom">
+			<view class="card-title" v-show='txfag==1'>持卡人</view>
+			<view class="input-box ss-flex ss-col-center border-bottom"  v-show='txfag==1'>
 				<view class="unit"></view>
 				<uni-easyinput :inputBorder="false" class="ss-flex-1 ss-p-l-10" v-model="state.name"
 					placeholder="请输入持卡人姓名" />
 			</view>
-			<view class="card-title">卡号</view>
-			<view class="input-box ss-flex ss-col-center border-bottom">
+			<view class="card-title"  v-show='txfag==1'>卡号</view>
+			<view class="input-box ss-flex ss-col-center border-bottom"  v-show='txfag==1'>
 				<view class="unit"></view>
 				<uni-easyinput :inputBorder="false" class="ss-flex-1 ss-p-l-10" v-model="state.accountNo"
 					placeholder="请输卡号" />
 			</view>
-			<view class="bank-box ss-flex ss-col-center ss-row-between ss-m-b-30">
+			<view class="card-title">收款码</view>
+			<view class="input-box ss-flex ss-col-center border-bottom">
+				<view class="unit"></view>
+				<uni-easyinput :inputBorder="false" class="ss-flex-1 ss-p-l-10" v-model="state.accountQrCodeUrl"
+					placeholder="请输收款码地址" />
+			</view>
+			
+			<view class="bank-box ss-flex ss-col-center ss-row-between ss-m-b-30" style='display:block'>
+				<view class="name">选择提现方式：</view>
+				<!-- <view class="bank-list ss-flex ss-col-center" style="margin-left:auto" >
+					<view class="empty-text">请选择提现方式</view>
+					<text class="cicon-forward"></text>
+				</view> -->
+					<uni-section title="单选" type="line">
+						<view class="uni-px-5 uni-pb-5" style='font-size:28rpx'>
+							<uni-data-checkbox v-model="txfag" :localdata="txList"></uni-data-checkbox>
+						</view>
+					</uni-section>
+			</view>
+			<view class="bank-box ss-flex ss-col-center ss-row-between ss-m-b-30"  v-show='txfag==1'>
 				<view class="name">选择银行</view>
 				<view class="bank-list ss-flex ss-col-center" @tap="onAccountSelect(true)">
 					<view v-if="!state.accountInfo.type" class="empty-text">请选择提现方式</view>
 					<view v-if="state.accountInfo.type === '0'" class="empty-text">工商银行</view>
 					<view v-if="state.accountInfo.type === '1'" class="empty-text">建设银行</view>
 					<view v-if="state.accountInfo.type === '2'" class="empty-text">农业银行</view>
-					<!-- 	<view v-if="!state.accountInfo.type" class="empty-text">请选择提现方式</view>
-					<view v-if="state.accountInfo.type === 'wechat'" class="empty-text">微信零钱</view>
-					<view v-if="state.accountInfo.type === 'alipay'" class="empty-text">支付宝账户</view>
-					<view v-if="state.accountInfo.type === 'bank'" class="empty-text">银行卡转账</view> -->
 					<text class="cicon-forward"></text>
 				</view>
 			</view>
@@ -51,10 +66,6 @@
 				<view class="placeholder-text" v-if="state.accountInfo.account_name">
 					{{ state.accountInfo.account_header }}|{{ state.accountInfo.account_name }}
 				</view>
-				<!-- 	<view class="placeholder-text" v-else>暂无提现账户</view>
-				<button class="add-btn ss-reset-button" @tap="onAccountEdit(true)">
-					{{ state.accountInfo.account_name ? '修改' : '添加' }}
-				</button> -->
 			</view>
 			<button class="ss-reset-button save-btn ui-BG-Main-Gradient ui-Shadow-Main" @tap="onConfirm">
 				确认提现
@@ -91,7 +102,7 @@
 	import {
 		computed,
 		reactive,
-		onBeforeMount
+		onBeforeMount,ref
 	} from 'vue';
 	import sheep from '@/sheep';
 	import accountTypeSelect from './components/account-type-select.vue';
@@ -130,7 +141,11 @@
 
 		return list;
 	}
-
+	let txfag=ref(1)
+	const txList=[{text:'银行卡提现',value:1},{text:'微信提现',value:2},{text:'支付宝提现',value:3}]
+	function tixian(v){
+		console.log(v)
+	}
 	const userStore = sheep.$store('user');
 	const userInfo = computed(() => userStore.userInfo);
 	const state = reactive({
@@ -152,6 +167,7 @@
 			methods: [],
 		},
 		rulesList: [],
+		accountQrCodeUrl:''
 	});
 
 	const onAccountEdit = (e) => {
@@ -167,8 +183,9 @@
 			accountNo: state.accountNo,
 			name: state.name,
 			bankName: state.accountInfo.type,
-			type: '2',
-			price: state.amount * 100
+			type: txfag.value,
+			price: state.amount * 100,
+			accountQrCodeUrl:state.accountQrCodeUrl
 		};
 		console.log(payload);
 		// return;
