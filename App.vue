@@ -19,7 +19,7 @@
     // 获取urlSchemes参数
     const args = plus.runtime.arguments;
     if (args) {
-    }
+    } 
 
     // 获取剪贴板
     uni.getClipboardData({

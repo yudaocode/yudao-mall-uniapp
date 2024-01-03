@@ -337,18 +337,18 @@
 						"group": "分销商城"
 					}
 				},
-                {
-                  "path": "wallet",
-                  "style": {
-                    "navigationBarTitleText": "我的佣金"
-                  },
-                  "meta": {
-                    "auth": true,
-                    "sync": true,
-                    "title": "用户佣金",
-                    "group": "分销中心"
-                  }
-                },
+				{
+					"path": "wallet",
+					"style": {
+						"navigationBarTitleText": "我的佣金"
+					},
+					"meta": {
+						"auth": true,
+						"sync": true,
+						"title": "用户佣金",
+						"group": "分销中心"
+					}
+				},
 				{
 					"path": "goods",
 					"style": {
@@ -622,7 +622,7 @@
 					}
 				},
 				{
-					"path": "bargainingList",
+					"path": "bargain/list",
 					"style": {
 						"navigationBarTitleText": "砍价列表"
 					},
@@ -633,7 +633,7 @@
 					}
 				},
 				{
-					"path": "bargainingDetail",
+					"path": "bargain/detail",
 					"style": {
 						"navigationBarTitleText": "砍价详情"
 					},

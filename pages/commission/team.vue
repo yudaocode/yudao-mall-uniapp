@@ -1,13 +1,104 @@
 <!-- 页面 TODO 芋艿：检查未开发 -->
 <template>
 	<s-layout title="我的团队" :class="state.scrollTop ? 'team-wrap' : ''" navbar="inner">
-		<view class="header-box" :style="[
+		<view class="promoter-list">
+			<view class='promoterHeader bg-color' style='backgroundColor:#e93323!important;height:218rpx;color:#fff'>
+				<view class='headerCon acea-row row-between' style='padding: 28px 29px 0 29px;'>
+					<view>
+						<view class='name' style="color:#fff">推广人数</view>
+						<view><text class='num'
+								style="color:#fff">{{(state.getSummary.firstBrokerageUserCount+ state.getSummary.secondBrokerageUserCount)|| 0 }}</text>人
+						</view>
+					</view>
+					<view class='iconfont icon-tuandui'></view>
+				</view>
+			</view>
+			<view style='padding: 0 30rpx;'>
+				<view class='nav acea-row row-around l1'>
+					<view :class="state.level == 1 ? 'item on' : 'item'" @click='setType(1)'>
+						一级({{state.getSummary.firstBrokerageUserCount || 0 }})</view>
+					<view :class="state.level == 2 ? 'item on' : 'item'" @click='setType(2)'>
+						二级({{state.getSummary.secondBrokerageUserCount || 0 }})
+					</view>
+				</view>
+				<view class='search acea-row row-between-wrapper'
+					style="display: flex;height: 100rpx;align-items: center;">
+					<view class='input'>
+						<input placeholder='点击搜索会员名称' v-model="state.nickname" confirm-type='search' name="search"
+							@confirm="submitForm" />
+
+					</view> 
+					<image src="/static/images/search.png" mode="" style='width: 60rpx;height: 64rpx;' @click="submitForm"></image>
+				</view>
+				<view class='list'>
+					<view class="sortNav acea-row row-middle" style="display: flex;align-items: center;">
+						<view class="sortItem" @click='setSort("userCount","asc")' v-if="sort === 'userCountDESC'">
+							团队排序
+							<image src='/static/images/sort1.png'></image>
+						</view>
+						<view class="sortItem" @click='setSort("userCount", "desc")'
+							v-else-if="sort === 'userCountASC'">团队排序
+							<image src='/static/images/sort3.png'></image>
+						</view>
+						<view class="sortItem" @click='setSort("userCount","desc")' v-else>团队排序
+							<image src='/static/images/sort2.png'></image>
+						</view>
+						<view class="sortItem" @click='setSort("price","asc")' v-if="sort === 'priceDESC'">
+							金额排序
+							<image src='/static/images/sort1.png'></image>
+						</view>
+						<view class="sortItem" @click='setSort("price", "desc")' v-else-if="sort === 'priceASC'">
+							金额排序
+							<image src='/static/images/sort3.png'></image>
+						</view>
+						<view class="sortItem" @click='setSort("price","desc")' v-else>金额排序
+							<image src='/static/images/sort2.png'></image>
+						</view>
+						<view class="sortItem" @click='setSort("orderCount","asc")' v-if="sort === 'orderCountDESC'">
+							订单排序
+							<image src='/static/images/sort1.png'></image>
+						</view>
+						<view class="sortItem" @click='setSort("orderCount", "desc")'
+							v-else-if="sort === 'orderCountASC'">订单排序
+							<image src='/static/images/sort3.png'></image>
+						</view>
+						<view class="sortItem" @click='setSort("orderCount","desc")' v-else>订单排序
+							<image src='/static/images/sort2.png'></image>
+						</view>
+					</view>
+								<block v-for="(item,index) in  state.pagination.data" :key="index">
+						<view class='item acea-row row-between-wrapper' style="display: flex;">
+							<view class="picTxt acea-row row-between-wrapper" style="display: flex;align-items: center;">
+								<view class='pictrue'>
+									<image :src='item.avatar'></image>
+								</view>
+								<view class='text'>
+									<view class='name line1'>{{item.nickname}}</view>
+									<view>加入时间: {{  sheep.$helper.timeFormat(item.brokerageTime, 'yyyy-mm-dd hh:MM:ss') }}</view>
+								</view>
+							</view>
+							<view class="right" style='justify-content:center;flex-direction:  column;display: flex;margin-left: auto;'>
+								<view><text class='num font-color'>{{ item.brokerageUserCount || 0}}</text>人
+								</view>
+								<view><text class="num">{{ item.orderCount|| 0}}</text>单</view>
+								<view><text class="num">{{ item.brokeragePrice || 0 }}</text>元</view>
+							</view>
+						</view>
+					</block>
+					<block v-if="state.pagination.data.length == 0">
+						<view style='text-align: center;'>暂无推广人数</view>
+					</block>
+				</view>
+			</view>
+		</view>
+		<!-- <home></home> -->
+
+		<!-- 		<view class="header-box" :style="[
         {
           marginTop: '-' + Number(statusBarHeight + 88) + 'rpx',
           paddingTop: Number(statusBarHeight + 108) + 'rpx',
         },
       ]">
-			<!-- 推荐人 -->
 			<view v-if="userInfo.parent_user" class="referrer-box ss-flex ss-col-center">
 				推荐人：
 				<image class="referrer-avatar ss-m-r-10" :src="sheep.$url.cdn(userInfo.parent_user.avatar)"
@@ -15,7 +106,6 @@
 				</image>
 				{{ userInfo.parent_user.nickname }}
 			</view>
-			<!-- 团队数据总览 -->
 			<view class="team-data-box ss-flex ss-col-center ss-row-between">
 				<view class="data-card">
 					<view class="total-item">
@@ -38,16 +128,16 @@
 				<view class="data-card">
 					<view class="total-item">
 						<view class="item-title">团队分销商人数（人）</view>
-						<view class="total-num">{{ agentInfo.child_agent_count_all || 0 }}</view>
+						<view class="total-num">{{ agentInfo?.child_agent_count_all || 0 }}</view>
 					</view>
 					<view class="category-item ss-flex">
 						<view class="ss-flex-1">
 							<view class="item-title">一级分销商</view>
-							<view class="category-num">{{ agentInfo.child_agent_count_1 || 0 }}</view>
+							<view class="category-num">{{ agentInfo?.child_agent_count_1 || 0 }}</view>
 						</view>
 						<view class="ss-flex-1">
 							<view class="item-title">二级分销商</view>
-							<view class="category-num">{{ agentInfo.child_agent_count_2 || 0 }}</view>
+							<view class="category-num">{{ agentInfo?.child_agent_count_2 || 0 }}</view>
 						</view>
 					</view>
 				</view>
@@ -71,7 +161,7 @@
 			</uni-list>
 		</view>
 		<s-empty v-if="state.pagination.total === 0" icon="/static/data-empty.png" text="暂无团队信息">
-		</s-empty>
+		</s-empty> -->
 	</s-layout>
 </template>
 
@@ -83,12 +173,17 @@
 	} from '@dcloudio/uni-app';
 	import {
 		computed,
-		reactive
+		reactive,
+		ref
 	} from 'vue';
 	import _ from 'lodash';
 	import {
 		onPageScroll
 	} from '@dcloudio/uni-app';
+
+
+
+
 
 	const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
 	const agentInfo = computed(() => sheep.$store('user').agentInfo);
@@ -102,6 +197,7 @@
 			state.scrollTop = true;
 		}
 	});
+	let sort=ref();
 	const state = reactive({
 		getSummary: {},
 		pagination: {
@@ -111,7 +207,13 @@
 			last_page: 1,
 		},
 		loadStatus: '',
+		// ↓新ui逻辑
+		level: 1,
+		nickname: ref(''),
+		sortKey:'',
+		isAsc:''
 	});
+
 
 	function filterUserNum(num) {
 		if (_.isNil(num)) {
@@ -120,6 +222,10 @@
 		return `下级团队${num}人`;
 	}
 
+	function submitForm() {
+		state.pagination.data = []
+		getTeamList();
+	}
 	async function getTeamList(page = 1, list_rows = 8) {
 		state.loadStatus = 'loading';
 		// 	nickname: this.nickname,
@@ -128,10 +234,10 @@
 		let res = await sheep.$api.commission.team({
 			pageSize: list_rows,
 			pageNo: page,
-			level: '1',
+			level: state.level,
 			'sortingField.order': 'desc',
 			'sortingField.field': 'userCount',
-			nickname: ''
+			nickname: state.nickname
 		});
 		console.log(res, '分销团队列表');
 		if (res.code === 0) {
@@ -148,6 +254,19 @@
 		}
 	}
 
+	function setType(e) {
+		state.pagination.data = []
+		state.level = e + '';
+		getTeamList( )
+	}
+
+	function setSort(sortKey, isAsc) {
+		state.pagination.data = []
+		sort = sortKey + isAsc.toUpperCase();	
+		state.isAsc=isAsc;
+		state.sortKey=sortKey;
+		getTeamList();
+	}
 	onLoad(async () => {
 		getTeamList();
 		let res = await sheep.$api.commission.getSummary();
@@ -168,6 +287,19 @@
 </script>
 
 <style lang="scss" scoped>
+	.l1 {
+		background-color: #fff;
+		height: 86rpx;
+		line-height: 86rpx;
+		font-size: 28rpx;
+		color: #282828;
+		border-bottom: 1rpx solid #eee;
+		border-top-left-radius: 14rpx;
+		border-top-right-radius: 14rpx;
+		display: flex;
+		justify-content: space-around;
+	}
+
 	.header-box {
 		box-sizing: border-box;
 		padding: 0 20rpx 20rpx 20rpx;
@@ -262,5 +394,143 @@
 			height: 34rpx;
 			border-radius: 50%;
 		}
+	}
+
+	.promoter-list .nav {
+		background-color: #fff;
+		height: 86rpx;
+		line-height: 86rpx;
+		font-size: 28rpx;
+		color: #282828;
+		border-bottom: 1rpx solid #eee;
+		border-top-left-radius: 14rpx;
+		border-top-right-radius: 14rpx;
+		margin-top: -30rpx;
+	}
+
+	.promoter-list .nav .item.on {
+		border-bottom: 5rpx solid;
+		// $theme-color
+		color: red;
+		// $theme-color
+	}
+
+	.promoter-list .search {
+		width: 100%;
+		background-color: #fff;
+		height: 100rpx;
+		padding: 0 24rpx;
+		box-sizing: border-box;
+		border-bottom-left-radius: 14rpx;
+		border-bottom-right-radius: 14rpx;
+	}
+
+	.promoter-list .search .input {
+		width: 592rpx;
+		height: 60rpx;
+		border-radius: 50rpx;
+		background-color: #f5f5f5;
+		text-align: center;
+		position: relative;
+	}
+
+	.promoter-list .search .input input {
+		height: 100%;
+		font-size: 26rpx;
+		width: 610rpx;
+		text-align: center;
+	}
+
+	.promoter-list .search .input .placeholder {
+		color: #bbb;
+	}
+
+	.promoter-list .search .input .iconfont {
+		position: absolute;
+		right: 28rpx;
+		color: #999;
+		font-size: 28rpx;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	.promoter-list .search .iconfont {
+		font-size: 32rpx;
+		color: #515151;
+		height: 60rpx;
+		line-height: 60rpx;
+	}
+
+	.promoter-list .list {
+		margin-top: 20rpx;
+	}
+
+	.promoter-list .list .sortNav {
+		background-color: #fff;
+		height: 76rpx;
+		border-bottom: 1rpx solid #eee;
+		color: #333;
+		font-size: 28rpx;
+		border-top-left-radius: 14rpx;
+		border-top-right-radius: 14rpx;
+	}
+
+	.promoter-list .list .sortNav .sortItem {
+		text-align: center;
+		flex: 1;
+	}
+
+	.promoter-list .list .sortNav .sortItem image {
+		width: 24rpx;
+		height: 24rpx;
+		margin-left: 6rpx;
+		vertical-align: -3rpx;
+	}
+
+	.promoter-list .list .item {
+		background-color: #fff;
+		border-bottom: 1rpx solid #eee;
+		height: 152rpx;
+		padding: 0 24rpx;
+		font-size: 24rpx;
+		color: #666;
+	}
+
+	.promoter-list .list .item .picTxt .pictrue {
+		width: 106rpx;
+		height: 106rpx;
+		border-radius: 50%;
+	}
+
+	.promoter-list .list .item .picTxt .pictrue image {
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+		border: 3rpx solid #fff;
+		box-shadow: 0 0 10rpx #aaa;
+		box-sizing: border-box;
+	}
+
+	.promoter-list .list .item .picTxt .text {
+		// width: 304rpx;
+		font-size: 24rpx;
+		color: #666;
+		margin-left: 14rpx;
+	}
+
+	.promoter-list .list .item .picTxt .text .name {
+		font-size: 28rpx;
+		color: #333;
+		margin-bottom: 13rpx;
+	}
+
+	.promoter-list .list .item .right {
+		text-align: right;
+		font-size: 22rpx;
+		color: #333;
+	}
+
+	.promoter-list .list .item .right .num {
+		margin-right: 7rpx;
 	}
 </style>
