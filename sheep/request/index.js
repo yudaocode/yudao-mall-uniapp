@@ -214,8 +214,8 @@ const request = (config) => {
 	}
 	// TODO 芋艿：额外拼接
 	if (config.url.indexOf('/app-api/') >= 0) {
-		config.url = 'http://api-dashboard.yudao.iocoder.cn' + config.url; // 调用【云端】
-		// config.url = 'http://127.0.0.1:48080' + config.url; // 调用【本地】
+		// config.url = 'http://api-dashboard.yudao.iocoder.cn' + config.url; // 调用【云端】
+		config.url = 'http://127.0.0.1:48080' + config.url; // 调用【本地】
 		// config.url = 'http://yunai.natapp1.cc' + config.url; // 调用【natapp】
 	}
 	return http.middleware(config);

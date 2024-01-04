@@ -154,6 +154,7 @@
 			},
 			value(newVal) {
 				this.dataList = this.getDataList(newVal)
+        // TODO @芋艿：这块可能被错误的注释了，需要跟进下
 				// fix by mehaotian is_reset 在 uni-forms 中定义
 				// if(!this.is_reset){
 				// 	this.is_reset = false
@@ -162,6 +163,7 @@
 			},
 			modelValue(newVal) {
 				this.dataList = this.getDataList(newVal);
+        // TODO @芋艿：这块可能被错误的注释了，需要跟进下
 				// if(!this.is_reset){
 				// 	this.is_reset = false
 				// 	this.formItem && this.formItem.setValue(newVal)
@@ -405,7 +407,7 @@
 					let selectedColor = this.selectedColor?this.selectedColor:'#2979ff'
 					styles['background-color'] = item.selected?selectedColor:'#fff'
 					styles['border-color'] = item.selected?selectedColor:'#DCDFE6'
-					
+
 					if(!item.selected && item.disabled){
 						styles['background-color'] = '#F2F6FC'
 						styles['border-color'] = item.selected?selectedColor:'#DCDFE6'
