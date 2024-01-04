@@ -74,6 +74,14 @@ const BrokerageApi = {
       method: 'GET',
     });
   },
+  // 获得下级分销统计分页
+  getBrokerageUserChildSummaryPage: (params) => {
+    return request({
+      url: '/app-api/trade/brokerage-user/child-summary-page',
+      method: 'GET',
+      params,
+    })
+  }
 }
 
 export default BrokerageApi
