@@ -1,7 +1,7 @@
 {
-  "name": "星品",
+  "name": "芋道商城",
   "appid": "__UNI__082C0BA",
-  "description": "Shopro是由SheepJS团队开发，使用Uniapp+Vue3技术驱动的在线商城系统，内含诸多功能与丰富的活动，期待您的使用和反馈。",
+  "description": "基于 uni-app + Vue3 技术驱动的在线商城系统，内含诸多功能与丰富的活动，期待您的使用和反馈。",
   "versionName": "1.8.3",
   "versionCode": 183,
   "transformPx": false,
@@ -226,7 +226,7 @@
     "async": {
       "timeout": 20000
     },
-    "title": "星品购",
+    "title": "芋道商城",
     "optimization": {
       "treeShaking": {
         "enable": true

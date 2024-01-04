@@ -26,14 +26,14 @@ const OrderApi = {
       .map((key) => key + '=' + data2[key])
       .join('&');
     return request({
-      url: `trade/order/settlement?${queryString}`,
+      url: `/app-api/trade/order/settlement?${queryString}`,
       method: 'GET',
     });
   },
   // 创建订单
   createOrder: (data) => {
     return request({
-      url: `trade/order/create`,
+      url: `/app-api/trade/order/create`,
       method: 'POST',
       data,
     });
@@ -41,7 +41,7 @@ const OrderApi = {
   // 获得订单
   getOrder: (id) => {
     return request({
-      url: `trade/order/get-detail`,
+      url: `/app-api/trade/order/get-detail`,
       method: 'GET',
       params: {
         id,
