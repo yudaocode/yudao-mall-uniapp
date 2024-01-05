@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-  import { ref, reactive, unref, watchPostEffect, watch } from 'vue';
+  import { ref, reactive, unref, watch } from 'vue';
   import sheep from '@/sheep';
   import { realName, bankName, bankCode, alipayAccount } from '@/sheep/validate/form';
 

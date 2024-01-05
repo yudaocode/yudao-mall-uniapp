@@ -154,20 +154,18 @@
 			},
 			value(newVal) {
 				this.dataList = this.getDataList(newVal)
-        // TODO @芋艿：这块可能被错误的注释了，需要跟进下
 				// fix by mehaotian is_reset 在 uni-forms 中定义
-				// if(!this.is_reset){
-				// 	this.is_reset = false
-				// 	this.formItem && this.formItem.setValue(newVal)
-				// }
+				if(!this.is_reset){
+					this.is_reset = false
+					this.formItem && this.formItem.setValue(newVal)
+				}
 			},
 			modelValue(newVal) {
 				this.dataList = this.getDataList(newVal);
-        // TODO @芋艿：这块可能被错误的注释了，需要跟进下
-				// if(!this.is_reset){
-				// 	this.is_reset = false
-				// 	this.formItem && this.formItem.setValue(newVal)
-				// }
+				if(!this.is_reset){
+					this.is_reset = false
+					this.formItem && this.formItem.setValue(newVal)
+				}
 			}
 		},
 		data() {
@@ -195,22 +193,22 @@
 			}
 		},
 		created() {
-			// this.form = this.getForm('uniForms')
-			// this.formItem = this.getForm('uniFormsItem')
+			this.form = this.getForm('uniForms')
+			this.formItem = this.getForm('uniFormsItem')
 			// this.formItem && this.formItem.setValue(this.value)
 
-			// if (this.formItem) {
-			// 	this.isTop = 6
-			// 	if (this.formItem.name) {
-			// 		// 如果存在name添加默认值,否则formData 中不存在这个字段不校验
-			// 		if(!this.is_reset){
-			// 			this.is_reset = false
-			// 			this.formItem.setValue(this.dataValue)
-			// 		}
-			// 		this.rename = this.formItem.name
-			// 		this.form.inputChildrens.push(this)
-			// 	}
-			// }
+			if (this.formItem) {
+				this.isTop = 6
+				if (this.formItem.name) {
+					// 如果存在name添加默认值,否则formData 中不存在这个字段不校验
+					if(!this.is_reset){
+						this.is_reset = false
+						this.formItem.setValue(this.dataValue)
+					}
+					this.rename = this.formItem.name
+					this.form.inputChildrens.push(this)
+				}
+			}
 
 			if (this.localdata && this.localdata.length !== 0) {
 				this.isLocal = true
@@ -275,7 +273,7 @@
 						}
 					}
 				}
-				// this.formItem && this.formItem.setValue(detail.value)
+				this.formItem && this.formItem.setValue(detail.value)
 				// TODO 兼容 vue2
 				this.$emit('input', detail.value);
 				// // TOTO 兼容 vue3
@@ -377,7 +375,7 @@
 						selectedArr.push(item[this.map.value])
 					}
 				})
-				return this.dataValue.length > 0 ? this.dataValue : selectedArr
+				return this.dataValue && this.dataValue.length > 0 ? this.dataValue : selectedArr
 			},
 
 			/**
@@ -386,13 +384,11 @@
 			setStyleBackgroud(item) {
 				let styles = {}
 				let selectedColor = this.selectedColor?this.selectedColor:'#2979ff'
-				if (this.selectedColor) {
-					if (this.mode !== 'list') {
-						styles['border-color'] = item.selected?selectedColor:'#DCDFE6'
-					}
-					if (this.mode === 'tag') {
-						styles['background-color'] = item.selected? selectedColor:'#f5f5f5'
-					}
+				if (this.mode !== 'list') {
+					styles['border-color'] = item.selected?selectedColor:'#DCDFE6'
+				}
+				if (this.mode === 'tag') {
+					styles['background-color'] = item.selected? selectedColor:'#f5f5f5'
 				}
 				let classles = ''
 				for (let i in styles) {
@@ -403,16 +399,15 @@
 			setStyleIcon(item) {
 				let styles = {}
 				let classles = ''
-				if (this.selectedColor) {
-					let selectedColor = this.selectedColor?this.selectedColor:'#2979ff'
-					styles['background-color'] = item.selected?selectedColor:'#fff'
-					styles['border-color'] = item.selected?selectedColor:'#DCDFE6'
+				let selectedColor = this.selectedColor?this.selectedColor:'#2979ff'
+				styles['background-color'] = item.selected?selectedColor:'#fff'
+				styles['border-color'] = item.selected?selectedColor:'#DCDFE6'
 
-					if(!item.selected && item.disabled){
-						styles['background-color'] = '#F2F6FC'
-						styles['border-color'] = item.selected?selectedColor:'#DCDFE6'
-					}
+				if(!item.selected && item.disabled){
+					styles['background-color'] = '#F2F6FC'
+					styles['border-color'] = item.selected?selectedColor:'#DCDFE6'
 				}
+
 				for (let i in styles) {
 					classles += `${i}:${styles[i]};`
 				}
@@ -421,17 +416,16 @@
 			setStyleIconText(item) {
 				let styles = {}
 				let classles = ''
-				if (this.selectedColor) {
-					let selectedColor = this.selectedColor?this.selectedColor:'#2979ff'
-					if (this.mode === 'tag') {
-						styles.color = item.selected?(this.selectedTextColor?this.selectedTextColor:'#fff'):'#666'
-					} else {
-						styles.color = item.selected?(this.selectedTextColor?this.selectedTextColor:selectedColor):'#666'
-					}
-					if(!item.selected && item.disabled){
-						styles.color = '#999'
-					}
+				let selectedColor = this.selectedColor?this.selectedColor:'#2979ff'
+				if (this.mode === 'tag') {
+					styles.color = item.selected?(this.selectedTextColor?this.selectedTextColor:'#fff'):'#666'
+				} else {
+					styles.color = item.selected?(this.selectedTextColor?this.selectedTextColor:selectedColor):'#666'
 				}
+				if(!item.selected && item.disabled){
+					styles.color = '#999'
+				}
+
 				for (let i in styles) {
 					classles += `${i}:${styles[i]};`
 				}
@@ -454,7 +448,7 @@
 </script>
 
 <style lang="scss">
-	$uni-primary: #2979ff !default;
+	$checked-color: #2979ff;
 	$border-color: #DCDFE6;
 	$disable:0.4;
 
@@ -620,8 +614,8 @@
 					// 选中
 					&.is-checked {
 						.checkbox__inner {
-							border-color: $uni-primary;
-							background-color: $uni-primary;
+							border-color: $checked-color;
+							background-color: $checked-color;
 
 							.checkbox__inner-icon {
 								opacity: 1;
@@ -629,14 +623,14 @@
 							}
 						}
 						.radio__inner {
-							border-color: $uni-primary;
+							border-color: $checked-color;
 							.radio__inner-icon {
 								opacity: 1;
-								background-color: $uni-primary;
+								background-color: $checked-color;
 							}
 						}
 						.checklist-text {
-							color: $uni-primary;
+							color: $checked-color;
 						}
 						// 选中禁用
 						&.is-disable {
@@ -689,10 +683,10 @@
 					}
 
 					&.is-checked {
-						border-color: $uni-primary;
+						border-color: $checked-color;
 						.checkbox__inner {
-							border-color: $uni-primary;
-							background-color: $uni-primary;
+							border-color: $checked-color;
+							background-color: $checked-color;
 							.checkbox__inner-icon {
 								opacity: 1;
 								transform: rotate(45deg);
@@ -700,16 +694,16 @@
 						}
 
 						.radio__inner {
-							border-color: $uni-primary;
+							border-color: $checked-color;
 
 							.radio__inner-icon {
 								opacity: 1;
-								background-color: $uni-primary;
+								background-color: $checked-color;
 							}
 						}
 
 						.checklist-text {
-							color: $uni-primary;
+							color: $checked-color;
 						}
 
 						// 选中禁用
@@ -741,8 +735,8 @@
 					}
 
 					&.is-checked {
-						background-color: $uni-primary;
-						border-color: $uni-primary;
+						background-color: $checked-color;
+						border-color: $checked-color;
 
 						.checklist-text {
 							color: #fff;
@@ -781,8 +775,8 @@
 
 					&.is-checked {
 						.checkbox__inner {
-							border-color: $uni-primary;
-							background-color: $uni-primary;
+							border-color: $checked-color;
+							background-color: $checked-color;
 
 							.checkbox__inner-icon {
 								opacity: 1;
@@ -795,13 +789,13 @@
 							}
 						}
 						.checklist-text {
-							color: $uni-primary;
+							color: $checked-color;
 						}
 
 						.checklist-content {
 							.checkobx__list {
 								opacity: 1;
-								border-color: $uni-primary;
+								border-color: $checked-color;
 							}
 						}
 
