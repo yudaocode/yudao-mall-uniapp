@@ -406,7 +406,18 @@
 						"title": "佣金排行榜",
 						"group": "分销商城"
 					}
-				}
+				}, {
+                "path": "withdraw",
+                "style": {
+                  "navigationBarTitleText": "申请提现"
+                },
+                "meta": {
+                  "auth": true,
+                  "sync": true,
+                  "title": "申请提现",
+                  "group": "分销商城"
+                }
+              }
 			]
 		},
 		{
@@ -550,18 +561,6 @@
 						"auth": true,
 						"sync": true,
 						"title": "充值记录",
-						"group": "支付"
-					}
-				},
-				{
-					"path": "withdraw",
-					"style": {
-						"navigationBarTitleText": "申请提现"
-					},
-					"meta": {
-						"auth": true,
-						"sync": true,
-						"title": "申请提现",
 						"group": "支付"
 					}
 				}

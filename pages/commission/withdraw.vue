@@ -1,3 +1,4 @@
+<!-- 分佣提现 -->
 <template>
   <s-layout title="申请提现" class="withdraw-wrap" navbar="inner">
     <view class="page-bg"></view>
@@ -14,7 +15,7 @@
         <view class="num-title">可提现金额（元）</view>
         <view class="wallet-num">{{ fen2yuan(state.brokerageInfo.brokeragePrice) }}</view>
       </view>
-      <button class="ss-reset-button log-btn" @tap="sheep.$router.go('/pages/pay/withdraw-log')">
+      <button class="ss-reset-button log-btn" @tap="sheep.$router.go('/pages/commission/wallet', { type: 2 })">
         提现记录
       </button>
     </view>
@@ -59,19 +60,22 @@
           placeholder="请输入提现账号"
         />
       </view>
-      <!-- TODO 芋艿： -->
+      <!-- 收款码 -->
       <view class="card-title" v-show="['2', '3'].includes(state.accountInfo.type)">收款码</view>
       <view
-        class="input-box ss-flex ss-col-center border-bottom"
+        class="input-box ss-flex ss-col-center"
         v-show="['2', '3'].includes(state.accountInfo.type)"
       >
         <view class="unit" />
-        <uni-easyinput
-          :inputBorder="false"
-          class="ss-flex-1 ss-p-l-10"
-          v-model="state.accountInfo.accountQrCodeUrl"
-          placeholder="请输收款码地址"
-        />
+        <view class="upload-img">
+          <s-uploader
+            v-model:url="state.accountInfo.accountQrCodeUrl"
+            fileMediatype="image"
+            limit="1"
+            mode="grid"
+            :imageStyles="{ width: '168rpx', height: '168rpx' }"
+          />
+        </view>
       </view>
       <!-- 持卡人姓名 -->
       <view class="card-title" v-show="state.accountInfo.type === '4'">持卡人</view>
@@ -142,7 +146,7 @@
 </template>
 
 <script setup>
-  import { computed, reactive, onBeforeMount, ref } from 'vue';
+  import { computed, reactive, onBeforeMount } from 'vue';
   import sheep from '@/sheep';
   import accountTypeSelect from './components/account-type-select.vue';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
@@ -211,7 +215,7 @@
       confirmText: '查看记录',
       success: (res) => {
         if (res.confirm) {
-          sheep.$router.go('/pages/pay/withdraw-log')
+          sheep.$router.go('/pages/commission/wallet', { type: 2 })
           return;
         }
         getBrokerageUser();

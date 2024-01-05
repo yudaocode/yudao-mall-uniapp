@@ -1,3 +1,4 @@
+<!-- 提现方式的 select 组件 -->
 <template>
   <su-popup :show="show" class="ss-checkout-counter-wrap" @close="hideModal">
     <view class="ss-modal-box bg-white ss-flex-col">

@@ -13,7 +13,7 @@
 					<view class="money-num">{{ state.showMoney ? fen2yuan(state.summary.withdrawPrice || 0) : '*****' }}</view>
 					<view class="ss-flex">
 						<view class="ss-m-r-20">
-							<button class="ss-reset-button withdraw-btn" @tap="sheep.$router.go('/pages/pay/withdraw')">
+							<button class="ss-reset-button withdraw-btn" @tap="sheep.$router.go('/pages/commission/withdraw')">
 								提现
 							</button>
 						</view>
@@ -214,9 +214,12 @@
     state.summary = data;
 	}
 
-	onLoad(async () => {
+	onLoad(async (options) => {
 		state.today = dayjs().format('YYYY-MM-DD');
 		state.date = [state.today, state.today];
+    if (options.type === 2) { // 切换到“提现” tab 下
+      state.currentTab = 1;
+    }
 		getLogList();
 		getAgentInfo();
 	});
