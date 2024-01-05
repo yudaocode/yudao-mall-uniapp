@@ -1,5 +1,5 @@
 'use strict';
-import sheep from '@/sheep';
+import FileApi from '@/sheep/api/infra/file';
 
 const ERR_MSG_OK = 'chooseAndUploadFile:ok';
 const ERR_MSG_FAIL = 'chooseAndUploadFile:fail';
@@ -190,8 +190,8 @@ function uploadFiles(choosePromise, { onChooseFile, onUploadProgress }) {
     })
     .then(async (files) => {
       for (let file of files.tempFiles) {
-        let { path } = await sheep.$api.app.upload(file.path, 'ugc');
-        file.url = path;
+        const { data } = await FileApi.uploadFile(file.path);
+        file.url = data;
       }
       return files;
     });

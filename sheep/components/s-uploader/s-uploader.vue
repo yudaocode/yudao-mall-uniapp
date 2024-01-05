@@ -1,3 +1,4 @@
+<!-- 文件上传，基于 upload-file 和 upload-image 实现 -->
 <template>
   <view class="uni-file-picker">
     <view v-if="title" class="uni-file-picker__header">

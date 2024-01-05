@@ -1,5 +1,3 @@
-import request2 from '@/sheep/request2';
-
 const FileApi = {
   // 上传文件
   uploadFile: (file) => {
