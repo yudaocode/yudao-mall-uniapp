@@ -130,8 +130,8 @@ http.interceptors.response.use(
 			(response.data.msg !== '' || response.config.custom.successMsg !== '') &&
 			response.config.custom.showSuccess
 		) {
-			uni.showToast({
-				title: response.config.custom.successMsg || response.data.msg,
+      uni.showToast({
+				title: response.config.custom.successMsg,
 				icon: 'none',
 			});
 		}
