@@ -49,17 +49,6 @@ export default {
         showError: false,
       },
     }),
-  // 商品评价类型
-  getType: (id) =>
-    request({
-      url: 'goods/comment/getType/' + id,
-      method: 'GET',
-      custom: {
-        showLoading: false,
-        showError: false,
-      },
-    }),
-  // 活动商品查询
   // 商品查询
   activity: (params = {}) =>
     request({

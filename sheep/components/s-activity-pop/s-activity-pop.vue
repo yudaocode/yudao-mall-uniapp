@@ -1,3 +1,4 @@
+<!-- 商品信息：满减送等营销活动的弹窗 -->
 <template>
   <su-popup :show="show" type="bottom" round="20" @close="emits('close')" showClose>
     <view class="model-box">
@@ -9,28 +10,20 @@
         :enable-back-to-top="true"
       >
         <view v-for="item in state.activityInfo" :key="item.id">
-          <!-- <uni-list :border="false">
-            <uni-list-item showArrow clickable @tap="sheep.$router.go('/pages/goods/list')">
-              <template v-slot:header>
-                <view class="model-content-tag ss-flex ss-row-center">{{ item.type_text }}</view>
-              </template>
-              <template v-slot:body>
-                <view class="ss-m-l-20 model-content-title">
-                  <view class="ss-m-b-24" v-for="text in item.texts" :key="text">
-                    {{ text }}
-                  </view>
-                </view>
-              </template>
-            </uni-list-item>
-          </uni-list> -->
           <view class="ss-flex ss-col-top ss-m-b-40" @tap="onGoodsList(item)">
-            <view class="model-content-tag ss-flex ss-row-center">{{ item.type_text }}</view>
+            <view class="model-content-tag ss-flex ss-row-center">满减</view>
+            <!-- TODO 芋艿：先简单做；未来再搞成满 xxx 减 yyy 元 -->
+<!--            <view class="ss-m-l-20 model-content-title ss-flex-1">-->
+<!--              <view class="ss-m-b-24" v-for="text in item.texts" :key="text">-->
+<!--                {{ text }}-->
+<!--              </view>-->
+<!--            </view>-->
             <view class="ss-m-l-20 model-content-title ss-flex-1">
-              <view class="ss-m-b-24" v-for="text in item.texts" :key="text">
-                {{ text }}
+              <view class="ss-m-b-24">
+                {{ item.name }}
               </view>
             </view>
-            <text class="cicon-forward"></text>
+            <text class="cicon-forward" />
           </view>
         </view>
       </scroll-view>

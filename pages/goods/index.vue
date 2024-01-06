@@ -8,12 +8,12 @@
 			<detailSkeleton v-if="state.skeletonLoading" />
 			<!-- 下架/售罄提醒 -->
 			<s-empty v-else-if="state.goodsInfo === null" text="商品不存在或已下架" icon="/static/soldout-empty.png" showAction
-				actionText="再逛逛" actionUrl="/pages/goods/list" />
+               actionText="再逛逛" actionUrl="/pages/goods/list" />
 			<block v-else>
 				<view class="detail-swiper-selector">
 					<!-- 商品轮播图  -->
 					<su-swiper class="ss-m-b-14" isPreview :list="formatGoodsSwiper(state.goodsInfo.sliderPicUrls)"
-						dotStyle="tag" imageMode="widthFix" dotCur="bg-mask-40" :seizeHeight="750" />
+                     otStyle="tag" imageMode="widthFix" dotCur="bg-mask-40" :seizeHeight="750" />
 
 					<!-- 价格+标题 -->
 					<view class="title-card detail-card ss-p-y-40 ss-p-x-20">
@@ -31,12 +31,12 @@
 							</view>
 						</view>
 						<view class="discounts-box ss-flex ss-row-between ss-m-b-28">
-							<!-- 满减送/限时折扣活动的提示 TODO 芋艿：promos 未写 -->
+							<!-- 满减送/限时折扣活动的提示 -->
 							<div class="tag-content">
 								<view class="tag-box ss-flex">
-									<view class="tag ss-m-r-10" v-for="promos in state.goodsInfo.promos"
-										:key="promos.id" @tap="onActivity">
-										{{ promos.title }}
+									<view class="tag ss-m-r-10" v-for="promos in state.activityInfo"
+                        :key="promos.id" @tap="onActivity">
+										{{ promos.name }}
 									</view>
 								</view>
 							</div>
@@ -55,12 +55,12 @@
 					<!-- 功能卡片 -->
 					<view class="detail-cell-card detail-card ss-flex-col">
 						<detail-cell-sku v-model="state.selectedSku.goods_sku_text" :sku="state.selectedSku"
-							@tap="state.showSelectSku = true" />
+                             @tap="state.showSelectSku = true" />
 					</view>
 
 					<!-- 规格与数量弹框 -->
 					<s-select-sku :goodsInfo="state.goodsInfo" :show="state.showSelectSku" @addCart="onAddCart"
-						@buy="onBuy" @change="onSkuChange" @close="state.showSelectSku = false" />
+                        @buy="onBuy" @change="onSkuChange" @close="state.showSelectSku = false" />
 				</view>
 
 				<!-- 评价 -->
@@ -120,6 +120,7 @@
 	import detailContentCard from './components/detail/detail-content-card.vue';
 	import detailActivityTip from './components/detail/detail-activity-tip.vue';
 	import { isEmpty } from 'lodash';
+  import SpuApi from '@/sheep/api/product/spu';
 
 	onPageScroll(() => {});
 
@@ -141,7 +142,7 @@
 		state.selectedSku = e;
 	}
 
-	// 添加购物车  TODO 芋艿：待测试
+	// 添加购物车
 	function onAddCart(e) {
     if (!e.id) {
       sheep.$helper.toast('请选择商品规格');
@@ -169,13 +170,12 @@
     });
 	}
 
-	// 营销活动  TODO 芋艿：待测试
+	// 营销活动
 	function onActivity() {
-		state.activityInfo = state.goodsInfo.promos;
 		state.showActivityModel = true;
 	}
 
-	// 立即领取  TODO 芋艿：待测试
+	// 立即领取
 	async function onGet(id) {
     const { code } = await CouponApi.takeCoupon(id);
     if (code !== 0) {
@@ -225,7 +225,7 @@
 		}
 		state.goodsId = options.id;
 		// 1. 加载商品信息
-		sheep.$api.goods.detail(state.goodsId).then((res) => {
+		SpuApi.getSpuDetail(state.goodsId).then((res) => {
 			// 未找到商品
 			if (res.code !== 0 || !res.data) {
 				state.goodsInfo = null;
@@ -252,7 +252,15 @@
 			if (res.code !== 0) {
 				return;
 			}
-			state.activityList = res.data;
+      res.data.forEach(activity => {
+        if ([1, 2, 3].includes(activity.type)) { // 情况一：拼团/秒杀/砍价
+          state.activityList.push(activity);
+        } else if (activity.type === 5) { // 情况二：满减送
+          state.activityInfo.push(activity);
+        } else { // 情况三：限时折扣 TODO 芋艿
+          console.log('待实现！优先级不高');
+        }
+      })
 		});
 	});
 </script>
