@@ -1,7 +1,5 @@
 <template>
-	<s-layout>
-		<!-- title='退货物流' -->
-		<!-- 不知为何加上页面就错误 -->
+	<s-layout title="退货物流">
 		<view>
 			<form @submit="subRefund" report-submit='true'>
 				<view class='apply-return'>
@@ -9,17 +7,18 @@
 						<view class='item acea-row row-between-wrapper' style="display: flex;align-items: center;">
 							<view>物流公司</view>
 							<picker mode='selector' class='num' @change="bindPickerChange" :value="state.expressIndex"
-								:range="state.expresses" range-key="name">
+                      :range="state.expresses" range-key="name">
 								<view class="picker acea-row row-between-wrapper">
 									<view class='reason'>{{ state.expresses[state.expressIndex].name }}</view>
-									<text class='iconfont icon-jiantou'></text>
+                  <!-- TODO 芋艿：这里样式有问题，少了 > 按钮 -->
+									<text class='iconfont icon-jiantou' />
 								</view>
 							</picker>
 						</view>
 						<view class='item textarea acea-row row-between' style="display: flex;align-items: center;">
 							<view>物流单号</view>
 							<input placeholder='请填写物流单号' class='num' name="logisticsNo"
-								placeholder-class='placeholder' />
+                     placeholder-class='placeholder' />
 						</view>
 						<button class='returnBnt bg-color ss-reset-button ui-BG-Main-Gradient sub-btn'
 							form-type="submit"
@@ -32,77 +31,57 @@
 </template>
 
 <script setup>
-	import sheep from '@/sheep';
-	import {
-		onLoad,
-		onReachBottom,
-		onPullDownRefresh
-	} from '@dcloudio/uni-app';
-	import {
-		computed,
-		watch,
-		ref,
-		reactive,
-		unref
-	} from 'vue';
-	const state = reactive({
-		expressIndex: 0,
-		expresses: [{
-				"id": 1,
-				"name": "申通快递"
-			},
-			{
-				"id": 2,
-				"name": "顺丰速运"
-			},
-			{
-				"id": 3,
-				"name": "中通快递"
-			},
-			{
-				"id": 4,
-				"name": "韵达快递"
-			}
-		], //模拟物流公司数组
+	import { onLoad } from '@dcloudio/uni-app';
+	import { reactive } from 'vue';
+  import sheep from '@/sheep';
+  import AfterSaleApi from '@/sheep/api/trade/afterSale';
+  import DeliveryApi from '@/sheep/api/trade/delivery';
+
+  const state = reactive({
+    id: 0, // 售后编号
+		expressIndex: 0, // 选中的 expresses 下标
+		expresses: [], // 可选的快递列表
 	})
 
 	function bindPickerChange(e) {
 		state.expressIndex = e.detail.value;
 	}
 
-	function subRefund(e) {
-		const formData = e.detail.value;
-		console.log(formData, '表单数据');
-		console.log(state.expresses[state.expressIndex].id, '物流公司id');
-		return;
-		// 下面是参考逻辑
-		AfterSaleApi.deliveryAfterSale({
-			id: this.id,
-			logisticsId: this.expresses[this.expressIndex].id,
-			logisticsNo: formData.logisticsNo,
-		}).then(res => {
-			this.$util.Tips({
-				title: '填写退货成功',
-				icon: 'success'
-			}, {
-				tab: 5,
-				url: '/pages/users/user_return_detail/index?id=' + this.id
-			});
-		}).catch(err => {
-			return this.$util.Tips({
-				title: err
-			});
-		})
+	async function subRefund(e) {
+    let data = {
+      id: state.id,
+      logisticsId: state.expresses[state.expressIndex].id,
+      logisticsNo: e.detail.value.logisticsNo,
+    };
+    const { code } = await AfterSaleApi.deliveryAfterSale(data);
+    if (code !== 0) {
+      return;
+    }
+    uni.showToast({
+      title: '填写退货成功',
+    });
+    sheep.$router.go('/pages/order/aftersale/detail', { id: state.id });
 	}
 
-	function getList() {
-
+  // 获得快递物流列表
+	async function getExpressList() {
+    const { code, data } = await DeliveryApi.getDeliveryExpressList();
+    if (code !== 0) {
+      return;
+    }
+    state.expresses = data;
 	}
-	onLoad(() => {
-		// 拿退货编号
+
+	onLoad(options => {
+    if (!options.id) {
+      sheep.$helper.toast(`缺少订单信息，请检查`);
+      return
+    }
+    state.id = options.id;
+    // 获得快递物流列表
+    getExpressList();
 	})
 </script>
-
 <style lang="scss" scoped>
 	.apply-return {
 		padding: 20rpx 30rpx 70rpx 30rpx;

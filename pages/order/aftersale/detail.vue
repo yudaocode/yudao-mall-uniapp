@@ -89,10 +89,13 @@
 		<s-empty v-if="isEmpty(state.info) && state.loading" icon="/static/order-empty.png" text="暂无该订单售后详情" />
 		<su-fixed bottom placeholder bg="bg-white" v-if="!isEmpty(state.info)">
 			<view class="foot_box">
-				<!-- TODO 功能缺失：填写退货信息 -->
         <button class="ss-reset-button btn" v-if="state.info.buttons?.includes('cancel')"
                 @tap="onApply(state.info.id)">
           取消申请
+        </button>
+        <button class="ss-reset-button btn" v-if="state.info.buttons?.includes('delivery')"
+                @tap="sheep.$router.go('/pages/order/aftersale/return-delivery', { id: state.info.id })">
+          填写退货
         </button>
 				<button class="ss-reset-button contcat-btn btn" @tap="sheep.$router.go('/pages/chat/index')">
           联系客服

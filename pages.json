@@ -193,6 +193,16 @@
 						"title": "申请售后"
 					}
 				},
+                {
+                  "path": "aftersale/return-delivery",
+                  "style": {
+                    "navigationBarTitleText": "退货物流"
+                  },
+                  "meta": {
+                    "auth": true,
+                    "title": "退货物流"
+                  }
+                },
 				{
 					"path": "aftersale/list",
 					"style": {

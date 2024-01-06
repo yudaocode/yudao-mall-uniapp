@@ -38,6 +38,14 @@ const AfterSaleApi = {
         afterSaleId,
       },
     });
+  },
+  // 退回货物
+  deliveryAfterSale: (data) => {
+    return request({
+      url: `/app-api/trade/after-sale/delivery`,
+      method: 'PUT',
+      data,
+    });
   }
 };
 
