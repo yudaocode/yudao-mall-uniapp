@@ -38,17 +38,6 @@ export default {
       },
     }),
 
-  // 商品评价列表
-  comment: (id, params = {}) =>
-    request2({
-      url: 'product/comment/list?spuId=' + id,
-      method: 'GET',
-      params,
-      custom: {
-        showLoading: false,
-        showError: false,
-      },
-    }),
   // 商品查询
   activity: (params = {}) =>
     request({

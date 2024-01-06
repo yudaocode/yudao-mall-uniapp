@@ -368,3 +368,20 @@ export function convertProductPropertyList(skus) {
   }
   return result;
 }
+
+/**
+ * 格式化满减送活动的规则
+ *
+ * @param activity 活动信息
+ * @param rule 优惠规格
+ * @returns {string} 规格字符串
+ */
+export function formatRewardActivityRule(activity, rule) {
+  if (activity.conditionType === 10) {
+    return `满 ${fen2yuan(rule.limit)} 元减 ${fen2yuan(rule.discountPrice)} 元`;
+  }
+  if (activity.conditionType === 20) {
+    return `满 ${rule.limit} 件减 ${fen2yuan(rule.discountPrice)} 元`;
+  }
+  return '';
+}

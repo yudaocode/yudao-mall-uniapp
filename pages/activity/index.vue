@@ -1,11 +1,13 @@
+<!-- 指定满减送的活动列表 -->
 <template>
   <s-layout class="activity-wrap" :title="state.activityInfo.title">
+    <!-- 活动信息 -->
     <su-sticky bgColor="#fff">
       <view class="ss-flex ss-col-top tip-box">
-        <view class="type-text ss-flex ss-row-center">{{ state.activityInfo.type_text }}：</view>
+        <view class="type-text ss-flex ss-row-center">满减：</view>
         <view class="ss-flex-1">
-          <view class="tip-content" v-for="item in state.activityInfo.texts" :key="item">
-            {{ item }}
+          <view class="tip-content" v-for="item in state.activityInfo.rules" :key="item">
+            {{ formatRewardActivityRule(state.activityInfo, item) }}
           </view>
         </view>
         <image class="activity-left-image" src="/static/activity-left.png" />
@@ -13,6 +15,7 @@
       </view>
     </su-sticky>
 
+    <!-- 商品信息 -->
     <view class="ss-flex ss-flex-wrap ss-p-x-20 ss-m-t-20 ss-col-top">
       <view class="goods-list-box">
         <view class="left-list" v-for="item in state.leftGoodsList" :key="item.id">
@@ -39,7 +42,7 @@
             @getHeight="mountMasonry($event, 'right')"
           >
             <template v-slot:cart>
-              <button class="ss-reset-button cart-btn"> </button>
+              <button class="ss-reset-button cart-btn" />
             </template>
           </s-goods-column>
         </view>
@@ -52,7 +55,7 @@
       :content-text="{
         contentdown: '上拉加载更多',
       }"
-      @tap="loadmore"
+      @tap="loadMore"
     />
   </s-layout>
 </template>
@@ -61,27 +64,32 @@
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import _ from 'lodash';
+  import RewardActivityApi from '@/sheep/api/promotion/rewardActivity';
+  import { formatRewardActivityRule } from '@/sheep/hooks/useGoods';
+  import SpuApi from '@/sheep/api/product/spu';
 
   const state = reactive({
+    activityId: 0, // 获得编号
+    activityInfo: {}, // 获得信息
+
     pagination: {
-      data: [],
-      current_page: 1,
+      list: [],
       total: 1,
-      last_page: 1,
+      pageNo: 1,
+      pageSize: 8,
     },
     loadStatus: '',
     leftGoodsList: [],
     rightGoodsList: [],
-    activityId: 0,
-    activityInfo: {},
   });
+
   // 加载瀑布流
   let count = 0;
   let leftHeight = 0;
   let rightHeight = 0;
 
   function mountMasonry(height = 0, where = 'left') {
-    if (!state.pagination.data[count]) return;
+    if (!state.pagination.list[count]) return;
 
     if (where === 'left') {
       leftHeight += height;
@@ -89,57 +97,64 @@
       rightHeight += height;
     }
     if (leftHeight <= rightHeight) {
-      state.leftGoodsList.push(state.pagination.data[count]);
+      state.leftGoodsList.push(state.pagination.list[count]);
     } else {
-      state.rightGoodsList.push(state.pagination.data[count]);
+      state.rightGoodsList.push(state.pagination.list[count]);
     }
     count++;
   }
-  async function getList(activityId, page = 1, list_rows = 6) {
-    state.loadStatus = 'loading';
-    const res = await sheep.$api.goods.activityList({
-      list_rows,
-      activity_id: activityId,
-      page,
-    });
-    if (res.error === 0) {
-      if (page >= 2) {
-        let couponList = _.concat(state.pagination.data, res.data.data);
-        state.pagination = {
-          ...res.data,
-          data: couponList,
-        };
-      } else {
-        state.pagination = res.data;
-      }
-      mountMasonry();
-      if (state.pagination.current_page < state.pagination.last_page) {
-        state.loadStatus = 'more';
-      } else {
-        state.loadStatus = 'noMore';
-      }
+
+  // 加载商品信息
+  async function getList() {
+    // 处理拓展参数
+    const params = {};
+    if (state.activityInfo.productScope === 2) {
+      params.ids = state.activityInfo.productSpuIds.join(',');
+    } else if (state.activityInfo.productScope === 3) {
+      params.categoryIds = state.activityInfo.productSpuIds.join(',');
     }
+    // 请求数据
+    state.loadStatus = 'loading';
+    const { code, data } = await SpuApi.getSpuPage({
+      pageNo: state.pagination.pageNo,
+      pageSize: state.pagination.pageSize,
+      ...params
+    });
+    if (code !== 0) {
+      return;
+    }
+    state.pagination.list = _.concat(state.pagination.list, data.list);
+    state.pagination.total = data.total;
+    state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
+    mountMasonry();
   }
+
+  // 加载活动信息
   async function getActivity(id) {
-    const { error, data } = await sheep.$api.activity.activity(id);
-    if (error === 0) {
+    const { code, data } = await RewardActivityApi.getRewardActivity(id);
+    if (code === 0) {
       state.activityInfo = data;
     }
   }
+
   // 加载更多
-  function loadmore() {
-    if (state.loadStatus !== 'noMore') {
-      getList(state.activityId, state.pagination.current_page + 1);
+  function loadMore() {
+    if (state.loadStatus === 'noMore') {
+      return;
     }
+    state.pagination.pageNo++;
+    getList();
   }
+
   // 上拉加载更多
   onReachBottom(() => {
-    loadmore();
+    loadMore();
   });
-  onLoad((options) => {
+
+  onLoad(async (options) => {
     state.activityId = options.activityId;
-    getList(state.activityId);
-    getActivity(state.activityId);
+    await getActivity(state.activityId);
+    await getList(state.activityId);
   });
 </script>
 <style lang="scss" scoped>
