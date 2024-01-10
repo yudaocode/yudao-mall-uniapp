@@ -9,8 +9,8 @@
       class="cicon-move-round"
       :class="{
         'uni-numbox--disabled': inputValue <= min || disabled,
-        'groupon-btn': activity == 'groupon',
-        'seckill-btn': activity == 'seckill',
+        'groupon-btn': activity === 'groupon',
+        'seckill-btn': activity === 'seckill',
       }"
       @click="_calcValue('minus')"
     ></text>
@@ -31,8 +31,8 @@
       class="cicon-add-round"
       :class="{
         'uni-numbox--disabled': inputValue >= max || disabled,
-        'groupon-btn': activity == 'groupon',
-        'seckill-btn': activity == 'seckill',
+        'groupon-btn': activity === 'groupon',
+        'seckill-btn': activity === 'seckill',
       }"
       @click="_calcValue('plus')"
     ></text>

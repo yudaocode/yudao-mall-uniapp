@@ -67,6 +67,7 @@ const buildSpmQuery = (params) => {
   let shareId = '0'; // 设置分享者用户ID
   if (typeof params.shareId === 'undefined') {
     if (user.isLogin) {
+      // todo @芋艿 id为空
       shareId = user.userInfo.id;
     }
   }
