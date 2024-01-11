@@ -1,5 +1,7 @@
 // ========== MALL - 营销模块 ==========
 
+import dayjs from "dayjs";
+
 /**
  * 优惠类型枚举
  */
@@ -43,5 +45,24 @@ export const PromotionProductScopeEnum = {
     CATEGORY: {
         scope: 3,
         name: '品类劵'
+    }
+}
+
+
+// 时间段的状态枚举
+export const TimeStatusEnum = {
+    WAIT_START: '即将开始',
+    STARTED: '进行中',
+    END: '已结束',
+}
+
+export const getTimeStatusEnum = (startTime, endTime) => {
+    const now = dayjs();
+    if (now.isBefore(startTime)) {
+        return TimeStatusEnum.WAIT_START;
+    } else if (now.isAfter(endTime)) {
+        return TimeStatusEnum.END;
+    } else {
+        return TimeStatusEnum.STARTED;
     }
 }

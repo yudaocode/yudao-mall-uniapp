@@ -133,7 +133,6 @@
         </view>
       </detail-tabbar>
     </block>
-    <!-- 轮播  -->
   </s-layout>
 </template>
 

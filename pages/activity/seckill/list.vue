@@ -106,13 +106,7 @@
   import { useDurationTime } from '@/sheep/hooks/useGoods';
   import SeckillApi from "@/sheep/api/promotion/seckill";
   import dayjs from "dayjs";
-
-  // 时间段的状态枚举
-  const TimeStatusEnum = {
-    WAIT_START: '即将开始',
-    STARTED: '进行中',
-    END: '已结束',
-  }
+  import {TimeStatusEnum} from "@/sheep/util/const";
 
   // 计算页面高度
   const { safeAreaInsets, safeArea } = sheep.$platform.device;
