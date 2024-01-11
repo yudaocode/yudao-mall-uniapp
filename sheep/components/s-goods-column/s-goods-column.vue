@@ -307,26 +307,17 @@
       type: [Array, Object],
       default() {
         return {
-          // TODO @疯狂：旧的要不剔除掉，后续都用新的
-          // 商品名称（旧）
-          title: { show: true },
-          // 商品介绍（旧）
-          subtitle: { show: true },
           // 商品价格
           price: { show: true },
-          // 市场价（旧）
-          original_price: { show: true },
-          // 销量（旧）
-          sales: { show: true },
           // 库存
           stock: { show: true },
-          // 商品名称（新）
+          // 商品名称
           name: { show: true },
-          // 商品介绍（新）
+          // 商品介绍
           introduction: { show: true },
-          // 市场价（新）
+          // 市场价
           marketPrice: { show: true },
-          // 销量（新）
+          // 销量
           salesCount: { show: true },
         };
       },

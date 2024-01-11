@@ -1,35 +1,32 @@
 <!-- 自定义页面：支持装修 -->
 <template>
   <s-layout
-    :title="page.name"
+    :title="state.name"
     navbar="custom"
-    :bgStyle="page.style?.background"
-    :navbarStyle="page.style?.navbar"
+    :bgStyle="state.page"
+    :navbarStyle="state.navigationBar"
     onShareAppMessage
     showLeftButton
   >
-    <s-block v-for="(item, index) in page.list" :key="index" :styles="item.style">
-      <s-block-item :type="item.type" :data="item.data" :styles="item.style" />
+    <s-block v-for="(item, index) in state.components" :key="index" :styles="item.property.style">
+      <s-block-item :type="item.id" :data="item.property" :styles="item.property.style" />
     </s-block>
   </s-layout>
 </template>
 
 <script setup>
-  import { computed, reactive } from 'vue';
-  import sheep from '@/sheep';
+  import { reactive } from 'vue';
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
+  import DiyPageApi from "@/sheep/api/promotion/diy/page";
 
-  const page = reactive({
+  const state = reactive({
     name: '',
-    list: [],
-    style: {},
+    components: [],
+    navigationBar: {},
+    page: {},
   });
   onLoad(async (options) => {
-    let id;
-
-    if (options.id) {
-      id = options.id;
-    }
+    let id = options.id
 
     // #ifdef MP
     // 小程序预览自定义页面
@@ -39,12 +36,12 @@
     }
     // #endif
 
-    // TODO @疯狂：貌似这里还没接上哈
-    const { error, data } = await sheep.$api.app.page(id);
-    if (error === 0) {
-      page.name = data.name;
-      page.list = data.diypage?.page?.data;
-      page.style = data.diypage?.page?.style;
+    const { code, data } = await DiyPageApi.getDiyPage(id);
+    if (code === 0) {
+      state.name = data.name;
+      state.components = data.property?.components;
+      state.navigationBar = data.property?.navigationBar;
+      state.page = data.property?.page;
     }
   });
 
