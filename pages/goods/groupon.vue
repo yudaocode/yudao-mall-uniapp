@@ -1,3 +1,4 @@
+<!-- 拼团商品详情 -->
 <template>
   <s-layout :onShareAppMessage="shareInfo" navbar="goods">
     <!-- 标题栏 -->
@@ -152,7 +153,6 @@
   import CombinationApi from "@/sheep/api/promotion/combination";
   import SpuApi from "@/sheep/api/product/spu";
 
-
   const headerBg = sheep.$url.css('/static/img/shop/goods/groupon-bg.png');
   const btnBg = sheep.$url.css('/static/img/shop/goods/groupon-btn.png');
   const disabledBtnBg = sheep.$url.css(
@@ -226,6 +226,7 @@
   }
 
   // 分享信息
+  // TODO @芋艿：分享的接入
   const shareInfo = computed(() => {
     if (isEmpty(state.activity)) return {};
     return sheep.$platform.share.getShareInfo(

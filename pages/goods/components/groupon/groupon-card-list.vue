@@ -73,7 +73,8 @@
   // 初始化
   onMounted(async () => {
     // 查询参团记录
-    const { data } = await CombinationApi.getHeadCombinationRecordList(props.modelValue.id, 1 , 10);
+    // status = 0 表示未成团
+    const { data } = await CombinationApi.getHeadCombinationRecordList(props.modelValue.id, 0 , 10);
     state.list = data;
   });
 </script>

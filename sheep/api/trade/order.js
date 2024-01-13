@@ -13,6 +13,12 @@ const OrderApi = {
     if (!(data.addressId > 0)) {
       delete data2.addressId;
     }
+    if (!(data.combinationActivityId) > 0) {
+      delete data2.combinationActivityId;
+    }
+    if (!(data.combinationHeadId > 0)) {
+      delete data2.combinationHeadId;
+    }
     // 解决 SpringMVC 接受 List<Item> 参数的问题
     delete data2.items;
     for (let i = 0; i < data.items.length; i++) {
@@ -28,6 +34,10 @@ const OrderApi = {
     return request({
       url: `/app-api/trade/order/settlement?${queryString}`,
       method: 'GET',
+      custom: {
+        showError: true,
+        showLoading: true,
+      },
     });
   },
   // 创建订单
