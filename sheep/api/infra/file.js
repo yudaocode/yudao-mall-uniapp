@@ -18,7 +18,7 @@ const FileApi = {
           // Authorization: token,
           Accept : '*/*',
           'tenant-id' :'1',
-          Authorization:  'Bearer test247',
+          // Authorization:  'Bearer test247',
         },
         success: (uploadFileRes) => {
           debugger

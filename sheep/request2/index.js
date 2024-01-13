@@ -96,7 +96,7 @@ http.interceptors.request.use(
 			config.header['Accept'] = '*/*'
 			config.header['tenant-id'] = '1';
 			config.header['terminal'] = '20';
-			config.header['Authorization'] = 'Bearer test247';
+			// config.header['Authorization'] = 'Bearer test247';
 		}
 		return config;
 	},

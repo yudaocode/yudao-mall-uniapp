@@ -3,6 +3,7 @@
   <s-layout title="拼团详情" class="detail-wrap" :navbar="state.data && !state.loading ? 'inner': 'normal'" :onShareAppMessage="shareInfo">
     <view v-if="state.loading"></view>
     <view v-if="state.data && !state.loading">
+      <!-- 团长信息 + 活动信息 -->
       <view
         class="recharge-box"
         v-if="state.data.headRecord"
@@ -34,35 +35,40 @@
           </template>
         </s-goods-item>
       </view>
+
       <view class="countdown-box detail-card ss-p-t-44 ss-flex-col ss-col-center">
-        <view v-if="state.activity.status === 1">
+        <!-- 情况一：拼团成功 -->
+        <view v-if="state.data.headRecord.status === 1">
           <view v-if="state.data.orderId">
             <view class="countdown-title ss-flex">
-              <text class="cicon-check-round"></text>
+              <text class="cicon-check-round" />
               恭喜您~拼团成功
             </view>
           </view>
           <view v-else>
             <view class="countdown-title ss-flex">
-              <text class="cicon-info"></text>
+              <text class="cicon-info" />
               抱歉~该团已满员
             </view>
           </view>
         </view>
-        <view v-if="state.activity.status === 2">
+
+        <!-- 情况二：拼团失败 -->
+        <view v-if="state.data.headRecord.status === 2">
           <view class="countdown-title ss-flex">
             <text class="cicon-info"></text>
             {{ state.data.orderId ? '拼团超时,已自动退款' : '该团已解散' }}
           </view>
         </view>
-        <view v-if="state.activity.status === 0">
+
+        <!-- 情况三：拼团进行中 -->
+        <view v-if="state.data.headRecord.status === 0">
           <view v-if="state.data.headRecord.expireTime <= new Date().getTime()">
             <view class="countdown-title ss-flex">
               <text class="cicon-info"></text>
               拼团已结束,请关注下次活动
             </view>
           </view>
-
           <view class="countdown-title ss-flex" v-else>
             还差
             <view class="num">{{ state.data.headRecord.userSize - state.data.headRecord.userCount }}人</view>
@@ -81,6 +87,7 @@
           </view>
         </view>
 
+        <!-- 拼团的记录列表，展示每个参团人 -->
         <view class="ss-m-t-60 ss-flex ss-flex-wrap ss-row-center">
           <!-- 团长 -->
           <view class="header-avatar ss-m-r-24 ss-m-b-20">
@@ -110,8 +117,10 @@
           </view>
         </view>
       </view>
+
+      <!-- 情况一：拼团成功；情况二：拼团失败 -->
       <view
-        v-if="state.activity.status === 1 || state.activity.status === 2"
+        v-if="state.data.headRecord.status === 1 || state.data.headRecord.status === 2"
         class="ss-m-t-40 ss-flex ss-row-center"
       >
         <button
@@ -123,8 +132,9 @@
         </button>
         <button class="ss-reset-button join-btn" v-else @tap="onCreateGroupon"> 我要开团 </button>
       </view>
-      <!-- 处于进入中时，查看订单或参加或邀请好友或参加 -->
-      <view v-if="state.activity.status === 0" class="ss-m-t-40 ss-flex ss-row-center">
+
+      <!-- 情况三：拼团进行中，查看订单或参加或邀请好友或参加 -->
+      <view v-if="state.data.headRecord.status === 0" class="ss-m-t-40 ss-flex ss-row-center">
         <view v-if="state.data.headRecord.expireTime <= new Date().getTime()">
           <button
             class="ss-reset-button join-btn"
@@ -133,7 +143,6 @@
           >
             查看订单
           </button>
-          <!-- 待确认 -->
           <button
             class="ss-reset-button disabled-btn"
             v-else
@@ -165,6 +174,7 @@
         </view>
       </view>
 
+      <!-- TODO 芋艿：这里暂时没接入 -->
       <view v-if="state.data.goods">
         <s-select-groupon-sku
           :show="state.showSelectSku"
@@ -177,7 +187,8 @@
         />
       </view>
     </view>
-    <s-empty v-if="!state.data && !state.loading" icon="/static/goods-empty.png"> </s-empty>
+
+    <s-empty v-if="!state.data && !state.loading" icon="/static/goods-empty.png" />
   </s-layout>
 </template>
 
@@ -193,7 +204,7 @@
   const headerBg = sheep.$url.css('/static/img/shop/user/withdraw_bg.png');
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   const state = reactive({
-    data: {},
+    data: {}, // 拼团详情
     loading: true,
     grouponAction: 'create',
     showSelectSku: false,
@@ -233,19 +244,19 @@
     });
   }
 
-  // 去开团
+  // 去开团 TODO 芋艿：这里没接入
   function onCreateGroupon() {
     state.grouponAction = 'create';
     state.grouponId = 0;
     state.showSelectSku = true;
   }
 
-  // 规格变更
+  // 规格变更 TODO 芋艿：这里没接入
   function onSkuChange(e) {
     state.selectedSkuPrice = e;
   }
 
-  // 立即参团
+  // 立即参团 TODO 芋艿：这里没接入
   function onJoinGroupon() {
     state.grouponAction = 'join';
     state.grouponId = state.data.activityId;
@@ -254,7 +265,7 @@
     state.showSelectSku = true;
   }
 
-  // 立即购买
+  // 立即购买 TODO 芋艿：这里没接入
   function onBuy(sku) {
     sheep.$router.go('/pages/order/confirm', {
       data: JSON.stringify({
