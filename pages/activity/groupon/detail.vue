@@ -1,3 +1,4 @@
+<!-- 拼团订单的详情 -->
 <template>
   <s-layout title="拼团详情" class="detail-wrap" :navbar="state.data && !state.loading ? 'inner': 'normal'" :onShareAppMessage="shareInfo">
     <view v-if="state.loading"></view>
@@ -202,6 +203,7 @@
     combinationHeadId: null, // 拼团团长编号
   });
 
+  // todo 芋艿：分享要再接下
   const shareInfo = computed(() => {
     if (isEmpty(state.data)) return {};
     return sheep.$platform.share.getShareInfo(
@@ -231,7 +233,7 @@
     });
   }
 
-  //去开团
+  // 去开团
   function onCreateGroupon() {
     state.grouponAction = 'create';
     state.grouponId = 0;

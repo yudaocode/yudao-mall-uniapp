@@ -1,16 +1,18 @@
+<!-- 拼团活动列表 -->
 <template>
   <s-layout navbar="inner" :bgStyle="{ color: '#FE832A' }">
-    <view
-      class="page-bg"
-      :style="[{ marginTop: '-' + Number(statusBarHeight + 88) + 'rpx' }]"
-    ></view>
+    <view class="page-bg" :style="[{ marginTop: '-' + Number(statusBarHeight + 88) + 'rpx' }]" />
     <view class="list-content">
       <!-- 参团会员统计 -->
       <view class="content-header ss-flex-col ss-col-center ss-row-center">
         <view class="content-header-title ss-flex ss-row-center">
-          <view v-for="(item, index) in state.summaryData.avatars" :key="index" class="picture"
-                :style='index === 6 ? "position: relative" : "position: static"'>
-            <span class="avatar" :style='`background-image: url(${item})`'></span>
+          <view
+            v-for="(item, index) in state.summaryData.avatars"
+            :key="index"
+            class="picture"
+            :style="index === 6 ? 'position: relative' : 'position: static'"
+          >
+            <span class="avatar" :style="`background-image: url(${item})`" />
             <span v-if="index === 6 && state.summaryData.avatars.length > 3" class="mengceng">
               <i>···</i>
             </span>
@@ -25,7 +27,7 @@
         :scroll-with-animation="false"
         :enable-back-to-top="true"
       >
-        <view class="goods-box ss-m-b-20" v-for="item in state.pagination.data" :key="item.id">
+        <view class="goods-box ss-m-b-20" v-for="item in state.pagination.list" :key="item.id">
           <s-goods-column
             class=""
             size="lg"
@@ -54,55 +56,60 @@
   import { reactive } from 'vue';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import CombinationApi from "@/sheep/api/promotion/combination";
+  import CombinationApi from '@/sheep/api/promotion/combination';
 
   const { safeAreaInsets, safeArea } = sheep.$platform.device;
   const sysNavBar = sheep.$platform.navbar;
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
-  const pageHeight = (safeArea.height + safeAreaInsets.bottom) * 2 + statusBarHeight - sysNavBar - 350;
+  const pageHeight =
+    (safeArea.height + safeAreaInsets.bottom) * 2 + statusBarHeight - sysNavBar - 350;
   const headerBg = sheep.$url.css('/static/img/shop/goods/groupon-header.png');
 
   const state = reactive({
     pagination: {
-      data: [],
+      list: [],
+      total: 0,
       pageNo: 1,
-      total: 1,
+      pageSize: 10,
     },
     loadStatus: '',
-    summaryData: {}
+    summaryData: {},
   });
 
   // 加载统计数据
   const getSummary = async () => {
-    const { data } = await CombinationApi.getCombinationRecordSummary()
-    state.summaryData = data
-  }
+    const { data } = await CombinationApi.getCombinationRecordSummary();
+    state.summaryData = data;
+  };
 
   // 加载活动列表
-  async function getList(pageNo = 1, pageSize = 10) {
+  async function getList() {
     state.loadStatus = 'loading';
     const { data } = await CombinationApi.getCombinationActivityPage({
-      pageNo,
-      pageSize,
+      pageNo: state.pagination.pageNo,
+      pageSize: state.pagination.pageSize,
     });
-    data.list.forEach(activity => {
-      state.pagination.data.push({...activity, price: activity.combinationPrice})
-    })
+    data.list.forEach((activity) => {
+      state.pagination.list.push({ ...activity, price: activity.combinationPrice });
+    });
     state.pagination.total = data.total;
-    state.pagination.pageNo = pageNo;
-    state.loadStatus = state.pagination.data.length < state.pagination.total ? 'more' : 'noMore';
+    state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
   }
 
   // 加载更多
   function loadMore() {
-    if (state.loadStatus !== 'noMore') {
-      getList(state.pagination.pageNo + 1);
+    if (state.loadStatus === 'noMore') {
+      return;
     }
+    state.pagination.pageNo++;
+    getList();
   }
+
   // 上拉加载更多
   onReachBottom(() => loadMore());
+
   // 页面初始化
-  onLoad( () => {
+  onLoad(() => {
     getSummary();
     getList();
   });
@@ -171,7 +178,7 @@
           width: auto;
           height: auto;
           background: linear-gradient(90deg, #ff6600 0%, #fe832a 100%);
-          color: #FFFFFF;
+          color: #ffffff;
           border-radius: 19rpx;
           padding: 4rpx 14rpx;
         }
@@ -186,9 +193,9 @@
           opacity: 1;
           position: absolute;
           left: -2rpx;
-          color: #FFF;
+          color: #fff;
           top: 2rpx;
-          i{
+          i {
             font-style: normal;
             font-size: 20rpx;
           }
