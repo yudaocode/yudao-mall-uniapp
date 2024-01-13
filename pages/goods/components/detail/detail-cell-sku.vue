@@ -19,7 +19,7 @@
     }
   });
   const value = computed(() => {
-    if (!props.sku.id) {
+    if (!props.sku?.id) {
       return '请选择商品规格';
     }
     let str = '';

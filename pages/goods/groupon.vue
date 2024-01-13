@@ -4,17 +4,14 @@
     <detailNavbar />
     <!-- 骨架屏 -->
     <detailSkeleton v-if="state.skeletonLoading" />
-    <!-- 空置页 -->
+    <!-- 下架/售罄提醒 -->
     <s-empty
-      v-else-if="
-        state.goodsInfo === null ||
-        !['groupon', 'groupon_ladder'].includes(state.goodsInfo.activity_type)
-      "
-      text="活动不存在或已结束"
-      icon="/static/soldout-empty.png"
-      showAction
-      actionText="返回上一页"
-      @clickAction="sheep.$router.back()"
+        v-else-if="state.goodsInfo === null || state.activity.status !== 0 || state.activity.endTime < new Date().getTime()"
+        text="活动不存在或已结束"
+        icon="/static/soldout-empty.png"
+        showAction
+        actionText="返回上一页"
+        @clickAction="sheep.$router.back()"
     />
     <block v-else>
       <view class="detail-swiper-selector">
@@ -35,7 +32,7 @@
             <view>
               <view class="price-box ss-flex ss-col-bottom ss-m-b-18">
                 <view class="price-text ss-m-r-16">
-                  {{ goodsPrice }}
+                  {{ fen2yuan(state.activity.price || state.goodsInfo.price) }}
                 </view>
                 <view class="tig ss-flex ss-col-center">
                   <view class="tig-icon ss-flex ss-col-center ss-row-center">
@@ -51,11 +48,11 @@
               <view class="ss-flex ss-row-between">
                 <view
                   class="origin-price ss-flex ss-col-center"
-                  v-if="state.goodsInfo.original_price"
+                  v-if="state.goodsInfo.price"
                 >
                   单买价：
                   <view class="origin-price-text">
-                    {{ state.goodsInfo.original_goods_price[0] || state.goodsInfo.original_price }}
+                    {{ fen2yuan(state.goodsInfo.price) }}
                   </view>
                 </view>
               </view>
@@ -74,38 +71,18 @@
             <view class="countdown-title" v-else> 活动已结束 </view>
           </view>
 
-          <view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo.title }}</view>
-          <view class="subtitle-text ss-line-1">{{ state.goodsInfo.subtitle }}</view>
+          <view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo.name }}</view>
+          <view class="subtitle-text ss-line-1">{{ state.goodsInfo.introduction }}</view>
         </view>
 
         <!-- 功能卡片 -->
         <view class="detail-cell-card detail-card ss-flex-col">
           <!-- 规格 -->
-          <detail-cell-sku
-            v-model="state.selectedSkuPrice.goods_sku_text"
-            :skus="state.goodsInfo.skus"
-            @tap="state.showSelectSku = true"
-          />
-          <!-- 玩法 -->
-          <detail-cell
-            v-if="state.goodsInfo.activity.richtext_id > 0"
-            label="玩法"
-            :value="state.goodsInfo.activity.richtext_title"
-            @click="
-              sheep.$router.go('/pages/public/richtext', {
-                id: state.goodsInfo.activity.richtext_id,
-                title: state.goodsInfo.activity.richtext_title,
-              })
-            "
-          />
+          <detail-cell-sku :sku="state.selectedSkuPrice" @tap="state.showSelectSku = true" />
         </view>
 
         <!-- 参团列表 -->
-        <groupon-card-list
-          v-if="state.goodsInfo.activity.rules.is_team_card === '1'"
-          v-model="state.goodsInfo"
-          @join="onJoinGroupon"
-        />
+        <groupon-card-list v-model="state.activity" @join="onJoinGroupon" />
 
         <!-- 规格与数量弹框 -->
         <s-select-groupon-sku
@@ -114,7 +91,6 @@
           :grouponAction="state.grouponAction"
           :grouponNum="state.grouponNum"
           @buy="onBuy"
-          @ladder="onLadder"
           @change="onSkuChange"
           @close="onSkuClose"
         />
@@ -123,65 +99,58 @@
       <!-- 评价 -->
       <detail-comment-card class="detail-comment-selector" :goodsId="state.goodsId" />
       <!-- 详情 -->
-      <detail-content-card class="detail-content-selector" :content="state.goodsInfo.content" />
+      <detail-content-card class="detail-content-selector" :content="state.goodsInfo.description" />
 
       <!-- 商品tabbar -->
       <!-- TODO: 已售罄、预热 判断 设计-->
       <detail-tabbar v-model="state.goodsInfo">
         <view class="buy-box ss-flex ss-col-center ss-p-r-20">
           <button
-            v-if="state.goodsInfo.activity.rules.is_alone == 1"
             class="ss-reset-button origin-price-btn ss-flex-col"
             @tap="sheep.$router.go('/pages/goods/index', { id: state.goodsInfo.id })"
           >
-            <view class="btn-price">{{
-              state.goodsInfo.original_goods_price[0] || state.goodsInfo.original_price
-            }}</view>
+            <view class="btn-price">{{ fen2yuan(state.goodsInfo.marketPrice) }}</view>
             <view>原价购买</view>
-          </button>
-          <button v-else class="ss-reset-button origin-price-btn ss-flex-col">
-            <view class="btn-title">{{
-              state.grouponNum == 0 ? '阶梯团' : state.grouponNum + '人团'
-            }}</view>
           </button>
           <button
             class="ss-reset-button btn-tox ss-flex-col"
             @tap="onCreateGroupon"
             :class="
-              state.goodsInfo.activity.status === 'ing' && state.goodsInfo.stock != 0
+              state.activity.status === 0 && state.goodsInfo.stock !== 0
                 ? 'check-btn-box'
                 : 'disabled-btn-box'
             "
-            :disabled="state.goodsInfo.stock === 0 || state.goodsInfo.activity.status != 'ing'"
+            :disabled="state.goodsInfo.stock === 0 || state.activity.status !== 0"
           >
-            <view class="btn-price">{{ goodsPrice }}</view>
-            <view v-if="state.goodsInfo.activity.status === 'ing'">
+            <view class="btn-price">{{ fen2yuan(state.activity.price || state.goodsInfo.price) }}</view>
+            <view v-if="state.activity.startTime > new Date().getTime()">未开始</view>
+            <view v-else-if="state.activity.endTime <= new Date().getTime()">已结束</view>
+            <view v-else>
               <view v-if="state.goodsInfo.stock === 0">已售罄</view>
               <view v-else>立即开团</view>
             </view>
-            <view v-else>{{ state.goodsInfo.activity.status_text }}</view>
           </button>
         </view>
       </detail-tabbar>
     </block>
-    <!-- 轮播  -->
   </s-layout>
 </template>
 
 <script setup>
-  import { reactive, computed, ref } from 'vue';
+  import { reactive, computed } from 'vue';
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import { isEmpty } from 'lodash';
   import detailNavbar from './components/detail/detail-navbar.vue';
-  import detailCell from './components/detail/detail-cell.vue';
   import detailCellSku from './components/detail/detail-cell-sku.vue';
   import detailTabbar from './components/detail/detail-tabbar.vue';
   import detailSkeleton from './components/detail/detail-skeleton.vue';
   import detailCommentCard from './components/detail/detail-comment-card.vue';
   import detailContentCard from './components/detail/detail-content-card.vue';
   import grouponCardList from './components/groupon/groupon-card-list.vue';
-  import { useDurationTime, formatPrice, formatGoodsSwiper } from '@/sheep/hooks/useGoods';
+  import {useDurationTime, formatGoodsSwiper, fen2yuan} from '@/sheep/hooks/useGoods';
+  import CombinationApi from "@/sheep/api/promotion/combination";
+  import SpuApi from "@/sheep/api/product/spu";
 
 
   const headerBg = sheep.$url.css('/static/img/shop/goods/groupon-bg.png');
@@ -189,7 +158,6 @@
   const disabledBtnBg = sheep.$url.css(
     '/static/img/shop/goods/activity-btn-disabled.png',
   );
-  const seckillBg = sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png');
   const grouponBg = sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png');
 
   onPageScroll(() => {});
@@ -200,46 +168,21 @@
     goodsSwiper: [],        // 商品轮播图
     showSelectSku: false,   // 显示规格弹框
     selectedSkuPrice: {},   // 选中的规格价格
+    activity: {},           // 团购活动
     grouponId: 0,           // 团购ID
-    grouponType: '',        // 团购类型
     grouponNum: 0,          // 团购人数
     grouponAction: 'create',  // 团购操作
-  });
-
-  // 商品主价格
-  const goodsPrice = computed(() => {
-    if (isEmpty(state.selectedSkuPrice)) {
-      return formatPrice(state.goodsInfo.price);
-    }
-	if(state.grouponNum === 0 && state.grouponType === 'groupon_ladder') {
-		return formatPrice(state.goodsInfo.price)
-	}
-    if (state.grouponType === 'groupon') {
-      return state.selectedSkuPrice.groupon_price;
-    }
-    if (state.grouponType === 'groupon_ladder') {
-      return state.selectedSkuPrice.ladder_price;
-    }
-    return '';
+    combinationHeadId: null, // 拼团团长编号
   });
 
   // 倒计时
   const endTime = computed(() => {
-    return useDurationTime(state.goodsInfo.activity.end_time);
+    return useDurationTime(state.activity.endTime);
   });
 
   // 规格变更
   function onSkuChange(e) {
     state.selectedSkuPrice = e;
-  }
-
-  // 阶梯变更
-  function onLadder(e) {
-    state.showSelectSku = false;
-    state.grouponNum = e
-    setTimeout(() => {
-      state.showSelectSku = true;
-    }, 80);
   }
 
   function onSkuClose() {
@@ -253,51 +196,53 @@
     state.showSelectSku = true;
   }
 
-  // 点击参团
-  function onJoinGroupon(groupon) {
+  /**
+   * 去参团
+   * @param record 团长的团购记录
+   */
+  function onJoinGroupon(record) {
     state.grouponAction = 'join';
-    state.grouponId = groupon.id;
-    state.grouponNum = groupon.num;
+    state.grouponId = record.activityId;
+    state.combinationHeadId = record.id;
+    state.grouponNum = record.userSize;
     state.showSelectSku = true;
   }
 
   // 立即购买
-  function onBuy(e) {
+  function onBuy(sku) {
     sheep.$router.go('/pages/order/confirm', {
       data: JSON.stringify({
         order_type: 'goods',
-        buy_type: 'groupon',
-        activity_id: state.goodsInfo.activity.id,
-        groupon_id: state.grouponId,
-        groupon_num: state.grouponNum,
-        goods_list: [
+        combinationActivityId: state.activity.id,
+        combinationHeadId: state.combinationHeadId,
+        items: [
           {
-            goods_id: e.goods_id,
-            goods_num: e.goods_num,
-            goods_sku_price_id: e.id,
+            skuId: sku.id,
+            count: sku.count,
           },
         ],
       }),
     });
   }
 
+  // 分享信息
   const shareInfo = computed(() => {
-    if (isEmpty(state.goodsInfo?.activity)) return {};
+    if (isEmpty(state.activity)) return {};
     return sheep.$platform.share.getShareInfo(
       {
-        title: state.goodsInfo.title,
-        image: sheep.$url.cdn(state.goodsInfo.image),
+        title: state.activity.name,
+        image: sheep.$url.cdn(state.goodsInfo.picUrl),
         params: {
           page: '3',
-          query: state.goodsInfo.id + ',' + state.goodsInfo.activity.id,
+          query: state.activity.id,
         },
       },
       {
         type: 'goods', // 商品海报
-        title: state.goodsInfo.title, // 商品标题
-        image: sheep.$url.cdn(state.goodsInfo.image), // 商品主图
-        price: state.goodsInfo.price[0], // 商品价格
-        original_price: state.goodsInfo.original_price, // 商品原价
+        title: state.activity.name, // 商品标题
+        image: sheep.$url.cdn(state.goodsInfo.picUrl), // 商品主图
+        price: fen2yuan(state.goodsInfo.price), // 商品价格
+        marketPrice: fen2yuan(state.goodsInfo.marketPrice), // 商品原价
       },
     );
   });
@@ -308,20 +253,22 @@
       state.goodsInfo = null;
       return;
     }
-    state.goodsId = options.id;
+    state.grouponId = options.id;
+    // 加载活动信息
+    const { code, data: activity } = await CombinationApi.getCombinationActivity(state.grouponId);
+    state.activity = activity;
     // 加载商品信息
-    const { error, data } = await sheep.$api.goods.detail(options.id, {
-      activity_id: options.activity_id,
+    const { data: spu } = await SpuApi.getSpuDetail(activity.spuId);
+    state.goodsId = spu.id;
+    activity.products.forEach(product => {
+      spu.price = Math.min(spu.price, product.combinationPrice); // 设置 SPU 的最低价格
     });
     // 关闭骨架屏
     state.skeletonLoading = false;
-    if (error === 0) {
-      state.goodsInfo = data;
-      state.grouponType = state.goodsInfo.activity_type;
-      if (state.grouponType === 'groupon') {
-        state.grouponNum = state.goodsInfo.activity.rules.team_num;
-      }
-      state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.images);
+    if (code === 0) {
+      state.goodsInfo = spu;
+      state.grouponNum = activity.userSize;
+      state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.sliderPicUrls);
     } else {
       // 未找到商品
       state.goodsInfo = null;
@@ -524,13 +471,6 @@
         color: #ff6000;
       }
     }
-  }
-
-  //秒杀卡片
-  .seckill-box {
-    background: v-bind(seckillBg)
-      no-repeat;
-    background-size: 100% 100%;
   }
 
   .groupon-box {

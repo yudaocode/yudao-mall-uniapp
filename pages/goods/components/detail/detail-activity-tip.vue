@@ -51,8 +51,7 @@
     const typePath = type === 1 ? 'seckill' :
       type === 2 ? 'TODO 拼团' : 'groupon';
     sheep.$router.go(`/pages/goods/${typePath}`, {
-      id: activity.spuId,
-      activity_id: activity.id,
+      id: activity.id,
     });
   }
 </script>

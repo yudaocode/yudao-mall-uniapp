@@ -281,7 +281,7 @@
 
     // 判断所有 property 大类是否选择完成
     if (choosePropertyId.length === propertyList.length && newSkuList.length) {
-      newSkuList[0].goods_num = state.selectedSku.goods_num || 1;
+      newSkuList[0].count = state.selectedSku.count || 1;
       state.selectedSku = newSkuList[0];
     } else {
       state.selectedSku = {};

@@ -31,32 +31,32 @@
       <view class="cart-content">
         <view
           class="goods-box ss-r-10 ss-m-b-14"
-          v-for="item in state.pagination.data"
+          v-for="item in state.pagination.list"
           :key="item.id"
         >
           <view class="ss-flex ss-col-center">
             <label
               class="check-box ss-flex ss-col-center ss-p-l-10"
               v-if="state.editMode"
-              @tap="onSelect(item.goods_id)"
+              @tap="onSelect(item.spuId)"
             >
               <radio
-                :checked="state.selectedCollectList.includes(item.goods_id)"
+                :checked="state.selectedSpuIdList.includes(item.spuId)"
                 color="var(--ui-BG-Main)"
                 style="transform: scale(0.8)"
-                @tap.stop="onSelect(item.goods_id)"
+                @tap.stop="onSelect(item.spuId)"
               />
             </label>
             <s-goods-item
-              :title="item.goods.title"
-              :img="item.goods.image"
-              :price="item.goods.price[0]"
-              :skuText="item.goods.subtitle"
+              :title="item.spuName"
+              :img="item.picUrl"
+              :price="item.price"
+              :skuText="item.introduction"
               priceColor="#FF3000"
               :titleWidth="400"
               @tap="
                 sheep.$router.go('/pages/goods/index', {
-                  id: item.goods_id,
+                  id: item.spuId,
                 })
               "
             >
@@ -78,12 +78,22 @@
               <view>全选</view>
             </label>
           </view>
-          <view class="footer-right">
+          <view class="footer-right ss-flex">
             <button
-              class="ss-reset-button ui-BG-Main-Gradient pay-btn ss-font-28 ui-Shadow-Main"
-              @tap="onCancel"
+              :class="['ss-reset-button  pay-btn ss-font-28 ',
+                  {
+                    'ui-BG-Main-Gradient': state.selectedSpuIdList.length > 0,
+                    'ui-Shadow-Main': state.selectedSpuIdList.length > 0
+                  }]"
+              @tap="onDelete"
             >
               删除足迹
+            </button>
+            <button
+              class="ss-reset-button ui-BG-Main-Gradient pay-btn ss-font-28 ui-Shadow-Main ml-2"
+              @tap="onClean"
+            >
+              清空
             </button>
           </view>
         </view>
@@ -95,7 +105,7 @@
       :content-text="{
         contentdown: '上拉加载更多',
       }"
-      @tap="loadmore"
+      @tap="loadMore"
     />
     <s-empty
       v-if="state.pagination.total === 0"
@@ -110,100 +120,105 @@
   import { reactive } from 'vue';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import _ from 'lodash';
+  import SpuHistoryApi from "@/sheep/api/product/history";
+  import {cloneDeep} from "@/sheep/helper/utils";
 
   const sys_navBar = sheep.$platform.navbar;
   const pagination = {
-    data: [],
-    current_page: 1,
+    list: [],
+    pageNo: 1,
     total: 1,
-    last_page: 1,
+    pageSize: 10,
   };
   const state = reactive({
-    pagination: {
-      data: [],
-      current_page: 1,
-      total: 1,
-      last_page: 1,
-    },
+    pagination: cloneDeep(pagination),
     loadStatus: '',
     editMode: false,
-    selectedCollectList: [],
+    selectedSpuIdList: [],
     selectAll: false,
   });
 
-  async function getData(page = 1, list_rows = 10) {
+  async function getList() {
     state.loadStatus = 'loading';
-    let res = await sheep.$api.user.view.list({
-      list_rows,
-      page,
+    const { code, data } = await SpuHistoryApi.getBrowseHistoryPage({
+      pageNo: state.pagination.pageNo,
+      pageSize: state.pagination.pageSize,
     });
-    if (res.error === 0) {
-      let orderList = _.concat(state.pagination.data, res.data.data);
-      state.pagination = {
-        ...res.data,
-        data: orderList,
-      };
-      if (state.pagination.current_page < state.pagination.last_page) {
-        state.loadStatus = 'more';
-      } else {
-        state.loadStatus = 'noMore';
-      }
+    if (code !== 0) {
+      return;
     }
-  }
-  // 格式化价格
-  function formatPrice(e) {
-    return e.length === 1 ? e[0] : e.join('~');
+
+    state.pagination.list = _.concat(state.pagination.list, data.list);
+    state.pagination.total = data.total;
+    if (state.pagination.list.length < state.pagination.total) {
+      state.loadStatus = 'more';
+    } else {
+      state.loadStatus = 'noMore';
+    }
   }
 
   // 单选选中
   const onSelect = (id) => {
-    if (!state.selectedCollectList.includes(id)) {
-      state.selectedCollectList.push(id);
+    if (!state.selectedSpuIdList.includes(id)) {
+      state.selectedSpuIdList.push(id);
     } else {
-      state.selectedCollectList.splice(state.selectedCollectList.indexOf(id), 1);
+      state.selectedSpuIdList.splice(state.selectedSpuIdList.indexOf(id), 1);
     }
-    state.selectAll = state.selectedCollectList.length === state.pagination.data.length;
+    state.selectAll = state.selectedSpuIdList.length === state.pagination.list.length;
   };
   // 全选
   const onSelectAll = () => {
     state.selectAll = !state.selectAll;
     if (!state.selectAll) {
-      state.selectedCollectList = [];
+      state.selectedSpuIdList = [];
     } else {
-      state.pagination.data.forEach((item) => {
-        if (state.selectedCollectList.includes(item.goods_id)) {
-          state.selectedCollectList.splice(state.selectedCollectList.indexOf(item.goods_id), 1);
+      state.pagination.list.forEach((item) => {
+        if (state.selectedSpuIdList.includes(item.spuId)) {
+          state.selectedSpuIdList.splice(state.selectedSpuIdList.indexOf(item.spuId), 1);
         }
-        state.selectedCollectList.push(item.goods_id);
+        state.selectedSpuIdList.push(item.spuId);
       });
     }
   };
-  async function onCancel() {
-    if (state.selectedCollectList) {
-      state.selectedCollectList = state.selectedCollectList.toString();
-      const { error } = await sheep.$api.user.view.delete({
-        goods_id: state.selectedCollectList,
-      });
-      if (error === 0) {
-        state.editMode = false;
-        state.selectedCollectList = [];
-        state.selectAll = false;
-        state.pagination = pagination;
-        getData();
-      }
+  // 删除足迹
+  async function onDelete() {
+    if (state.selectedSpuIdList.length <= 0) {
+      return;
+    }
+
+    const { code } = await SpuHistoryApi.deleteBrowseHistory(state.selectedSpuIdList);
+    if (code === 0) {
+      reload();
     }
   }
+  // 清空
+  async function onClean() {
+    const { code } = await SpuHistoryApi.cleanBrowseHistory();
+    if (code === 0) {
+      reload();
+    }
+  }
+
+  function reload() {
+    state.editMode = false;
+    state.selectedSpuIdList = [];
+    state.selectAll = false;
+    state.pagination = pagination;
+    getList();
+  }
+
   // 加载更多
-  function loadmore() {
+  function loadMore() {
     if (state.loadStatus !== 'noMore') {
-      getData(state.pagination.current_page + 1);
+      state.pagination.pageNo += 1;
+      getList();
     }
   }
   onReachBottom(() => {
-    loadmore();
+    loadMore();
   });
   onLoad(() => {
-    getData();
+    getList();
   });
 </script>
 

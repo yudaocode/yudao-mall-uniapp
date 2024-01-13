@@ -5,23 +5,17 @@
       :style="[{ marginTop: '-' + Number(statusBarHeight + 88) + 'rpx' }]"
     ></view>
     <view class="list-content">
+      <!-- 参团会员统计 -->
       <view class="content-header ss-flex-col ss-col-center ss-row-center">
-        <view class="content-header-title ss-m-b-22 ss-flex ss-row-center">
-          <view>{{ state.activityInfo.title }}</view>
-          <!-- <view class="more">更多</view> -->
-        </view>
-        <view class="content-header-box ss-flex ss-row-center">
-          <view class="countdown-box ss-flex" v-if="endTime?.ms > 0 && state.activityInfo">
-            <view class="countdown-title ss-m-r-12">距结束</view>
-            <view class="ss-flex countdown-time">
-              <view class="ss-flex countdown-h">{{ endTime.h }}</view>
-              <view class="ss-m-x-4">:</view>
-              <view class="countdown-num ss-flex ss-row-center">{{ endTime.m }}</view>
-              <view class="ss-m-x-4">:</view>
-              <view class="countdown-num ss-flex ss-row-center">{{ endTime.s }}</view>
-            </view>
+        <view class="content-header-title ss-flex ss-row-center">
+          <view v-for="(item, index) in state.summaryData.avatars" :key="index" class="picture"
+                :style='index === 6 ? "position: relative" : "position: static"'>
+            <span class="avatar" :style='`background-image: url(${item})`'></span>
+            <span v-if="index === 6 && state.summaryData.avatars.length > 3" class="mengceng">
+              <i>···</i>
+            </span>
           </view>
-          <view class="" v-if="endTime?.ms < 0 && state.activityInfo"> 活动已结束 </view>
+          <text class="pic_count">{{ state.summaryData.userCount || 0 }}人参与</text>
         </view>
       </view>
       <scroll-view
@@ -37,12 +31,7 @@
             size="lg"
             :data="item"
             :grouponTag="true"
-            @click="
-              sheep.$router.go('/pages/goods/groupon', {
-                id: item.id,
-                activity_id: state.activityId,
-              })
-            "
+            @click="sheep.$router.go('/pages/goods/groupon', { id: item.id })"
           >
             <template v-slot:cart>
               <button class="ss-reset-button cart-btn">去拼团</button>
@@ -55,92 +44,67 @@
           :content-text="{
             contentdown: '上拉加载更多',
           }"
-          @tap="loadmore"
+          @tap="loadMore"
         />
       </scroll-view>
     </view>
   </s-layout>
 </template>
 <script setup>
-  import { reactive, computed } from 'vue';
+  import { reactive } from 'vue';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import _ from 'lodash';
-  import { useDurationTime } from '@/sheep/hooks/useGoods';
+  import CombinationApi from "@/sheep/api/promotion/combination";
 
-  const { screenHeight, safeAreaInsets, screenWidth, safeArea } = sheep.$platform.device;
-  const sys_navBar = sheep.$platform.navbar;
+  const { safeAreaInsets, safeArea } = sheep.$platform.device;
+  const sysNavBar = sheep.$platform.navbar;
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
-  const pageHeight =
-    (safeArea.height + safeAreaInsets.bottom) * 2 + statusBarHeight - sys_navBar - 350;
+  const pageHeight = (safeArea.height + safeAreaInsets.bottom) * 2 + statusBarHeight - sysNavBar - 350;
   const headerBg = sheep.$url.css('/static/img/shop/goods/groupon-header.png');
 
   const state = reactive({
-    activityId: 0,
     pagination: {
       data: [],
-      current_page: 1,
+      pageNo: 1,
       total: 1,
-      last_page: 1,
     },
     loadStatus: '',
-    activityInfo: {},
-  });
-  // 倒计时
-  const endTime = computed(() => {
-    if (state.activityInfo.end_time) {
-      return useDurationTime(state.activityInfo.end_time);
-    }
+    summaryData: {}
   });
 
-  async function getList(activityId, page = 1, list_rows = 4) {
-    state.loadStatus = 'loading';
-    const res = await sheep.$api.goods.activityList({
-      list_rows,
-      activity_id: activityId,
-      page,
-    });
-    if (res.error === 0) {
-      if (page >= 2) {
-        let couponList = _.concat(state.pagination.data, res.data.data);
-        state.pagination = {
-          ...res.data,
-          data: couponList,
-        };
-      } else {
-        state.pagination = res.data;
-      }
-      if (state.pagination.current_page < state.pagination.last_page) {
-        state.loadStatus = 'more';
-      } else {
-        state.loadStatus = 'noMore';
-      }
-    }
+  // 加载统计数据
+  const getSummary = async () => {
+    const { data } = await CombinationApi.getCombinationRecordSummary()
+    state.summaryData = data
   }
-  async function getActivity(id) {}
+
+  // 加载活动列表
+  async function getList(pageNo = 1, pageSize = 10) {
+    state.loadStatus = 'loading';
+    const { data } = await CombinationApi.getCombinationActivityPage({
+      pageNo,
+      pageSize,
+    });
+    data.list.forEach(activity => {
+      state.pagination.data.push({...activity, price: activity.combinationPrice})
+    })
+    state.pagination.total = data.total;
+    state.pagination.pageNo = pageNo;
+    state.loadStatus = state.pagination.data.length < state.pagination.total ? 'more' : 'noMore';
+  }
+
   // 加载更多
-  function loadmore() {
+  function loadMore() {
     if (state.loadStatus !== 'noMore') {
-      getList(state.activityId, state.pagination.current_page + 1);
+      getList(state.pagination.pageNo + 1);
     }
   }
   // 上拉加载更多
-  onReachBottom(() => {
-    loadmore();
-  });
-  onLoad(async (options) => {
-    if (!options.id) {
-      state.activityInfo = null;
-      return;
-    }
-    state.activityId = options.id;
-    getList(state.activityId);
-    const { error, data } = await sheep.$api.activity.activity(options.id);
-    if (error === 0) {
-      state.activityInfo = data;
-    } else {
-      state.activityInfo = null;
-    }
+  onReachBottom(() => loadMore());
+  // 页面初始化
+  onLoad( () => {
+    getSummary();
+    getList();
   });
 </script>
 <style lang="scss" scoped>
@@ -160,7 +124,7 @@
     .content-header {
       width: 100%;
       border-radius: 20rpx 20rpx 0 0;
-      height: 150rpx;
+      height: 100rpx;
       background: linear-gradient(180deg, #fff4f7, #ffe4d1);
       .content-header-title {
         width: 100%;
@@ -178,55 +142,55 @@
           color: #999999;
           line-height: 30rpx;
         }
-      }
-      .content-header-box {
-        width: 678rpx;
-        height: 64rpx;
-        background: rgba($color: #fff, $alpha: 0.66);
-        border-radius: 32px;
-        .num {
-          font-size: 24rpx;
-          font-family: OPPOSANS;
-          font-weight: 500;
-          color: #f51c11;
-          line-height: 30rpx;
-        }
-        .title {
-          font-size: 24rpx;
-          font-weight: 400;
-          font-family: OPPOSANS;
-          color: #333;
-          line-height: 30rpx;
-        }
-        .countdown-title {
-          font-size: 28rpx;
-          font-weight: 500;
-          color: #333333;
-          line-height: 28rpx;
+
+        .picture {
+          display: inline-table;
         }
 
-        .countdown-time {
-          font-size: 28rpx;
-          color: rgba(#ed3c30, 0.23);
-          .countdown-h {
-            font-size: 24rpx;
-            font-family: OPPOSANS;
-            font-weight: 500;
-            color: #ffffff;
-            padding: 0 4rpx;
-            height: 40rpx;
-            background: rgba(#ed3c30, 0.23);
-            border-radius: 6rpx;
-          }
-          .countdown-num {
-            font-size: 24rpx;
-            font-family: OPPOSANS;
-            font-weight: 500;
-            color: #ffffff;
-            width: 40rpx;
-            height: 40rpx;
-            background: rgba(#ed3c30, 0.23);
-            border-radius: 6rpx;
+        .avatar {
+          width: 38rpx;
+          height: 38rpx;
+          display: inline-table;
+          vertical-align: middle;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          user-select: none;
+          border-radius: 50%;
+          background-repeat: no-repeat;
+          background-size: cover;
+          background-position: 0 0;
+          margin-right: -10rpx;
+          box-shadow: 0 0 0 1px #fe832a;
+        }
+
+        .pic_count {
+          margin-left: 30rpx;
+          font-size: 22rpx;
+          font-weight: 500;
+          width: auto;
+          height: auto;
+          background: linear-gradient(90deg, #ff6600 0%, #fe832a 100%);
+          color: #FFFFFF;
+          border-radius: 19rpx;
+          padding: 4rpx 14rpx;
+        }
+
+        .mengceng {
+          width: 40rpx;
+          height: 40rpx;
+          line-height: 36rpx;
+          background: rgba(51, 51, 51, 0.6);
+          text-align: center;
+          border-radius: 50%;
+          opacity: 1;
+          position: absolute;
+          left: -2rpx;
+          color: #FFF;
+          top: 2rpx;
+          i{
+            font-style: normal;
+            font-size: 20rpx;
           }
         }
       }

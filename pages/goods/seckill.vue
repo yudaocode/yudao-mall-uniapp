@@ -5,7 +5,7 @@
     <detailNavbar />
     <!-- 骨架屏 -->
     <detailSkeleton v-if="state.skeletonLoading" />
-    <!-- 空置页 -->
+    <!-- 下架/售罄提醒 -->
     <s-empty
       v-else-if="state.goodsInfo === null || state.goodsInfo.activity_type !== 'seckill'"
       text="活动不存在或已结束"
@@ -16,7 +16,7 @@
     />
     <block v-else>
       <view class="detail-swiper-selector">
-        <!-- 轮播  -->
+        <!-- 商品图轮播 -->
         <su-swiper
           class="ss-m-b-14"
           isPreview
@@ -63,14 +63,13 @@
             <detail-progress :percent="state.percent" />
           </view>
 
-          <view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo.name }}</view>
+          <view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo?.name }}</view>
           <view class="subtitle-text ss-line-1">{{ state.goodsInfo.introduction }}</view>
         </view>
 
         <!-- 功能卡片 -->
         <view class="detail-cell-card detail-card ss-flex-col">
           <detail-cell-sku
-            v-model="state.selectedSku.goods_sku_text"
             :sku="state.selectedSku"
             @tap="state.showSelectSku = true"
           />
@@ -108,30 +107,27 @@
           <button v-else class="ss-reset-button origin-price-btn ss-flex-col">
             <view
               class="no-original"
-              :class="
-                state.goodsInfo.stock === 0 || activity.status != 'ing' ? '' : ''
-              "
+              :class="state.goodsInfo.stock === 0 || timeStatusEnum !== TimeStatusEnum.STARTED ? '' : ''"
             >
               秒杀价
             </view>
           </button>
-          <!-- TODO @疯狂：status 判断不太对 -->
           <button
             class="ss-reset-button btn-box ss-flex-col"
             @tap="state.showSelectSku = true"
             :class="
-              activity.status === 'ing' && state.goodsInfo.stock != 0
+              timeStatusEnum === TimeStatusEnum.STARTED && state.goodsInfo.stock != 0
                 ? 'check-btn-box'
                 : 'disabled-btn-box'
             "
-            :disabled="state.goodsInfo.stock === 0 || activity.status != 'ing'"
+            :disabled="state.goodsInfo.stock === 0 || timeStatusEnum !== TimeStatusEnum.STARTED"
           >
             <view class="btn-price">{{ fen2yuan(state.goodsInfo.price) }}</view>
-            <view v-if="activity.status === 'ing'">
+            <view v-if="timeStatusEnum === TimeStatusEnum.STARTED">
               <view v-if="state.goodsInfo.stock === 0">已售罄</view>
               <view v-else>立即秒杀</view>
             </view>
-            <view v-else>{{ activity.status_text }}</view>
+            <view v-else>{{ timeStatusEnum }}</view>
           </button>
         </view>
       </detail-tabbar>
@@ -154,6 +150,7 @@
   import detailProgress from './components/detail/detail-progress.vue';
   import SeckillApi from "@/sheep/api/promotion/seckill";
   import SpuApi from "@/sheep/api/product/spu";
+  import {getTimeStatusEnum, TimeStatusEnum} from "@/sheep/util/const";
 
   const headerBg = sheep.$url.css('/static/img/shop/goods/seckill-bg.png');
   const btnBg = sheep.$url.css('/static/img/shop/goods/seckill-btn.png');
@@ -186,49 +183,51 @@
   }
 
   // 立即购买
-  function onBuy(e) {
+  function onBuy(sku) {
     sheep.$router.go('/pages/order/confirm', {
       data: JSON.stringify({
         order_type: 'goods',
         buy_type: 'seckill',
-        activityId: activity.value.id,
-        goods_list: [
+        seckillActivityId: activity.value.id,
+        items: [
           {
-            goods_id: e.goods_id,
-            goods_num: e.goods_num,
-            goods_sku_price_id: e.id,
+            skuId: sku.id,
+            count: sku.count,
           },
         ],
       }),
     });
   }
 
+  // 分享信息
   const shareInfo = computed(() => {
-    if (isEmpty(state.goodsInfo?.activity)) return {};
+    if (isEmpty(activity)) return {};
     return sheep.$platform.share.getShareInfo(
       {
-        title: state.goodsInfo.name,
+        title: activity.value.name,
         image: sheep.$url.cdn(state.goodsInfo.picUrl),
         params: {
           page: '4',
-          query: state.goodsInfo.id + ',' + activity.value.id,
+          query: activity.value.id,
         },
       },
       {
         type: 'goods', // 商品海报
-        title: state.goodsInfo.name, // 商品标题
+        title: activity.value.name, // 商品标题
         image: sheep.$url.cdn(state.goodsInfo.picUrl), // 商品主图
-        price: state.goodsInfo.price[0], // 商品价格
+        price: state.goodsInfo.price, // 商品价格
         marketPrice: state.goodsInfo.marketPrice, // 商品原价
       },
     );
   });
 
   const activity = ref()
+  const timeStatusEnum = ref('')
   // 查询活动
   const getActivity = async (id) => {
     const { data } = await SeckillApi.getSeckillActivity(id)
     activity.value = data
+    timeStatusEnum.value = getTimeStatusEnum(activity.startTime, activity.endTime)
 
     // 查询商品
     await getSpu(data.spuId)
@@ -247,7 +246,6 @@
 
     // 价格、库存使用活动的
     data.skus.forEach(sku => {
-      debugger
       const product = activity.value.products.find(product => product.skuId === sku.id);
       if (product) {
         sku.price = product.seckillPrice;

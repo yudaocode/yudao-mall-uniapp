@@ -13,34 +13,26 @@
     <view v-if="state.pagination.total > 0">
       <view
         class="order-list-card-box bg-white ss-r-10 ss-m-t-14 ss-m-20"
-        v-for="order in state.pagination.data"
+        v-for="order in state.pagination.list"
         :key="order.id"
       >
         <view class="order-card-header ss-flex ss-col-center ss-row-between ss-p-x-20">
-          <view class="order-no">订单号：{{ order.my.order.order_sn }}</view>
-          <view
-            class="ss-font-26"
-            :class="
-              order.status === 'ing'
-                ? 'warning-color'
-                : order.status === 'invalid'
-                ? 'danger-color'
-                : 'success-color'
-            "
-            >{{ order.status_text }}</view
-          >
+          <view class="order-no">订单号：{{ order.no }}</view>
+          <view class="ss-font-26" :class="formatOrderColor(order)">
+            {{ formatOrderStatus(order) }}
+          </view>
         </view>
-        <view class="border-bottom">
+        <view class="border-bottom" v-for="item in order.items" :key="item.id">
           <s-goods-item
-            :img="order.goods.image"
-            :title="order.goods.title"
-            :price="order.goods.price[0]"
-            priceColor="#E1212B"
-            radius="20"
+              :img="item.picUrl"
+              :title="item.spuName"
+              :skuText="item.properties.map((property) => property.valueName).join(' ')"
+              :price="item.price"
+              :num="item.count"
           >
             <template #groupon>
               <view class="ss-flex">
-                <view class="sales-title"> {{ order.num }}人团 </view>
+                <view class="sales-title"> {{ item.num }}人团 </view>
                 <!-- <view class="num-title ss-m-l-20"> 已拼{{ order.goods.sales }}件 </view> -->
               </view>
             </template>
@@ -49,16 +41,16 @@
         <view class="order-card-footer ss-flex ss-row-right ss-p-x-20">
           <button
             class="detail-btn ss-reset-button"
-            @tap="sheep.$router.go('/pages/order/detail', { id: order.my.order_id })"
+            @tap="sheep.$router.go('/pages/order/detail', { id: order.id })"
           >
             订单详情
           </button>
           <button
             class="tool-btn ss-reset-button"
-            :class="{ 'ui-BG-Main-Gradient': order.status === 'ing' }"
+            :class="{ 'ui-BG-Main-Gradient': order.status === 0 }"
             @tap="sheep.$router.go('/pages/activity/groupon/detail', { id: order.id })"
           >
-            {{ order.status === 'ing' ? '邀请拼团' : '拼团详情' }}
+            {{ order.status === 0 ? '邀请拼团' : '拼团详情' }}
           </button>
         </view>
       </view>
@@ -69,7 +61,7 @@
       :content-text="{
         contentdown: '上拉加载更多',
       }"
-      @tap="loadmore"
+      @tap="loadMore"
     />
   </s-layout>
 </template>
@@ -79,15 +71,17 @@
   import { onLoad, onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import _ from 'lodash';
+  import OrderApi from "@/sheep/api/trade/order";
+  import {formatOrderColor, formatOrderStatus} from "@/sheep/hooks/useGoods";
 
   // 数据
   const state = reactive({
     currentTab: 0,
     pagination: {
-      data: [],
-      current_page: 1,
+      list: [],
       total: 1,
-      last_page: 1,
+      pageNo: 1,
+      pageSize: 1,
     },
     loadStatus: '',
     deleteOrderId: 0,
@@ -96,19 +90,18 @@
   const tabMaps = [
     {
       name: '全部',
-      value: 'all',
     },
     {
       name: '进行中',
-      value: 'ing',
+      value: 0,
     },
     {
       name: '拼团成功',
-      value: 'finish',
+      value: 1,
     },
     {
       name: '拼团失败',
-      value: 'invalid',
+      value: 2,
     },
   ];
 
@@ -116,9 +109,9 @@
   function onTabsChange(e) {
     state.pagination = {
       data: [],
-      current_page: 1,
+      pageNo: 1,
       total: 1,
-      last_page: 1,
+      pageSize: 5,
     };
     state.currentTab = e.index;
     getGrouponList();
@@ -149,8 +142,8 @@
   async function onConfirm(orderId) {
     const { error, data } = await sheep.$api.order.confirm(orderId);
     if (error === 0) {
-      let index = state.pagination.data.findIndex((order) => order.id === orderId);
-      state.pagination.data[index] = data;
+      let index = state.pagination.list.findIndex((order) => order.id === orderId);
+      state.pagination.list[index] = data;
     }
   }
 
@@ -158,33 +151,30 @@
   async function onCancel(orderId) {
     const { error, data } = await sheep.$api.order.cancel(orderId);
     if (error === 0) {
-      let index = state.pagination.data.findIndex((order) => order.id === orderId);
-      state.pagination.data[index] = data;
+      let index = state.pagination.list.findIndex((order) => order.id === orderId);
+      state.pagination.list[index] = data;
     }
   }
 
   // 获取订单列表
-  async function getGrouponList(page = 1, list_rows = 5) {
+  async function getGrouponList() {
     state.loadStatus = 'loading';
-    let res = await sheep.$api.activity.myGroupon({
-      type: tabMaps[state.currentTab].value,
+    // todo: 缺少拼团订单接口
+    const { code, data } = await OrderApi.getOrderPage({
+      pageNo: state.pagination.pageNo,
+      pageSize: state.pagination.pageSize,
+      status: tabMaps[state.currentTab].value,
+      commentStatus: tabMaps[state.currentTab].value === 30 ? false : null
     });
-    if (res.error === 0) {
-      if (page >= 2) {
-        let orderList = _.concat(state.pagination.data, res.data.data);
-        state.pagination = {
-          ...res.data,
-          data: orderList,
-        };
-      } else {
-        state.pagination = res.data;
-      }
-
-      if (state.pagination.current_page < state.pagination.last_page) {
-        state.loadStatus = 'more';
-      } else {
-        state.loadStatus = 'noMore';
-      }
+    if (code !== 0) {
+      return;
+    }
+    state.pagination.list = _.concat(state.pagination.list, data.list)
+    state.pagination.total = data.total;
+    if (state.pagination.list.length < state.pagination.total) {
+      state.loadStatus = 'more';
+    } else {
+      state.loadStatus = 'noMore';
     }
   }
 
@@ -196,15 +186,16 @@
   });
 
   // 加载更多
-  function loadmore() {
+  function loadMore() {
     if (state.loadStatus !== 'noMore') {
-      getGrouponList(state.pagination.current_page + 1);
+      state.pagination.pageNo++;
+      getGrouponList();
     }
   }
 
   // 上拉加载更多
   onReachBottom(() => {
-    loadmore();
+    loadMore();
   });
   //下拉刷新
   onPullDownRefresh(() => {
