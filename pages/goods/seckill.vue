@@ -199,7 +199,7 @@
     });
   }
 
-  // 分享信息
+  // 分享信息 TODO 芋艿：待接入
   const shareInfo = computed(() => {
     if (isEmpty(activity)) return {};
     return sheep.$platform.share.getShareInfo(

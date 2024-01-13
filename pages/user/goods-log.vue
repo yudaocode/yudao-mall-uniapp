@@ -1,3 +1,4 @@
+<!-- 商品浏览记录  -->
 <template>
   <s-layout title="我的足迹" :bgStyle="{ color: '#f2f2f2' }">
     <view class="cart-box ss-flex ss-flex-col ss-row-between">
@@ -150,11 +151,7 @@
 
     state.pagination.list = _.concat(state.pagination.list, data.list);
     state.pagination.total = data.total;
-    if (state.pagination.list.length < state.pagination.total) {
-      state.loadStatus = 'more';
-    } else {
-      state.loadStatus = 'noMore';
-    }
+    state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
   }
 
   // 单选选中
@@ -166,6 +163,7 @@
     }
     state.selectAll = state.selectedSpuIdList.length === state.pagination.list.length;
   };
+
   // 全选
   const onSelectAll = () => {
     state.selectAll = !state.selectAll;
@@ -180,6 +178,7 @@
       });
     }
   };
+
   // 删除足迹
   async function onDelete() {
     if (state.selectedSpuIdList.length <= 0) {
@@ -191,6 +190,7 @@
       reload();
     }
   }
+
   // 清空
   async function onClean() {
     const { code } = await SpuHistoryApi.cleanBrowseHistory();
@@ -214,9 +214,11 @@
       getList();
     }
   }
+
   onReachBottom(() => {
     loadMore();
   });
+
   onLoad(() => {
     getList();
   });

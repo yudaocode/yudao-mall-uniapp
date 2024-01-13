@@ -23,13 +23,6 @@ const SpuHistoryApi = {
             method: 'GET',
             data
         });
-    },
-    // 获得商品浏览记录数量
-    getBrowseHistoryCount: () => {
-        return request({
-            url: '/app-api/product/browse-history/get-count',
-            method: 'GET',
-        });
     }
 };
 export default SpuHistoryApi;
