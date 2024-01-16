@@ -102,6 +102,16 @@ const OrderApi = {
       },
     });
   },
+  // 获得交易订单的物流轨迹
+  getOrderExpressTrackList: (id) => {
+    return request({
+      url: `/app-api/trade/order/get-express-track-list`,
+      method: 'GET',
+      params: {
+        id,
+      },
+    });
+  },
   // 获得交易订单数量
   getOrderCount: () => {
     return request({
