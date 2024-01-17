@@ -1,6 +1,17 @@
 import request from '@/sheep/request';
 
 const AfterSaleApi = {
+  // 获得售后分页
+  getAfterSalePage: (params) => {
+    return request({
+      url: `/app-api/trade/after-sale/page`,
+      method: 'GET',
+      params,
+      custom: {
+        showLoading: false,
+      },
+    });
+  },
   // 创建售后
   createAfterSale: (data) => {
     return request({

@@ -1,4 +1,3 @@
-import third from '@/sheep/api/third';
 import $wxsdk from '@/sheep/libs/sdk-h5-weixin';
 import { getRootUrl } from '@/sheep/helper';
 import AuthUtil from '@/sheep/api/member/auth';

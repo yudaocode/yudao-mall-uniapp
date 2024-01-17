@@ -372,7 +372,8 @@
     // 对详情数据进行适配
     let res;
     if (state.comeinType === 'wechat') {
-      res = await sheep.$api.order.detail(id, {
+      // TODO 芋艿：微信场景下
+      res = await OrderApi.getOrder(id, {
         merchant_trade_no: state.merchantTradeNo,
       });
     } else {

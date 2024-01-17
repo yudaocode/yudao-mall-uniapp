@@ -1,12 +1,7 @@
 import request from '@/sheep/request';
 
+// TODO 芋艿：小程序直播还不支持
 export default {
-  // 自定义页面
-  page: (id) =>
-    request({
-      url: 'page/' + id,
-      method: 'GET',
-    }),
   //小程序直播
   mplive: {
     getRoomList: (ids) =>

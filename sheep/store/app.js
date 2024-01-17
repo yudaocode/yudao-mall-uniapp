@@ -1,4 +1,3 @@
-import appApi from '@/sheep/api/app';
 import diyTemplateApi from '@/sheep/api/promotion/diy/template';
 import { defineStore } from 'pinia';
 import $platform from '@/sheep/platform';

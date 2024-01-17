@@ -38,7 +38,7 @@
         <view class="order-card-footer ss-flex ss-row-right ss-p-x-20">
           <button
             class="detail-btn ss-reset-button"
-            @tap="sheep.$router.go('/pages/order/detail', { id: record.id })"
+            @tap="sheep.$router.go('/pages/order/detail', { id: record.orderId })"
           >
             订单详情
           </button>

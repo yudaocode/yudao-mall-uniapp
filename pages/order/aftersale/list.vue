@@ -102,7 +102,7 @@
 	// 获取售后列表
 	async function getOrderList() {
 		state.loadStatus = 'loading';
-		let { data, code } = await sheep.$api.order.aftersale.list({
+		let { data, code } = await AfterSaleApi.getAfterSalePage({
 			// type: tabMaps[state.currentTab].value,
       pageNo: state.pagination.pageNo,
       pageSize: state.pagination.pageSize,

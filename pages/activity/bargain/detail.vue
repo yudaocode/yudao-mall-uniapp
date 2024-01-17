@@ -102,25 +102,10 @@
 </template>
 
 <script setup>
-	import {
-		computed,
-		reactive
-	} from 'vue';
+	import { reactive } from 'vue';
 	import sheep from '@/sheep';
-	import _ from 'lodash';
-	import {
-		onLoad,
-		onReachBottom
-	} from '@dcloudio/uni-app';
-	import {
-		useDurationTime
-	} from '@/sheep/hooks/useGoods';
-	import {
-		showShareModal
-	} from '@/sheep/hooks/useModal';
-	import {
-		isEmpty
-	} from 'lodash';
+	import { onLoad } from '@dcloudio/uni-app';
+  import BargainApi from '@/sheep/api/promotion/bargain'
 
 	const state = reactive({
 		id: '',
@@ -142,7 +127,7 @@
 		let {
 			data,
 			code
-		} = await sheep.$api.activity.getBargainActivityDetail({
+		} = await BargainApi.getBargainActivityDetail({
 			id: state.id
 		})
 		if (code == 0) {

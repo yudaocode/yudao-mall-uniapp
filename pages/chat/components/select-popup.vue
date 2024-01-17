@@ -32,11 +32,12 @@
 
 <script setup>
   import { reactive, watch } from 'vue';
-  import { onLoad } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import _ from 'lodash';
   import GoodsItem from './goods.vue';
   import OrderItem from './order.vue';
+  import OrderApi from '@/sheep/api/trade/order';
+  import SpuHistoryApi from '@/sheep/api/product/history';
 
   const emits = defineEmits(['select', 'close']);
   const props = defineProps({
@@ -74,11 +75,11 @@
     state.loadStatus = 'loading';
     const res =
       props.mode == 'goods'
-        ? await sheep.$api.user.view.list({
+        ? await SpuHistoryApi.getBrowseHistoryPage({
             page,
             list_rows,
           })
-        : await sheep.$api.order.list({
+        : await OrderApi.getOrderPage({
             page,
             list_rows,
           });

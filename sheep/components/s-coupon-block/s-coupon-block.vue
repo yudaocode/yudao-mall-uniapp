@@ -45,10 +45,10 @@
 
 <script setup>
   import sheep from '@/sheep';
-  import TemplateApi from '@/sheep/api/promotion/coupon';
+  import CouponApi from '@/sheep/api/promotion/coupon';
   import { ref, onMounted } from 'vue';
-  import {CouponTemplateValidityTypeEnum, PromotionDiscountTypeEnum} from "@/sheep/util/const";
-  import {floatToFixed2, formatDate} from "@/sheep/util";
+  import { CouponTemplateValidityTypeEnum, PromotionDiscountTypeEnum } from "@/sheep/util/const";
+  import { floatToFixed2, formatDate } from "@/sheep/util";
 
   const props = defineProps({
     data: {
@@ -91,6 +91,7 @@
     }
     return `未知【${coupon.discountType}】`
   }
+
   // 格式化【有效期限】
   const formatValidityType = (row) => {
     if (row.validityType === CouponTemplateValidityTypeEnum.DATE.type) {
@@ -103,9 +104,9 @@
   }
 
   const couponList = ref([]);
-  //立即领取优惠券
+  // 立即领取优惠券
   async function onGetCoupon(id) {
-    const { error, msg } = await sheep.$api.coupon.get(id);
+    const { error, msg } = await CouponApi.takeCoupon(id);
     if (error === 0) {
       uni.showToast({
         title: msg,
@@ -116,7 +117,7 @@
     await getCouponTemplateList()
   }
   const getCouponTemplateList = async () => {
-    const { data } = await TemplateApi.getCouponTemplateListByIds(props.data.couponIds.join(','));
+    const { data } = await CouponApi.getCouponTemplateListByIds(props.data.couponIds.join(','));
     couponList.value = data;
   }
   onMounted(() => {

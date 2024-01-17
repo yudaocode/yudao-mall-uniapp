@@ -82,7 +82,7 @@
 	import {
 		fen2yuan
 	} from '@/sheep/hooks/useGoods';
-	import BargainApi from '@/sheep/api/activity'
+	import BargainApi from '@/sheep/api/promotion/bargain'
 	const state = reactive({
 		navH: '',
 		returnShow: true,

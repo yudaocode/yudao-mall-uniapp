@@ -87,13 +87,11 @@
 
 <script setup>
 	import { reactive } from 'vue';
-	import {
-		onLoad,
-		onReachBottom
-	} from '@dcloudio/uni-app';
+	import { onLoad, onReachBottom } from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
 	import _ from 'lodash';
   import { resetPagination } from '@/sheep/util';
+  import SpuApi from '@/sheep/api/product/spu';
 
 	const sys_navBar = sheep.$platform.navbar;
 	const emits = defineEmits(['close', 'change']);
@@ -232,7 +230,7 @@
 
 	async function getList() {
 		state.loadStatus = 'loading';
-		const { code, data } = await sheep.$api.goods.list({
+		const { code, data } = await SpuApi.getSpuPage({
       pageNo: state.pagination.pageNo,
       pageSize: state.pagination.pageSize,
 			sortField: state.currentSort,

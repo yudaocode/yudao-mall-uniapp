@@ -1,7 +1,7 @@
 import {
 	defineStore
 } from 'pinia';
-import userApi from '@/sheep/api/user';
+// import userApi from '@/sheep/api/user';
 import $share from '@/sheep/platform/share';
 import {
 	isEmpty,
@@ -13,8 +13,6 @@ import app from './app';
 import {
 	showAuthModal
 } from '@/sheep/hooks/useModal';
-import AuthUtil from '@/sheep/api/member/auth';
-import BrokerageApi from '@/sheep/api/trade/brokerage';
 import UserApi from '@/sheep/api/member/user';
 import PayWalletApi from '@/sheep/api/pay/wallet';
 import OrderApi from '@/sheep/api/trade/order';
