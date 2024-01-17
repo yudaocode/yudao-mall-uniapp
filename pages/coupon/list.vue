@@ -15,7 +15,7 @@
       text="暂无优惠券"
     />
     <!-- 情况一：领劵中心 -->
-    <template v-if="state.currentTab === '0'">
+    <template v-if="state.currentTab === 0">
       <view v-for="item in state.pagination.list" :key="item.id">
         <s-coupon-list
           :data="item"
@@ -40,11 +40,7 @@
         <s-coupon-list
           :data="item"
           type="user"
-          @tap="
-            sheep.$router.go('/pages/coupon/detail', {
-              data: JSON.stringify(item),
-            })
-          "
+          @tap="sheep.$router.go('/pages/coupon/detail', { couponId: item.id })"
         >
           <template #default>
             <button
@@ -183,12 +179,12 @@
       getData();
     // 我的优惠劵
     } else {
-      state.type = Option.type;
       Option.type === 'geted'
         ? (state.currentTab = 1)
         : Option.type === 'used'
           ? (state.currentTab = 2)
           : (state.currentTab = 3);
+      state.type = state.currentTab;
       getCoupon();
     }
   });
