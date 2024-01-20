@@ -160,8 +160,8 @@
     sheep.$router.go('/pages/order/confirm', {
       data: JSON.stringify({
         items: [{
-          skuId: state.selectedSku.id,
-          count: 1
+          skuId: e.id,
+          count: e.goods_num
         }],
         // TODO 芋艿：后续清理掉这 2 参数
         deliveryType: 1,
