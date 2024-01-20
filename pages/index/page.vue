@@ -17,7 +17,7 @@
 <script setup>
   import { reactive } from 'vue';
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
-  import DiyPageApi from "@/sheep/api/promotion/diy/page";
+  import DiyApi from '@/sheep/api/promotion/diy';
 
   const state = reactive({
     name: '',
@@ -36,7 +36,7 @@
     }
     // #endif
 
-    const { code, data } = await DiyPageApi.getDiyPage(id);
+    const { code, data } = await DiyApi.getDiyPage(id);
     if (code === 0) {
       state.name = data.name;
       state.components = data.property?.components;

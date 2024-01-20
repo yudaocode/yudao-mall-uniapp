@@ -59,6 +59,9 @@ const OrderApi = {
       params: {
         id,
       },
+      custom: {
+        showLoading: false,
+      },
     });
   },
   // 订单列表

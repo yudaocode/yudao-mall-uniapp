@@ -6,7 +6,7 @@ const FavoriteApi = {
     return request({
       url: '/product/favorite/page',
       method: 'GET',
-      params: data
+      params: data,
     });
   },
   // 检查是否收藏过商品
@@ -15,8 +15,8 @@ const FavoriteApi = {
       url: '/product/favorite/exits',
       method: 'GET',
       params: {
-        spuId
-      }
+        spuId,
+      },
     });
   },
   // 添加商品收藏
@@ -25,8 +25,13 @@ const FavoriteApi = {
       url: '/product/favorite/create',
       method: 'POST',
       data: {
-        spuId
-      }
+        spuId,
+      },
+      custom: {
+        auth: true,
+        showSuccess: true,
+        successMsg: '收藏成功',
+      },
     });
   },
   // 取消商品收藏
@@ -35,10 +40,15 @@ const FavoriteApi = {
       url: '/product/favorite/delete',
       method: 'DELETE',
       data: {
-        spuId
-      }
+        spuId,
+      },
+      custom: {
+        auth: true,
+        showSuccess: true,
+        successMsg: '取消成功',
+      },
     });
-  }
+  },
 };
 
 export default FavoriteApi;

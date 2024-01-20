@@ -10,7 +10,11 @@ const CommentApi = {
         spuId,
         pageNo,
         pageSize,
-        type
+        type,
+      },
+      custom: {
+        showLoading: false,
+        showError: false,
       },
     });
   },

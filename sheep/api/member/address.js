@@ -13,7 +13,11 @@ const AddressApi = {
     return request({
       url: '/member/address/create',
       method: 'POST',
-      data
+      data,
+      custom: {
+        showSuccess: true,
+        successMsg: '保存成功'
+      },
     });
   },
   // 更新用户收件地址
@@ -21,7 +25,11 @@ const AddressApi = {
     return request({
       url: '/member/address/update',
       method: 'PUT',
-      data
+      data,
+      custom: {
+        showSuccess: true,
+        successMsg: '更新成功'
+      },
     });
   },
   // 获得用户收件地址

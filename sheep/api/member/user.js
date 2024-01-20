@@ -19,8 +19,9 @@ const UserApi = {
       method: 'PUT',
       data,
       custom: {
-        showSuccess: true,
         auth: true,
+        showSuccess: true,
+        successMsg: '更新成功'
       },
     });
   },

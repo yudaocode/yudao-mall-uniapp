@@ -7,6 +7,10 @@ const CouponApi = {
       url: '/promotion/coupon-template/list-by-ids',
       method: 'GET',
       params: { ids },
+      custom: {
+        showLoading: false, // 不展示 Loading，避免领取优惠劵时，不成功提示
+        showError: false,
+      },
     });
   },
   // 获得优惠劵模版列表
@@ -47,6 +51,13 @@ const CouponApi = {
       url: '/promotion/coupon/take',
       method: 'POST',
       data: { templateId },
+      custom: {
+        auth: true,
+        showLoading: true,
+        loadingMsg: '领取中',
+        showSuccess: true,
+        successMsg: '领取成功',
+      },
     });
   },
   // 获得优惠劵
@@ -78,6 +89,10 @@ const CouponApi = {
         spuIds: spuIds.join(','),
         skuIds: skuIds.join(','),
         categoryIds: categoryIds.join(','),
+      },
+      custom: {
+        showError: false,
+        showLoading: false, // 避免影响 settlementOrder 结算的结果
       },
     });
   }

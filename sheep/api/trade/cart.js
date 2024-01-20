@@ -39,6 +39,10 @@ const CartApi = {
     return request({
       url: '/trade/cart/list',
       method: 'GET',
+      custom: {
+        showLoading: false,
+        auth: true,
+      },
     });
   },
 };
