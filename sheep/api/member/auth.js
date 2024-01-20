@@ -50,6 +50,20 @@ const AuthUtil = {
       method: 'POST',
     });
   },
+  // 刷新令牌
+  refreshToken: (refreshToken) => {
+    return request({
+      url: '/app-api/member/auth/refresh-token',
+      method: 'POST',
+      params: {
+        refreshToken
+      },
+      custom: {
+        loading: false, // 不用加载中
+        showError: false, // 不展示错误提示
+      },
+    });
+  },
   // 社交授权的跳转
   socialAuthRedirect: (type, redirectUri) => {
     return request({
@@ -112,6 +126,7 @@ const AuthUtil = {
       },
     })
   },
+  //
 };
 
 export default AuthUtil;
