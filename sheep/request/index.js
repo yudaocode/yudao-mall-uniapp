@@ -73,10 +73,13 @@ const http = new Request({
  */
 http.interceptors.request.use(
 	(config) => {
+    // 自定义处理【auth 授权】：必须登录的接口，则跳出 AuthModal 登录弹窗
 		if (config.custom.auth && !$store('user').isLogin) {
 			showAuthModal();
 			return Promise.reject();
 		}
+
+    // 自定义处理【loading 加载中】：如果需要显示 loading，则显示 loading
 		if (config.custom.showLoading) {
 			LoadingInstance.count++;
 			LoadingInstance.count === 1 &&
@@ -88,6 +91,8 @@ http.interceptors.request.use(
 					},
 				});
 		}
+
+    // 增加 token 令牌、terminal 终端、tenant 租户的请求头
 		const token = uni.getStorageSync('token');
 		if (token) config.header['Authorization'] = token;
 		// TODO 芋艿：特殊处理
@@ -114,28 +119,37 @@ http.interceptors.response.use(
 			$store('user').setToken(response.data.data.accessToken);
 		}
 
+    // 自定处理【loading 加载中】：如果需要显示 loading，则关闭 loading
 		response.config.custom.showLoading && closeLoading();
-		if (response.data.error !== 0 && response.data.code !== 0) {
-			if (response.config.custom.showError)
+
+    // 自定义处理【error 错误提示】：如果需要显示错误提示，则显示错误提示
+		if (response.data.code !== 0) {
+      // 特殊：如果 401 错误码，则跳转到登录页 or 刷新令牌
+      if (response.data.code === 401) {
+        handleAuthorized();
+      }
+
+      // 错误提示
+			if (response.config.custom.showError) {
 				uni.showToast({
 					title: response.data.msg || '服务器开小差啦,请稍后再试~',
 					icon: 'none',
 					mask: true,
 				});
-			return Promise.resolve(response.data);
+      }
 		}
-		// 成功时的提示
-		if (
-			(response.data.error === 0 || response.data.code === 0) &&
-			(response.data.msg !== '' || response.config.custom.successMsg !== '') &&
-			response.config.custom.showSuccess
-		) {
+
+		// 自定义处理【showSuccess 成功提示】：如果需要显示成功提示，则显示成功提示
+		if (response.config.custom.showSuccess
+      && response.config.custom.successMsg !== ''
+      &&  response.data.code === 0) {
       uni.showToast({
 				title: response.config.custom.successMsg,
 				icon: 'none',
 			});
 		}
-    // TODO 芋艿：全局的 error code 处理；例如说 401
+
+    // 返回结果：包括 code + data + msg
 		return Promise.resolve(response.data);
 	},
 	(error) => {
@@ -153,8 +167,7 @@ http.interceptors.response.use(
 					} else {
 						errorMessage = '请先登录';
 					}
-					userStore.logout(true);
-					showAuthModal();
+          handleAuthorized()
 					break;
 				case 403:
 					errorMessage = '拒绝访问';
@@ -184,7 +197,7 @@ http.interceptors.response.use(
 					errorMessage = '网络超时';
 					break;
 				case 505:
-					errorMessage = 'HTTP版本不受支持';
+					errorMessage = 'HTTP 版本不受支持';
 					break;
 			}
 			if (error.errMsg.includes('timeout')) errorMessage = '请求超时';
@@ -208,6 +221,15 @@ http.interceptors.response.use(
 		return false;
 	},
 );
+
+/**
+ * 处理 401 未登录的错误
+ */
+const handleAuthorized = () => {
+  const userStore = $store('user');
+  userStore.logout(true);
+  showAuthModal();
+}
 
 const request = (config) => {
 	if (config.url[0] !== '/') {
