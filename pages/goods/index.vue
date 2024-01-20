@@ -205,8 +205,8 @@
 			title: state.goodsInfo.name, // 商品标题
 			// image: sheep.$url.cdn(state.goodsInfo.image), // 商品主图
 			image: sheep.$url.cdn(state.goodsInfo.picUrl), // 商品主图
-			price: state.goodsInfo.price, // 商品价格
-			original_price: state.goodsInfo.original_price, // 商品原价
+			price: fen2yuan(state.goodsInfo.price), // 商品价格
+			original_price: fen2yuan(state.goodsInfo.maretPrice), // 商品原价
 		}, );
 	});
 
