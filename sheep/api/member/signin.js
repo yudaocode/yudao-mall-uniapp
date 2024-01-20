@@ -4,21 +4,21 @@ const SignInApi = {
   // 获得签到规则列表
   getSignInConfigList: () => {
     return request({
-      url: '/app-api/member/sign-in/config/list',
+      url: '/member/sign-in/config/list',
       method: 'GET',
     });
   },
   // 获得个人签到统计
   getSignInRecordSummary: () => {
     return request({
-      url: '/app-api/member/sign-in/record/get-summary',
+      url: '/member/sign-in/record/get-summary',
       method: 'GET',
     });
   },
   // 签到
   createSignInRecord: () => {
     return request({
-      url: '/app-api/member/sign-in/record/create',
+      url: '/member/sign-in/record/create',
       method: 'POST',
     });
   },
@@ -28,7 +28,7 @@ const SignInApi = {
       .map((key) => encodeURIComponent(key) + '=' + params[key])
       .join('&');
     return request({
-      url: `/app-api/member/sign-in/record/page?${queryString}`,
+      url: `/member/sign-in/record/page?${queryString}`,
       method: 'GET',
     });
   },

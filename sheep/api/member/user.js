@@ -4,7 +4,7 @@ const UserApi = {
   // 获得基本信息
   getUserInfo: () => {
     return request({
-      url: '/app-api/member/user/get',
+      url: '/member/user/get',
       method: 'GET',
       custom: {
         showLoading: false,
@@ -15,7 +15,7 @@ const UserApi = {
   // 修改基本信息
   updateUser: (data) => {
     return request({
-      url: '/app-api/member/user/update',
+      url: '/member/user/update',
       method: 'PUT',
       data,
       custom: {
@@ -27,7 +27,7 @@ const UserApi = {
   // 修改用户手机
   updateUserMobile: (data) => {
     return request({
-      url: '/app-api/member/user/update-mobile',
+      url: '/member/user/update-mobile',
       method: 'PUT',
       data,
       custom: {
@@ -40,7 +40,7 @@ const UserApi = {
   // 基于微信小程序的授权码，修改用户手机
   updateUserMobileByWeixin: (code) => {
     return request({
-      url: '/app-api/member/user/update-mobile-by-weixin',
+      url: '/member/user/update-mobile-by-weixin',
       method: 'PUT',
       data: {
         code
@@ -55,7 +55,7 @@ const UserApi = {
   // 修改密码
   updateUserPassword: (data) => {
     return request({
-      url: '/app-api/member/user/update-password',
+      url: '/member/user/update-password',
       method: 'PUT',
       data,
       custom: {
@@ -68,7 +68,7 @@ const UserApi = {
   // 重置密码
   resetUserPassword: (data) => {
     return request({
-      url: '/app-api/member/user/reset-password',
+      url: '/member/user/reset-password',
       method: 'PUT',
       data,
       custom: {

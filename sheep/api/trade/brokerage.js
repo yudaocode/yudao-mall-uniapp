@@ -4,14 +4,14 @@ const BrokerageApi = {
   // 获得个人分销信息
   getBrokerageUser: () => {
     return request({
-      url: '/app-api/trade/brokerage-user/get',
+      url: '/trade/brokerage-user/get',
       method: 'GET'
     });
   },
   // 获得个人分销统计
   getBrokerageUserSummary: () => {
     return request({
-      url: '/app-api/trade/brokerage-user/get-summary',
+      url: '/trade/brokerage-user/get-summary',
       method: 'GET',
     });
   },
@@ -24,14 +24,14 @@ const BrokerageApi = {
       .map((key) => encodeURIComponent(key) + '=' + params[key])
       .join('&');
     return request({
-      url: `/app-api/trade/brokerage-record/page?${queryString}`,
+      url: `/trade/brokerage-record/page?${queryString}`,
       method: 'GET',
     });
   },
   // 创建分销提现
   createBrokerageWithdraw: (data) => {
     return request({
-      url: '/app-api/trade/brokerage-withdraw/create',
+      url: '/trade/brokerage-withdraw/create',
       method: 'POST',
       data,
     });
@@ -39,7 +39,7 @@ const BrokerageApi = {
   // 获得商品的分销金额
   getProductBrokeragePrice: (spuId) => {
     return request({
-      url: '/app-api/trade/brokerage-record/get-product-brokerage-price',
+      url: '/trade/brokerage-record/get-product-brokerage-price',
       method: 'GET',
       params: {
         spuId
@@ -50,7 +50,7 @@ const BrokerageApi = {
   getRankByPrice: (params) => {
     const queryString = `times=${params.times[0]}&times=${params.times[1]}`;
     return request({
-      url: `/app-api/trade/brokerage-user/get-rank-by-price?${queryString}`,
+      url: `/trade/brokerage-user/get-rank-by-price?${queryString}`,
       method: 'GET',
     });
   },
@@ -60,7 +60,7 @@ const BrokerageApi = {
       .map((key) => encodeURIComponent(key) + '=' + params[key])
       .join('&');
     return request({
-      url: `/app-api/trade/brokerage-user/rank-page-by-price?${queryString}`,
+      url: `/trade/brokerage-user/rank-page-by-price?${queryString}`,
       method: 'GET',
     });
   },
@@ -70,14 +70,14 @@ const BrokerageApi = {
       .map((key) => encodeURIComponent(key) + '=' + params[key])
       .join('&');
     return request({
-      url: `/app-api/trade/brokerage-user/rank-page-by-user-count?${queryString}`,
+      url: `/trade/brokerage-user/rank-page-by-user-count?${queryString}`,
       method: 'GET',
     });
   },
   // 获得下级分销统计分页
   getBrokerageUserChildSummaryPage: (params) => {
     return request({
-      url: '/app-api/trade/brokerage-user/child-summary-page',
+      url: '/trade/brokerage-user/child-summary-page',
       method: 'GET',
       params,
     })

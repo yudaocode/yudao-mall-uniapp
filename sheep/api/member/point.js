@@ -10,7 +10,7 @@ const PointApi = {
       .map((key) => encodeURIComponent(key) + '=' + params[key])
       .join('&');
     return request({
-      url: `/app-api/member/point/record/page?${queryString}`,
+      url: `/member/point/record/page?${queryString}`,
       method: 'GET',
     });
   }

@@ -4,10 +4,7 @@
  */
 
 import Request from 'luch-request';
-import {
-	baseUrl,
-	apiPath
-} from '@/sheep/config';
+import { baseUrl, apiPath } from '@/sheep/config';
 import $store from '@/sheep/store';
 import $platform from '@/sheep/platform';
 import {
@@ -51,7 +48,7 @@ function closeLoading() {
  * @description 请求基础配置 可直接使用访问自定义请求
  */
 const http = new Request({
-	baseURL: baseUrl,
+	baseURL: baseUrl + apiPath,
 	timeout: 8000,
 	method: 'GET',
 	header: {
@@ -99,12 +96,10 @@ http.interceptors.request.use(
       config.header['Authorization'] = token;
     }
 		// TODO 芋艿：特殊处理
-		if (config.url.indexOf('/app-api/') !== -1) {
-			config.header['Accept'] = '*/*'
-			config.header['tenant-id'] = '1';
-			config.header['terminal'] = '20';
-			// config.header['Authorization'] = 'Bearer test247';
-		}
+    config.header['Accept'] = '*/*'
+    config.header['tenant-id'] = '1';
+    config.header['terminal'] = '20';
+    // config.header['Authorization'] = 'Bearer test247';
 		return config;
 	},
 	(error) => {
@@ -301,15 +296,6 @@ const getRefreshToken = () => {
 }
 
 const request = (config) => {
-	if (config.url[0] !== '/') {
-		config.url = apiPath + config.url;
-	}
-	// TODO 芋艿：额外拼接
-	if (config.url.indexOf('/app-api/') >= 0) {
-		// config.url = 'http://api-dashboard.yudao.iocoder.cn' + config.url; // 调用【云端】
-		config.url = 'http://127.0.0.1:48080' + config.url; // 调用【本地】
-		// config.url = 'http://yunai.natapp1.cc' + config.url; // 调用【natapp】
-	}
 	return http.middleware(config);
 };
 

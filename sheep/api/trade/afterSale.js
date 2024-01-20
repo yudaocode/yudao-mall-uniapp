@@ -4,7 +4,7 @@ const AfterSaleApi = {
   // 获得售后分页
   getAfterSalePage: (params) => {
     return request({
-      url: `/app-api/trade/after-sale/page`,
+      url: `/trade/after-sale/page`,
       method: 'GET',
       params,
       custom: {
@@ -15,7 +15,7 @@ const AfterSaleApi = {
   // 创建售后
   createAfterSale: (data) => {
     return request({
-      url: `/app-api/trade/after-sale/create`,
+      url: `/trade/after-sale/create`,
       method: 'POST',
       data,
     });
@@ -23,7 +23,7 @@ const AfterSaleApi = {
   // 获得售后
   getAfterSale: (id) => {
     return request({
-      url: `/app-api/trade/after-sale/get`,
+      url: `/trade/after-sale/get`,
       method: 'GET',
       params: {
         id,
@@ -33,7 +33,7 @@ const AfterSaleApi = {
   // 取消售后
   cancelAfterSale: (id) => {
     return request({
-      url: `/app-api/trade/after-sale/cancel`,
+      url: `/trade/after-sale/cancel`,
       method: 'DELETE',
       params: {
         id,
@@ -43,7 +43,7 @@ const AfterSaleApi = {
   // 获得售后日志列表
   getAfterSaleLogList: (afterSaleId) => {
     return request({
-      url: `/app-api/trade/after-sale-log/list`,
+      url: `/trade/after-sale-log/list`,
       method: 'GET',
       params: {
         afterSaleId,
@@ -53,7 +53,7 @@ const AfterSaleApi = {
   // 退回货物
   deliveryAfterSale: (data) => {
     return request({
-      url: `/app-api/trade/after-sale/delivery`,
+      url: `/trade/after-sale/delivery`,
       method: 'PUT',
       data,
     });

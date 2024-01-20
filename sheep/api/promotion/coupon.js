@@ -4,7 +4,7 @@ const CouponApi = {
   // 获得优惠劵模板列表
   getCouponTemplateListByIds: (ids) => {
     return request({
-      url: '/app-api/promotion/coupon-template/list-by-ids',
+      url: '/promotion/coupon-template/list-by-ids',
       method: 'GET',
       params: { ids },
     });
@@ -12,7 +12,7 @@ const CouponApi = {
   // 获得优惠劵模版列表
   getCouponTemplateList: (spuId, productScope, count) => {
     return request({
-      url: '/app-api/promotion/coupon-template/list',
+      url: '/promotion/coupon-template/list',
       method: 'GET',
       params: { spuId, productScope, count },
     });
@@ -20,7 +20,7 @@ const CouponApi = {
   // 获得优惠劵模版分页
   getCouponTemplatePage: (params) => {
     return request({
-      url: '/app-api/promotion/coupon-template/page',
+      url: '/promotion/coupon-template/page',
       method: 'GET',
       params,
     });
@@ -28,7 +28,7 @@ const CouponApi = {
   // 获得优惠劵模版
   getCouponTemplate: (id) => {
     return request({
-      url: '/app-api/promotion/coupon-template/get',
+      url: '/promotion/coupon-template/get',
       method: 'GET',
       params: { id },
     });
@@ -36,7 +36,7 @@ const CouponApi = {
   // 我的优惠劵列表
   getCouponPage: (params) => {
     return request({
-      url: '/app-api/promotion/coupon/page',
+      url: '/promotion/coupon/page',
       method: 'GET',
       params,
     });
@@ -44,7 +44,7 @@ const CouponApi = {
   // 领取优惠券
   takeCoupon: (templateId) => {
     return request({
-      url: '/app-api/promotion/coupon/take',
+      url: '/promotion/coupon/take',
       method: 'POST',
       data: { templateId },
     });
@@ -52,7 +52,7 @@ const CouponApi = {
   // 获得优惠劵
   getCoupon: (id) => {
     return request({
-      url: '/app-api/promotion/coupon/get',
+      url: '/promotion/coupon/get',
       method: 'GET',
       params: { id },
     });
@@ -60,7 +60,7 @@ const CouponApi = {
   // 获得未使用的优惠劵数量
   getUnusedCouponCount: () => {
     return request({
-      url: '/app-api/promotion/coupon/get-unused-count',
+      url: '/promotion/coupon/get-unused-count',
       method: 'GET',
       custom: {
         showLoading: false,
@@ -71,7 +71,7 @@ const CouponApi = {
   // 获得匹配指定商品的优惠劵列表
   getMatchCouponList: (price, spuIds, skuIds, categoryIds) => {
     return request({
-      url: '/app-api/promotion/coupon/match-list',
+      url: '/promotion/coupon/match-list',
       method: 'GET',
       params: {
         price,

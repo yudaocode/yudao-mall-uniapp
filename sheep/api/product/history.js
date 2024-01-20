@@ -4,7 +4,7 @@ const SpuHistoryApi = {
     // 删除商品浏览记录
     deleteBrowseHistory: (spuIds) => {
         return request({
-            url: '/app-api/product/browse-history/delete',
+            url: '/product/browse-history/delete',
             method: 'DELETE',
             data: { spuIds },
         });
@@ -12,14 +12,14 @@ const SpuHistoryApi = {
     // 清空商品浏览记录
     cleanBrowseHistory: () => {
         return request({
-            url: '/app-api/product/browse-history/clean',
+            url: '/product/browse-history/clean',
             method: 'DELETE',
         });
     },
     // 获得商品浏览记录分页
     getBrowseHistoryPage: (data) => {
         return request({
-            url: '/app-api/product/browse-history/page',
+            url: '/product/browse-history/page',
             method: 'GET',
             data
         });

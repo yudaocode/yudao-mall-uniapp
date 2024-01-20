@@ -4,7 +4,7 @@ const SocialApi = {
   // 获得社交用户
   getSocialUser: (type) => {
     return request({
-      url: '/app-api/member/social-user/get',
+      url: '/member/social-user/get',
       method: 'GET',
       params: {
         type
@@ -17,7 +17,7 @@ const SocialApi = {
   // 社交绑定
   socialBind: (type, code, state) => {
     return request({
-      url: '/app-api/member/social-user/bind',
+      url: '/member/social-user/bind',
       method: 'POST',
       data: {
         type,
@@ -36,7 +36,7 @@ const SocialApi = {
   // 社交绑定
   socialUnbind: (type, openid) => {
     return request({
-      url: '/app-api/member/social-user/unbind',
+      url: '/member/social-user/unbind',
       method: 'DELETE',
       data: {
         type,

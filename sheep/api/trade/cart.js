@@ -3,7 +3,7 @@ import request from '@/sheep/request';
 const CartApi = {
   addCart: (data) => {
     return request({
-      url: '/app-api/trade/cart/add',
+      url: '/trade/cart/add',
       method: 'POST',
       data: data,
       custom: {
@@ -14,21 +14,21 @@ const CartApi = {
   },
   updateCartCount: (data) => {
     return request({
-      url: '/app-api/trade/cart/update-count',
+      url: '/trade/cart/update-count',
       method: 'PUT',
       data: data
     });
   },
   updateCartSelected: (data) => {
     return request({
-      url: '/app-api/trade/cart/update-selected',
+      url: '/trade/cart/update-selected',
       method: 'PUT',
       data: data
     });
   },
   deleteCart: (ids) => {
     return request({
-      url: '/app-api/trade/cart/delete',
+      url: '/trade/cart/delete',
       method: 'DELETE',
       params: {
         ids
@@ -37,7 +37,7 @@ const CartApi = {
   },
   getCartList: () => {
     return request({
-      url: '/app-api/trade/cart/list',
+      url: '/trade/cart/list',
       method: 'GET',
     });
   },

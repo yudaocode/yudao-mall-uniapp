@@ -4,7 +4,7 @@ const PayWalletApi = {
   // 获取钱包
   getPayWallet() {
     return request({
-      url: '/app-api/pay/wallet/get',
+      url: '/pay/wallet/get',
       method: 'GET',
       custom: {
         showLoading: false,
@@ -18,7 +18,7 @@ const PayWalletApi = {
       .map((key) => encodeURIComponent(key) + '=' + params[key])
       .join('&');
     return request({
-      url: `/app-api/pay/wallet-transaction/page?${queryString}`,
+      url: `/pay/wallet-transaction/page?${queryString}`,
       method: 'GET',
     });
   },
@@ -26,8 +26,8 @@ const PayWalletApi = {
   getWalletTransactionSummary: (params) => {
     const queryString = `createTime=${params.createTime[0]}&createTime=${params.createTime[1]}`;
     return request({
-      url: `/app-api/pay/wallet-transaction/get-summary?${queryString}`,
-      // url: `/app-api/pay/wallet-transaction/get-summary`,
+      url: `/pay/wallet-transaction/get-summary?${queryString}`,
+      // url: `/pay/wallet-transaction/get-summary`,
       method: 'GET',
       // params: params
     });
@@ -35,7 +35,7 @@ const PayWalletApi = {
   // 获得钱包充值套餐列表
   getWalletRechargePackageList: () => {
     return request({
-      url: '/app-api/pay/wallet-recharge-package/list',
+      url: '/pay/wallet-recharge-package/list',
       method: 'GET',
       custom: {
         showError: false,
@@ -46,7 +46,7 @@ const PayWalletApi = {
   // 创建钱包充值记录（发起充值）
   createWalletRecharge: (data) => {
     return request({
-      url: '/app-api/pay/wallet-recharge/create',
+      url: '/pay/wallet-recharge/create',
       method: 'POST',
       data,
     });
@@ -54,7 +54,7 @@ const PayWalletApi = {
   // 获得钱包充值记录分页
   getWalletRechargePage: (params) => {
     return request({
-      url: '/app-api/pay/wallet-recharge/page',
+      url: '/pay/wallet-recharge/page',
       method: 'GET',
       params,
       custom: {

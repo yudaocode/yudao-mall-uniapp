@@ -4,7 +4,7 @@ const FavoriteApi = {
   // 获得商品收藏分页
   getFavoritePage: (data) => {
     return request({
-      url: '/app-api/product/favorite/page',
+      url: '/product/favorite/page',
       method: 'GET',
       params: data
     });
@@ -12,7 +12,7 @@ const FavoriteApi = {
   // 检查是否收藏过商品
   isFavoriteExists: (spuId) => {
     return request({
-      url: '/app-api/product/favorite/exits',
+      url: '/product/favorite/exits',
       method: 'GET',
       params: {
         spuId
@@ -22,7 +22,7 @@ const FavoriteApi = {
   // 添加商品收藏
   createFavorite: (spuId) => {
     return request({
-      url: '/app-api/product/favorite/create',
+      url: '/product/favorite/create',
       method: 'POST',
       data: {
         spuId
@@ -32,7 +32,7 @@ const FavoriteApi = {
   // 取消商品收藏
   deleteFavorite: (spuId) => {
     return request({
-      url: '/app-api/product/favorite/delete',
+      url: '/product/favorite/delete',
       method: 'DELETE',
       data: {
         spuId

@@ -4,21 +4,21 @@ const BargainApi = {
   // 获得砍价记录的概要信息
   getBargainRecordSummary: () => {
     return request({
-      url: '/app-api/promotion/bargain-record/get-summary',
+      url: '/promotion/bargain-record/get-summary',
       method: 'GET',
     });
   },
   // 获得砍价活动分页
   getBargainActivityPage: () => {
     return request({
-      url: '/app-api/promotion/bargain-activity/page',
+      url: '/promotion/bargain-activity/page',
       method: 'GET',
     });
   },
   // 获得砍价活动详情
   getBargainActivityDetail(params) {
     return request({
-      url: '/app-api/promotion/bargain-activity/get-detail',
+      url: '/promotion/bargain-activity/get-detail',
       method: 'GET',
       params,
     });
