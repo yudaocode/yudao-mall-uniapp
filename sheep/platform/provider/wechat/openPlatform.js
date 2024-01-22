@@ -1,5 +1,5 @@
 // 登录
-import third from '@/sheep/api/third';
+// import third from '@/sheep/api/third';
 import SocialApi from '@/sheep/api/member/social';
 
 // TODO 芋艿：等后面搞 App 再弄

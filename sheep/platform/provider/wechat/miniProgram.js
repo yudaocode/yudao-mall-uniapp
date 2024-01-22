@@ -1,4 +1,4 @@
-import third from '@/sheep/api/third';
+// import third from '@/sheep/api/third';
 import AuthUtil from '@/sheep/api/member/auth';
 import SocialApi from '@/sheep/api/member/social';
 import UserApi from '@/sheep/api/member/user';
