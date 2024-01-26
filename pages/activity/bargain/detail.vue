@@ -55,14 +55,16 @@
 				<!-- 砍价记录 -->
 				<view class='title font-color acea-row row-center-wrapper'>
 					<view class='pictrue'>
-						<image src='../static/zuo2.png'></image>
+            <!-- TODO 芋艿：暂时不支持砍价功能，后续换到 cdn 加载图片 -->
+<!--						<image src='../static/zuo2.png'></image>-->
 					</view>
 					<view class="tits">
 						<view class='titleCon'>砍价记录</view>
 						<view class="line"></view>
 					</view>
 					<view class='pictrue on'>
-						<image src='../static/you2.png'></image>
+            <!-- TODO 芋艿：暂时不支持砍价功能，后续换到 cdn 加载图片 -->
+            <!--						<image src='../static/you2.png'></image>-->
 					</view>
 				</view>
 				<view class='bargainGang borRadius14'>
