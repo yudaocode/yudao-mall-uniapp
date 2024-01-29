@@ -56,7 +56,7 @@ export function formatNum(prefix, type, num) {
   // 例如：100  - 199  显示为 100+
   //      9000 - 9999 显示为 9000+
   let pow = Math.pow(10, `${num}`.length - 1);
-  return `${prefix}${(num / pow) * pow}+`;
+  return `${prefix}${Math.round((num / pow) * pow)}+`;
 }
 
 // 格式化价格
