@@ -49,13 +49,7 @@
 	import _ from 'lodash';
   import { formatAfterSaleStatus, formatAfterSaleStatusDescription, handleAfterSaleButtons } from '@/sheep/hooks/useGoods';
   import AfterSaleApi from '@/sheep/api/trade/afterSale';
-
-	const paginationNull = {
-		list: [],
-    total: 0,
-    pageNo: 1,
-    pageSize: 10
-	};
+  import { resetPagination } from '@/sheep/util';
 
 	const state = reactive({
 		currentTab: 0,
@@ -94,7 +88,7 @@
 
 	// 切换选项卡
 	function onTabsChange(e) {
-		state.pagination = paginationNull
+    resetPagination(state.pagination);
 		state.currentTab = e.index;
 		getOrderList();
 	}
@@ -126,7 +120,7 @@
 				}
         const { code } = await AfterSaleApi.cancelAfterSale(orderId);
         if (code === 0) {
-          state.pagination = paginationNull
+          resetPagination(state.pagination);
           await getOrderList();
         }
 			},

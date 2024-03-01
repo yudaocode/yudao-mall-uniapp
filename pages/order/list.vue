@@ -91,13 +91,7 @@
 		isEmpty
 	} from 'lodash';
   import OrderApi from '@/sheep/api/trade/order';
-
-	const paginationNull = {
-		list: [],
-    total: 0,
-		pageNo: 1,
-    pageSize: 5,
-	};
+  import { resetPagination } from '@/sheep/util';
 
 	// 数据
 	const state = reactive({
@@ -138,7 +132,7 @@
       return;
     }
     // 重头加载代码
-		state.pagination = paginationNull;
+		resetPagination(state.pagination);
 		state.currentTab = e.index;
 		getOrderList();
 	}
@@ -191,8 +185,8 @@
 		// 正常的确认收货流程
 		const { code } = await OrderApi.receiveOrder(order.id);
 		if (code === 0) {
-			state.pagination = paginationNull;
-			await getOrderList();
+      resetPagination(state.pagination);
+      await getOrderList();
 		}
 	}
 
@@ -315,7 +309,7 @@
 
 	// 下拉刷新
 	onPullDownRefresh(() => {
-		state.pagination = paginationNull;
+    resetPagination(state.pagination);
 		getOrderList();
 		setTimeout(function() {
 			uni.stopPullDownRefresh();
