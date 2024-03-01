@@ -201,4 +201,5 @@ export default {
   getInfo,
   getOpenid,
   subscribeMessage,
+  checkUpdate
 };
