@@ -67,7 +67,7 @@
       class="detail-goods"
       :style="[{ marginTop: state.orderInfo.receiverAreaId > 0 ? '0' : '-40rpx' }]"
     >
-      <!-- 订单信息 TODO 芋艿： -->
+      <!-- 订单信 -->
       <view class="order-list" v-for="item in state.orderInfo.items" :key="item.goods_id">
         <view class="order-card">
           <s-goods-item
@@ -168,9 +168,17 @@
         <text class="detail">￥{{ fen2yuan(state.orderInfo.deliveryPrice) }}</text>
       </view>
       <!-- TODO 芋艿：优惠劵抵扣、积分抵扣 -->
+      <view class="notice-item ss-flex ss-row-between" v-if="state.orderInfo.couponPrice > 0">
+        <text class="title">优惠劵金额</text>
+        <text class="detail">-¥{{ fen2yuan(state.orderInfo.couponPrice) }}</text>
+      </view>
       <view class="notice-item ss-flex ss-row-between" v-if="state.orderInfo.discountPrice > 0">
-        <text class="title">优惠金额</text>
+        <text class="title">活动优惠</text>
         <text class="detail">¥{{ fen2yuan(state.orderInfo.discountPrice) }}</text>
+      </view>
+      <view class="notice-item ss-flex ss-row-between" v-if="state.orderInfo.vipPrice > 0">
+        <text class="title">会员优惠</text>
+        <text class="detail">-¥{{ fen2yuan(state.orderInfo.vipPrice) }}</text>
       </view>
       <view class="notice-item all-rpice-item ss-flex ss-m-t-20">
         <text class="title">{{ state.orderInfo.payStatus ? '已付款' : '需付款' }}</text>

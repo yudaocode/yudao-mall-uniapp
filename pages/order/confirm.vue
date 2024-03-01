@@ -103,6 +103,17 @@
             <text class="_icon-forward item-icon" />
           </view>
         </view>
+        <view
+          class="order-item ss-flex ss-col-center ss-row-between"
+          v-if="state.orderInfo.price.vipPrice > 0"
+        >
+          <view class="item-title">会员优惠</view>
+          <view class="ss-flex ss-col-center">
+            <text class="item-value text-red">
+              -￥{{ fen2yuan(state.orderInfo.price.vipPrice) }}
+            </text>
+          </view>
+        </view>
       </view>
       <view class="total-box-footer ss-font-28 ss-flex ss-row-right ss-col-center ss-m-r-28">
         <view class="total-num ss-m-r-20">
