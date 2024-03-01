@@ -55,8 +55,10 @@ export function formatNum(prefix, type, num) {
   // 情况三：大于 10，除第一位外，其它位都显示为0
   // 例如：100  - 199  显示为 100+
   //      9000 - 9999 显示为 9000+
-  let pow = Math.pow(10, `${num}`.length - 1);
-  return `${prefix}${(num / pow) * pow}+`;
+  const numStr = num.toString();
+  const first = numStr[0];
+  const other = '0'.repeat(numStr.length - 1);
+  return `${prefix}${first}${other}+`;
 }
 
 // 格式化价格
