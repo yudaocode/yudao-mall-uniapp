@@ -629,28 +629,6 @@
 						"title": "秒杀活动",
 						"group": "营销活动"
 					}
-				},
-				{
-					"path": "bargain/list",
-					"style": {
-						"navigationBarTitleText": "砍价列表"
-					},
-					"meta": {
-						"sync": true,
-						"title": "砍价列表",
-						"group": "营销活动"
-					}
-				},
-				{
-					"path": "bargain/detail",
-					"style": {
-						"navigationBarTitleText": "砍价详情"
-					},
-					"meta": {
-						"sync": true,
-						"title": "砍价详情",
-						"group": "营销活动"
-					}
 				}
 			]
 		}
