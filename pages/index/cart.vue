@@ -28,12 +28,11 @@
 								style="transform: scale(0.8)" @tap.stop="onSelectSingle(item.id)" />
 						</label>
 						<s-goods-item :title="item.spu.name" :img="item.spu.picUrl || item.goods.image"
-							:price="item.sku.price/100"
+							:price="item.sku.price"
 							:skuText="item.sku.properties.length>1? item.sku.properties.reduce((items2,items)=>items2.valueName+' '+items.valueName):item.sku.properties[0].valueName"
 							priceColor="#FF3000" :titleWidth="400">
 							<template v-if="!state.editMode" v-slot:tool>
-								<su-number-box :min="0" :max="item.sku.stock" :step="1" v-model="item.count"
-									@change="onNumberChange($event, item)"></su-number-box>
+								<su-number-box :min="0" :max="item.sku.stock" :step="1" v-model="item.count" @change="onNumberChange($event, item)" />
 							</template>
 						</s-goods-item>
 					</view>
@@ -50,7 +49,7 @@
 						</label>
 						<text>合计：</text>
 						<view class="text-price price-text">
-							{{ state.totalPriceSelected }}
+							{{ fen2yuan(state.totalPriceSelected) }}
 						</view>
 					</view>
 					<view class="footer-right">
@@ -72,11 +71,8 @@
 
 <script setup>
 	import sheep from '@/sheep';
-	import {
-		computed,
-		reactive,
-		unref
-	} from 'vue';
+	import { computed, reactive } from 'vue';
+  import { fen2yuan } from '../../sheep/hooks/useGoods';
 
 	const sys_navBar = sheep.$platform.navbar;
 	const cart = sheep.$store('cart');
@@ -89,12 +85,13 @@
 		isAllSelected: computed(() => cart.isAllSelected),
 		totalPriceSelected: computed(() => cart.totalPriceSelected),
 	});
+
 	// 单选选中
 	function onSelectSingle(id) {
-		console.log('单选')
 		cart.selectSingle(id);
 	}
-	// 全选
+
+  // 全选
 	function onSelectAll() {
 		cart.selectAll(!state.isAllSelected);
 	}
@@ -105,7 +102,6 @@
 		let goods_list = [];
 		state.selectedList = state.list.filter((item) => state.selectedIds.includes(item.id));
 		state.selectedList.map((item) => {
-			console.log(item, '便利');
 			// 此处前端做出修改
 			items.push({
 				skuId: item.sku.id,
