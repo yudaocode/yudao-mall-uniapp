@@ -26,7 +26,7 @@
     // 检测 H5 登录回调
     let returnUrl = uni.getStorageSync('returnUrl');
     if (returnUrl) {
-      uni.removeStorage('returnUrl');
+      uni.removeStorage({key:'returnUrl'});
       location.replace(returnUrl);
     } else {
       uni.switchTab({
