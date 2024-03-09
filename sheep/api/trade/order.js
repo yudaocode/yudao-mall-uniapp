@@ -13,7 +13,7 @@ const OrderApi = {
     if (!(data.addressId > 0)) {
       delete data2.addressId;
     }
-    if (!(data.combinationActivityId) > 0) {
+    if (!(data.combinationActivityId > 0)) {
       delete data2.combinationActivityId;
     }
     if (!(data.combinationHeadId > 0)) {
