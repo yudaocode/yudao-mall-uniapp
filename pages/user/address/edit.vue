@@ -167,20 +167,26 @@
       }
       state.model = data;
 		}
-    // 情况二：微信导入 TODO 芋艿：待接入
-		if (options.data) {
-			let data = JSON.parse(options.data);
-			const areaData = uni.getStorageSync('areaData');
-			let provinceArr = areaData.filter(item => item.name == data.province_name);
-			data.province_id = provinceArr[0].id;
-			let provinceArr2 = provinceArr[0].children.filter(item => item.name == data.city_name);
-			data.city_id = provinceArr2[0].id;
-			let provinceArr3 = provinceArr2[0].children.filter(item => item.name == data.district_name);
-			data.district_id = provinceArr3[0].id;
-			state.model = {
-				...state.model,
-				...data,
-			};
+     // 情况二：微信导入
+    if (options.data) {
+      let data = JSON.parse(options.data);
+      const areaData = uni.getStorageSync('areaData');
+      const findAreaByName = (areas, name) => areas.find(item => item.name === name);
+
+      let provinceObj = findAreaByName(areaData, data.province_name);
+      let cityObj = provinceObj ? findAreaByName(provinceObj.children, data.city_name) : undefined;
+      let districtObj = cityObj ? findAreaByName(cityObj.children, data.district_name) : undefined;
+      let areaId = (districtObj || cityObj || provinceObj).id;
+
+      state.model = {
+        ...state.model,
+        areaId,
+        areaName: [data.province_name, data.city_name, data.district_name].filter(Boolean).join(" "),
+        defaultStatus: false,
+        detailAddress: data.address,
+        mobile: data.mobile,
+        name: data.consignee,
+      };
 		}
 	});
 </script>
