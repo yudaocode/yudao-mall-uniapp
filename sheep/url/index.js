@@ -71,7 +71,7 @@ function append_thumbnail_params(url, params) {
       if (!gravity && gravity != 'center') {
         // 指定了裁剪区域
         mode = 'mfit';
-        crop_str = '/crop,g_' + gravityFormat('aliyun', gravity) + ',w_' + width + ',h_' + height;
+        crop_str = '/crop,g_' + gravityFormatMap('aliyun', gravity) + ',w_' + width + ',h_' + height;
       }
 
       // 质量压缩
@@ -91,7 +91,7 @@ function append_thumbnail_params(url, params) {
         // 指定了裁剪区域
         mode_str = 'crop';
         mode = 'fill';
-        crop_str = '/gravity/' + gravityFormat('qcloud', gravity);
+        crop_str = '/gravity/' + gravityFormatMap('qcloud', gravity);
       }
 
       // 质量压缩
@@ -121,7 +121,7 @@ function append_thumbnail_params(url, params) {
       if (mode == 'fill' || (!gravity && gravity != 'center')) {
         // 指定了裁剪区域,全部转为 mfit
         mode = 'mfit';
-        crop_str = '/gravity/' + gravityFormat('qiniu', gravity) + '/crop/' + size;
+        crop_str = '/gravity/' + gravityFormatMap('qiniu', gravity) + '/crop/' + size;
       }
       // 质量压缩
       if (quality > 0 && quality < 100) {
