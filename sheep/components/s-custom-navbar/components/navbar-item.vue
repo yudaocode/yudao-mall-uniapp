@@ -1,5 +1,7 @@
+<!-- 顶部导航栏 - 单元格 -->
 <template>
   <view class="ss-flex ss-col-center">
+    <!-- 类型一： 文字 -->
     <view
       v-if="data.type === 'text'"
       class="nav-title inline"
@@ -7,15 +9,17 @@
     >
       {{ data.text }}
     </view>
+    <!-- 类型二： 图片 -->
     <view
       v-if="data.type === 'image'"
       :style="[{ width: width }]"
       class="menu-icon-wrap ss-flex ss-row-center ss-col-center"
       @tap="sheep.$router.go(data.url)"
     >
-      <image class="nav-image" :src="sheep.$url.cdn(data.src)" mode="aspectFit"></image>
+      <image class="nav-image" :src="sheep.$url.cdn(data.imgUrl)" mode="aspectFit"></image>
     </view>
-    <view class="ss-flex-1" v-if="data.type == 'search'" :style="[{ width: width }]">
+    <!-- 类型三： 搜索框 -->
+    <view class="ss-flex-1" v-if="data.type === 'search'" :style="[{ width: width }]">
       <s-search-block
         :placeholder="data.placeholder || '搜索关键字'"
         :radius="data.borderRadius"

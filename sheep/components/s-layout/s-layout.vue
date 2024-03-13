@@ -4,7 +4,7 @@
     :class="['theme-' + sys.mode, 'main-' + sys.theme, 'font-' + sys.fontSize]"
   >
     <view class="page-main" :style="[bgMain]">
-      <!-- 默认通用顶部导航栏 -->
+      <!-- 顶部导航栏-情况1：默认通用顶部导航栏 -->
       <su-navbar
         v-if="navbar === 'normal'"
         :title="title"
@@ -16,21 +16,21 @@
         :defaultSearch="defaultSearch"
       />
 
-      <!-- 装修组件导航栏-普通 -->
+      <!-- 顶部导航栏-情况2：装修组件导航栏-标准 -->
       <s-custom-navbar
         v-else-if="navbar === 'custom' && navbarMode === 'normal'"
         :data="navbarStyle"
         :showLeftButton="showLeftButton"
       />
       <view class="page-body" :style="[bgBody]">
-        <!-- 沉浸式头部 -->
+        <!-- 顶部导航栏-情况3：沉浸式头部 -->
         <su-inner-navbar v-if="navbar === 'inner'" :title="title" />
         <view
           v-if="navbar === 'inner'"
           :style="[{ paddingTop: sheep.$platform.navbar + 'px' }]"
         ></view>
 
-        <!-- 装修组件导航栏-沉浸式 -->
+        <!-- 顶部导航栏-情况4：装修组件导航栏-沉浸式 -->
         <s-custom-navbar v-if="navbar === 'custom' && navbarMode === 'inner'" :data="navbarStyle" :showLeftButton="showLeftButton" />
 
         <!-- 页面内容插槽 -->
@@ -92,7 +92,7 @@
     navbarStyle: {
       type: Object,
       default: () => ({
-        mode: '',
+        styleType: '',
         type: '',
         color: '',
         src: '',
@@ -143,7 +143,7 @@
 
   // 导航栏模式(因为有自定义导航栏 需要计算)
   const navbarMode = computed(() => {
-    if (props.navbar === 'normal' || props.navbarStyle.mode === 'normal') {
+    if (props.navbar === 'normal' || props.navbarStyle.styleType === 'normal') {
       return 'normal';
     }
     return 'inner';
