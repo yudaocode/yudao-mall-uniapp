@@ -2,7 +2,7 @@
 <template>
 	<view v-if="template">
 		<s-layout title="首页" navbar="custom" tabbar="/pages/index/index" :bgStyle="template.page"
-			:navbarStyle="template.style?.navbar" onShareAppMessage>
+			:navbarStyle="template.navigationBar" onShareAppMessage>
 			<s-block v-for="(item, index) in template.components" :key="index" :styles="item.property.style">
 				<s-block-item :type="item.id" :data="item.property" :styles="item.property.style" />
 			</s-block>

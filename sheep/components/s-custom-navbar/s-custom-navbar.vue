@@ -1,7 +1,7 @@
 <!-- 顶部导航栏 -->
 <template>
   <navbar
-    :alway="isAlway"
+    :alway="isAlways"
     :back="false"
     bg=""
     :placeholder="isPlaceholder"
@@ -12,7 +12,7 @@
     <template #item>
       <view class="nav-box">
         <view class="nav-icon" v-if="showLeftButton">
-          <view class="icon-box ss-flex" :class="{ 'inner-icon-box': data.mode == 'inner' }">
+          <view class="icon-box ss-flex" :class="{ 'inner-icon-box': data.styleType === 'inner' }">
             <view class="icon-button icon-button-left ss-flex ss-row-center" @tap="onClickLeft">
               <text class="sicon-back" v-if="hasHistory" />
               <text class="sicon-home" v-else />
@@ -43,7 +43,7 @@
    *
    *
    * @property {Number | String}  alwaysShow = [0,1]			    - 是否常驻
-   * @property {Number | String}  mode = [inner]			    	- 是否沉浸式
+   * @property {Number | String}  styleType = [inner]			   	- 是否沉浸式
    * @property {String | Number} type 		 					- 标题背景模式
    * @property {String} color 		 							- 页面背景色
    * @property {String} src 		 								- 页面背景图片
@@ -66,26 +66,27 @@
   });
   const hasHistory = sheep.$router.hasHistory();
   const sticky = computed(() => {
-    if (props.data.mode == 'inner') {
-      if (props.data.alway) {
+    if (props.data.styleType === 'inner') {
+      if (props.data.alwaysShow) {
         return false;
       }
     }
-    if (props.data.mode == 'normal') {
+    if (props.data.styleType === 'normal') {
       return false;
     }
   });
   const navList = computed(() => {
-    if (!props.data.list) return [];
     // #ifdef MP
-    return props.data.list.mp;
+    return props.data.mapCells || [];
     // #endif
-    return props.data.list.app;
+    return props.data.otherCells || [];
   });
-  // 单元格大小
+  // 页面宽度
   const windowWidth = sheep.$platform.device.windowWidth;
+  // 单元格宽度
   const cell = computed(() => {
     if (unref(navList).length) {
+      // 默认宽度为8个格子，微信公众号右上角有胶囊按钮所以是6个格子
       let cell = (windowWidth - 90) / 8;
       // #ifdef MP
       cell = (windowWidth - 80 - unref(sheep.$platform.capsule).width) / 6;
@@ -102,28 +103,26 @@
     };
     return obj;
   };
-  const isAlway = computed(() =>
-    props.data.mode === 'inner' ? Boolean(props.data.alwaysShow) : true,
+  const isAlways = computed(() =>
+    props.data.styleType === 'inner' ? Boolean(props.data.alwaysShow) : true,
   );
   const isOpacity = computed(() =>
-    props.data.mode === 'normal'
+    props.data.styleType === 'normal'
       ? false
       : props.showLeftButton
       ? false
-      : props.data.mode === 'inner',
+      : props.data.styleType === 'inner',
   );
-  const isPlaceholder = computed(() => props.data.mode === 'normal');
+  const isPlaceholder = computed(() => props.data.styleType === 'normal');
   const bgStyles = computed(() => {
-    if (props.data.type) {
-      return {
-        background:
-          props.data.type == 'color'
-            ? props.data.color
-            : `url(${sheep.$url.cdn(props.data.src)}) no-repeat top center / 100% 100%`,
-      };
-    }
+    return {
+      background:
+          props.data.bgType === 'img' && props.data.bgImg
+          ? `url(${sheep.$url.cdn(props.data.bgImg)}) no-repeat top center / 100% 100%`
+          : props.data.bgColor
+    };
   });
-
+  // 左侧按钮：返回上一页或首页
   function onClickLeft() {
     if (hasHistory) {
       sheep.$router.back();
@@ -131,6 +130,7 @@
       sheep.$router.go('/pages/index/index');
     }
   }
+  // 右侧按钮：打开快捷菜单
   function onClickRight() {
     showMenuTools();
   }
