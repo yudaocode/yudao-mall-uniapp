@@ -144,10 +144,10 @@
 		});
 	}
 
-	// 分享拼团 TODO 芋艿：待测试
+	// 跳转拼团记录的详情
 	function onOrderGroupon(order) {
 		sheep.$router.go('/pages/activity/groupon/detail', {
-			id: order.ext.groupon_id,
+			id: order.combinationRecordId,
 		});
 	}
 
