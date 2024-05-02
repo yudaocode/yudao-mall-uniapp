@@ -71,7 +71,7 @@
       <view class="order-list" v-for="item in state.orderInfo.items" :key="item.goods_id">
         <view class="order-card">
           <s-goods-item
-            @tap="onGoodsDetail(item.skuId)"
+            @tap="onGoodsDetail(item.spuId)"
             :img="item.picUrl"
             :title="item.spuName"
             :skuText="item.properties.map((property) => property.valueName).join(' ')"
