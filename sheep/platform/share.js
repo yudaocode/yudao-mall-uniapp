@@ -130,7 +130,7 @@ const decryptSpm = (spm) => {
       query = shareParamsArray[2].split(',');
       shareParams.query = {
         id: query[0],
-        activity_id: query[1],
+        activity_id: query[1], // TODO 芋艿：接入分享后，应该统一成 id 参数
       };
       break;
     case '4':
