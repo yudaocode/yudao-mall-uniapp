@@ -1,4 +1,4 @@
-const files = import.meta.globEager('./*.js');
+const files = import.meta.glob('./*.js', { eager: true });
 let api = {};
 Object.keys(files).forEach((key) => {
   api = {
