@@ -2,56 +2,17 @@
 <template>
   <su-popup :show="show" round="10" @close="onClosePoster" type="center" class="popup-box">
     <view class="ss-flex-col ss-col-center ss-row-center">
-      <view
-        v-if="poster.src === ''"
-        class="poster-title ss-flex ss-row-center"
-        :style="{
-          height: poster.height + 'px',
-          width: poster.width + 'px',
-        }"
-      >
-        海报加载中...
-      </view>
-      <image
-        v-else
-        class="poster-img"
-        :src="poster.src"
-        :style="{
-          height: poster.height + 'px',
-          width: poster.width + 'px',
-        }"
-        :show-menu-by-longpress="true"
-      />
-      <canvas
-        class="hideCanvas"
-        :canvas-id="poster.canvasId"
-        :id="poster.canvasId"
-        :style="{
-          height: poster.height + 'px',
-          width: poster.width + 'px',
-        }"
-      />
-      <view
-        class="poster-btn-box ss-m-t-20 ss-flex ss-row-between ss-col-center"
-        v-if="poster.src !== ''"
-      >
-        <button class="cancel-btn ss-reset-button" @tap="onClosePoster">取消</button>
-        <button class="save-btn ss-reset-button ui-BG-Main" @tap="onSavePoster">
-          {{
-            ['wechatOfficialAccount', 'H5'].includes(sheep.$platform.name)
-              ? '长按图片保存'
-              : '保存图片'
-          }}
-        </button>
-      </view>
+      <template v-if="poster.views.length > 0">
+        <l-painter :board="poster" />
+      </template>
     </view>
   </su-popup>
 </template>
 
 <script setup>
-  import { reactive, getCurrentInstance } from 'vue';
+  import { getCurrentInstance, reactive } from 'vue';
   import sheep from '@/sheep';
-  import useCanvas from './useCanvas';
+  import { getPosterData } from '@/sheep/components/s-share-modal/canvas-poster/poster';
 
   const props = defineProps({
     show: {
@@ -60,16 +21,21 @@
     },
     shareInfo: {
       type: Object,
-      default() {},
+      default() {
+      },
     },
   });
 
+
   const poster = reactive({
-    canvasId: 'canvasId',
-    width: sheep.$platform.device.windowWidth * 0.9,
-    height: 600,
-    src: '',
+    css: {
+      // 根节点若无尺寸，自动获取父级节点
+      width: sheep.$platform.device.windowWidth * 0.9,
+      height: 600,
+    },
+    views: [],
   });
+
 
   const emits = defineEmits(['success', 'close']);
   const vm = getCurrentInstance();
@@ -100,14 +66,11 @@
 
   // 使用 canvas 生成海报
   async function getPoster(params) {
-    poster.src = '';
-    poster.shareInfo = props.shareInfo;
-    // #ifdef APP-PLUS
-    poster.canvasId = 'canvasId-' + new Date().getTime();
-    // #endif
-    const canvas = await useCanvas(poster, vm);
-    console.log('canvas',canvas);
-    return canvas;
+    let drawer = await getPosterData({
+      width: sheep.$platform.device.windowWidth * 0.9,
+      shareInfo: props.shareInfo,
+    });
+    poster.views = drawer;
   }
 
   defineExpose({
@@ -119,9 +82,11 @@
   .popup-box {
     position: relative;
   }
+
   .poster-title {
     color: #999;
   }
+
   // 分享海报
   .poster-btn-box {
     width: 600rpx;
@@ -129,6 +94,7 @@
     left: 50%;
     transform: translateX(-50%);
     bottom: -80rpx;
+
     .cancel-btn {
       width: 240rpx;
       height: 70rpx;
@@ -139,6 +105,7 @@
       font-weight: 500;
       color: $dark-9;
     }
+
     .save-btn {
       width: 240rpx;
       height: 70rpx;
@@ -152,6 +119,7 @@
   .poster-img {
     border-radius: 20rpx;
   }
+
   .hideCanvas {
     position: fixed;
     top: -99999rpx;
