@@ -194,20 +194,20 @@
 		if (isEmpty(state.goodsInfo)) return {};
 		return sheep.$platform.share.getShareInfo({
 			title: state.goodsInfo.name,
-			image: sheep.$url.cdn(state.goodsInfo.image),
-			desc: state.goodsInfo.subtitle,
+			image: sheep.$url.cdn(state.goodsInfo.picUrl),
+			desc: state.goodsInfo.introduction,
+      path: 'pages/goods/index',
 			params: {
 				page: '2',
 				query: state.goodsInfo.id,
 			},
 		}, {
 			type: 'goods', // 商品海报
-			title: state.goodsInfo.name, // 商品标题
-			// image: sheep.$url.cdn(state.goodsInfo.image), // 商品主图
+			title: state.goodsInfo.name, // 商品名称
 			image: sheep.$url.cdn(state.goodsInfo.picUrl), // 商品主图
 			price: fen2yuan(state.goodsInfo.price), // 商品价格
-			original_price: fen2yuan(state.goodsInfo.maretPrice), // 商品原价
-		}, );
+			original_price: fen2yuan(state.goodsInfo.marketPrice), // 商品原价
+		});
 	});
 
   async function getCoupon() {

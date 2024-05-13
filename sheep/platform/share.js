@@ -19,6 +19,7 @@ const getShareInfo = (
     title: '', // 自定义分享标题
     desc: '', // 自定义描述
     image: '', // 自定义分享图片
+    path: '', // 页面基础路径，不要以 / 开头
     params: {}, // 自定义分享参数
   },
   poster = {
@@ -26,7 +27,7 @@ const getShareInfo = (
     type: 'user',
   },
 ) => {
-  let shareInfo = {
+  const shareInfo = {
     title: '', // 分享标题
     desc: '', // 描述
     image: '', // 分享图片
@@ -48,6 +49,7 @@ const getShareInfo = (
 
   // 配置转发参数
   if (shareConfig.methods.includes('forward')) {
+    // TODO puhui999: forward 这块有点问题
     if (shareConfig.forwardInfo.title === '' || shareConfig.forwardInfo.image === '') {
       console.log('请在平台设置中配置转发信息');
     }
@@ -55,9 +57,10 @@ const getShareInfo = (
     shareInfo.title = scene.title || shareConfig.forwardInfo.title;
     shareInfo.image = $url.cdn(scene.image || shareConfig.forwardInfo.image);
     shareInfo.desc = scene.desc || shareConfig.forwardInfo.subtitle;
-    shareInfo.path = buildSpmPath(query);
+    shareInfo.path = buildSpmPath(scene.path, query);
   }
-
+  shareInfo.path = scene.path;
+  console.log('shareInfo', shareInfo);
   return shareInfo;
 };
 
@@ -89,8 +92,8 @@ const buildSpmQuery = (params) => {
 };
 
 // 构造页面分享参数
-const buildSpmPath = (query) => {
-  return `/pages/index/index?${query}`;
+const buildSpmPath = (path, query) => {
+  return `/${path}?${query}`;
 };
 
 // 构造分享链接

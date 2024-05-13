@@ -22,8 +22,8 @@ export default async function useCanvas(options, vm) {
     vm,
   );
 
-  let drawer = getPosterData(options);
-
+  let drawer = await getPosterData(options);
+  console.log(drawer);
   // 绘制背景图
   const background = await qsc.drawImg({
     type: 'image',

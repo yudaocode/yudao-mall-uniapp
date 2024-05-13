@@ -1,10 +1,11 @@
 import sheep from '@/sheep';
-import { formatImageUrlProtocol } from './index';
+import third from '@/sheep/api/migration/third';
+import { formatImageUrlProtocol, getBase64Src } from './index';
 
-const goods = (poster) => {
+const goods = async (poster) => {
   const width = poster.width;
   const userInfo = sheep.$store('user').userInfo;
-
+  const wxa_qrcode = (await third.wechat.getWxacode(poster.shareInfo.path, poster.shareInfo.query)).data;
   return {
     background: formatImageUrlProtocol(sheep.$url.cdn(sheep.$store('app').platform.share.posterInfo.goods_bg)),
     list: [
@@ -107,7 +108,7 @@ const goods = (poster) => {
       {
         name: 'wxacode',
         type: 'image',
-        val: sheep.$api.third.wechat.getWxacode(poster.shareInfo.path),
+        val: wxa_qrcode,
         x: width * 0.75,
         y: width * 1.3,
         width: width * 0.2,

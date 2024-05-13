@@ -101,12 +101,12 @@
   // 使用 canvas 生成海报
   async function getPoster(params) {
     poster.src = '';
-
     poster.shareInfo = props.shareInfo;
     // #ifdef APP-PLUS
     poster.canvasId = 'canvasId-' + new Date().getTime();
     // #endif
     const canvas = await useCanvas(poster, vm);
+    console.log('canvas',canvas);
     return canvas;
   }
 

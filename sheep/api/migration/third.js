@@ -1,5 +1,6 @@
 import request from '@/sheep/request';
-import { baseUrl, apiPath } from '@/sheep/config';
+
+const socialType = 34; // 社交类型 - 微信小程序
 
 export default {
   // 微信相关
@@ -19,12 +20,18 @@ export default {
       }),
 
     // 获取微信小程序码
-    getWxacode: (path) =>
-      `${baseUrl}${apiPath}third/wechat/wxacode?platform=miniProgram&payload=${encodeURIComponent(
-        JSON.stringify({
+    getWxacode: async (path, query) => {
+      return await request({
+        url: '/member/social-user/wxa-qrcode',
+        method: 'POST',
+        data: {
+          type: socialType,
+          scene: query,
+          isCheckPath: false, // TODO 开发环境暂不检查 path 是否存在
           path,
-        }),
-      )}`,
+        },
+      });
+    },
   },
 
   // 苹果相关

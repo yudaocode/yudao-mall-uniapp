@@ -30,3 +30,30 @@ export function formatImageUrlProtocol(url) {
 
   return url;
 }
+
+
+export function getBase64Src(base64data, appType) {
+  const [, format, bodyData] = /data:image\/(\w+);base64,(.*)/.exec(base64data) || [];
+  switch (appType) {
+    case 'wechat':
+      const filePath = `${wx.env.USER_DATA_PATH}/tmp_base64src.${format}`;
+      return new Promise((resolve, reject) => {
+        const fileManager = uni.getFileSystemManager();
+        fileManager.writeFile({
+          filePath: filePath,
+          data: bodyData, // base64 数据
+          encoding: 'base64', // 字符编码
+          success: () => {
+            resolve(filePath);
+          },
+          file: (err) => {
+            console.log('base64 保存失败', err);
+          },
+        });
+      });
+    default:
+      console.warn('获得 base64 图片地址只做了微信小程序端的转换，其它端请自行实现！！！');
+      break;
+  }
+}
+
