@@ -1,7 +1,6 @@
 import {
 	defineStore
 } from 'pinia';
-// import userApi from '@/sheep/api/user';
 import $share from '@/sheep/platform/share';
 import {
 	isEmpty,

@@ -12,7 +12,6 @@ const goods = async (poster) => {
       src: formatImageUrlProtocol(sheep.$url.cdn(sheep.$store('app').platform.share.posterInfo.goods_bg)),
       css: {
         width,
-        background: 'white',
         position: 'fixed',
         'object-fit': 'contain',
         top: '0',

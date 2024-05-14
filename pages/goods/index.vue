@@ -196,7 +196,6 @@
 			title: state.goodsInfo.name,
 			image: sheep.$url.cdn(state.goodsInfo.picUrl),
 			desc: state.goodsInfo.introduction,
-      path: 'pages/goods/index',
 			params: {
 				page: '2',
 				query: state.goodsInfo.id,
