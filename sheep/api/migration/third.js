@@ -1,7 +1,5 @@
 import request from '@/sheep/request';
 
-const socialType = 34; // 社交类型 - 微信小程序
-
 export default {
   // 微信相关
   wechat: {
@@ -25,10 +23,9 @@ export default {
         url: '/member/social-user/wxa-qrcode',
         method: 'POST',
         data: {
-          type: socialType,
           scene: query,
-          isCheckPath: false, // TODO 开发环境暂不检查 path 是否存在
           path,
+          checkPath: false, // TODO 开发环境暂不检查 path 是否存在
         },
       });
     },

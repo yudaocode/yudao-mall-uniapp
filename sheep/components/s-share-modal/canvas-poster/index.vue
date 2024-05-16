@@ -2,24 +2,20 @@
 <template>
   <su-popup :show="show" round="10" @close="onClosePoster" type="center" class="popup-box">
     <view class="ss-flex-col ss-col-center ss-row-center">
-      <view
-        v-if="poster.views.length === 0"
-        class="poster-title ss-flex ss-row-center"
+      <image
+        v-if="!!painterImageUrl"
+        class="poster-img"
+        :src="painterImageUrl"
         :style="{
-          height: poster.height + 'px',
-          width: poster.width + 'px',
+          height: poster.css.height+ 'px',
+          width: poster.css.width + 'px',
         }"
-      >
-        海报加载中...
-      </view>
-      <!-- v-if 保障等待所有的海报信息都加载完后才开始渲染 -->
-          <template v-if="poster.views.length > 0">
-            <l-painter :board="poster" ref="painterRef"/>
-          </template>
+        :show-menu-by-longpress="true"
+      />
     </view>
     <view
       class="poster-btn-box ss-m-t-20 ss-flex ss-row-between ss-col-center"
-      v-if="poster.views.length > 0"
+      v-if="!!painterImageUrl"
     >
       <button class="cancel-btn ss-reset-button" @tap="onClosePoster">取消</button>
       <button class="save-btn ss-reset-button ui-BG-Main" @tap="onSavePoster">
@@ -30,11 +26,26 @@
         }}
       </button>
     </view>
+    <!--  海报画板：默认隐藏只用来生成海报。生成方式为主动调用  -->
+    <l-painter
+      isCanvasToTempFilePath
+      @success="setPainterImageUrl"
+      hidden
+      ref="painterRef"
+    />
   </su-popup>
 </template>
 
 <script setup>
-  import { reactive, ref } from 'vue';
+  /**
+   * 海报生成和展示
+   * 提示：小程序码默认跳转首页，由首页进行 spm 参数解析后跳转到对应的分享页面
+   * @description 用于生成分享海报，如：分享商品海报。
+   * @tutorial https://ext.dcloud.net.cn/plugin?id=2389
+   * @property {Boolean} show   弹出层控制
+   * @property {Object}  shareInfo 分享信息
+   */
+  import { reactive, ref, unref } from 'vue';
   import sheep from '@/sheep';
   import { getPosterData } from '@/sheep/components/s-share-modal/canvas-poster/poster';
 
@@ -45,7 +56,7 @@
     },
     shareInfo: {
       type: Object,
-      default() {
+      default: () => {
       },
     },
   });
@@ -54,7 +65,7 @@
     css: {
       // 根节点若无尺寸，自动获取父级节点
       width: sheep.$platform.device.windowWidth * 0.9,
-      height: 600
+      height: 600,
     },
     views: [],
   });
@@ -65,33 +76,32 @@
     emits('close');
   };
 
-  const painterRef = ref()
+  const painterRef = ref(); // 海报画板
+  const painterImageUrl = ref(); // 海报 url
+  // 渲染海报
+  const renderPoster = async () => {
+    await painterRef.value.render(unref(poster));
+  };
+  // 获得生成的图片
+  const setPainterImageUrl = (path) => {
+    painterImageUrl.value = path;
+  };
   // 保存海报图片
   const onSavePoster = () => {
     if (['WechatOfficialAccount', 'H5'].includes(sheep.$platform.name)) {
       sheep.$helper.toast('请长按图片保存');
       return;
     }
-
-    painterRef.value.canvasToTempFilePathSync({
-      fileType: "jpg",
-      // 如果返回的是base64是无法使用 saveImageToPhotosAlbum，需要设置 pathType为url
-      pathType: 'url',
-      quality: 1,
+    // 非H5 保存到相册
+    uni.saveImageToPhotosAlbum({
+      filePath: painterImageUrl.value,
       success: (res) => {
-        console.log(res.tempFilePath);
-        // 非H5 保存到相册
-        uni.saveImageToPhotosAlbum({
-          filePath: res.tempFilePath,
-          success: (res) => {
-            onClosePoster();
-            sheep.$helper.toast('保存成功');
-          },
-          fail: (err) => {
-            sheep.$helper.toast('保存失败');
-            console.log('图片保存失败:', err);
-          },
-        });
+        onClosePoster();
+        sheep.$helper.toast('保存成功');
+      },
+      fail: (err) => {
+        sheep.$helper.toast('保存失败');
+        console.log('图片保存失败:', err);
       },
     });
   };
@@ -102,6 +112,7 @@
       width: poster.css.width,
       shareInfo: props.shareInfo,
     });
+    await renderPoster();
   }
 
   defineExpose({
