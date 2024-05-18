@@ -1,61 +1,75 @@
 import sheep from '@/sheep';
 import { formatImageUrlProtocol } from './index';
+import third from '@/sheep/api/migration/third';
 
-const user = (poster) => {
+const user = async (poster) => {
   const width = poster.width;
   const userInfo = sheep.$store('user').userInfo;
-
-  return {
-    background: formatImageUrlProtocol(sheep.$url.cdn(sheep.$store('app').platform.share.posterInfo.user_bg)),
-    list: [
-      {
-        name: 'nickname',
-        type: 'text',
-        val: userInfo.nickname,
-        x: width / 2,
-        y: width * 0.4,
-        paintbrushProps: {
-          textAlign: 'center',
-          fillStyle: '#333',
-          font: {
-            fontSize: 14,
-            fontFamily: 'sans-serif',
-          },
-        },
+  const wxa_qrcode = (await third.wechat.getWxacode(poster.shareInfo.path, poster.shareInfo.query)).data;
+  return [
+    {
+      type: 'image',
+      src: formatImageUrlProtocol(sheep.$url.cdn(sheep.$store('app').platform.share.posterInfo.user_bg)),
+      css: {
+        width,
+        position: 'fixed',
+        'object-fit': 'contain',
+        top: '0',
+        left: '0',
+        zIndex: -1,
       },
-      {
-        name: 'avatar',
-        type: 'image',
-        val: formatImageUrlProtocol(sheep.$url.cdn(userInfo.avatar)),
-        x: width * 0.4,
-        y: width * 0.16,
+    },
+    {
+      type: 'text',
+      text: userInfo.nickname,
+      css: {
+        color: '#333',
+        fontSize: 14,
+        textAlign: 'center',
+        fontFamily: 'sans-serif',
+        position: 'fixed',
+        top: width * 0.4,
+        left: width / 2,
+      },
+    },
+    {
+      type: 'image',
+      src: formatImageUrlProtocol(sheep.$url.cdn(userInfo.avatar)),
+      css: {
+        position: 'fixed',
+        left: width * 0.4,
+        top: width * 0.16,
         width: width * 0.2,
         height: width * 0.2,
-        d: width * 0.2,
       },
-      // #ifndef MP-WEIXIN
-      {
-        name: 'qrcode',
-        type: 'qrcode',
-        val: poster.shareInfo.link,
-        x: width * 0.35,
-        y: width * 0.84,
-        size: width * 0.3,
-      },
-      // #endif
-      // #ifdef MP-WEIXIN
-      {
-        name: 'wxacode',
-        type: 'image',
-        val: sheep.$api.third.wechat.getWxacode(poster.shareInfo.path),
-        x: width * 0.35,
-        y: width * 0.84,
+    },
+    // #ifndef MP-WEIXIN
+    {
+      type: 'qrcode',
+      text: poster.shareInfo.link,
+      css: {
+        position: 'fixed',
+        left: width * 0.35,
+        top: width * 0.84,
         width: width * 0.3,
         height: width * 0.3,
       },
-      // #endif
-    ],
-  };
+    },
+    // #endif
+    // #ifdef MP-WEIXIN
+    {
+      type: 'image',
+      src: wxa_qrcode,
+      css: {
+        position: 'fixed',
+        left: width * 0.35,
+        top: width * 0.84,
+        width: width * 0.3,
+        height: width * 0.3,
+      },
+    },
+    // #endif
+  ];
 };
 
 export default user;

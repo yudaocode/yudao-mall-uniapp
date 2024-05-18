@@ -72,7 +72,7 @@ const app = defineStore({
         };
         this.platform = {
           share: {
-            methods: [ "poster", "link" ],
+            methods: ["poster", "link"],
             linkAddress: "https://shopro.sheepjs.com/#/",
             posterInfo: {
               "user_bg": "/static/img/shop/config/user-poster-bg.png",

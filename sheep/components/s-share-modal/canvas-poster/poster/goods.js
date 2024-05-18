@@ -1,121 +1,126 @@
 import sheep from '@/sheep';
+import third from '@/sheep/api/migration/third';
 import { formatImageUrlProtocol } from './index';
 
-const goods = (poster) => {
+const goods = async (poster) => {
   const width = poster.width;
   const userInfo = sheep.$store('user').userInfo;
-
-  return {
-    background: formatImageUrlProtocol(sheep.$url.cdn(sheep.$store('app').platform.share.posterInfo.goods_bg)),
-    list: [
-      {
-        name: 'nickname',
-        type: 'text',
-        val: userInfo.nickname,
-        x: width * 0.22,
-        y: width * 0.06,
-        paintbrushProps: {
-          fillStyle: '#333',
-          font: {
-            fontSize: 16,
-            fontFamily: 'sans-serif',
-          },
-        },
+  const wxa_qrcode = (await third.wechat.getWxacode(poster.shareInfo.path, poster.shareInfo.query)).data;
+  return [
+    {
+      type: 'image',
+      src: formatImageUrlProtocol(sheep.$url.cdn(sheep.$store('app').platform.share.posterInfo.goods_bg)),
+      css: {
+        width,
+        position: 'fixed',
+        'object-fit': 'contain',
+        top: '0',
+        left: '0',
+        zIndex: -1,
       },
-      {
-        name: 'avatar',
-        type: 'image',
-        val: formatImageUrlProtocol(sheep.$url.cdn(userInfo.avatar)),
-        x: width * 0.04,
-        y: width * 0.04,
+    },
+    {
+      type: 'text',
+      text: userInfo.nickname,
+      css: {
+        color: '#333',
+        fontSize: 16,
+        fontFamily: 'sans-serif',
+        position: 'fixed',
+        top: width * 0.06,
+        left: width * 0.22,
+      },
+    },
+    {
+      type: 'image',
+      src: formatImageUrlProtocol(sheep.$url.cdn(userInfo.avatar)),
+      css: {
+        position: 'fixed',
+        left: width * 0.04,
+        top: width * 0.04,
         width: width * 0.14,
         height: width * 0.14,
-        d: width * 0.14,
       },
-      {
-        name: 'goodsImage',
-        type: 'image',
-        val: formatImageUrlProtocol(poster.shareInfo.poster.image),
-        x: width * 0.03,
-        y: width * 0.21,
+    },
+    {
+      type: 'image',
+      src: formatImageUrlProtocol(poster.shareInfo.poster.image),
+      css: {
+        position: 'fixed',
+        left: width * 0.03,
+        top: width * 0.21,
         width: width * 0.94,
         height: width * 0.94,
-        r: 10,
       },
-      {
-        name: 'goodsTitle',
-        type: 'text',
-        val: poster.shareInfo.poster.title,
-        x: width * 0.04,
-        y: width * 1.18,
-        maxWidth: width * 0.91,
-        line: 2,
+    },
+    {
+      type: 'text',
+      text: poster.shareInfo.poster.title,
+      css: {
+        position: 'fixed',
+        left: width * 0.04,
+        top: width * 1.18,
+        color: '#333',
+        fontSize: 14,
         lineHeight: 5,
-        paintbrushProps: {
-          fillStyle: '#333',
-          font: {
-            fontSize: 14,
-          },
-        },
+        maxWidth: width * 0.91,
       },
-      {
-        name: 'goodsPrice',
-        type: 'text',
-        val: '￥' + poster.shareInfo.poster.price,
-        x: width * 0.04,
-        y: width * 1.3,
-        paintbrushProps: {
-          fillStyle: '#ff0000',
-          font: {
-            fontSize: 20,
-            fontFamily: 'OPPOSANS',
-          },
-        },
+    },
+    {
+      type: 'text',
+      text: '￥' + poster.shareInfo.poster.price,
+      css: {
+        position: 'fixed',
+        left: width * 0.04,
+        top: width * 1.3,
+        fontSize: 20,
+        fontFamily: 'OPPOSANS',
+        color: '#333',
       },
-      {
-        name: 'goodsOriginalPrice',
-        type: 'text',
-        val:
-          poster.shareInfo.poster.original_price > 0
-            ? '￥' + poster.shareInfo.poster.original_price
-            : '',
-        x: width * 0.3,
-        y: width * 1.32,
-        paintbrushProps: {
-          fillStyle: '#999',
-          font: {
-            fontSize: 10,
-            fontFamily: 'OPPOSANS',
-          },
-        },
-        textDecoration: {
-          line: 'line-through',
-          style: 'solide',
-        },
+    },
+    {
+      type: 'text',
+      text:
+        poster.shareInfo.poster.original_price > 0
+          ? '￥' + poster.shareInfo.poster.original_price
+          : '',
+      css: {
+        position: 'fixed',
+        left: width * 0.3,
+        top: width * 1.32,
+        color: '#999',
+        fontSize: 10,
+        fontFamily: 'OPPOSANS',
+        textDecoration: 'line-through',
       },
-      // #ifndef MP-WEIXIN
-      {
-        name: 'qrcode',
-        type: 'qrcode',
-        val: poster.shareInfo.link,
-        x: width * 0.75,
-        y: width * 1.3,
-        size: width * 0.2,
-      },
-      // #endif
-      // #ifdef MP-WEIXIN
-      {
-        name: 'wxacode',
-        type: 'image',
-        val: sheep.$api.third.wechat.getWxacode(poster.shareInfo.path),
-        x: width * 0.75,
-        y: width * 1.3,
+    },
+    // #ifndef MP-WEIXIN
+    {
+      type: 'qrcode',
+      text: poster.shareInfo.link,
+      css: {
+        position: 'fixed',
+        left: width * 0.75,
+        top: width * 1.3,
         width: width * 0.2,
         height: width * 0.2,
       },
-      // #endif
-    ],
-  };
+    },
+    // #endif
+    // #ifdef MP-WEIXIN
+    {
+      type: 'image',
+      src: wxa_qrcode,
+      css: {
+        position: 'fixed',
+        left: width * 0.75,
+        top: width * 1.3,
+        width: width * 0.2,
+        height: width * 0.2,
+      },
+    },
+    // #endif
+  ];
 };
 
 export default goods;

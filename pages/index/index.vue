@@ -53,6 +53,7 @@
 		// 小程序识别二维码
 		if (options.scene) {
 			const sceneParams = decodeURIComponent(options.scene).split('=');
+      console.log("sceneParams=>",sceneParams);
 			options[sceneParams[0]] = sceneParams[1];
 		}
 		// #endif

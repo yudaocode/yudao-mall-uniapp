@@ -26,7 +26,7 @@ const getShareInfo = (
     type: 'user',
   },
 ) => {
-  let shareInfo = {
+  const shareInfo = {
     title: '', // 分享标题
     desc: '', // 描述
     image: '', // 分享图片
@@ -45,9 +45,12 @@ const getShareInfo = (
 
   // 配置分享链接地址
   shareInfo.link = buildSpmLink(query, shareConfig.linkAddress);
+  // 配置页面地址带参数
+  shareInfo.path = buildSpmPath(query);
 
   // 配置转发参数
   if (shareConfig.methods.includes('forward')) {
+    // TODO puhui999: forward 这块有点问题
     if (shareConfig.forwardInfo.title === '' || shareConfig.forwardInfo.image === '') {
       console.log('请在平台设置中配置转发信息');
     }
@@ -55,7 +58,7 @@ const getShareInfo = (
     shareInfo.title = scene.title || shareConfig.forwardInfo.title;
     shareInfo.image = $url.cdn(scene.image || shareConfig.forwardInfo.image);
     shareInfo.desc = scene.desc || shareConfig.forwardInfo.subtitle;
-    shareInfo.path = buildSpmPath(query);
+    shareInfo.path = buildSpmPath(scene.path, query);
   }
 
   return shareInfo;
@@ -67,7 +70,6 @@ const buildSpmQuery = (params) => {
   let shareId = '0'; // 设置分享者用户ID
   if (typeof params.shareId === 'undefined') {
     if (user.isLogin) {
-      // todo @芋艿 id为空
       shareId = user.userInfo.id;
     }
   }
@@ -88,9 +90,11 @@ const buildSpmQuery = (params) => {
   return `spm=${shareId}.${page}.${query}.${platform}.${from}`;
 };
 
-// 构造页面分享参数
+// 构造页面分享参数: 所有的分享都先到首页进行 spm 参数解析
 const buildSpmPath = (query) => {
-  return `/pages/index/index?${query}`;
+  // 默认是主页，页面 page，例如 pages/index/index，根路径前不要填加 /，
+  // 不能携带参数（参数请放在scene字段里），如果不填写这个字段，默认跳主页面。scancode_time为系统保留参数，不允许配置
+  return `pages/index/index`;
 };
 
 // 构造分享链接

@@ -1,5 +1,4 @@
 import request from '@/sheep/request';
-import { baseUrl, apiPath } from '@/sheep/config';
 
 export default {
   // 微信相关
@@ -19,12 +18,17 @@ export default {
       }),
 
     // 获取微信小程序码
-    getWxacode: (path) =>
-      `${baseUrl}${apiPath}third/wechat/wxacode?platform=miniProgram&payload=${encodeURIComponent(
-        JSON.stringify({
+    getWxacode: async (path, query) => {
+      return await request({
+        url: '/member/social-user/wxa-qrcode',
+        method: 'POST',
+        data: {
+          scene: query,
           path,
-        }),
-      )}`,
+          checkPath: false, // TODO 开发环境暂不检查 path 是否存在
+        },
+      });
+    },
   },
 
   // 苹果相关

@@ -94,7 +94,6 @@
     "luch-request": "^3.0.8",
     "pinia": "^2.0.33",
     "pinia-plugin-persist-uni": "^1.2.0",
-    "qs-canvas": "^1.0.11",
     "weixin-js-sdk": "^1.6.0"
   },
   "devDependencies": {
