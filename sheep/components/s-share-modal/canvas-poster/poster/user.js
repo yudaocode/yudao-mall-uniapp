@@ -5,7 +5,7 @@ import third from '@/sheep/api/migration/third';
 const user = async (poster) => {
   const width = poster.width;
   const userInfo = sheep.$store('user').userInfo;
-  const wxa_qrcode = (await third.wechat.getWxacode(poster.shareInfo.path, poster.shareInfo.query)).data;
+  const wxa_qrcode = 'data:image/png;base64,' + (await third.wechat.getWxacode(poster.shareInfo.path, poster.shareInfo.query)).data;
   return [
     {
       type: 'image',

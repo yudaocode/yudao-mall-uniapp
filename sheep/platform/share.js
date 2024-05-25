@@ -73,7 +73,7 @@ const buildSpmQuery = (params) => {
       shareId = user.userInfo.id;
     }
   }
-  let page = '1'; // 页面类型: 1=首页(默认),2=商品,3=拼团商品,4=秒杀商品,5=邀请参团...按需扩展
+  let page = '1'; // 页面类型: 1=首页(默认),2=商品,3=拼团商品,4=秒杀商品,5=邀请参团,6=分销邀请...按需扩展
   if (typeof params.page !== 'undefined') {
     page = params.page;
   }
@@ -152,6 +152,8 @@ const decryptSpm = (spm) => {
         id: shareParamsArray[2],
       };
       break;
+    case '6': // 分销
+      // TODO puhui999: 如果用户未登录想想怎么搞
   }
   shareParams.platform = platformMap[shareParamsArray[3] - 1];
   shareParams.from = fromMap[shareParamsArray[4] - 1];
