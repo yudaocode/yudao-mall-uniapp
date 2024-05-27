@@ -1,11 +1,10 @@
 import sheep from '@/sheep';
-import third from '@/sheep/api/migration/third';
-import { formatImageUrlProtocol } from './index';
+import { formatImageUrlProtocol, getWxaQrcode } from './index';
 
 const goods = async (poster) => {
   const width = poster.width;
   const userInfo = sheep.$store('user').userInfo;
-  const wxa_qrcode = 'data:image/png;base64,' + (await third.wechat.getWxacode(poster.shareInfo.path, poster.shareInfo.query)).data;
+  const wxa_qrcode = await getWxaQrcode(poster.shareInfo.path, poster.shareInfo.query);
   return [
     {
       type: 'image',
@@ -62,7 +61,7 @@ const goods = async (poster) => {
         top: width * 1.18,
         color: '#333',
         fontSize: 14,
-        lineHeight: 5,
+        lineHeight: 15,
         maxWidth: width * 0.91,
       },
     },
@@ -72,7 +71,7 @@ const goods = async (poster) => {
       css: {
         position: 'fixed',
         left: width * 0.04,
-        top: width * 1.3,
+        top: width * 1.31,
         fontSize: 20,
         fontFamily: 'OPPOSANS',
         color: '#333',
@@ -87,7 +86,7 @@ const goods = async (poster) => {
       css: {
         position: 'fixed',
         left: width * 0.3,
-        top: width * 1.32,
+        top: width * 1.33,
         color: '#999',
         fontSize: 10,
         fontFamily: 'OPPOSANS',

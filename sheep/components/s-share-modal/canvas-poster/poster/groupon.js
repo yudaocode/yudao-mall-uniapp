@@ -1,11 +1,10 @@
 import sheep from '@/sheep';
-import { formatImageUrlProtocol } from './index';
-import third from '@/sheep/api/migration/third';
+import { formatImageUrlProtocol, getWxaQrcode } from './index';
 
 const groupon = async (poster) => {
   const width = poster.width;
   const userInfo = sheep.$store('user').userInfo;
-  const wxa_qrcode = 'data:image/png;base64,' + (await third.wechat.getWxacode(poster.shareInfo.path, poster.shareInfo.query)).data;
+  const wxa_qrcode = await getWxaQrcode(poster.shareInfo.path, poster.shareInfo.query);
   return [
     {
       type: 'image',

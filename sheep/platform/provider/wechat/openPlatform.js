@@ -1,6 +1,7 @@
 // 登录
 import third from '@/sheep/api/migration/third';
 import SocialApi from '@/sheep/api/member/social';
+import $share from '@/sheep/platform/share';
 
 // TODO 芋艿：等后面搞 App 再弄
 const socialType = 32; // 社交类型 - 微信开放平台
@@ -16,6 +17,7 @@ const login = () => {
     });
     debugger
     if (loginRes.errMsg == 'login:ok') {
+      // TODO third.wechat.login 函数未实现
       const res = await third.wechat.login({
         platform: 'openPlatform',
         shareInfo: uni.getStorageSync('shareLog') || {},
@@ -27,6 +29,7 @@ const login = () => {
       });
 
       if (res.error === 0) {
+        $share.bindBrokerageUser()
         resolve(true);
       }
     } else {
