@@ -2,6 +2,7 @@ import $store from '@/sheep/store';
 import $platform from '@/sheep/platform';
 import $router from '@/sheep/router';
 import $url from '@/sheep/url';
+import BrokerageApi from '@/sheep/api/trade/brokerage';
 // #ifdef H5
 import $wxsdk from '@/sheep/libs/sdk-h5-weixin';
 // #endif
@@ -152,18 +153,16 @@ const decryptSpm = (spm) => {
         id: shareParamsArray[2],
       };
       break;
-    case '6': // 分销
-      // TODO puhui999: 如果用户未登录想想怎么搞
   }
   shareParams.platform = platformMap[shareParamsArray[3] - 1];
   shareParams.from = fromMap[shareParamsArray[4] - 1];
-  if (shareParams.shareId != 0) {
-    // 已登录 立即添加分享记录
+  if (shareParams.shareId !== 0) {
+    // 已登录 绑定推广员
     if (user.isLogin) {
-      user.addShareLog(shareParams);
+      bindBrokerageUser(shareParams.shareId);
     } else {
-      // 未登录 待用户登录后添加分享记录
-      uni.setStorageSync('shareLog', shareParams);
+      // 记录分享者编号
+      uni.setStorageSync('shareId', shareParams.shareId);
     }
   }
 
@@ -171,6 +170,19 @@ const decryptSpm = (spm) => {
     $router.go(shareParams.page, shareParams.query);
   }
   return shareParams;
+};
+
+// 绑定推广员
+const bindBrokerageUser = async (val= undefined) => {
+  try {
+    const shareId = val || uni.getStorageSync('shareId');
+    if (!shareId) {
+      return;
+    }
+    await BrokerageApi.bindBrokerageUser({ bindUserId: shareId });
+    uni.removeStorageSync('shareId');
+  } catch {
+  }
 };
 
 // 更新公众号分享sdk
@@ -186,4 +198,5 @@ export default {
   getShareInfo,
   updateShareInfo,
   decryptSpm,
+  bindBrokerageUser,
 };
