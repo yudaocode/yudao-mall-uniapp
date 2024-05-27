@@ -29,6 +29,7 @@
     <!--  海报画板：默认隐藏只用来生成海报。生成方式为主动调用  -->
     <l-painter
       isCanvasToTempFilePath
+      pathType="url"
       @success="setPainterImageUrl"
       hidden
       ref="painterRef"
@@ -65,7 +66,7 @@
     css: {
       // 根节点若无尺寸，自动获取父级节点
       width: sheep.$platform.device.windowWidth * 0.9,
-      height: 600,
+      height: 550,
     },
     views: [],
   });
@@ -92,6 +93,7 @@
       sheep.$helper.toast('请长按图片保存');
       return;
     }
+
     // 非H5 保存到相册
     uni.saveImageToPhotosAlbum({
       filePath: painterImageUrl.value,
