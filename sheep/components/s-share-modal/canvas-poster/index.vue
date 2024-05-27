@@ -110,6 +110,7 @@
 
   // 获得海报数据
   async function getPoster() {
+    painterImageUrl.value = undefined
     poster.views = await getPosterData({
       width: poster.css.width,
       shareInfo: props.shareInfo,
