@@ -304,12 +304,7 @@ export function useChatWebSocket(socketConfig) {
 
   // 用户id,获取token
   const getUserToken = async (id) => {
-    const res = await chat.unifiedToken();
-    if (res.error === 0) {
-      uni.setStorageSync('socketUserToken', res.data.token);
-      // SocketIo && SocketIo.connected && socketLogin(res.data.token)
-    }
-    return res;
+    return uni.getStorageSync('token');
   };
 
   // 用户登录

@@ -159,119 +159,13 @@
       </scroll-view>
     </view>
     <su-fixed bottom>
-      <view class="send-wrap ss-flex">
-        <view class="left ss-flex ss-flex-1">
-          <uni-easyinput
-            class="ss-flex-1 ss-p-l-22"
-            :inputBorder="false"
-            :clearable="false"
-            v-model="chat.msg"
-            placeholder="请输入你要咨询的问题"
-          ></uni-easyinput>
-        </view>
-        <text class="sicon-basic bq" @tap.stop="onTools('emoji')"></text>
-        <text
-          v-if="!chat.msg"
-          class="sicon-edit"
-          :class="{ 'is-active': chat.toolsMode == 'tools' }"
-          @tap.stop="onTools('tools')"
-        ></text>
-        <button v-if="chat.msg" class="ss-reset-button send-btn" @tap="onSendMessage">
-          发送
-        </button>
-      </view>
+      <message-input v-model="chat.msg" @on-tools="onTools" @send-message="onSendMessage"></message-input>
     </su-fixed>
-    <su-popup
-      :show="chat.showTools"
-      @close="
-        chat.showTools = false;
-        chat.toolsMode = '';
-      "
-    >
-      <view class="ss-modal-box ss-flex-col">
-        <view class="send-wrap ss-flex">
-          <view class="left ss-flex ss-flex-1">
-            <uni-easyinput
-              class="ss-flex-1 ss-p-l-22"
-              :inputBorder="false"
-              :clearable="false"
-              v-model="chat.msg"
-              placeholder="请输入你要咨询的问题"
-            ></uni-easyinput>
-          </view>
-          <text class="sicon-basic bq" @tap.stop="onTools('emoji')"></text>
-          <text></text>
-          <text
-            v-if="!chat.msg"
-            class="sicon-edit"
-            :class="{ 'is-active': chat.toolsMode == 'tools' }"
-            @tap.stop="onTools('tools')"
-          ></text>
-          <button v-if="chat.msg" class="ss-reset-button send-btn" @tap="onSendMessage">
-            发送
-          </button>
-        </view>
-        <view class="content ss-flex ss-flex-1">
-          <template v-if="chat.toolsMode == 'emoji'">
-            <swiper
-              class="emoji-swiper"
-              :indicator-dots="true"
-              circular
-              indicator-active-color="#7063D2"
-              indicator-color="rgba(235, 231, 255, 1)"
-              :autoplay="false"
-              :interval="3000"
-              :duration="1000"
-            >
-              <swiper-item v-for="emoji in emojiPage" :key="emoji">
-                <view class="ss-flex ss-flex-wrap">
-                  <template v-for="item in emoji" :key="item">
-                    <image
-                      class="emoji-img"
-                      :src="sheep.$url.cdn(`/static/img/chat/emoji/${item.file}`)"
-                      @tap="onEmoji(item)"
-                    >
-                    </image>
-                  </template>
-                </view>
-              </swiper-item>
-            </swiper>
-          </template>
-          <template v-else>
-            <view class="image">
-              <s-uploader
-                file-mediatype="image"
-                :imageStyles="{ width: 50, height: 50, border: false }"
-                @select="onSelect({ type: 'image', data: $event })"
-              >
-                <image
-                  class="icon"
-                  :src="sheep.$url.static('/static/img/shop/chat/image.png')"
-                  mode="aspectFill"
-                ></image>
-              </s-uploader>
-              <view>图片</view>
-            </view>
-            <view class="goods" @tap="onShowSelect('goods')">
-              <image
-                class="icon"
-                :src="sheep.$url.static('/static/img/shop/chat/goods.png')"
-                mode="aspectFill"
-              ></image>
-              <view>商品</view>
-            </view>
-            <view class="order" @tap="onShowSelect('order')">
-              <image
-                class="icon"
-                :src="sheep.$url.static('/static/img/shop/chat/order.png')"
-                mode="aspectFill"
-              ></image>
-              <view>订单</view>
-            </view>
-          </template>
-        </view>
-      </view>
-    </su-popup>
+    <!--  聊天工具  -->
+    <tools-popup :show-tools="chat.showTools" :tools-mode="chat.toolsMode" @close="handleToolsClose"
+                 @on-emoji="onEmoji" @image-select="onSelect" @on-show-select="onShowSelect">
+      <message-input v-model="chat.msg" @on-tools="onTools" @send-message="onSendMessage"></message-input>
+    </tools-popup>
 
     <SelectPopup
       :mode="chat.selectMode"
@@ -286,10 +180,12 @@
   import sheep from '@/sheep';
   import { computed, reactive, toRefs } from 'vue';
   import { onLoad } from '@dcloudio/uni-app';
-  import { emojiList, emojiPage } from './emoji.js';
+  import { emojiList } from './emoji.js';
   import SelectPopup from './components/select-popup.vue';
   import GoodsItem from './components/goods.vue';
   import OrderItem from './components/order.vue';
+  import MessageInput from './components/messageInput.vue';
+  import ToolsPopup from './components/toolsPopup.vue';
   import { useChatWebSocket } from './socket';
 
   const {
@@ -372,12 +268,23 @@
     },
   });
 
+  //======================= 聊天工具相关 =======================
+
+  function handleToolsClose() {
+    chat.showTools = false;
+    chat.toolsMode = '';
+  }
+
+  function onEmoji(item) {
+    chat.msg += item.name;
+  }
+
   // 点击工具栏开关
   function onTools(mode) {
-    if (!socketState.value.isConnect) {
-      sheep.$helper.toast(socketState.value.tip || '您已掉线！请返回重试');
-      return;
-    }
+    // if (!socketState.value.isConnect) {
+    //   sheep.$helper.toast(socketState.value.tip || '您已掉线！请返回重试');
+    //   return;
+    // }
 
     if (!chat.toolsMode || chat.toolsMode === mode) {
       chat.showTools = !chat.showTools;
@@ -521,10 +428,6 @@
       scrollBottom();
     });
     // scrollBottom();
-  }
-
-  function onEmoji(item) {
-    chat.msg += item.name;
   }
 
   function selEmojiFile(name) {
@@ -761,98 +664,6 @@
         height: 120rpx;
       }
     }
-
-    .send-wrap {
-      padding: 18rpx 20rpx;
-      background: #fff;
-
-      .left {
-        height: 64rpx;
-        border-radius: 32rpx;
-        background: var(--ui-BG-1);
-      }
-
-      .bq {
-        font-size: 50rpx;
-        margin-left: 10rpx;
-      }
-
-      .sicon-edit {
-        font-size: 50rpx;
-        margin-left: 10rpx;
-        transform: rotate(0deg);
-        transition: all linear 0.2s;
-
-        &.is-active {
-          transform: rotate(45deg);
-        }
-      }
-
-      .send-btn {
-        width: 100rpx;
-        height: 60rpx;
-        line-height: 60rpx;
-        border-radius: 30rpx;
-        background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
-        font-size: 26rpx;
-        color: #fff;
-        margin-left: 11rpx;
-      }
-    }
-  }
-
-  .content {
-    width: 100%;
-    align-content: space-around;
-    border-top: 1px solid #dfdfdf;
-    padding: 20rpx 0 0;
-
-    .emoji-swiper {
-      width: 100%;
-      height: 280rpx;
-      padding: 0 20rpx;
-
-      .emoji-img {
-        width: 50rpx;
-        height: 50rpx;
-        display: inline-block;
-        margin: 10rpx;
-      }
-    }
-
-    .image,
-    .goods,
-    .order {
-      width: 33.3%;
-      height: 280rpx;
-      text-align: center;
-      font-size: 24rpx;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-
-      .icon {
-        width: 50rpx;
-        height: 50rpx;
-        margin-bottom: 21rpx;
-      }
-    }
-
-    :deep() {
-      .uni-file-picker__container {
-        justify-content: center;
-      }
-
-      .file-picker__box {
-        display: none;
-
-        &:last-of-type {
-          display: flex;
-        }
-      }
-    }
   }
 </style>
 <style>
@@ -861,6 +672,7 @@
     height: 24px;
     margin: 0 3px;
   }
+
   .full-img {
     object-fit: cover;
     width: 100px;
