@@ -64,7 +64,7 @@ export const convertToInteger = (num) => {
  * @description format 季度 + 星期 + 几周："YYYY-mm-dd HH:MM:SS WWW QQQQ ZZZ"
  * @returns {string} 返回拼接后的时间字符串
  */
-export function formatDate(date, format) {
+export function formatDate(date, format= 'YYYY-MM-DD HH:mm:ss') {
   // 日期不存在，则返回空
   if (!date) {
     return ''

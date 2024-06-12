@@ -1,163 +1,14 @@
 <template>
   <s-layout class="chat-wrap" title="客服" navbar="inner">
+    <!-- 头部连接状态展示  -->
     <div class="status">
       {{ socketState.isConnect ? customerServiceInfo.title : '网络已断开，请检查网络后刷新重试' }}
     </div>
+    <!--  覆盖头部导航栏背景颜色  -->
     <div class="page-bg" :style="{ height: sys_navBar + 'px' }"></div>
-    <view class="chat-box" :style="{ height: pageHeight + 'px' }">
-      <scroll-view
-        :style="{ height: pageHeight + 'px' }"
-        scroll-y="true"
-        :scroll-with-animation="false"
-        :enable-back-to-top="true"
-        :scroll-into-view="chat.scrollInto"
-      >
-        <button
-          class="loadmore-btn ss-reset-button"
-          v-if="
-            chatList.length &&
-            chatHistoryPagination.lastPage > 1 &&
-            loadingMap[chatHistoryPagination.loadStatus].title
-          "
-          @click="onLoadMore"
-        >
-          {{ loadingMap[chatHistoryPagination.loadStatus].title }}
-          <i
-            class="loadmore-icon sa-m-l-6"
-            :class="loadingMap[chatHistoryPagination.loadStatus].icon"
-          ></i>
-        </button>
-        <view class="message-item ss-flex-col" v-for="(item, index) in chatList" :key="index">
-          <view class="ss-flex ss-row-center ss-col-center">
-            <!-- 日期 -->
-            <view v-if="item.from !== 'system' && showTime(item, index)" class="date-message">
-              {{ formatTime(item.date) }}
-            </view>
-            <!-- 系统消息 -->
-            <view v-if="item.from === 'system'" class="system-message">
-              {{ item.content.text }}
-            </view>
-          </view>
-          <!-- 常见问题 -->
-          <view v-if="item.mode === 'template' && item.content.list.length" class="template-wrap">
-            <view class="title">猜你想问</view>
-            <view
-              class="item"
-              v-for="(item, index) in item.content.list"
-              :key="index"
-              @click="onTemplateList(item)"
-            >
-              * {{ item.title }}
-            </view>
-          </view>
-
-          <view
-            v-if="
-              (item.from === 'customer_service' && item.mode !== 'template') ||
-              item.from === 'customer'
-            "
-            class="ss-flex ss-col-top"
-            :class="[
-              item.from === 'customer_service'
-                ? `ss-row-left`
-                : item.from === 'customer'
-                ? `ss-row-right`
-                : '',
-            ]"
-          >
-            <!-- 客服头像 -->
-            <image
-              v-show="item.from === 'customer_service'"
-              class="chat-avatar ss-m-r-24"
-              :src="
-                sheep.$url.cdn(item?.sender?.avatar) ||
-                sheep.$url.static('/static/img/shop/chat/default.png')
-              "
-              mode="aspectFill"
-            ></image>
-
-            <!-- 发送状态 -->
-            <span
-              v-if="
-                item.from === 'customer' &&
-                index == chatData.chatList.length - 1 &&
-                chatData.isSendSucces !== 0
-              "
-              class="send-status"
-            >
-              <image
-                v-if="chatData.isSendSucces == -1"
-                class="loading"
-                :src="sheep.$url.static('/static/img/shop/chat/loading.png')"
-                mode="aspectFill"
-              ></image>
-              <!-- <image
-                v-if="chatData.isSendSucces == 1"
-                class="warning"
-                :src="sheep.$url.static('/static/img/shop/chat/warning.png')"
-                mode="aspectFill"
-                @click="onAgainSendMessage(item)"
-              ></image> -->
-            </span>
-
-            <!-- 内容 -->
-            <template v-if="item.mode === 'text'">
-              <view class="message-box" :class="[item.from]">
-                <div
-                  class="message-text ss-flex ss-flex-wrap"
-                  @click="onRichtext"
-                  v-html="replaceEmoji(item.content.text)"
-                ></div>
-              </view>
-            </template>
-            <template v-if="item.mode === 'image'">
-              <view class="message-box" :class="[item.from]" :style="{ width: '200rpx' }">
-                <su-image
-                  class="message-img"
-                  isPreview
-                  :previewList="[sheep.$url.cdn(item.content.url)]"
-                  :current="0"
-                  :src="sheep.$url.cdn(item.content.url)"
-                  :height="200"
-                  :width="200"
-                  mode="aspectFill"
-                ></su-image>
-              </view>
-            </template>
-            <template v-if="item.mode === 'goods'">
-              <GoodsItem
-                :goodsData="item.content.item"
-                @tap="
-                  sheep.$router.go('/pages/goods/index', {
-                    id: item.content.item.id,
-                  })
-                "
-              />
-            </template>
-            <template v-if="item.mode === 'order'">
-              <OrderItem
-                from="msg"
-                :orderData="item.content.item"
-                @tap="
-                  sheep.$router.go('/pages/order/detail', {
-                    id: item.content.item.id,
-                  })
-                "
-              />
-            </template>
-            <!-- user头像 -->
-            <image
-              v-show="item.from === 'customer'"
-              class="chat-avatar ss-m-l-24"
-              :src="sheep.$url.cdn(customerUserInfo.avatar)"
-              mode="aspectFill"
-            >
-            </image>
-          </view>
-        </view>
-        <view id="scrollBottom"></view>
-      </scroll-view>
-    </view>
+    <!--  聊天区域  -->
+    <ChatBox></ChatBox>
+    <!--  消息发送区域  -->
     <su-fixed bottom>
       <message-input v-model="chat.msg" @on-tools="onTools" @send-message="onSendMessage"></message-input>
     </su-fixed>
@@ -166,7 +17,7 @@
                  @on-emoji="onEmoji" @image-select="onSelect" @on-show-select="onShowSelect">
       <message-input v-model="chat.msg" @on-tools="onTools" @send-message="onSendMessage"></message-input>
     </tools-popup>
-
+    <!--  商品订单选择  -->
     <SelectPopup
       :mode="chat.selectMode"
       :show="chat.showSelect"
@@ -177,17 +28,16 @@
 </template>
 
 <script setup>
+  import { useChatWebSocket } from '@/pages/chat/socket';
+  import ChatBox from './components/chatBox.vue';
+  import { reactive, toRefs } from 'vue';
   import sheep from '@/sheep';
-  import { computed, reactive, toRefs } from 'vue';
+  import ToolsPopup from '@/pages/chat/components/toolsPopup.vue';
+  import MessageInput from '@/pages/chat/components/messageInput.vue';
   import { onLoad } from '@dcloudio/uni-app';
-  import { emojiList } from './emoji.js';
-  import SelectPopup from './components/select-popup.vue';
-  import GoodsItem from './components/goods.vue';
-  import OrderItem from './components/order.vue';
-  import MessageInput from './components/messageInput.vue';
-  import ToolsPopup from './components/toolsPopup.vue';
-  import { useChatWebSocket } from './socket';
+  import SelectPopup from '@/pages/chat/components/select-popup.vue';
 
+  const sys_navBar = sheep.$platform.navbar;
   const {
     socketInit,
     state: chatData,
@@ -209,46 +59,6 @@
   const customerUserInfo = toRefs(chatData).customerUserInfo;
   const socketState = toRefs(chatData).socketState;
 
-  const sys_navBar = sheep.$platform.navbar;
-  const chatConfig = computed(() => sheep.$store('app').chat);
-
-  const { screenHeight, safeAreaInsets, safeArea, screenWidth } = sheep.$platform.device;
-  const pageHeight = safeArea.height - 44 - 35 - 50;
-
-  const chatStatus = {
-    online: {
-      text: '在线',
-      colorVariate: '#46c55f',
-    },
-    offline: {
-      text: '离线',
-      colorVariate: '#b5b5b5',
-    },
-    busy: {
-      text: '忙碌',
-      colorVariate: '#ff0e1b',
-    },
-  };
-
-  // 加载更多
-  const loadingMap = {
-    loadmore: {
-      title: '查看更多',
-      icon: 'el-icon-d-arrow-left',
-    },
-    nomore: {
-      title: '没有更多了',
-      icon: '',
-    },
-    loading: {
-      title: '加载中... ',
-      icon: 'el-icon-loading',
-    },
-  };
-  const onLoadMore = () => {
-    chatHistoryPagination.value.page < chatHistoryPagination.value.lastPage && socketHistoryList();
-  };
-
   const chat = reactive({
     msg: '',
     scrollInto: '',
@@ -268,7 +78,41 @@
     },
   });
 
-  //======================= 聊天工具相关 =======================
+  function scrollBottom() {
+    let timeout = null;
+    chat.scrollInto = '';
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      chat.scrollInto = 'scrollBottom';
+    }, 100);
+  }
+
+  // 发送消息
+  function onSendMessage() {
+    if (!socketState.value.isConnect) {
+      sheep.$helper.toast(socketState.value.tip || '您已掉线！请返回重试');
+      return;
+    }
+    if (!chat.msg) return;
+    const data = {
+      from: 'customer',
+      mode: 'text',
+      date: new Date().getTime(),
+      content: {
+        text: chat.msg,
+      },
+    };
+    socketSendMsg(data, () => {
+      scrollBottom();
+    });
+    chat.showTools = false;
+    // scrollBottom();
+    setTimeout(() => {
+      chat.msg = '';
+    }, 100);
+  }
+
+  //======================= 聊天工具相关 start =======================
 
   function handleToolsClose() {
     chat.showTools = false;
@@ -366,137 +210,27 @@
     }
   }
 
-  function onAgainSendMessage(item) {
-    if (!socketState.value.isConnect) {
-      sheep.$helper.toast(socketState.value.tip || '您已掉线！请返回重试');
-      return;
-    }
-    if (!item) return;
-    const data = {
-      from: 'customer',
-      mode: 'text',
-      date: new Date().getTime(),
-      content: item.content,
-    };
-    socketSendMsg(data, () => {
-      scrollBottom();
-    });
-  }
-
-  function onSendMessage() {
-    if (!socketState.value.isConnect) {
-      sheep.$helper.toast(socketState.value.tip || '您已掉线！请返回重试');
-      return;
-    }
-    if (!chat.msg) return;
-    const data = {
-      from: 'customer',
-      mode: 'text',
-      date: new Date().getTime(),
-      content: {
-        text: chat.msg,
-      },
-    };
-    socketSendMsg(data, () => {
-      scrollBottom();
-    });
-    chat.showTools = false;
-    // scrollBottom();
-    setTimeout(() => {
-      chat.msg = '';
-    }, 100);
-  }
-
-  // 点击猜你想问
-  function onTemplateList(e) {
-    if (!socketState.value.isConnect) {
-      sheep.$helper.toast(socketState.value.tip || '您已掉线！请返回重试');
-      return;
-    }
-    const data = {
-      from: 'customer',
-      mode: 'text',
-      date: new Date().getTime(),
-      content: {
-        text: e.title,
-      },
-      customData: {
-        question_id: e.id,
-      },
-    };
-    socketSendMsg(data, () => {
-      scrollBottom();
-    });
-    // scrollBottom();
-  }
-
-  function selEmojiFile(name) {
-    for (let index in emojiList) {
-      if (emojiList[index].name === name) {
-        return emojiList[index].file;
-      }
-    }
-    return false;
-  }
-
-  function replaceEmoji(data) {
-    let newData = data;
-    if (typeof newData !== 'object') {
-      let reg = /\[(.+?)\]/g; // [] 中括号
-      let zhEmojiName = newData.match(reg);
-      if (zhEmojiName) {
-        zhEmojiName.forEach((item) => {
-          let emojiFile = selEmojiFile(item);
-          newData = newData.replace(
-            item,
-            `<img class="chat-img" style="width: 24px;height: 24px;margin: 0 3px;" src="${sheep.$url.cdn(
-              '/static/img/chat/emoji/' + emojiFile,
-            )}"/>`,
-          );
-        });
-      }
-    }
-    return newData;
-  }
-
-  function scrollBottom() {
-    let timeout = null;
-    chat.scrollInto = '';
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      chat.scrollInto = 'scrollBottom';
-    }, 100);
-  }
+  //======================= 聊天工具相关 end =======================
 
   onLoad(async () => {
-    const { error } = await getUserToken();
-    if (error === 0) {
-      socketInit(chatConfig.value, () => {
-        scrollBottom();
-      });
-    } else {
-      socketState.value.isConnect = false;
-    }
+    socketInit({}, () => {
+      scrollBottom();
+    });
   });
 </script>
 
-<style lang="scss" scoped>
-  .page-bg {
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
-    background-size: 750rpx 100%;
-    z-index: 1;
-  }
-
+<style scoped lang="scss">
   .chat-wrap {
-    // :deep() {
-    //   .ui-navbar-box {
-    //     background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
-    //   }
-    // }
+
+    .page-bg {
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
+      background-size: 750rpx 100%;
+      z-index: 1;
+    }
 
     .status {
       position: relative;
@@ -511,172 +245,5 @@
       font-weight: 400;
       color: var(--ui-BG-Main);
     }
-
-    .chat-box {
-      padding: 0 20rpx 0;
-
-      .loadmore-btn {
-        width: 98%;
-        height: 40px;
-        font-size: 12px;
-        color: #8c8c8c;
-
-        .loadmore-icon {
-          transform: rotate(90deg);
-        }
-      }
-
-      .message-item {
-        margin-bottom: 33rpx;
-      }
-
-      .date-message,
-      .system-message {
-        width: fit-content;
-        border-radius: 12rpx;
-        padding: 8rpx 16rpx;
-        margin-bottom: 16rpx;
-        background-color: var(--ui-BG-3);
-        color: #999;
-        font-size: 24rpx;
-      }
-
-      .chat-avatar {
-        width: 70rpx;
-        height: 70rpx;
-        border-radius: 50%;
-      }
-
-      .send-status {
-        color: #333;
-        height: 80rpx;
-        margin-right: 8rpx;
-        display: flex;
-        align-items: center;
-
-        .loading {
-          width: 32rpx;
-          height: 32rpx;
-          -webkit-animation: rotating 2s linear infinite;
-          animation: rotating 2s linear infinite;
-
-          @-webkit-keyframes rotating {
-            0% {
-              transform: rotateZ(0);
-            }
-
-            100% {
-              transform: rotateZ(360deg);
-            }
-          }
-
-          @keyframes rotating {
-            0% {
-              transform: rotateZ(0);
-            }
-
-            100% {
-              transform: rotateZ(360deg);
-            }
-          }
-        }
-
-        .warning {
-          width: 32rpx;
-          height: 32rpx;
-          color: #ff3000;
-        }
-      }
-
-      .message-box {
-        max-width: 50%;
-        font-size: 16px;
-        line-height: 20px;
-        // max-width: 500rpx;
-        white-space: normal;
-        word-break: break-all;
-        word-wrap: break-word;
-        padding: 20rpx;
-        border-radius: 10rpx;
-        color: #fff;
-        background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
-
-        &.customer_service {
-          background: #fff;
-          color: #333;
-        }
-
-        :deep() {
-          .imgred {
-            width: 100%;
-          }
-
-          .imgred,
-          img {
-            width: 100%;
-          }
-        }
-      }
-
-      :deep() {
-        .goods,
-        .order {
-          max-width: 500rpx;
-        }
-      }
-
-      .message-img {
-        width: 100px;
-        height: 100px;
-        border-radius: 6rpx;
-      }
-
-      .template-wrap {
-        // width: 100%;
-        padding: 20rpx 24rpx;
-        background: #fff;
-        border-radius: 10rpx;
-
-        .title {
-          font-size: 26rpx;
-          font-weight: 500;
-          color: #333;
-          margin-bottom: 29rpx;
-        }
-
-        .item {
-          font-size: 24rpx;
-          color: var(--ui-BG-Main);
-          margin-bottom: 16rpx;
-
-          &:last-of-type {
-            margin-bottom: 0;
-          }
-        }
-      }
-
-      .error-img {
-        width: 400rpx;
-        height: 400rpx;
-      }
-
-      #scrollBottom {
-        height: 120rpx;
-      }
-    }
-  }
-</style>
-<style>
-  .chat-img {
-    width: 24px;
-    height: 24px;
-    margin: 0 3px;
-  }
-
-  .full-img {
-    object-fit: cover;
-    width: 100px;
-    height: 100px;
-    border-radius: 6px;
   }
 </style>

@@ -3,6 +3,7 @@ import sheep from '@/sheep';
 // import chat from '@/sheep/api/chat';
 import dayjs from 'dayjs';
 import io from '@hyoga/uni-socket.io';
+import { baseUrl, websocketPath } from '@/sheep/config';
 
 export function useChatWebSocket(socketConfig) {
   let SocketIo = null;
@@ -14,7 +15,7 @@ export function useChatWebSocket(socketConfig) {
     customerUserInfo: {}, //用户信息
     customerServerInfo: {
       //客服信息
-      title: '连接中...',
+      title: '客服已接入',
       state: 'connecting',
       avatar: null,
       nickname: '',
@@ -35,7 +36,7 @@ export function useChatWebSocket(socketConfig) {
 
     chatConfig: {}, // 配置信息
 
-    isSendSucces: -1, // 是否发送成功 -1=发送中|0=发送成功|1发送失败
+    isSendSuccess: -1, // 是否发送成功 -1=发送中|0=发送成功|1发送失败
   });
 
   /**
@@ -49,7 +50,11 @@ export function useChatWebSocket(socketConfig) {
     if (state.socketState.isConnecting) return; // 重连中，返回false
 
     // 启动初始化
-    SocketIo = io(config.chat_domain, {
+    SocketIo = io(baseUrl + websocketPath, {
+      path:websocketPath,
+      query:{
+        token: getAccessToken()
+      },
       reconnection: true, // 默认 true    是否断线重连
       reconnectionAttempts: 5, // 默认无限次   断线尝试次数
       reconnectionDelay: 1000, // 默认 1000，进行下一次重连的间隔。
@@ -302,8 +307,8 @@ export function useChatWebSocket(socketConfig) {
     );
   };
 
-  // 用户id,获取token
-  const getUserToken = async (id) => {
+  // 获取token
+  const getAccessToken = () => {
     return uni.getStorageSync('token');
   };
 
@@ -803,9 +808,6 @@ export function useChatWebSocket(socketConfig) {
     onDrop,
     onPaste,
     upload,
-
-    getUserToken,
-
     state,
 
     socketTest,
