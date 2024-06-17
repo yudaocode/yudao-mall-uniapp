@@ -1,275 +1,262 @@
 <template>
   <view class="chat-box" :style="{ height: pageHeight + 'px' }">
-    <!--  竖向滚动区域需要设置固定 height  -->
     <scroll-view
       :style="{ height: pageHeight + 'px' }"
-      scroll-y="true"
-      :scroll-with-animation="false"
-      :enable-back-to-top="true"
-      :scroll-into-view="state.scrollInto"
+      class="scroll"
+      :scroll-y="true"
+      :scroll-top="currentTop"
+      @scroll="handle_scroll"
+      @scrolltolower="upper"
     >
-      <!--  消息渲染  -->
-      <view class="message-item ss-flex-col" v-for="(item, index) in chatList" :key="index">
-        <view class="ss-flex ss-row-center ss-col-center">
-          <!-- 日期 -->
-          <view v-if="item.contentType !== KeFuMessageContentTypeEnum.SYSTEM && showTime(item, index)"
-                class="date-message">
-            {{ formatDate(item.date) }}
-          </view>
-          <!-- 系统消息 -->
-          <view v-if="item.contentType === KeFuMessageContentTypeEnum.SYSTEM" class="system-message">
-            {{ item.content }}
-          </view>
-        </view>
-        <!-- 消息体渲染管理员消息和用户消息并左右展示  -->
-        <view
-          v-if="item.contentType !== KeFuMessageContentTypeEnum.SYSTEM"
-          class="ss-flex ss-col-top"
-          :class="[
+      <view v-for="(data, index) in scrollData" :key="index" :id="'item-' + index">
+        <template v-if="includePage(index)">
+          <!--  消息渲染  -->
+          <view class="message-item ss-flex-col scroll-item" v-for="(item, index2) in data" :key="index">
+            <view class="ss-flex ss-row-center ss-col-center">
+              <!-- 日期 -->
+              <view v-if="item.contentType !== KeFuMessageContentTypeEnum.SYSTEM && showTime(item,data, index2)"
+                    class="date-message">
+                {{ formatDate(item.createTime) }}
+              </view>
+              <!-- 系统消息 -->
+              <view v-if="item.contentType === KeFuMessageContentTypeEnum.SYSTEM" class="system-message">
+                {{ item.content }}
+              </view>
+            </view>
+            <!-- 消息体渲染管理员消息和用户消息并左右展示  -->
+            <view
+              v-if="item.contentType !== KeFuMessageContentTypeEnum.SYSTEM"
+              class="ss-flex ss-col-top"
+              :class="[
               item.senderType === UserTypeEnum.ADMIN
                 ? `ss-row-left`
                 : item.senderType === UserTypeEnum.MEMBER
                 ? `ss-row-right`
                 : '',
             ]"
-        >
-          <!-- 客服头像 -->
-          <image
-            v-show="item.senderType === UserTypeEnum.ADMIN"
-            class="chat-avatar ss-m-r-24"
-            :src="
+            >
+              <!-- 客服头像 -->
+              <image
+                v-show="item.senderType === UserTypeEnum.ADMIN"
+                class="chat-avatar ss-m-r-24"
+                :src="
                 sheep.$url.cdn(item?.senderAvatar) ||
                 sheep.$url.static('/static/img/shop/chat/default.png')
               "
-            mode="aspectFill"
-          ></image>
+                mode="aspectFill"
+              ></image>
 
-          <!-- 发送状态 -->
-          <span
-            v-if="
+              <!-- 发送状态 -->
+              <span
+                v-if="
                 item.senderType === UserTypeEnum.MEMBER &&
-                index == chatList.length - 1 &&
+                index == data.length - 1 &&
                 isSendSuccess !== 0
               "
-            class="send-status"
-          >
+                class="send-status"
+              >
               <image
                 v-if="isSendSuccess == -1"
                 class="loading"
                 :src="sheep.$url.static('/static/img/shop/chat/loading.png')"
                 mode="aspectFill"
               ></image>
-            <!-- <image
-              v-if="chatData.isSendSuccess == 1"
-              class="warning"
-              :src="sheep.$url.static('/static/img/shop/chat/warning.png')"
-              mode="aspectFill"
-              @click="onAgainSendMessage(item)"
-            ></image> -->
+                <!-- <image
+                  v-if="chatData.isSendSuccess == 1"
+                  class="warning"
+                  :src="sheep.$url.static('/static/img/shop/chat/warning.png')"
+                  mode="aspectFill"
+                  @click="onAgainSendMessage(item)"
+                ></image> -->
             </span>
 
-          <!-- 内容 -->
-          <template v-if="item.contentType === KeFuMessageContentTypeEnum.TEXT">
-            <view class="message-box" :class="{'admin': item.senderType === UserTypeEnum.ADMIN}">
-              <mp-html :content="replaceEmoji(item.content)" />
-            </view>
-          </template>
-          <template v-if="item.contentType === KeFuMessageContentTypeEnum.IMAGE">
-            <view class="message-box" :class="{'admin': item.senderType === UserTypeEnum.ADMIN}" :style="{ width: '200rpx' }">
-              <su-image
-                class="message-img"
-                isPreview
-                :previewList="[sheep.$url.cdn(item.content)]"
-                :current="0"
-                :src="sheep.$url.cdn(item.content)"
-                :height="200"
-                :width="200"
-                mode="aspectFill"
-              ></su-image>
-            </view>
-          </template>
-          <template v-if="item.contentType === KeFuMessageContentTypeEnum.PRODUCT">
-            <GoodsItem
-              :goodsData="item.content.item"
-              @tap="
-                  sheep.$router.go('/pages/goods/index', {
-                    id: item.content.item.id,
-                  })
-                "
-            />
-          </template>
-          <template v-if="item.contentType === KeFuMessageContentTypeEnum.ORDER">
-            <OrderItem
-              from="msg"
-              :orderData="item.content.item"
-              @tap="
-                  sheep.$router.go('/pages/order/detail', {
-                    id: item.content.item.id,
-                  })
-                "
-            />
-          </template>
-          <!-- user头像 -->
-          <image
-            v-if="item.senderType === UserTypeEnum.MEMBER"
-            class="chat-avatar ss-m-l-24"
-            :src="sheep.$url.cdn(item?.senderAvatar) ||
+              <!-- 内容 -->
+              <template v-if="item.contentType === KeFuMessageContentTypeEnum.TEXT">
+                <view class="message-box" :class="{'admin': item.senderType === UserTypeEnum.ADMIN}">
+                  <mp-html :content="replaceEmoji(item.content)" />
+                </view>
+              </template>
+              <template v-if="item.contentType === KeFuMessageContentTypeEnum.IMAGE">
+                <view class="message-box" :class="{'admin': item.senderType === UserTypeEnum.ADMIN}"
+                      :style="{ width: '200rpx' }">
+                  <su-image
+                    class="message-img"
+                    isPreview
+                    :previewList="[sheep.$url.cdn(item.content)]"
+                    :current="0"
+                    :src="sheep.$url.cdn(item.content)"
+                    :height="200"
+                    :width="200"
+                    mode="aspectFill"
+                  ></su-image>
+                </view>
+              </template>
+              <!--              <template v-if="item.contentType === KeFuMessageContentTypeEnum.PRODUCT">-->
+              <!--                <GoodsItem-->
+              <!--                  :goodsData="item.content.item"-->
+              <!--                  @tap="-->
+              <!--                  sheep.$router.go('/pages/goods/index', {-->
+              <!--                    id: item.content.item.id,-->
+              <!--                  })-->
+              <!--                "-->
+              <!--                />-->
+              <!--              </template>-->
+              <!--              <template v-if="item.contentType === KeFuMessageContentTypeEnum.ORDER">-->
+              <!--                <OrderItem-->
+              <!--                  from="msg"-->
+              <!--                  :orderData="item.content.item"-->
+              <!--                  @tap="-->
+              <!--                  sheep.$router.go('/pages/order/detail', {-->
+              <!--                    id: item.content.item.id,-->
+              <!--                  })-->
+              <!--                "-->
+              <!--                />-->
+              <!--              </template>-->
+              <!-- user头像 -->
+              <image
+                v-if="item.senderType === UserTypeEnum.MEMBER"
+                class="chat-avatar ss-m-l-24"
+                :src="sheep.$url.cdn(item?.senderAvatar) ||
                 sheep.$url.static('/static/img/shop/chat/default.png')"
-            mode="aspectFill"
-          >
-          </image>
-        </view>
+                mode="aspectFill"
+              >
+              </image>
+            </view>
+          </view>
+        </template>
+        <view v-if="!includePage(index)" :style="{ height: pagesHeight[index] }"></view>
       </view>
-      <!-- 视图滚动锚点  -->
-      <view id="scrollBottom"></view>
     </scroll-view>
+    <!-- TODO puhui999: 这里还有一点问题 -->
+    <view v-show="showGoBottom" class="go-back-btn" @click="handle_goBottom">查看最新消息</view>
   </view>
 </template>
 
 <script setup>
+  /**
+   * uniapp 实现虚拟列表
+   *
+   * see https://juejin.cn/post/7105280477141041183
+   */
+  import { nextTick, reactive, ref, unref } from 'vue';
+  import { onLoad } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import OrderItem from '@/pages/chat/components/order.vue';
-  import GoodsItem from '@/pages/chat/components/goods.vue';
-  import { reactive, ref, unref } from 'vue';
+  import KeFuApi from '@/sheep/api/promotion/kefu';
+  import { isEmpty } from '@/sheep/helper/utils';
+  import { KeFuMessageContentTypeEnum, UserTypeEnum } from '@/pages/chat/components/constants';
   import { formatDate } from '@/sheep/util';
   import dayjs from 'dayjs';
-  import { KeFuMessageContentTypeEnum,UserTypeEnum } from './constants';
   import { emojiList } from '@/pages/chat/emoji';
 
-  const KEFU_MESSAGE_TYPE = 'kefu_message_type'; // 客服消息类型
-  const { screenHeight, safeAreaInsets, safeArea, screenWidth } = sheep.$platform.device;
+  const { safeArea } = sheep.$platform.device;
   const pageHeight = safeArea.height - 44 - 35 - 50;
-  const state = reactive({
-    scrollInto: '',
-  });
 
-  const chatList = [
-    {
-      id: 1,
-      conversationId: 1001,
-      senderId: 1,
-      senderType: 1, // UserTypeEnum.MEMBER
-      receiverId: 2,
-      receiverType: 1, // UserTypeEnum.MEMBER
-      contentType: 1, // KeFuMessageContentTypeEnum.TEXT
-      content: "Hello, how are you?",
-      readStatus: false
-    },
-    {
-      id: 2,
-      conversationId: 1001,
-      senderId: 2,
-      senderType: 1, // UserTypeEnum.MEMBER
-      receiverId: 1,
-      receiverType: 1, // UserTypeEnum.MEMBER
-      contentType: 1, // KeFuMessageContentTypeEnum.TEXT
-      content: "I'm good, thanks! [流泪][流泪][流泪][流泪]",
-      readStatus: false
-    },
-    {
-      id: 3,
-      conversationId: 1002,
-      senderId: 3,
-      senderType: 2, // UserTypeEnum.ADMIN
-      receiverId: 4,
-      receiverType: 1, // UserTypeEnum.MEMBER
-      contentType: 2, // KeFuMessageContentTypeEnum.IMAGE
-      content: "https://static.iocoder.cn/mall/a79f5d2ea6bf0c3c11b2127332dfe2df.jpg",
-      readStatus: true
-    },
-    {
-      id: 4,
-      conversationId: 1002,
-      senderId: 4,
-      senderType: 1, // UserTypeEnum.MEMBER
-      receiverId: 3,
-      receiverType: 2, // UserTypeEnum.ADMIN
-      contentType: 1, // KeFuMessageContentTypeEnum.TEXT
-      content: "This is a text message.",
-      readStatus: false
-    },
-    {
-      id: 5,
-      conversationId: 1003,
-      senderId: 5,
-      senderType: 1, // UserTypeEnum.MEMBER
-      receiverId: 6,
-      receiverType: 1, // UserTypeEnum.MEMBER
-      contentType: 3, // KeFuMessageContentTypeEnum.VOICE
-      content: "Voice content here",
-      readStatus: true
-    },
-    {
-      id: 6,
-      conversationId: 1003,
-      senderId: 6,
-      senderType: 1, // UserTypeEnum.MEMBER
-      receiverId: 5,
-      receiverType: 1, // UserTypeEnum.MEMBER
-      contentType: 1, // KeFuMessageContentTypeEnum.TEXT
-      content: "Another text message.",
-      readStatus: false
-    },
-    {
-      id: 7,
-      conversationId: 1004,
-      senderId: 7,
-      senderType: 2, // UserTypeEnum.ADMIN
-      receiverId: 8,
-      receiverType: 1, // UserTypeEnum.MEMBER
-      contentType: 1, // KeFuMessageContentTypeEnum.VIDEO
-      content: "Video content here",
-      readStatus: true
-    },
-    {
-      id: 8,
-      conversationId: 1004,
-      senderId: 8,
-      senderType: 1, // UserTypeEnum.MEMBER
-      receiverId: 7,
-      receiverType: 2, // UserTypeEnum.ADMIN
-      contentType: 5, // KeFuMessageContentTypeEnum.SYSTEM
-      content: "System message content",
-      readStatus: false
-    },
-    {
-      id: 9,
-      conversationId: 1005,
-      senderId: 9,
-      senderType: 1, // UserTypeEnum.MEMBER
-      receiverId: 10,
-      receiverType: 1, // UserTypeEnum.MEMBER
-      contentType: 10, // KeFuMessageContentTypeEnum.PRODUCT
-      content: "Product message content",
-      readStatus: true
-    },
-    {
-      id: 10,
-      conversationId: 1005,
-      senderId: 10,
-      senderType: 1, // UserTypeEnum.MEMBER
-      receiverId: 9,
-      receiverType: 1, // UserTypeEnum.MEMBER
-      contentType: 11, // KeFuMessageContentTypeEnum.ORDER
-      content: "Order message content",
-      readStatus: false
+  const currentShowPage = ref(0); // 当前展示的页码
+  const pagesHeight = reactive([]); // 记录每个页面的高度
+  const visiblePagesList = ref([-1, 0, 1]);
+  const scrollData = ref([]);
+
+  // 向上滚动
+  const upper = async () => {
+    // 页数据满十条后加载下一页
+    if (currentShowPage.value === 0 || scrollData.value[currentShowPage.value - 1].length === 10) {
+      currentShowPage.value += 1;
     }
-  ];
+    await getMessageList();
+    await nextTick();
+    setPageHeight();
+    observer(currentShowPage.value);
+  };
 
-  const isSendSuccess = ref(-1)
+  // 获得消息分页列表
+  const getMessageList = async (pageNo = undefined) => {
+    const { data } = await KeFuApi.getMessageListPage({
+      pageNo: pageNo || currentShowPage.value,
+    });
+    if (isEmpty(data.list)) {
+      return;
+    }
+    scrollData.value[pageNo ? pageNo - 1 : currentShowPage.value - 1] = data.list;
+  };
+  defineExpose({ getMessageList });
+  const scrollTop = ref(0); // 当前滚动区域距离顶部的距离
+  const currentTop = ref(0);
+  const showGoBottom = ref(false);
+  // 滚动条滚动时触发
+  const handle_scroll = throttle(event => {
+    scrollTop.value = event[0].detail.scrollTop;
+    if (scrollTop > 300) {
+      showGoBottom.value = true;
+    }
+  }, 100);
+  const handle_goBottom = () => {
+    currentTop.value = scrollTop.value;
+    nextTick(() => {
+      currentTop.value = 0;
+    });
+    showGoBottom.value = false;
+  };
+
+  // 获取每页数据的页面高度
+  const setPageHeight = () => {
+    let query = uni.createSelectorQuery();
+    query
+      .select(`#item-${currentShowPage.value}`)
+      .boundingClientRect(res => {
+        console.log(res);
+        pagesHeight[currentShowPage.value] = res && res.height;
+      })
+      .exec();
+  };
+
+  const observer = pageNum => {
+    const observeView = wx
+      .createIntersectionObserver()
+      .relativeTo('#scroll', { top: 0, bottom: 0 });
+    observeView.observe(`#item-${pageNum}`, res => {
+      if (res.intersectionRatio > 0) visiblePagesList.value = [pageNum - 1, pageNum, pageNum + 1];
+    });
+  };
+
+  // 虚拟列表展示可视区域的数据
+  const includePage = index => {
+    return visiblePagesList.value.indexOf(index) > -1;
+  };
+
+  // 防抖
+  function throttle(fnc, delay) {
+    let timer;
+    return function() {
+      let _this = this;
+      let args = arguments;
+      if (!timer) {
+        timer = setTimeout(() => {
+          fnc.call(_this, args);
+          timer = null;
+        }, delay);
+      }
+    };
+  }
+
+  const isSendSuccess = ref(0); // 是否发送成功 -1=发送中|0=发送成功|1发送失败
+  onLoad(() => {
+    setPageHeight();
+    observer(currentShowPage.value);
+  });
   //======================= 工具函数 =======================
   /**
    * 是否显示时间
    * @param {*} item - 数据
    * @param {*} index - 索引
    */
-  const showTime = (item, index) => {
-    if (unref(chatList)[index + 1]) {
-      let dateString = dayjs(unref(chatList)[index + 1].date).fromNow();
-      return dateString !== dayjs(unref(item).date).fromNow();
+  const showTime = (item, data, index) => {
+    if (unref(data)[index + 1]) {
+      let dateString = dayjs(unref(data)[index + 1].createTime).fromNow();
+      return dateString !== dayjs(unref(item).createTime).fromNow();
     }
     return false;
   };
+
   // 处理表情
   function replaceEmoji(data) {
     let newData = data;
@@ -290,6 +277,7 @@
     }
     return newData;
   }
+
   function selEmojiFile(name) {
     for (let index in emojiList) {
       if (emojiList[index].name === name) {
@@ -300,7 +288,37 @@
   }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
+  // scroll-view 倒置，也就是说顶部是底，底部才是顶，下拉加载旧数据，回到底部就是新数据
+  .scroll {
+    transform: rotate(180deg);
+
+    & ::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+      color: transparent;
+    }
+  }
+
+  // 内容区域也翻转一下
+  .scroll-item {
+    transform: rotate(180deg);
+  }
+
+  .go-back-btn {
+    width: 100rpx;
+    height: 60rpx;
+    line-height: 60rpx;
+    position: fixed;
+    bottom: 100rpx;
+    left: 80%;
+    transform: translateX(-50%);
+    text-align: center;
+    background-color: lightblue;
+    border-radius: 10rpx;
+  }
+
   .chat-box {
     padding: 0 20rpx 0;
 

@@ -15,10 +15,11 @@ const KeFuApi = {
       },
     });
   },
-  getConversation: () => {
+  getMessageListPage: (params) => {
     return request({
-      url: '/promotion/kefu-conversation/get',
+      url: '/promotion/kefu-message/page',
       method: 'GET',
+      params,
       custom: {
         auth: true,
         showLoading: false,

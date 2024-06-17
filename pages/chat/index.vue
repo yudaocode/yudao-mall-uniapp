@@ -2,12 +2,12 @@
   <s-layout class="chat-wrap" title="客服" navbar="inner">
     <!-- 头部连接状态展示  -->
     <div class="status">
-      {{ socketState.isConnect ? customerServiceInfo.title : '网络已断开，请检查网络后刷新重试' }}
+      {{ socketState.isConnect ? "连接客服成功" : '网络已断开，请检查网络后刷新重试' }}
     </div>
     <!--  覆盖头部导航栏背景颜色  -->
     <div class="page-bg" :style="{ height: sys_navBar + 'px' }"></div>
     <!--  聊天区域  -->
-    <ChatBox></ChatBox>
+    <ChatBox ref="chatBoxRef"></ChatBox>
     <!--  消息发送区域  -->
     <su-fixed bottom>
       <message-input v-model="chat.msg" @on-tools="onTools" @send-message="onSendMessage"></message-input>
@@ -28,88 +28,50 @@
 </template>
 
 <script setup>
-  import { useChatWebSocket } from '@/pages/chat/socket';
   import ChatBox from './components/chatBox.vue';
-  import { reactive, toRefs } from 'vue';
+  import { nextTick, reactive, ref, toRefs } from 'vue';
   import sheep from '@/sheep';
   import ToolsPopup from '@/pages/chat/components/toolsPopup.vue';
   import MessageInput from '@/pages/chat/components/messageInput.vue';
   import { onLoad } from '@dcloudio/uni-app';
   import SelectPopup from '@/pages/chat/components/select-popup.vue';
+  import { KeFuMessageContentTypeEnum } from '@/pages/chat/components/constants';
+  import FileApi from '@/sheep/api/infra/file';
+  import KeFuApi from '@/sheep/api/promotion/kefu';
+  import { useWebSocket } from '@/sheep/hooks/useWebSocket';
 
   const sys_navBar = sheep.$platform.navbar;
-  const {
-    socketInit,
-    state: chatData,
-    socketSendMsg,
-    formatChatInput,
-    socketHistoryList,
-    onDrop,
-    onPaste,
-    getFocus,
-    // upload,
-    getUserToken,
-    // socketTest,
-    showTime,
-    formatTime,
-  } = useChatWebSocket();
-  const chatList = toRefs(chatData).chatList;
-  const customerServiceInfo = toRefs(chatData).customerServerInfo;
-  const chatHistoryPagination = toRefs(chatData).chatHistoryPagination;
-  const customerUserInfo = toRefs(chatData).customerUserInfo;
-  const socketState = toRefs(chatData).socketState;
+  const { socketInit, state } = useWebSocket();
+  const socketState = toRefs(state).socketState;
 
   const chat = reactive({
     msg: '',
     scrollInto: '',
-
     showTools: false,
     toolsMode: '',
-
     showSelect: false,
     selectMode: '',
-    chatStyle: {
-      mode: 'inner',
-      color: '#F8270F',
-      type: 'color',
-      alwaysShow: 1,
-      src: '',
-      list: {},
-    },
   });
 
-  function scrollBottom() {
-    let timeout = null;
-    chat.scrollInto = '';
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      chat.scrollInto = 'scrollBottom';
-    }, 100);
+  // 发送消息
+  async function onSendMessage() {
+    if (!chat.msg) return;
+    try {
+      const data = {
+        contentType: KeFuMessageContentTypeEnum.TEXT,
+        content: chat.msg,
+      };
+      await KeFuApi.sendMessage(data);
+      await getMessageList()
+      chat.msg = '';
+    } finally {
+      chat.showTools = false;
+    }
   }
 
-  // 发送消息
-  function onSendMessage() {
-    if (!socketState.value.isConnect) {
-      sheep.$helper.toast(socketState.value.tip || '您已掉线！请返回重试');
-      return;
-    }
-    if (!chat.msg) return;
-    const data = {
-      from: 'customer',
-      mode: 'text',
-      date: new Date().getTime(),
-      content: {
-        text: chat.msg,
-      },
-    };
-    socketSendMsg(data, () => {
-      scrollBottom();
-    });
-    chat.showTools = false;
-    // scrollBottom();
-    setTimeout(() => {
-      chat.msg = '';
-    }, 100);
+  const chatBoxRef = ref()
+  const getMessageList = async () => {
+    await chatBoxRef.value.getMessageList(1)
   }
 
   //======================= 聊天工具相关 start =======================
@@ -125,6 +87,7 @@
 
   // 点击工具栏开关
   function onTools(mode) {
+    // TODO puhui999: socket 连接不稳定先注释掉
     // if (!socketState.value.isConnect) {
     //   sheep.$helper.toast(socketState.value.tip || '您已掉线！请返回重试');
     //   return;
@@ -147,24 +110,18 @@
 
   async function onSelect({ type, data }) {
     let msg = '';
+    // TODO puhui999: 还需要重构
     switch (type) {
       case 'image':
-        const { path, fullurl } = await sheep.$api.app.upload(data.tempFiles[0].path, 'default');
+        const res = await FileApi.uploadFile(data.tempFiles[0].path);
         msg = {
-          from: 'customer',
-          mode: 'image',
-          date: new Date().getTime(),
-          content: {
-            url: fullurl,
-            path: path,
-          },
+          contentType: KeFuMessageContentTypeEnum.IMAGE,
+          content: res.data,
         };
         break;
       case 'goods':
         msg = {
-          from: 'customer',
-          mode: 'goods',
-          date: new Date().getTime(),
+          contentType: KeFuMessageContentTypeEnum.PRODUCT,
           content: {
             item: {
               id: data.goods.id,
@@ -178,9 +135,7 @@
         break;
       case 'order':
         msg = {
-          from: 'customer',
-          mode: 'order',
-          date: new Date().getTime(),
+          contentType: KeFuMessageContentTypeEnum.ORDER,
           content: {
             item: {
               id: data.id,
@@ -200,9 +155,7 @@
         break;
     }
     if (msg) {
-      socketSendMsg(msg, () => {
-        scrollBottom();
-      });
+      // 发送消息
       // scrollBottom();
       chat.showTools = false;
       chat.showSelect = false;
@@ -214,8 +167,11 @@
 
   onLoad(async () => {
     socketInit({}, () => {
-      scrollBottom();
+    // 监听服务端消息
     });
+    await nextTick()
+    // 加载历史消息
+    await getMessageList()
   });
 </script>
 
