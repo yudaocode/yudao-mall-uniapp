@@ -61,7 +61,7 @@
         contentType: KeFuMessageContentTypeEnum.TEXT,
         content: chat.msg,
       };
-      await KeFuApi.sendMessage(data);
+      await KeFuApi.sendKefuMessage(data);
       await getMessageList()
       chat.msg = '';
     } finally {

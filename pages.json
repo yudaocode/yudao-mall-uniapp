@@ -86,8 +86,7 @@
 	],
 	"subPackages": [{
 			"root": "pages/goods",
-			"pages": [
-              {
+			"pages": [{
 					"path": "index",
 					"style": {
 						"navigationBarTitleText": "商品详情"
@@ -151,8 +150,7 @@
 		},
 		{
 			"root": "pages/order",
-			"pages": [
-              {
+			"pages": [{
 					"path": "detail",
 					"style": {
 						"navigationBarTitleText": "订单详情"
@@ -251,8 +249,7 @@
 		},
 		{
 			"root": "pages/user",
-			"pages": [
-              {
+			"pages": [{
 					"path": "info",
 					"style": {
 						"navigationBarTitleText": "我的信息"
@@ -338,8 +335,7 @@
 		},
 		{
 			"root": "pages/commission",
-			"pages": [
-              {
+			"pages": [{
 					"path": "index",
 					"style": {
 						"navigationBarTitleText": "分销"
@@ -436,8 +432,7 @@
 		},
 		{
 			"root": "pages/app",
-			"pages": [
-              {
+			"pages": [{
 				"path": "sign",
 				"style": {
 					"navigationBarTitleText": "签到中心"
@@ -452,8 +447,7 @@
 		},
 		{
 			"root": "pages/public",
-			"pages": [
-              {
+			"pages": [{
 					"path": "setting",
 					"style": {
 						"navigationBarTitleText": "系统设置"
@@ -502,8 +496,7 @@
 		},
 		{
 			"root": "pages/coupon",
-			"pages": [
-              {
+			"pages": [{
 					"path": "list",
 					"style": {
 						"navigationBarTitleText": "领券中心"
@@ -545,8 +538,7 @@
 		},
 		{
 			"root": "pages/pay",
-			"pages": [
-              {
+			"pages": [{
 					"path": "index",
 					"style": {
 						"navigationBarTitleText": "收银台"
@@ -586,8 +578,7 @@
 		},
 		{
 			"root": "pages/activity",
-			"pages": [
-              {
+			"pages": [{
 					"path": "groupon/detail",
 					"style": {
 						"navigationBarTitleText": "拼团详情"

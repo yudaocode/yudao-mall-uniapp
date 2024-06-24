@@ -1,7 +1,7 @@
 import request from '@/sheep/request';
 
 const KeFuApi = {
-  sendMessage: (data) => {
+  sendKefuMessage: (data) => {
     return request({
       url: '/promotion/kefu-message/send',
       method: 'POST',
@@ -15,7 +15,7 @@ const KeFuApi = {
       },
     });
   },
-  getMessageListPage: (params) => {
+  getKefuMessagePage: (params) => {
     return request({
       url: '/promotion/kefu-message/page',
       method: 'GET',

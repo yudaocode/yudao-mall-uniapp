@@ -133,11 +133,6 @@
 </template>
 
 <script setup>
-  /**
-   * uniapp 实现虚拟列表
-   *
-   * see https://juejin.cn/post/7105280477141041183
-   */
   import { nextTick, reactive, ref, unref } from 'vue';
   import { onLoad } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
@@ -170,7 +165,7 @@
 
   // 获得消息分页列表
   const getMessageList = async (pageNo = undefined) => {
-    const { data } = await KeFuApi.getMessageListPage({
+    const { data } = await KeFuApi.getKefuMessagePage({
       pageNo: pageNo || currentShowPage.value,
     });
     if (isEmpty(data.list)) {
