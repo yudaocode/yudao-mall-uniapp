@@ -166,7 +166,8 @@
   //======================= 聊天工具相关 end =======================
 
   onLoad(async () => {
-    socketInit({}, () => {
+    socketInit({}, (res) => {
+      console.log(res);
     // 监听服务端消息
     });
     await nextTick()

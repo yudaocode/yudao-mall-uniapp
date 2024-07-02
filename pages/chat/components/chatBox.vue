@@ -133,7 +133,7 @@
 </template>
 
 <script setup>
-  import { nextTick, reactive, ref, unref } from 'vue';
+  import { nextTick, onMounted,onBeforeUnmount, reactive, ref, unref } from 'vue';
   import { onLoad } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import KeFuApi from '@/sheep/api/promotion/kefu';
@@ -174,6 +174,23 @@
     scrollData.value[pageNo ? pageNo - 1 : currentShowPage.value - 1] = data.list;
   };
   defineExpose({ getMessageList });
+
+  const poller = ref(null) // TODO puhui999: 轮训定时器，暂时模拟 websocket
+  onMounted(() => {
+    // TODO puhui999: 轮训相关，功能完善后移除
+    if (!poller.value) {
+      poller.value = setInterval(() => {
+        getMessageList(1)
+      }, 1000)
+    }
+  })
+  // TODO puhui999: 轮训相关，功能完善后移除
+  onBeforeUnmount(() => {
+    if (!poller.value) {
+      return
+    }
+    clearInterval(poller.value)
+  })
   const scrollTop = ref(0); // 当前滚动区域距离顶部的距离
   const currentTop = ref(0);
   const showGoBottom = ref(false);
