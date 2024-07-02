@@ -109,8 +109,7 @@
   }
 
   async function onSelect({ type, data }) {
-    let msg = '';
-    // TODO puhui999: 还需要重构
+    let msg;
     switch (type) {
       case 'image':
         const res = await FileApi.uploadFile(data.tempFiles[0].path);
@@ -119,6 +118,7 @@
           content: res.data,
         };
         break;
+      // TODO puhui999: 还需要重构
       case 'goods':
         msg = {
           contentType: KeFuMessageContentTypeEnum.PRODUCT,
@@ -157,6 +157,8 @@
     if (msg) {
       // 发送消息
       // scrollBottom();
+      await KeFuApi.sendKefuMessage(msg);
+      await getMessageList()
       chat.showTools = false;
       chat.showSelect = false;
       chat.selectMode = '';
