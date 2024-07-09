@@ -91,16 +91,16 @@
                   ></su-image>
                 </view>
               </template>
-              <!--              <template v-if="item.contentType === KeFuMessageContentTypeEnum.PRODUCT">-->
-              <!--                <GoodsItem-->
-              <!--                  :goodsData="item.content.item"-->
-              <!--                  @tap="-->
-              <!--                  sheep.$router.go('/pages/goods/index', {-->
-              <!--                    id: item.content.item.id,-->
-              <!--                  })-->
-              <!--                "-->
-              <!--                />-->
-              <!--              </template>-->
+              <template v-if="item.contentType === KeFuMessageContentTypeEnum.PRODUCT">
+                <GoodsItem
+                  :goodsData="JSON.parse(item.content)"
+                  @tap="
+                    sheep.$router.go('/pages/goods/index', {
+                      id: JSON.parse(item.content).id,
+                    })
+                  "
+                />
+              </template>
               <!--              <template v-if="item.contentType === KeFuMessageContentTypeEnum.ORDER">-->
               <!--                <OrderItem-->
               <!--                  from="msg"-->
@@ -133,8 +133,9 @@
 </template>
 
 <script setup>
-  import { nextTick, onMounted,onBeforeUnmount, reactive, ref, unref } from 'vue';
+  import { nextTick, onBeforeUnmount, onMounted, reactive, ref, unref } from 'vue';
   import { onLoad } from '@dcloudio/uni-app';
+  import GoodsItem from './goods.vue';
   import sheep from '@/sheep';
   import KeFuApi from '@/sheep/api/promotion/kefu';
   import { isEmpty } from '@/sheep/helper/utils';
@@ -175,22 +176,6 @@
   };
   defineExpose({ getMessageList });
 
-  const poller = ref(null) // TODO puhui999: 轮训定时器，暂时模拟 websocket
-  onMounted(() => {
-    // TODO puhui999: 轮训相关，功能完善后移除
-    if (!poller.value) {
-      poller.value = setInterval(() => {
-        getMessageList(1)
-      }, 1000)
-    }
-  })
-  // TODO puhui999: 轮训相关，功能完善后移除
-  onBeforeUnmount(() => {
-    if (!poller.value) {
-      return
-    }
-    clearInterval(poller.value)
-  })
   const scrollTop = ref(0); // 当前滚动区域距离顶部的距离
   const currentTop = ref(0);
   const showGoBottom = ref(false);
@@ -232,6 +217,7 @@
 
   // 虚拟列表展示可视区域的数据
   const includePage = index => {
+    console.log(visiblePagesList.value, index);
     return visiblePagesList.value.indexOf(index) > -1;
   };
 

@@ -118,19 +118,17 @@
           content: res.data,
         };
         break;
-      // TODO puhui999: 还需要重构
       case 'goods':
         msg = {
           contentType: KeFuMessageContentTypeEnum.PRODUCT,
-          content: {
-            item: {
-              id: data.goods.id,
-              title: data.goods.title,
-              image: data.goods.image,
-              price: data.goods.price,
-              stock: data.goods.stock,
-            },
-          },
+          content: JSON.stringify({
+            id: data.id,
+            spuName: data.spuName,
+            picUrl: data.picUrl,
+            price: data.price,
+            introduction: data.introduction,
+            stock: data.stock,
+          })
         };
         break;
       case 'order':

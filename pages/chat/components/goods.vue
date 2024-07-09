@@ -1,15 +1,15 @@
 <template>
   <view class="goods ss-flex">
-    <image class="image" :src="sheep.$url.cdn(goodsData.image)" mode="aspectFill"> </image>
+    <image class="image" :src="sheep.$url.cdn(goodsData.picUrl)" mode="aspectFill"> </image>
     <view class="ss-flex-1">
       <view class="title ss-line-2">
-        {{ goodsData.title }}
+        {{ goodsData.spuName }}
       </view>
-      <view v-if="goodsData.subtitle" class="subtitle ss-line-1">
-        {{ goodsData.subtitle }}
+      <view v-if="goodsData.introduction" class="subtitle ss-line-1">
+        {{ goodsData.introduction }}
       </view>
       <view class="price ss-m-t-8">
-        ￥{{ isArray(goodsData.price) ? goodsData.price[0] : goodsData.price }}
+        ￥{{ goodsData.price }}
       </view>
     </view>
   </view>
@@ -17,7 +17,6 @@
 
 <script setup>
   import sheep from '@/sheep';
-  import { isArray } from 'lodash';
 
   const props = defineProps({
     goodsData: {
