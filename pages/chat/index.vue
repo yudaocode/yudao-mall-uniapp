@@ -121,34 +121,13 @@
       case 'goods':
         msg = {
           contentType: KeFuMessageContentTypeEnum.PRODUCT,
-          content: JSON.stringify({
-            id: data.id,
-            spuName: data.spuName,
-            picUrl: data.picUrl,
-            price: data.price,
-            introduction: data.introduction,
-            stock: data.stock,
-          })
+          content: JSON.stringify(data)
         };
         break;
       case 'order':
         msg = {
           contentType: KeFuMessageContentTypeEnum.ORDER,
-          content: {
-            item: {
-              id: data.id,
-              order_sn: data.order_sn,
-              create_time: data.create_time,
-              pay_fee: data.pay_fee,
-              items: data.items.filter((item) => ({
-                goods_id: item.goods_id,
-                goods_title: item.goods_title,
-                goods_image: item.goods_image,
-                goods_price: item.goods_price,
-              })),
-              status_text: data.status_text,
-            },
-          },
+          content: JSON.stringify(data),
         };
         break;
     }

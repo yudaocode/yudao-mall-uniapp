@@ -101,17 +101,16 @@
                   "
                 />
               </template>
-              <!--              <template v-if="item.contentType === KeFuMessageContentTypeEnum.ORDER">-->
-              <!--                <OrderItem-->
-              <!--                  from="msg"-->
-              <!--                  :orderData="item.content.item"-->
-              <!--                  @tap="-->
-              <!--                  sheep.$router.go('/pages/order/detail', {-->
-              <!--                    id: item.content.item.id,-->
-              <!--                  })-->
-              <!--                "-->
-              <!--                />-->
-              <!--              </template>-->
+              <template v-if="item.contentType === KeFuMessageContentTypeEnum.ORDER">
+                <OrderItem
+                  :orderData="JSON.parse(item.content)"
+                  @tap="
+                  sheep.$router.go('/pages/order/detail', {
+                    id: JSON.parse(item.content).id,
+                  })
+                "
+                />
+              </template>
               <!-- user头像 -->
               <image
                 v-if="item.senderType === UserTypeEnum.MEMBER"
@@ -133,9 +132,10 @@
 </template>
 
 <script setup>
-  import { nextTick, onBeforeUnmount, onMounted, reactive, ref, unref } from 'vue';
+  import { nextTick, reactive, ref, unref } from 'vue';
   import { onLoad } from '@dcloudio/uni-app';
   import GoodsItem from './goods.vue';
+  import OrderItem from './order.vue';
   import sheep from '@/sheep';
   import KeFuApi from '@/sheep/api/promotion/kefu';
   import { isEmpty } from '@/sheep/helper/utils';
