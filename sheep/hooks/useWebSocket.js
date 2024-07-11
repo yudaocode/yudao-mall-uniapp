@@ -1,96 +1,131 @@
-import { reactive, ref } from 'vue';
-import io from '@hyoga/uni-socket.io';
+import { reactive, ref, onBeforeUnmount } from 'vue';
 import { baseUrl, websocketPath } from '@/sheep/config';
-export function useWebSocket() {
-  const SocketIo = ref(null)
-  // chat状态数据
-  const state = reactive({
-    socketState: {
-      isConnect: true, //是否连接成功
-      isConnecting: false, //重连中，不允许新的socket开启。
-      tip: '',
-    },
-    chatConfig: {}, // 配置信息
-  });
-  /**
-   * 连接初始化
-   * @param {Object} config  - 配置信息
-   * @param {Function} callBack -回调函数,有新消息接入，保持底部
-   */
-  const socketInit = (config, callBack) => {
-    state.chatConfig = config;
-    if (SocketIo.value && SocketIo.value.connected) return; // 如果socket已经连接，返回false
-    if (state.socketState.isConnecting) return; // 重连中，返回false
+import { copyValueToTarget } from '@/sheep/util';
 
-    // 启动初始化
-    SocketIo.value = io(baseUrl + websocketPath, {
-      path:websocketPath,
-      query:{
-        token: getAccessToken()
-      },
-      reconnection: true, // 默认 true    是否断线重连
-      reconnectionAttempts: 5, // 默认无限次   断线尝试次数
-      reconnectionDelay: 1000, // 默认 1000，进行下一次重连的间隔。
-      reconnectionDelayMax: 5000, // 默认 5000， 重新连接等待的最长时间 默认 5000
-      randomizationFactor: 0.5, // 默认 0.5 [0-1]，随机重连延迟时间
-      timeout: 20000, // 默认 20s
-      transports: ['websocket', 'polling'], // websocket | polling,
-      ...config,
-    });
-
-    // 监听连接
-    SocketIo.value.on('connect', async (res) => {
-      console.log('socket:connect');
-      // 消息返回
-      callBack && callBack(res)
-    });
-
-    // 监听错误 error
-    SocketIo.value.on('error', (error) => {
-      console.log('error:', error);
-    });
-    // 重连失败 connect_error
-    SocketIo.value.on('connect_error', (error) => {
-      console.log('connect_error');
-    });
-    // 连接上，但无反应 connect_timeout
-    SocketIo.value.on('connect_timeout', (error) => {
-      console.log(error, 'connect_timeout');
-    });
-    // 服务进程销毁 disconnect
-    SocketIo.value.on('disconnect', (error) => {
-      console.log(error, 'disconnect');
-    });
-    // 服务重启重连上reconnect
-    SocketIo.value.on('reconnect', (error) => {
-      console.log(error, 'reconnect');
-    });
-    // 开始重连reconnect_attempt
-    SocketIo.value.on('reconnect_attempt', (error) => {
-      state.socketState.isConnect = false;
-      state.socketState.isConnecting = true;
-      console.log(error, 'reconnect_attempt');
-    });
-    // 重新连接中reconnecting
-    SocketIo.value.on('reconnecting', (error) => {
-      console.log(error, 'reconnecting');
-    });
-    // 重新连接错误reconnect_error
-    SocketIo.value.on('reconnect_error', (error) => {
-      console.log('reconnect_error');
-    });
-    // 重新连接失败reconnect_failed
-    SocketIo.value.on('reconnect_failed', (error) => {
-      state.socketState.isConnecting = false;
-      console.log(error, 'reconnect_failed');
-    });
-  };
+export function useWebSocket(opt) {
   // 获取token
   const getAccessToken = () => {
     return uni.getStorageSync('token');
   };
-  return {
-    state,
-    socketInit
-  }
+
+  const options = reactive({
+    url: (baseUrl + websocketPath).replace('http', 'ws') + '?token=' + getAccessToken(), // ws 地址
+    isReconnecting: false, // 正在重新连接
+    reconnectInterval: 3000, // 重连间隔，单位毫秒
+    heartBeatInterval: 5000, // 心跳间隔，单位毫秒
+    pingTimeoutDuration: 1000, // 超过这个时间，后端没有返回pong，则判定后端断线了。
+    heartBeatTimer: null, // 心跳计时器
+    destroy: false, // 是否销毁
+    onConnected: () => {
+    }, // 连接成功时触发
+    onClosed: () => {
+    }, // 连接关闭时触发
+    onMessage: (data) => {
+    }, // 收到消息
+  });
+  const Socket = ref(null); // Socket 链接实例
+
+  const initEventListeners = () => {
+    Socket.value.onOpen(() => {
+      // WebSocket连接已打开
+      options.onConnected();
+      startHeartBeat();
+    });
+
+    Socket.value.onMessage((res) => {
+      try {
+        const obj = JSON.parse(res.data);
+        if (obj.type === 'pong') {
+          // 收到pong消息，心跳正常，无需处理
+          resetPingTimeout(); // 重置计时
+        } else {
+          // 处理其他消息
+          options.onMessage(obj);
+        }
+      } catch {
+        console.error(res.data);
+      }
+    });
+
+    Socket.value.onClose((res) => {
+      // WebSocket连接已关闭
+      if (options.destroy) {
+        options.onClosed();
+        return;
+      }
+      stopHeartBeat();
+      if (!options.isReconnecting) {
+        reconnect();
+      }
+    });
+  };
+
+  const sendMessage = (message) => {
+    if (Socket.value) {
+      Socket.value.send({
+        data: message,
+      });
+    }
+  };
+
+  const startHeartBeat = () => {
+    options.heartBeatTimer = setInterval(() => {
+      sendMessage(JSON.stringify({
+        type: 'ping',
+      })); // 发送ping消息
+      options.pingTimeout = setTimeout(() => {
+        // 未收到pong消息，尝试重连...
+        reconnect();
+      }, options.pingTimeoutDuration);
+    }, options.heartBeatInterval);
+  };
+
+  const stopHeartBeat = () => {
+    if (options.heartBeatTimer) {
+      clearInterval(options.heartBeatTimer);
+    }
+  };
+
+  const reconnect = () => {
+    options.isReconnecting = true;
+    setTimeout(() => {
+      onReconnect();
+      initSocket();
+      options.isReconnecting = false;
+    }, options.reconnectInterval);
+  };
+
+  const resetPingTimeout = () => {
+    clearTimeout(options.pingTimeout); // 重置计时
+  };
+
+  const close = () => {
+    options.destroy = true;
+    stopHeartBeat();
+    if (Socket.value) {
+      Socket.value.close();
+      Socket.value = null;
+    }
+  };
+  /**
+   * 重连时触发
+   */
+  const onReconnect = () => {
+    console.log('尝试重连...');
+  };
+
+  const initSocket = () => {
+    copyValueToTarget(options, opt);
+    Socket.value = uni.connectSocket({
+      url: options.url,
+      complete: () => {
+      },
+    });
+    initEventListeners();
+  };
+  initSocket();
+
+  onBeforeUnmount(()=>{
+    close()
+  })
 }

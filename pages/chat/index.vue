@@ -2,7 +2,7 @@
   <s-layout class="chat-wrap" title="客服" navbar="inner">
     <!-- 头部连接状态展示  -->
     <div class="status">
-      {{ socketState.isConnect ? "连接客服成功" : '网络已断开，请检查网络后刷新重试' }}
+<!--      {{ socketState.isConnect ? "连接客服成功" : '网络已断开，请检查网络后刷新重试' }}-->
     </div>
     <!--  覆盖头部导航栏背景颜色  -->
     <div class="page-bg" :style="{ height: sys_navBar + 'px' }"></div>
@@ -29,7 +29,7 @@
 
 <script setup>
   import ChatBox from './components/chatBox.vue';
-  import { nextTick, reactive, ref, toRefs } from 'vue';
+  import { nextTick, reactive, ref } from 'vue';
   import sheep from '@/sheep';
   import ToolsPopup from '@/pages/chat/components/toolsPopup.vue';
   import MessageInput from '@/pages/chat/components/messageInput.vue';
@@ -41,8 +41,6 @@
   import { useWebSocket } from '@/sheep/hooks/useWebSocket';
 
   const sys_navBar = sheep.$platform.navbar;
-  const { socketInit, state } = useWebSocket();
-  const socketState = toRefs(state).socketState;
 
   const chat = reactive({
     msg: '',
@@ -143,12 +141,21 @@
   }
 
   //======================= 聊天工具相关 end =======================
+  useWebSocket({
+    // 连接成功
+    onConnected:()=>{
 
+    },
+    // 连接关闭
+    onClosed:()=>{
+
+    },
+    // 收到消息
+    onMessage:(data)=>{
+      console.log(data);
+    }
+  });
   onLoad(async () => {
-    socketInit({}, (res) => {
-      console.log(res);
-    // 监听服务端消息
-    });
     await nextTick()
     // 加载历史消息
     await getMessageList()
