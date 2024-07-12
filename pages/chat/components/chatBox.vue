@@ -217,7 +217,6 @@
 
   // 虚拟列表展示可视区域的数据
   const includePage = index => {
-    console.log(visiblePagesList.value, index);
     return visiblePagesList.value.indexOf(index) > -1;
   };
 

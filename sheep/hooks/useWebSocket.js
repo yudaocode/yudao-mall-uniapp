@@ -1,9 +1,13 @@
-import { reactive, ref, onBeforeUnmount } from 'vue';
+import { onBeforeUnmount, reactive, ref } from 'vue';
 import { baseUrl, websocketPath } from '@/sheep/config';
 import { copyValueToTarget } from '@/sheep/util';
 
+/**
+ * WebSocket 创建 hook
+ * @param opt 连接配置
+ * @return {{options: *}}
+ */
 export function useWebSocket(opt) {
-  // 获取token
   const getAccessToken = () => {
     return uni.getStorageSync('token');
   };
@@ -16,6 +20,8 @@ export function useWebSocket(opt) {
     pingTimeoutDuration: 1000, // 超过这个时间，后端没有返回pong，则判定后端断线了。
     heartBeatTimer: null, // 心跳计时器
     destroy: false, // 是否销毁
+    pingTimeout: null, // 心跳检测定时器
+    reconnectTimeout: null, // 重连定时器ID的属性
     onConnected: () => {
     }, // 连接成功时触发
     onClosed: () => {
@@ -23,109 +29,129 @@ export function useWebSocket(opt) {
     onMessage: (data) => {
     }, // 收到消息
   });
-  const Socket = ref(null); // Socket 链接实例
+  const SocketTask = ref(null); // SocketTask 由 uni.connectSocket() 接口创建
 
   const initEventListeners = () => {
-    Socket.value.onOpen(() => {
-      // WebSocket连接已打开
+    // 监听 WebSocket 连接打开事件
+    SocketTask.value.onOpen(() => {
+      console.log('WebSocket 连接成功');
+      // 连接成功时触发
       options.onConnected();
+      // 开启心跳检查
       startHeartBeat();
     });
-
-    Socket.value.onMessage((res) => {
+    // 监听 WebSocket 接受到服务器的消息事件
+    SocketTask.value.onMessage((res) => {
       try {
-        const obj = JSON.parse(res.data);
-        if (obj.type === 'pong') {
-          // 收到pong消息，心跳正常，无需处理
-          resetPingTimeout(); // 重置计时
+        if (res.data === 'pong') {
+          // 收到心跳重置心跳超时检查
+          resetPingTimeout();
         } else {
-          // 处理其他消息
-          options.onMessage(obj);
+          options.onMessage(JSON.parse(res.data));
         }
-      } catch {
-        console.error(res.data);
+      } catch (error) {
+        console.error(error);
       }
     });
-
-    Socket.value.onClose((res) => {
-      // WebSocket连接已关闭
+    // 监听 WebSocket 连接关闭事件
+    SocketTask.value.onClose((event) => {
+      // 情况一：实例销毁
       if (options.destroy) {
         options.onClosed();
-        return;
-      }
-      stopHeartBeat();
-      if (!options.isReconnecting) {
+      } else { // 情况二：连接失败重连
+        // 停止心跳检查
+        stopHeartBeat();
+        // 重连
         reconnect();
       }
     });
   };
 
+  // 发送消息
   const sendMessage = (message) => {
-    if (Socket.value) {
-      Socket.value.send({
-        data: message,
-      });
+    if (SocketTask.value && !options.destroy) {
+      SocketTask.value.send({ data: message });
     }
   };
-
+  // 开始心跳检查
   const startHeartBeat = () => {
     options.heartBeatTimer = setInterval(() => {
-      sendMessage(JSON.stringify({
-        type: 'ping',
-      })); // 发送ping消息
+      sendMessage('ping');
       options.pingTimeout = setTimeout(() => {
-        // 未收到pong消息，尝试重连...
+        // 如果在超时时间内没有收到 pong，则认为连接断开
         reconnect();
       }, options.pingTimeoutDuration);
     }, options.heartBeatInterval);
   };
-
+  // 停止心跳检查
   const stopHeartBeat = () => {
-    if (options.heartBeatTimer) {
-      clearInterval(options.heartBeatTimer);
-    }
+    clearInterval(options.heartBeatTimer);
+    resetPingTimeout();
   };
 
+  // WebSocket 重连
   const reconnect = () => {
+    if (options.destroy || !SocketTask.value) {
+      // 如果WebSocket已被销毁或尚未完全关闭，不进行重连
+      return;
+    }
+
+    // 重连中
     options.isReconnecting = true;
-    setTimeout(() => {
-      onReconnect();
-      initSocket();
-      options.isReconnecting = false;
+
+    // 清除现有的重连标志，以避免多次重连
+    if (options.reconnectTimeout) {
+      clearTimeout(options.reconnectTimeout);
+    }
+
+    // 设置重连延迟
+    options.reconnectTimeout = setTimeout(() => {
+      // 检查组件是否仍在运行和WebSocket是否关闭
+      if (!options.destroy) {
+        // 重置重连标志
+        options.isReconnecting = false;
+        // 初始化新的WebSocket连接
+        initSocket();
+      }
     }, options.reconnectInterval);
   };
 
   const resetPingTimeout = () => {
-    clearTimeout(options.pingTimeout); // 重置计时
+    if (options.pingTimeout) {
+      clearTimeout(options.pingTimeout);
+      options.pingTimeout = null; // 清除超时ID
+    }
   };
 
   const close = () => {
     options.destroy = true;
     stopHeartBeat();
-    if (Socket.value) {
-      Socket.value.close();
-      Socket.value = null;
+    if (options.reconnectTimeout) {
+      clearTimeout(options.reconnectTimeout);
     }
-  };
-  /**
-   * 重连时触发
-   */
-  const onReconnect = () => {
-    console.log('尝试重连...');
+    if (SocketTask.value) {
+      SocketTask.value.close();
+      SocketTask.value = null;
+    }
   };
 
   const initSocket = () => {
+    options.destroy = false;
     copyValueToTarget(options, opt);
-    Socket.value = uni.connectSocket({
+    SocketTask.value = uni.connectSocket({
       url: options.url,
       complete: () => {
+      },
+      success: () => {
       },
     });
     initEventListeners();
   };
+
   initSocket();
 
-  onBeforeUnmount(()=>{
-    close()
-  })
+  onBeforeUnmount(() => {
+    close();
+  });
+  return { options };
 }

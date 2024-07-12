@@ -2,7 +2,7 @@
   <s-layout class="chat-wrap" title="客服" navbar="inner">
     <!-- 头部连接状态展示  -->
     <div class="status">
-<!--      {{ socketState.isConnect ? "连接客服成功" : '网络已断开，请检查网络后刷新重试' }}-->
+      {{ !isReconnecting ? "连接客服成功" : '会话重连中！！！' }}
     </div>
     <!--  覆盖头部导航栏背景颜色  -->
     <div class="page-bg" :style="{ height: sys_navBar + 'px' }"></div>
@@ -29,13 +29,12 @@
 
 <script setup>
   import ChatBox from './components/chatBox.vue';
-  import { nextTick, reactive, ref } from 'vue';
+  import { reactive, ref, toRefs } from 'vue';
   import sheep from '@/sheep';
   import ToolsPopup from '@/pages/chat/components/toolsPopup.vue';
   import MessageInput from '@/pages/chat/components/messageInput.vue';
-  import { onLoad } from '@dcloudio/uni-app';
   import SelectPopup from '@/pages/chat/components/select-popup.vue';
-  import { KeFuMessageContentTypeEnum } from '@/pages/chat/components/constants';
+  import { KeFuMessageContentTypeEnum, WebSocketMessageTypeConstants } from '@/pages/chat/components/constants';
   import FileApi from '@/sheep/api/infra/file';
   import KeFuApi from '@/sheep/api/promotion/kefu';
   import { useWebSocket } from '@/sheep/hooks/useWebSocket';
@@ -85,11 +84,10 @@
 
   // 点击工具栏开关
   function onTools(mode) {
-    // TODO puhui999: socket 连接不稳定先注释掉
-    // if (!socketState.value.isConnect) {
-    //   sheep.$helper.toast(socketState.value.tip || '您已掉线！请返回重试');
-    //   return;
-    // }
+    if (isReconnecting.value) {
+      sheep.$helper.toast( '您已掉线！请返回重试');
+      return;
+    }
 
     if (!chat.toolsMode || chat.toolsMode === mode) {
       chat.showTools = !chat.showTools;
@@ -141,25 +139,32 @@
   }
 
   //======================= 聊天工具相关 end =======================
-  useWebSocket({
+  const {options} = useWebSocket({
     // 连接成功
-    onConnected:()=>{
-
-    },
-    // 连接关闭
-    onClosed:()=>{
-
+    onConnected:async () => {
+      await getMessageList()
     },
     // 收到消息
-    onMessage:(data)=>{
+    onMessage:async (data) => {
       console.log(data);
+      const type = data.type
+      if (!type) {
+        console.error('未知的消息类型：' + data.value)
+        return
+      }
+      // 2.2 消息类型：KEFU_MESSAGE_TYPE
+      if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_TYPE) {
+        // 刷新消息列表
+        await getMessageList()
+        return
+      }
+      // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ
+      if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_ADMIN_READ) {
+        console.log("管理员已读消息");
+      }
     }
   });
-  onLoad(async () => {
-    await nextTick()
-    // 加载历史消息
-    await getMessageList()
-  });
+  const isReconnecting = toRefs(options).isReconnecting
 </script>
 
 <style scoped lang="scss">
