@@ -7,7 +7,7 @@
     <!--  覆盖头部导航栏背景颜色  -->
     <div class="page-bg" :style="{ height: sys_navBar + 'px' }"></div>
     <!--  聊天区域  -->
-    <ChatBox ref="chatBoxRef"></ChatBox>
+    <MessageList ref="messageListRef"></MessageList>
     <!--  消息发送区域  -->
     <su-fixed bottom>
       <message-input v-model="chat.msg" @on-tools="onTools" @send-message="onSendMessage"></message-input>
@@ -28,13 +28,13 @@
 </template>
 
 <script setup>
-  import ChatBox from './components/chatBox.vue';
+  import MessageList from './components/messageList.vue';
   import { reactive, ref, toRefs } from 'vue';
   import sheep from '@/sheep';
   import ToolsPopup from '@/pages/chat/components/toolsPopup.vue';
   import MessageInput from '@/pages/chat/components/messageInput.vue';
   import SelectPopup from '@/pages/chat/components/select-popup.vue';
-  import { KeFuMessageContentTypeEnum, WebSocketMessageTypeConstants } from '@/pages/chat/components/constants';
+  import { KeFuMessageContentTypeEnum, WebSocketMessageTypeConstants } from '@/pages/chat/util/constants';
   import FileApi from '@/sheep/api/infra/file';
   import KeFuApi from '@/sheep/api/promotion/kefu';
   import { useWebSocket } from '@/sheep/hooks/useWebSocket';
@@ -59,17 +59,14 @@
         content: chat.msg,
       };
       await KeFuApi.sendKefuMessage(data);
-      await getMessageList()
+      await messageListRef.value.refreshMessageList()
       chat.msg = '';
     } finally {
       chat.showTools = false;
     }
   }
 
-  const chatBoxRef = ref()
-  const getMessageList = async () => {
-    await chatBoxRef.value.getMessageList(1)
-  }
+  const messageListRef = ref()
 
   //======================= 聊天工具相关 start =======================
 
@@ -131,7 +128,7 @@
       // 发送消息
       // scrollBottom();
       await KeFuApi.sendKefuMessage(msg);
-      await getMessageList()
+      await messageListRef.value.refreshMessageList()
       chat.showTools = false;
       chat.showSelect = false;
       chat.selectMode = '';
@@ -142,11 +139,10 @@
   const {options} = useWebSocket({
     // 连接成功
     onConnected:async () => {
-      await getMessageList()
+      await messageListRef.value.getMessageList()
     },
     // 收到消息
     onMessage:async (data) => {
-      console.log(data);
       const type = data.type
       if (!type) {
         console.error('未知的消息类型：' + data.value)
@@ -155,7 +151,7 @@
       // 2.2 消息类型：KEFU_MESSAGE_TYPE
       if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_TYPE) {
         // 刷新消息列表
-        await getMessageList()
+        await messageListRef.value.refreshMessageList()
         return
       }
       // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ

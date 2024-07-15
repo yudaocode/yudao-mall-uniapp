@@ -71,7 +71,7 @@
   /**
    * 聊天工具
    */
-  import { emojiPage } from '@/pages/chat/emoji';
+  import { emojiPage } from '@/pages/chat/util/emoji';
   import sheep from '@/sheep';
 
   const props = defineProps({
