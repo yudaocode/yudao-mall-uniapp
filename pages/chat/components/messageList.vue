@@ -6,8 +6,9 @@
       :scroll-y="true"
       :scroll-top="currentTop"
       @scroll="handleScroll"
+      @scrolltolower="handleScrolltolower"
     >
-      <view ref="innerRef" v-if="refreshContent" style="width: 100%; padding-bottom: 10rpx">
+      <view ref="messageViewRef" class="messageView" v-if="refreshContent" style="width: 100%; padding-bottom: 10rpx">
         <!--  消息渲染  -->
         <view class="message-item ss-flex-col scroll-item" v-for="(item, index) in getMessageList0" :key="item.id">
           <view class="ss-flex ss-row-center ss-col-center">
@@ -109,23 +110,25 @@
 </template>
 
 <script setup>
+  import { computed, getCurrentInstance, nextTick, reactive, ref, unref } from 'vue';
+  import dayjs from 'dayjs';
+  import _ from 'lodash'
   import { KeFuMessageContentTypeEnum, UserTypeEnum } from '@/pages/chat/util/constants';
+  import { emojiList } from '@/pages/chat/util/emoji';
+  import { isEmpty } from '@/sheep/helper/utils';
   import sheep from '@/sheep';
   import KeFuApi from '@/sheep/api/promotion/kefu';
   import { formatDate } from '@/sheep/util';
   import GoodsItem from '@/pages/chat/components/goods.vue';
   import OrderItem from '@/pages/chat/components/order.vue';
-  import { computed, nextTick, reactive, ref, unref } from 'vue';
-  import dayjs from 'dayjs';
-  import { emojiList } from '@/pages/chat/util/emoji';
-  import { isEmpty } from '@/sheep/helper/utils';
 
   const { safeArea } = sheep.$platform.device;
   const pageHeight = safeArea.height - 44 - 35 - 50;
+  const vm = getCurrentInstance();
   const getMessageContent = computed(() => (item) => JSON.parse(item.content)); // 解析消息内容
   const messageList = ref([]); // 消息列表
   const currentTop = ref(0); // 当前距顶位置
-  const showNewMessageTip = ref(true); // 显示有新消息提示
+  const showNewMessageTip = ref(false); // 显示有新消息提示
   const queryParams = reactive({
     pageNo: 1,
     pageSize: 10,
@@ -177,7 +180,7 @@
   defineExpose({ getMessageList, refreshMessageList });
 
   /** 滚动到底部 */
-  const innerRef = ref();
+  const messageViewRef = ref();
   const scrollToBottom = async () => {
     // 1. 首次加载时滚动到最新消息，如果加载的是历史消息则不滚动
     if (loadHistory.value) {
@@ -185,7 +188,12 @@
     }
     // 2. 滚动到最新消息，关闭新消息提示
     await nextTick();
-    currentTop.value = innerRef.value.$el.clientHeight;
+    // #ifdef MP
+    currentTop.value = await getMessageViewHeight();
+    // #endif
+    // #ifdef H5
+    currentTop.value = messageViewRef.value.$el.clientHeight;
+    // #endif
     showNewMessageTip.value = false;
   };
 
@@ -202,13 +210,22 @@
       return;
     }
     // 触顶自动加载下一页数据
+    console.log(event.detail.scrollTop);
     if (event.detail.scrollTop === 0) {
       await handleOldMessage();
+      // 防抖
+      // _.debounce(handleOldMessage, 200)
     }
   };
   const handleOldMessage = async () => {
     // 记录已有页面高度
-    const oldPageHeight = innerRef.value.$el.clientHeight;
+    let oldPageHeight = 0;
+    // #ifdef MP
+    oldPageHeight = await getMessageViewHeight();
+    // #endif
+    // #ifdef H5
+    oldPageHeight = messageViewRef.value.$el.clientHeight;
+    // #endif
     if (!oldPageHeight) {
       return;
     }
@@ -217,10 +234,35 @@
     queryParams.pageNo += 1;
     await getMessageList();
     // 等页面加载完后，获得上一页最后一条消息的位置，控制滚动到它所在位置
-    currentTop.value = innerRef.value.$el.clientHeight - oldPageHeight;
+    // #ifdef MP
+    // TODO puhui999: 微信滚动条定位还是有点问题，页面会闪烁
+    currentTop.value = (await getMessageViewHeight()) - oldPageHeight - 127;
+    // #endif
+    // #ifdef H5
+    currentTop.value = messageViewRef.value.$el.clientHeight - oldPageHeight;
+    // #endif
+  };
+  // 触底事件
+  const handleScrolltolower = () => {
+    // refreshContent.value = false;
+    // loadHistory.value = false;
+    // // messageList.value = messageList.value.slice(0, 10)
+  };
+
+  /**
+   * 获得消息列表高度
+   */
+  const getMessageViewHeight = () => {
+    return new Promise((resolve, reject) => {
+      uni.createSelectorQuery().in(vm).select('.messageView').boundingClientRect((rect) => {
+        console.log(rect);
+        resolve(rect.height);
+      }).exec();
+    });
   };
 
   //======================= 工具 =======================
+
   const showTime = computed(() => (item, index) => {
     if (unref(messageList.value)[index + 1]) {
       let dateString = dayjs(unref(messageList.value)[index + 1].createTime).fromNow();
