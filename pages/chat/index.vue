@@ -1,17 +1,13 @@
 <template>
-  <s-layout class="chat-wrap" title="客服" navbar="inner">
-    <!-- 头部连接状态展示  -->
-    <div class="status">
-      {{ !isReconnecting ? "连接客服成功" : '会话重连中！！！' }}
-    </div>
+  <s-layout class="chat-wrap" :title="!isReconnecting ? '连接客服成功' : '会话重连中'" navbar="inner">
     <!--  覆盖头部导航栏背景颜色  -->
     <div class="page-bg" :style="{ height: sys_navBar + 'px' }"></div>
     <!--  聊天区域  -->
-    <MessageList ref="messageListRef"></MessageList>
-    <!--  消息发送区域  -->
-    <su-fixed bottom>
-      <message-input v-model="chat.msg" @on-tools="onTools" @send-message="onSendMessage"></message-input>
-    </su-fixed>
+    <MessageList ref="messageListRef">
+      <template #bottom>
+        <message-input v-model="chat.msg" @on-tools="onTools" @send-message="onSendMessage"></message-input>
+      </template>
+    </MessageList>
     <!--  聊天工具  -->
     <tools-popup :show-tools="chat.showTools" :tools-mode="chat.toolsMode" @close="handleToolsClose"
                  @on-emoji="onEmoji" @image-select="onSelect" @on-show-select="onShowSelect">
@@ -28,7 +24,7 @@
 </template>
 
 <script setup>
-  import MessageList from './components/messageList.vue';
+  import MessageList from '@/pages/chat/components/messageList.vue';
   import { reactive, ref, toRefs } from 'vue';
   import sheep from '@/sheep';
   import ToolsPopup from '@/pages/chat/components/toolsPopup.vue';
@@ -59,14 +55,14 @@
         content: chat.msg,
       };
       await KeFuApi.sendKefuMessage(data);
-      await messageListRef.value.refreshMessageList()
+      await messageListRef.value.refreshMessageList();
       chat.msg = '';
     } finally {
       chat.showTools = false;
     }
   }
 
-  const messageListRef = ref()
+  const messageListRef = ref();
 
   //======================= 聊天工具相关 start =======================
 
@@ -82,7 +78,7 @@
   // 点击工具栏开关
   function onTools(mode) {
     if (isReconnecting.value) {
-      sheep.$helper.toast( '您已掉线！请返回重试');
+      sheep.$helper.toast('您已掉线！请返回重试');
       return;
     }
 
@@ -114,7 +110,7 @@
       case 'goods':
         msg = {
           contentType: KeFuMessageContentTypeEnum.PRODUCT,
-          content: JSON.stringify(data)
+          content: JSON.stringify(data),
         };
         break;
       case 'order':
@@ -128,7 +124,7 @@
       // 发送消息
       // scrollBottom();
       await KeFuApi.sendKefuMessage(msg);
-      await messageListRef.value.refreshMessageList()
+      await messageListRef.value.refreshMessageList();
       chat.showTools = false;
       chat.showSelect = false;
       chat.selectMode = '';
@@ -136,31 +132,30 @@
   }
 
   //======================= 聊天工具相关 end =======================
-  const {options} = useWebSocket({
+  const { options } = useWebSocket({
     // 连接成功
-    onConnected:async () => {
-      await messageListRef.value.getMessageList()
+    onConnected: async () => {
     },
     // 收到消息
-    onMessage:async (data) => {
-      const type = data.type
+    onMessage: async (data) => {
+      const type = data.type;
       if (!type) {
-        console.error('未知的消息类型：' + data.value)
-        return
+        console.error('未知的消息类型：' + data.value);
+        return;
       }
       // 2.2 消息类型：KEFU_MESSAGE_TYPE
       if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_TYPE) {
         // 刷新消息列表
-        await messageListRef.value.refreshMessageList()
-        return
+        await messageListRef.value.refreshMessageList(JSON.parse(data.content));
+        return;
       }
       // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ
       if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_ADMIN_READ) {
-        console.log("管理员已读消息");
+        console.log('管理员已读消息');
       }
-    }
+    },
   });
-  const isReconnecting = toRefs(options).isReconnecting
+  const isReconnecting = toRefs(options).isReconnecting; // 重连状态
 </script>
 
 <style scoped lang="scss">
