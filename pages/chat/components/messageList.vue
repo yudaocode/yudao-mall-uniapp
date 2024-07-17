@@ -5,6 +5,10 @@
             safe-area-inset-bottom bottom-bg-color="#f8f8f8" :back-to-top-style="backToTopStyle"
             :auto-show-back-to-top="showNewMessageTip" @backToTopClick="onBackToTopClick"
             @scrolltoupper="onScrollToUpper" @query="queryList">
+    <template #top>
+      <!-- 撑一下顶部导航 -->
+      <view style="height: 45px"></view>
+    </template>
     <!-- style="transform: scaleY(-1)"必须写，否则会导致列表倒置！！！ -->
     <!-- 注意不要直接在chat-item组件标签上设置style，因为在微信小程序中是无效的，请包一层view -->
     <template #cell="{item,index}">

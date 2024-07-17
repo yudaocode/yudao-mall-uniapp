@@ -166,8 +166,7 @@
       position: absolute;
       top: 0;
       left: 0;
-      background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
-      background-size: 750rpx 100%;
+      background-color: var(--ui-BG-Main);
       z-index: 1;
     }
 
