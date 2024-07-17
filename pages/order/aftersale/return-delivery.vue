@@ -6,14 +6,15 @@
 					<view class='list borRadius14'>
 						<view class='item acea-row row-between-wrapper' style="display: flex;align-items: center;">
 							<view>物流公司</view>
-							<picker mode='selector' class='num' @change="bindPickerChange" :value="state.expressIndex"
-                      :range="state.expresses" range-key="name">
-								<view class="picker acea-row row-between-wrapper">
-									<view class='reason'>{{ state.expresses[state.expressIndex].name }}</view>
-                  <!-- TODO 芋艿：这里样式有问题，少了 > 按钮 -->
-									<text class='iconfont icon-jiantou' />
-								</view>
-							</picker>
+							<view v-if="state.expresses.length>0" style="flex:1">
+								<picker mode='selector' class='num' @change="bindPickerChange" :value="state.expressIndex"
+									:range="state.expresses" range-key="name">
+									<view class="picker acea-row row-between-wrapper" style="display: flex;justify-content: space-between;">
+										<view class='reason'>{{ state.expresses[state.expressIndex].name }}</view>
+										<text class='iconfont _icon-forward' />
+									</view>
+								</picker>
+							</view>
 						</view>
 						<view class='item textarea acea-row row-between' style="display: flex;align-items: center;">
 							<view>物流单号</view>
