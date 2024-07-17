@@ -99,14 +99,8 @@
 </template>
 
 <script setup>
-	import {
-		reactive,
-		computed
-	} from 'vue';
-	import {
-		onLoad,
-		onPageScroll
-	} from '@dcloudio/uni-app';
+	import { reactive, computed } from 'vue';
+	import { onLoad, onPageScroll } from '@dcloudio/uni-app';
 	import sheep from '@/sheep';
 	import CouponApi from '@/sheep/api/promotion/coupon';
 	import ActivityApi from '@/sheep/api/promotion/activity';
@@ -124,7 +118,8 @@
 
 	onPageScroll(() => {});
 
-	const state = reactive({
+  const isLogin = computed(() => sheep.$store('user').isLogin);
+  const state = reactive({
 		goodsId: 0,
 		skeletonLoading: true, // SPU 加载中
 		goodsInfo: {}, // SPU 信息
@@ -235,12 +230,14 @@
 			state.goodsInfo = res.data;
 
       // 加载是否收藏
-      FavoriteApi.isFavoriteExists(state.goodsId, 'goods').then((res) => {
-        if (res.code !== 0) {
-          return;
-        }
-        state.goodsInfo.favorite = res.data;
-      });
+      if (isLogin.value) {
+        FavoriteApi.isFavoriteExists(state.goodsId, 'goods').then((res) => {
+          if (res.code !== 0) {
+            return;
+          }
+          state.goodsInfo.favorite = res.data;
+        });
+      }
 		});
 
 		// 2. 加载优惠劵信息
