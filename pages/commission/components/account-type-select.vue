@@ -62,20 +62,20 @@
       value: '1',
     },
     {
+      icon: '/static/img/shop/pay/bank.png',
+      title: '银行卡转账',
+      value: '2',
+    },
+    {
       icon: '/static/img/shop/pay/wechat.png',
       title: '微信零钱',
-      value: '2',
+      value: '3',
     },
     {
       icon: '/static/img/shop/pay/alipay.png',
       title: '支付宝账户',
-      value: '3',
-    },
-    {
-      icon: '/static/img/shop/pay/bank.png',
-      title: '银行卡转账',
       value: '4',
-    },
+    }
   ];
 
   function onChange(e) {

@@ -26,9 +26,9 @@
         <view class="bank-list ss-flex ss-col-center" @tap="onAccountSelect(true)">
           <view v-if="!state.accountInfo.type" class="empty-text">请选择提现方式</view>
           <view v-if="state.accountInfo.type === '1'" class="empty-text">钱包余额</view>
-          <view v-if="state.accountInfo.type === '2'" class="empty-text">微信零钱</view>
-          <view v-if="state.accountInfo.type === '3'" class="empty-text">支付宝账户</view>
-          <view v-if="state.accountInfo.type === '4'" class="empty-text">银行卡转账</view>
+          <view v-if="state.accountInfo.type === '2'" class="empty-text">银行卡转账</view>
+          <view v-if="state.accountInfo.type === '3'" class="empty-text">微信零钱</view>
+          <view v-if="state.accountInfo.type === '4'" class="empty-text">支付宝账户</view>
           <text class="cicon-forward" />
         </view>
       </view>
@@ -61,10 +61,10 @@
         />
       </view>
       <!-- 收款码 -->
-      <view class="card-title" v-show="['2', '3'].includes(state.accountInfo.type)">收款码</view>
+      <view class="card-title" v-show="['3', '4'].includes(state.accountInfo.type)">收款码</view>
       <view
         class="input-box ss-flex ss-col-center"
-        v-show="['2', '3'].includes(state.accountInfo.type)"
+        v-show="['3', '4'].includes(state.accountInfo.type)"
       >
         <view class="unit" />
         <view class="upload-img">
@@ -78,10 +78,10 @@
         </view>
       </view>
       <!-- 持卡人姓名 -->
-      <view class="card-title" v-show="state.accountInfo.type === '4'">持卡人</view>
+      <view class="card-title" v-show="state.accountInfo.type === '2'">持卡人</view>
       <view
         class="input-box ss-flex ss-col-center border-bottom"
-        v-show="state.accountInfo.type === '4'"
+        v-show="state.accountInfo.type === '2'"
       >
         <view class="unit" />
         <uni-easyinput
@@ -92,10 +92,10 @@
         />
       </view>
       <!-- 提现银行 -->
-      <view class="card-title" v-show="state.accountInfo.type === '4'">提现银行</view>
+      <view class="card-title" v-show="state.accountInfo.type === '2'">提现银行</view>
       <view
         class="input-box ss-flex ss-col-center border-bottom"
-        v-show="state.accountInfo.type === '4'"
+        v-show="state.accountInfo.type === '2'"
       >
         <view class="unit" />
         <uni-easyinput
@@ -106,10 +106,10 @@
         />
       </view>
       <!-- 开户地址 -->
-      <view class="card-title" v-show="state.accountInfo.type === '4'">开户地址</view>
+      <view class="card-title" v-show="state.accountInfo.type === '2'">开户地址</view>
       <view
         class="input-box ss-flex ss-col-center border-bottom"
-        v-show="state.accountInfo.type === '4'"
+        v-show="state.accountInfo.type === '2'"
       >
         <view class="unit" />
         <uni-easyinput
