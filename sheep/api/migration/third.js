@@ -18,6 +18,7 @@ export default {
       }),
 
     // 获取微信小程序码
+    // TODO @puhui999：这个接口，挪到 /Users/yunai/Java/yudao-mall-uniapp/sheep/api/member/social.js
     getWxacode: async (path, query) => {
       return await request({
         url: '/member/social-user/wxa-qrcode',
