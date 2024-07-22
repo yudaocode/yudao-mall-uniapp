@@ -65,7 +65,12 @@ const getShareInfo = (
   return shareInfo;
 };
 
-// 构造spm分享参数
+/**
+ * 构造 spm 分享参数
+ *
+ * @param params json 格式，其中包含：1）shareId 分享用户的编号；2）page 页面类型；3）query 页面 ID（参数）；4）platform 平台类型；5）from 分享来源类型。
+ * @return 分享串 `spm=${shareId}.${page}.${query}.${platform}.${from}`
+ */
 const buildSpmQuery = (params) => {
   const user = $store('user');
   let shareId = '0'; // 设置分享者用户ID
@@ -87,7 +92,7 @@ const buildSpmQuery = (params) => {
   if (typeof params.from !== 'undefined') {
     from = platformMap.indexOf(params.from) + 1;
   }
-  //spmParams = ...  可按需扩展
+  // spmParams = ...  可按需扩展
   return `spm=${shareId}.${page}.${query}.${platform}.${from}`;
 };
 

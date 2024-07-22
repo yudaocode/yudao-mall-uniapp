@@ -11,9 +11,10 @@ console.log(`[芋道商城 ${version}]  http://doc.iocoder.cn`);
 
 export const apiPath = import.meta.env.SHOPRO_API_PATH;
 export const staticUrl = import.meta.env.SHOPRO_STATIC_URL;
-
+export const websocketPath = import.meta.env.SHOPRO_WEBSOCKET_PATH;
 export default {
   baseUrl,
   apiPath,
   staticUrl,
+  websocketPath
 };

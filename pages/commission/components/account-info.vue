@@ -16,7 +16,7 @@
             />
           </button>
         </view>
-        <view class="ss-flex" @tap="sheep.$router.go('/pages/user/wallet/commission')">
+        <view class="ss-flex" @tap="sheep.$router.go('/pages/commission/wallet')">
           <view class="header-title ss-m-r-4">查看明细</view>
           <text class="cicon-play-arrow" />
         </view>

@@ -80,15 +80,6 @@ const user = defineStore({
       });
     },
 
-    // 添加分享记录
-    // TODO 芋艿：整理下；
-    // async addShareLog(params) {
-    // 	const {
-    // 		error
-    // 	} = await userApi.addShareLog(params);
-    // 	if (error === 0) uni.removeStorageSync('shareLog');
-    // },
-
     // 设置 token
     setToken(token = '', refreshToken = '') {
       if (token === '') {
@@ -153,14 +144,6 @@ const user = defineStore({
 
       // 绑定推广员
       $share.bindBrokerageUser()
-      // 添加分享记录
-      // TODO 芋艿：整理下；
-      // const shareLog = uni.getStorageSync('shareLog');
-      // if (!isEmpty(shareLog)) {
-      // 	this.addShareLog({
-      // 		...shareLog,
-      // 	});
-      // }
     },
 
     // 登出系统

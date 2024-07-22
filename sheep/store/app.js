@@ -28,7 +28,6 @@ const app = defineStore({
       },
       bind_mobile: 0, // 登陆后绑定手机号提醒 (弱提醒，可手动关闭)
     },
-    chat: {},
     template: {
       // 店铺装修模板
       basic: {}, // 基本信息
@@ -73,7 +72,7 @@ const app = defineStore({
         this.platform = {
           share: {
             methods: ["poster", "link"],
-            linkAddress: "https://shopro.sheepjs.com/#/",
+            linkAddress: "http://127.0.0.1:3000", // TODO 芋艿：可以考虑改到 .env 那
             posterInfo: {
               "user_bg": "/static/img/shop/config/user-poster-bg.png",
               "goods_bg": "/static/img/shop/config/goods-poster-bg.png",
@@ -82,10 +81,6 @@ const app = defineStore({
           },
           bind_mobile: 0
         };
-        this.chat = {
-          chat_domain: "https://api.shopro.sheepjs.com/chat",
-          room_id: "admin"
-        }
         this.has_wechat_trade_managed = 0;
 
         // 加载主题

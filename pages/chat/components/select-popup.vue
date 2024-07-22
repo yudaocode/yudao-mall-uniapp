@@ -14,11 +14,11 @@
         <view
           class="item"
           v-for="item in state.pagination.data"
-          :key="item"
+          :key="item.id"
           @tap="emits('select', { type: mode, data: item })"
         >
           <template v-if="mode == 'goods'">
-            <GoodsItem :goodsData="item.goods" />
+            <GoodsItem :goodsData="item" />
           </template>
           <template v-if="mode == 'order'">
             <OrderItem :orderData="item" />
@@ -32,7 +32,6 @@
 
 <script setup>
   import { reactive, watch } from 'vue';
-  import sheep from '@/sheep';
   import _ from 'lodash';
   import GoodsItem from './goods.vue';
   import OrderItem from './order.vue';
@@ -83,7 +82,7 @@
             page,
             list_rows,
           });
-    let orderList = _.concat(state.pagination.data, res.data.data);
+    let orderList = _.concat(state.pagination.data, res.data.list);
     state.pagination = {
       ...res.data,
       data: orderList,
