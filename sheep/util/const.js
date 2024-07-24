@@ -56,6 +56,13 @@ export const TimeStatusEnum = {
     END: '已结束',
 }
 
+// TODO 订阅模版枚举
+export const SubscribeTemplate = {
+  ORDER_AFTERSALE_CHANGE: "售后进度通知",
+  MONEY_CHANGE: "充值成功通知"
+}
+
+
 export const getTimeStatusEnum = (startTime, endTime) => {
     const now = dayjs();
     if (now.isBefore(startTime)) {

@@ -4,13 +4,10 @@ export default {
   // 微信相关
   wechat: {
     // 小程序订阅消息
-    subscribeTemplate: (params) =>
+    subscribeTemplate: () =>
       request({
-        url: 'third/wechat/subscribeTemplate',
+        url: '/member/social-user/get-subscribe-template',
         method: 'GET',
-        params: {
-          platform: 'miniProgram',
-        },
         custom: {
           showError: false,
           showLoading: false,

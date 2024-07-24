@@ -130,6 +130,7 @@
   import TradeConfigApi from '@/sheep/api/trade/config';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import AfterSaleApi from '@/sheep/api/trade/afterSale';
+  import { SubscribeTemplate } from '@/sheep/util/const';
 
   const form = ref(null);
   const state = reactive({
@@ -165,7 +166,7 @@
   // 提交表单
   async function submit() {
     // #ifdef MP
-    sheep.$platform.useProvider('wechat').subscribeMessage('order_aftersale_change');
+    sheep.$platform.useProvider('wechat').subscribeMessage(SubscribeTemplate.ORDER_AFTERSALE_CHANGE);
     // #endif
     let data = {
       orderItemId: state.itemId,
