@@ -1,4 +1,4 @@
-import third from '@/sheep/api/migration/third'
+import third from '@/sheep/api/migration/third';
 import AuthUtil from '@/sheep/api/member/auth';
 import SocialApi from '@/sheep/api/member/social';
 import UserApi from '@/sheep/api/member/user';
@@ -128,14 +128,14 @@ async function getInfo() {
 const checkUpdate = async (silence = true) => {
   if (uni.canIUse('getUpdateManager')) {
     const updateManager = uni.getUpdateManager();
-    updateManager.onCheckForUpdate(function (res) {
+    updateManager.onCheckForUpdate(function(res) {
       // 请求完新版本信息的回调
       if (res.hasUpdate) {
-        updateManager.onUpdateReady(function () {
+        updateManager.onUpdateReady(function() {
           uni.showModal({
             title: '更新提示',
             content: '新版本已经准备好，是否重启应用？',
-            success: function (res) {
+            success: function(res) {
               if (res.confirm) {
                 // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
                 updateManager.applyUpdate();
@@ -143,7 +143,7 @@ const checkUpdate = async (silence = true) => {
             },
           });
         });
-        updateManager.onUpdateFailed(function () {
+        updateManager.onUpdateFailed(function() {
           // 新的版本下载失败
           // uni.showModal({
           //   title: '已经有新版本了哟~',
@@ -164,8 +164,8 @@ const checkUpdate = async (silence = true) => {
 
 // 获取订阅消息模板
 async function getSubscribeTemplate() {
-  const { error, data } = await third.wechat.subscribeTemplate();
-  if (error === 0) {
+  const { code, data } = await third.wechat.subscribeTemplate();
+  if (code === 0) {
     subscribeEventList = data;
   }
 }
@@ -174,11 +174,17 @@ async function getSubscribeTemplate() {
 function subscribeMessage(event) {
   let tmplIds = [];
   if (typeof event === 'string') {
-    tmplIds.push(subscribeEventList[event]);
+    const temp = subscribeEventList.find(item => item.title.includes(event));
+    if (temp) {
+      tmplIds.push(temp.priTmplId);
+    }
   }
   if (typeof event === 'object') {
-    event.forEach((item) => {
-      if (typeof subscribeEventList[item] !== 'undefined') tmplIds.push(subscribeEventList[item]);
+    event.forEach((e) => {
+      const temp = subscribeEventList.find(item => item.title.includes(e));
+      if (temp) {
+        tmplIds.push(temp.priTmplId);
+      }
     });
   }
   if (tmplIds.length === 0) return;
@@ -201,5 +207,5 @@ export default {
   getInfo,
   getOpenid,
   subscribeMessage,
-  checkUpdate
+  checkUpdate,
 };
