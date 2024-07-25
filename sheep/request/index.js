@@ -4,7 +4,7 @@
  */
 
 import Request from 'luch-request';
-import { baseUrl, apiPath } from '@/sheep/config';
+import { baseUrl, apiPath, tenantId } from '@/sheep/config';
 import $store from '@/sheep/store';
 import $platform from '@/sheep/platform';
 import {
@@ -96,8 +96,8 @@ http.interceptors.request.use(
       config.header['Authorization'] = token;
     }
 		// TODO 芋艿：特殊处理
-    config.header['Accept'] = '*/*'
-    config.header['tenant-id'] = '1';
+    config.header['Accept'] = '*/*';
+    config.header['tenant-id'] = tenantId;
     config.header['terminal'] = '20';
     // config.header['Authorization'] = 'Bearer test247';
 		return config;
