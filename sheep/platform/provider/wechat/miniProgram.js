@@ -164,7 +164,7 @@ const checkUpdate = async (silence = true) => {
 
 // 获取订阅消息模板
 async function getSubscribeTemplate() {
-  const { code, data } = await third.wechat.subscribeTemplate();
+  const { code, data } = await third.wechat.getSubscribeTemplateList();
   if (code === 0) {
     subscribeEventList = data;
   }
@@ -176,14 +176,14 @@ function subscribeMessage(event) {
   if (typeof event === 'string') {
     const temp = subscribeEventList.find(item => item.title.includes(event));
     if (temp) {
-      tmplIds.push(temp.priTmplId);
+      tmplIds.push(temp.id);
     }
   }
   if (typeof event === 'object') {
     event.forEach((e) => {
       const temp = subscribeEventList.find(item => item.title.includes(e));
       if (temp) {
-        tmplIds.push(temp.priTmplId);
+        tmplIds.push(temp.id);
       }
     });
   }
