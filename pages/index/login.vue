@@ -14,13 +14,14 @@
     new URLSearchParams(location.search).forEach((value, key) => {
       options[key] = value;
     });
+    // 执行登录 or 绑定，注意需要 await 绑定
     const event = options.event;
     const code = options.code;
     const state = options.state;
     if (event === 'login') { // 场景一：登录
-      const res = await sheep.$platform.useProvider().login(code, state);
+      await sheep.$platform.useProvider().login(code, state);
     } else if (event === 'bind') { // 场景二：绑定
-      sheep.$platform.useProvider().bind(code, state);
+      await sheep.$platform.useProvider().bind(code, state);
     }
 
     // 检测 H5 登录回调
