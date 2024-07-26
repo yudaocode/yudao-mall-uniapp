@@ -9,12 +9,13 @@ import AuthUtil from '@/sheep/api/member/auth';
 export function showAuthModal(type = 'smsLogin') {
   const modal = $store('modal');
   if (modal.auth !== '') {
-    closeAuthModal();
+    // 注意：延迟修改，保证下面的 closeAuthModal 先执行掉
     setTimeout(() => {
       modal.$patch((state) => {
         state.auth = type;
       });
-    }, 100);
+    }, 200);
+    closeAuthModal();
   } else {
     modal.$patch((state) => {
       state.auth = type;
