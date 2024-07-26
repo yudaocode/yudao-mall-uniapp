@@ -216,6 +216,7 @@
     const { code, data } = await OrderApi.createOrder({
       items: state.orderPayload.items,
       couponId: state.orderPayload.couponId,
+      remark: state.orderPayload.remark,
       addressId: state.addressInfo.id,
       deliveryType: 1, // TODO 芋艿：需要支持【门店自提】
       pointStatus: false, // TODO 芋艿：需要支持【积分选择】
