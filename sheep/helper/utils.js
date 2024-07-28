@@ -45,7 +45,7 @@ export function last(data) {
 }
 
 export function cloneDeep(obj) {
-  const d = isArray(obj) ? obj : {};
+  const d = isArray(obj) ? [...obj] : {};
 
   if (isObject(obj)) {
     for (const key in obj) {
