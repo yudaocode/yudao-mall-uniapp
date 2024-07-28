@@ -272,7 +272,7 @@
 
   // 复制
   const onCopy = () => {
-    sheep.$helper.copyText(state.orderInfo.sn);
+    sheep.$helper.copyText(state.orderInfo.no);
   };
 
   // 去支付

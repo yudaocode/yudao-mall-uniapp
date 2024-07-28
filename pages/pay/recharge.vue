@@ -47,6 +47,7 @@
 	import { onLoad } from '@dcloudio/uni-app';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import PayWalletApi from '@/sheep/api/pay/wallet';
+  import { SubscribeTemplate } from '@/sheep/util/const';
 
 	const userWallet = computed(() => sheep.$store('user').userWallet);
 	const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
@@ -73,20 +74,20 @@
 
   // 发起支付
 	async function onConfirm() {
-		const { code, data } = await PayWalletApi.createWalletRecharge({
-			packageId: state.packageList.find((item) => fen2yuan(item.payPrice) === state.recharge_money)?.id,
-			payPrice: state.recharge_money * 100
-		});
-		if (code !== 0) {
-			return;
-		}
+		// const { code, data } = await PayWalletApi.createWalletRecharge({
+		// 	packageId: state.packageList.find((item) => fen2yuan(item.payPrice) === state.recharge_money)?.id,
+		// 	payPrice: state.recharge_money * 100
+		// });
+		// if (code !== 0) {
+		// 	return;
+		// }
     // #ifdef MP
-    sheep.$platform.useProvider('wechat').subscribeMessage('money_change');
+    sheep.$platform.useProvider('wechat').subscribeMessage(SubscribeTemplate.MONEY_CHANGE);
     // #endif
-    sheep.$router.go('/pages/pay/index', {
-      id: data.payOrderId,
-      orderType: 'recharge'
-    });
+    // sheep.$router.go('/pages/pay/index', {
+    //   id: data.payOrderId,
+    //   orderType: 'recharge'
+    // });
 	}
 
 	onLoad(() => {

@@ -1,4 +1,4 @@
-import { baseUrl, apiPath } from '@/sheep/config';
+import { baseUrl, apiPath, tenantId } from '@/sheep/config';
 
 const FileApi = {
   // 上传文件
@@ -15,8 +15,8 @@ const FileApi = {
         name: 'file',
         header: {
           // Accept: 'text/json',
-          Accept : '*/*',
-          'tenant-id' :'1',
+          Accept: '*/*',
+          'tenant-id': tenantId,
           // Authorization:  'Bearer test247',
         },
         success: (uploadFileRes) => {
