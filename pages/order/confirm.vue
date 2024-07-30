@@ -166,6 +166,7 @@
   import OrderApi from '@/sheep/api/trade/order';
   import CouponApi from '@/sheep/api/promotion/coupon';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
+  import { SubscribeTemplate } from '@/sheep/util/const';
 
   const state = reactive({
     orderPayload: {},
@@ -230,6 +231,11 @@
     if (state.orderPayload.items[0].cartId > 0) {
       sheep.$store('cart').getList();
     }
+
+    // #ifdef MP
+    sheep.$platform.useProvider('wechat').subscribeMessage(SubscribeTemplate.DELIVERY_ORDER);
+    // #endif
+
     // 跳转到支付页面
     sheep.$router.redirect('/pages/pay/index', {
       id: data.payOrderId,
