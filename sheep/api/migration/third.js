@@ -4,9 +4,9 @@ export default {
   // 微信相关
   wechat: {
     // 小程序订阅消息
-    subscribeTemplate: () =>
+    getSubscribeTemplateList: () =>
       request({
-        url: '/member/social-user/get-subscribe-template',
+        url: '/member/social-user/get-subscribe-template-list',
         method: 'GET',
         custom: {
           showError: false,

@@ -59,7 +59,9 @@ export const TimeStatusEnum = {
 // TODO 订阅模版枚举
 export const SubscribeTemplate = {
   ORDER_AFTERSALE_CHANGE: "售后进度通知",
-  MONEY_CHANGE: "充值成功通知"
+  WALLET_RECHARGER_PAID: "充值成功通知",
+  WALLET_RECHARGE_REFUNDED: "退款申请通知",
+  DELIVERY_ORDER: "订单发货通知",
 }
 
 
