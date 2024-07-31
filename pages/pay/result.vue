@@ -51,7 +51,7 @@
 
       <!-- TODO 芋艿：订阅 -->
       <!-- #ifdef MP -->
-      <view class="subscribe-box ss-flex ss-m-t-44">
+      <view class="subscribe-box ss-flex ss-m-t-44" v-if="showSubscribeBtn">
         <image class="subscribe-img" :src="sheep.$url.static('/static/img/shop/order/cargo.png')" />
         <view class="subscribe-title ss-m-r-48 ss-m-l-16">获取实时发货信息与订单状态</view>
         <view class="subscribe-start" @tap="subscribeMessage">立即订阅</view>
@@ -63,12 +63,13 @@
 
 <script setup>
   import { onLoad, onHide, onShow } from '@dcloudio/uni-app';
-  import { reactive, computed } from 'vue';
+  import { reactive, computed, ref } from 'vue';
   import { isEmpty } from 'lodash';
   import sheep from '@/sheep';
   import PayOrderApi from '@/sheep/api/pay/order';
-  import { fen2yuan } from '../../sheep/hooks/useGoods';
+  import { fen2yuan } from '@/sheep/hooks/useGoods';
   import OrderApi from '@/sheep/api/trade/order';
+  import { SubscribeTemplate } from '@/sheep/util/const';
 
   const state = reactive({
     id: 0, // 支付单号
@@ -111,7 +112,16 @@
         // 非待支付，可能是已支付，可能是已退款
         state.result = 'paid';
         // #ifdef MP
-        subscribeMessage();
+        uni.showModal({
+          title: '支付结果',
+          showCancel: false, // 不要取消按钮
+          content: "支付成功",
+          success: () => {
+            // 订阅只能由用户主动触发，只能包一层 showModal 诱导用户点击
+            autoSubscribeMessage();
+          }
+        })
+
         // #endif
         // 特殊：获得商品订单信息
         if (state.orderType === 'goods') {
@@ -146,13 +156,33 @@
 
   // TODO 芋艿：待测试
   // #ifdef MP
+  const showSubscribeBtn = ref(false) // 默认隐藏
+  const SUBSCRIBE_BTN_STATUS_STORAGE_KEY = "subscribe_btn_status"
   function subscribeMessage() {
-    let event = ['order_dispatched'];
+    let event = [SubscribeTemplate.DELIVERY_ORDER];
     if (state.tradeOrder.type === 3) {
-      event.push('groupon_finish');
-      event.push('groupon_fail');
+      // TODO puhui999: 待完善
+      event.push('拼团成功');
+      event.push('拼团失败');
     }
-    sheep.$platform.useProvider('wechat').subscribeMessage(event);
+    sheep.$platform.useProvider('wechat').subscribeMessage(event, () => {
+      // 订阅后记录一下订阅状态
+      uni.removeStorageSync(SUBSCRIBE_BTN_STATUS_STORAGE_KEY);
+      uni.setStorageSync(SUBSCRIBE_BTN_STATUS_STORAGE_KEY, '已订阅');
+      // 隐藏订阅按钮
+      showSubscribeBtn.value = false;
+    });
+  }
+  async function autoSubscribeMessage() {
+    // 1. 校验是否手动订阅过
+    const subscribeBtnStatus = uni.getStorageSync(SUBSCRIBE_BTN_STATUS_STORAGE_KEY);
+    if (!subscribeBtnStatus) {
+      showSubscribeBtn.value = true;
+      return
+    }
+
+    // 2. 订阅消息
+    subscribeMessage()
   }
   // #endif
 

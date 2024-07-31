@@ -233,10 +233,6 @@
       sheep.$store('cart').getList();
     }
 
-    // #ifdef MP
-    sheep.$platform.useProvider('wechat').subscribeMessage(SubscribeTemplate.DELIVERY_ORDER);
-    // #endif
-
     // 跳转到支付页面
     sheep.$router.redirect('/pages/pay/index', {
       id: data.payOrderId,
