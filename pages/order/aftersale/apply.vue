@@ -165,9 +165,6 @@
 
   // 提交表单
   async function submit() {
-    // #ifdef MP
-    sheep.$platform.useProvider('wechat').subscribeMessage(SubscribeTemplate.ORDER_AFTERSALE_CHANGE);
-    // #endif
     let data = {
       orderItemId: state.itemId,
       refundPrice: state.item.payPrice,
