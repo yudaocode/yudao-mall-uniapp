@@ -82,7 +82,7 @@
       return;
     }
     // #ifdef MP
-    sheep.$platform.useProvider('wechat').subscribeMessage([SubscribeTemplate.WALLET_RECHARGER_PAID, SubscribeTemplate.WALLET_RECHARGE_REFUNDED]);
+    sheep.$platform.useProvider('wechat').subscribeMessage(SubscribeTemplate.WALLET_RECHARGER_PAID);
     // #endif
     sheep.$router.go('/pages/pay/index', {
       id: data.payOrderId,

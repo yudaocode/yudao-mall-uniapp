@@ -161,9 +161,7 @@
   function subscribeMessage() {
     let event = [SubscribeTemplate.DELIVERY_ORDER];
     if (state.tradeOrder.type === 3) {
-      // TODO puhui999: 待完善
-      event.push('拼团成功');
-      event.push('拼团失败');
+      event.push(SubscribeTemplate.COMBINATION_RESULT);
     }
     sheep.$platform.useProvider('wechat').subscribeMessage(event, () => {
       // 订阅后记录一下订阅状态
