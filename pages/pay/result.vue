@@ -146,7 +146,6 @@
   }
 
   function onOrder() {
-    // TODO 芋艿：待测试
     if (state.orderType === 'recharge') {
       sheep.$router.redirect('/pages/pay/recharge-log');
     } else {
@@ -154,12 +153,14 @@
     }
   }
 
-  // TODO 芋艿：待测试
   // #ifdef MP
   const showSubscribeBtn = ref(false) // 默认隐藏
   const SUBSCRIBE_BTN_STATUS_STORAGE_KEY = "subscribe_btn_status"
   function subscribeMessage() {
-    let event = [WxaSubscribeTemplate.TRADE_ORDER_DELIVERY];
+    if (state.orderType !== 'goods') {
+      return;
+    }
+    const event = [WxaSubscribeTemplate.TRADE_ORDER_DELIVERY];
     if (state.tradeOrder.type === 3) {
       event.push(WxaSubscribeTemplate.PROMOTION_COMBINATION_SUCCESS);
     }

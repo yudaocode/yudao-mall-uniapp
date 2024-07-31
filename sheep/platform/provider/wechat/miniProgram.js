@@ -1,4 +1,3 @@
-import third from '@/sheep/api/migration/third';
 import AuthUtil from '@/sheep/api/member/auth';
 import SocialApi from '@/sheep/api/member/social';
 import UserApi from '@/sheep/api/member/user';
@@ -164,7 +163,7 @@ const checkUpdate = async (silence = true) => {
 
 // 获取订阅消息模板
 async function getSubscribeTemplate() {
-  const { code, data } = await third.wechat.getSubscribeTemplateList();
+  const { code, data } = await SocialApi.getSubscribeTemplateList();
   if (code === 0) {
     subscribeEventList = data;
   }
