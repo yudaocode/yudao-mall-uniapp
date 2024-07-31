@@ -166,7 +166,7 @@
   import OrderApi from '@/sheep/api/trade/order';
   import CouponApi from '@/sheep/api/promotion/coupon';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
-  import { SubscribeTemplate } from '@/sheep/util/const';
+  import { WxaSubscribeTemplate } from '@/sheep/util/const';
 
   const state = reactive({
     orderPayload: {},

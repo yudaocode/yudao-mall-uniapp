@@ -47,7 +47,7 @@
   import { onLoad } from '@dcloudio/uni-app';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import PayWalletApi from '@/sheep/api/pay/wallet';
-  import { SubscribeTemplate } from '@/sheep/util/const';
+  import { WxaSubscribeTemplate } from '@/sheep/util/const';
 
   const userWallet = computed(() => sheep.$store('user').userWallet);
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
@@ -82,7 +82,7 @@
       return;
     }
     // #ifdef MP
-    sheep.$platform.useProvider('wechat').subscribeMessage(SubscribeTemplate.WALLET_RECHARGER_PAID);
+    sheep.$platform.useProvider('wechat').subscribeMessage(WxaSubscribeTemplate.PAY_WALLET_RECHARGER_SUCCESS);
     // #endif
     sheep.$router.go('/pages/pay/index', {
       id: data.payOrderId,

@@ -69,7 +69,7 @@
   import PayOrderApi from '@/sheep/api/pay/order';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import OrderApi from '@/sheep/api/trade/order';
-  import { SubscribeTemplate } from '@/sheep/util/const';
+  import { WxaSubscribeTemplate } from '@/sheep/util/const';
 
   const state = reactive({
     id: 0, // 支付单号
@@ -159,9 +159,9 @@
   const showSubscribeBtn = ref(false) // 默认隐藏
   const SUBSCRIBE_BTN_STATUS_STORAGE_KEY = "subscribe_btn_status"
   function subscribeMessage() {
-    let event = [SubscribeTemplate.DELIVERY_ORDER];
+    let event = [WxaSubscribeTemplate.TRADE_ORDER_DELIVERY];
     if (state.tradeOrder.type === 3) {
-      event.push(SubscribeTemplate.COMBINATION_RESULT);
+      event.push(WxaSubscribeTemplate.PROMOTION_COMBINATION_SUCCESS);
     }
     sheep.$platform.useProvider('wechat').subscribeMessage(event, () => {
       // 订阅后记录一下订阅状态
