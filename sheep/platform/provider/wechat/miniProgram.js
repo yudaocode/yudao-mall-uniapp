@@ -171,7 +171,7 @@ async function getSubscribeTemplate() {
 }
 
 // 订阅消息
-function subscribeMessage(event) {
+function subscribeMessage(event, callback= undefined) {
   let tmplIds = [];
   if (typeof event === 'string') {
     const temp = subscribeEventList.find(item => item.title.includes(event));
@@ -191,6 +191,10 @@ function subscribeMessage(event) {
 
   uni.requestSubscribeMessage({
     tmplIds,
+		success: ()=>{
+      // 不管是拒绝还是同意都触发
+      callback && callback()
+		},
     fail: (err) => {
       console.log(err);
     },
