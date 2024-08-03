@@ -1,3 +1,39 @@
+// ========== COMMON - 公共模块 ==========
+
+/**
+ * 与后端Terminal枚举一一对应
+ */
+export const TerminalEnum = {
+  UNKNOWN: 0, // 未知, 目的：在无法解析到 terminal 时，使用它
+  WECHAT_MINI_PROGRAM: 10, //微信小程序
+  WECHAT_WAP: 11, // 微信公众号
+  H5: 20, // H5 网页
+  APP: 31, // 手机 App
+};
+
+/**
+ * 将Uniapp提供的平台转换为后端所需的Terminal值
+ * @param platformType Uniapp提供的平台类型
+ */
+export const getTerminalEnumByUniPlatform = (platformType) => {
+  let terminal;
+  // 与后端terminal枚举一一对应
+  switch (platformType) {
+    case 'app':
+      terminal = TerminalEnum.APP;
+      break;
+    case 'web':
+      terminal = TerminalEnum.H5;
+      break;
+    case 'mp-weixin':
+      terminal = TerminalEnum.WECHAT_MINI_PROGRAM;
+      break;
+    default:
+      terminal = TerminalEnum.UNKNOWN;
+  }
+  return terminal;
+};
+
 // ========== MALL - 营销模块 ==========
 
 import dayjs from "dayjs";
