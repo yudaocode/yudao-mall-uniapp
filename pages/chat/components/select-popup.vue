@@ -32,7 +32,7 @@
 
 <script setup>
   import { reactive, watch } from 'vue';
-  import _ from 'lodash';
+  import _ from 'lodash-es';
   import GoodsItem from './goods.vue';
   import OrderItem from './order.vue';
   import OrderApi from '@/sheep/api/trade/order';

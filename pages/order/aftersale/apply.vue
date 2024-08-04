@@ -98,11 +98,7 @@
         </view>
         <view class="modal-content content_box">
           <radio-group @change="onChange">
-            <label
-              class="radio ss-flex ss-col-center"
-              v-for="item in state.reasonList"
-              :key="item"
-            >
+            <label class="radio ss-flex ss-col-center" v-for="item in state.reasonList" :key="item">
               <view class="ss-flex-1 ss-p-20">{{ item }}</view>
               <radio
                 :value="item"
@@ -153,9 +149,9 @@
     ],
     reasonList: [], // 可选的申请原因数组
     showModal: false, // 是否显示申请原因弹窗
-    currentValue: '' // 当前选择的售后原因
+    currentValue: '', // 当前选择的售后原因
   });
-  const formData = reactive({
+  let formData = reactive({
     way: '',
     applyReason: '',
     applyDescription: '',

@@ -24,19 +24,24 @@
     <su-sticky :customNavHeight="sys_navBar">
       <!-- 统计 -->
       <view class="filter-box ss-p-x-30 ss-flex ss-col-center ss-row-between">
-				<uni-datetime-picker v-model="state.date" type="daterange" @change="onChangeTime" :end="state.today">
-					<button class="ss-reset-button date-btn">
-						<text>{{ dateFilterText }}</text>
-						<text class="cicon-drop-down ss-seldate-icon"></text>
-					</button>
-				</uni-datetime-picker>
+        <uni-datetime-picker
+          v-model="state.date"
+          type="daterange"
+          @change="onChangeTime"
+          :end="state.today"
+        >
+          <button class="ss-reset-button date-btn">
+            <text>{{ dateFilterText }}</text>
+            <text class="cicon-drop-down ss-seldate-icon"></text>
+          </button>
+        </uni-datetime-picker>
 
         <!-- TODO 芋艿：优化 -->
-<!--				<view class="total-box">-->
-<!--					<view class="ss-m-b-10">总收入￥{{ state.pagination.income }}</view>-->
-<!--					<view>总支出￥{{ -state.pagination.expense }}</view>-->
-<!--				</view>-->
-			</view>
+        <!--				<view class="total-box">-->
+        <!--					<view class="ss-m-b-10">总收入￥{{ state.pagination.income }}</view>-->
+        <!--					<view>总支出￥{{ -state.pagination.expense }}</view>-->
+        <!--				</view>-->
+      </view>
       <su-tabs
         :list="tabMaps"
         @change="onChange"
@@ -83,7 +88,7 @@
   import sheep from '@/sheep';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import { computed, reactive } from 'vue';
-  import _ from 'lodash';
+  import _ from 'lodash-es';
   import dayjs from 'dayjs';
   import PointApi from '@/sheep/api/member/point';
   import { resetPagination } from '@/sheep/util';

@@ -14,12 +14,18 @@
       >
         <template #rightBottom>
           <view class="ss-flex ss-row-between">
-            <view class="commission-num" v-if="item.brokerageMinPrice === undefined">预计佣金：计算中</view>
-            <view class="commission-num" v-else-if="item.brokerageMinPrice === item.brokerageMaxPrice">
+            <view class="commission-num" v-if="item.brokerageMinPrice === undefined"
+              >预计佣金：计算中</view
+            >
+            <view
+              class="commission-num"
+              v-else-if="item.brokerageMinPrice === item.brokerageMaxPrice"
+            >
               预计佣金：{{ fen2yuan(item.brokerageMinPrice) }}
             </view>
             <view class="commission-num" v-else>
-              预计佣金：{{ fen2yuan(item.brokerageMinPrice) }} ~ {{ fen2yuan(item.brokerageMaxPrice) }}
+              预计佣金：{{ fen2yuan(item.brokerageMinPrice) }} ~
+              {{ fen2yuan(item.brokerageMaxPrice) }}
             </view>
             <button
               class="ss-reset-button share-btn ui-BG-Main-Gradient"
@@ -53,7 +59,7 @@
   import $share from '@/sheep/platform/share';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import { reactive } from 'vue';
-  import _ from 'lodash';
+  import _ from 'lodash-es';
   import { showShareModal } from '@/sheep/hooks/useModal';
   import SpuApi from '@/sheep/api/product/spu';
   import BrokerageApi from '@/sheep/api/trade/brokerage';

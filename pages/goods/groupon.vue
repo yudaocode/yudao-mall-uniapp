@@ -7,12 +7,16 @@
     <detailSkeleton v-if="state.skeletonLoading" />
     <!-- 下架/售罄提醒 -->
     <s-empty
-        v-else-if="state.goodsInfo === null || state.activity.status !== 0 || state.activity.endTime < new Date().getTime()"
-        text="活动不存在或已结束"
-        icon="/static/soldout-empty.png"
-        showAction
-        actionText="返回上一页"
-        @clickAction="sheep.$router.back()"
+      v-else-if="
+        state.goodsInfo === null ||
+        state.activity.status !== 0 ||
+        state.activity.endTime < new Date().getTime()
+      "
+      text="活动不存在或已结束"
+      icon="/static/soldout-empty.png"
+      showAction
+      actionText="返回上一页"
+      @clickAction="sheep.$router.back()"
     />
     <block v-else>
       <view class="detail-swiper-selector">
@@ -47,10 +51,7 @@
                 </view>
               </view>
               <view class="ss-flex ss-row-between">
-                <view
-                  class="origin-price ss-flex ss-col-center"
-                  v-if="state.goodsInfo.price"
-                >
+                <view class="origin-price ss-flex ss-col-center" v-if="state.goodsInfo.price">
                   单买价：
                   <view class="origin-price-text">
                     {{ fen2yuan(state.goodsInfo.price) }}
@@ -123,7 +124,9 @@
             "
             :disabled="state.goodsInfo.stock === 0 || state.activity.status !== 0"
           >
-            <view class="btn-price">{{ fen2yuan(state.activity.price || state.goodsInfo.price) }}</view>
+            <view class="btn-price">{{
+              fen2yuan(state.activity.price || state.goodsInfo.price)
+            }}</view>
             <view v-if="state.activity.startTime > new Date().getTime()">未开始</view>
             <view v-else-if="state.activity.endTime <= new Date().getTime()">已结束</view>
             <view v-else>
@@ -141,7 +144,7 @@
   import { reactive, computed } from 'vue';
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import { isEmpty } from 'lodash';
+  import { isEmpty } from 'lodash-es';
   import detailNavbar from './components/detail/detail-navbar.vue';
   import detailCellSku from './components/detail/detail-cell-sku.vue';
   import detailTabbar from './components/detail/detail-tabbar.vue';
@@ -149,29 +152,27 @@
   import detailCommentCard from './components/detail/detail-comment-card.vue';
   import detailContentCard from './components/detail/detail-content-card.vue';
   import grouponCardList from './components/groupon/groupon-card-list.vue';
-  import {useDurationTime, formatGoodsSwiper, fen2yuan} from '@/sheep/hooks/useGoods';
-  import CombinationApi from "@/sheep/api/promotion/combination";
-  import SpuApi from "@/sheep/api/product/spu";
+  import { useDurationTime, formatGoodsSwiper, fen2yuan } from '@/sheep/hooks/useGoods';
+  import CombinationApi from '@/sheep/api/promotion/combination';
+  import SpuApi from '@/sheep/api/product/spu';
 
   const headerBg = sheep.$url.css('/static/img/shop/goods/groupon-bg.png');
   const btnBg = sheep.$url.css('/static/img/shop/goods/groupon-btn.png');
-  const disabledBtnBg = sheep.$url.css(
-    '/static/img/shop/goods/activity-btn-disabled.png',
-  );
+  const disabledBtnBg = sheep.$url.css('/static/img/shop/goods/activity-btn-disabled.png');
   const grouponBg = sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png');
 
   onPageScroll(() => {});
   const state = reactive({
-    skeletonLoading: true,  // 骨架屏
-    goodsId: 0,             // 商品ID
-    goodsInfo: {},          // 商品信息
-    goodsSwiper: [],        // 商品轮播图
-    showSelectSku: false,   // 显示规格弹框
-    selectedSkuPrice: {},   // 选中的规格价格
-    activity: {},           // 团购活动
-    grouponId: 0,           // 团购ID
-    grouponNum: 0,          // 团购人数
-    grouponAction: 'create',  // 团购操作
+    skeletonLoading: true, // 骨架屏
+    goodsId: 0, // 商品ID
+    goodsInfo: {}, // 商品信息
+    goodsSwiper: [], // 商品轮播图
+    showSelectSku: false, // 显示规格弹框
+    selectedSkuPrice: {}, // 选中的规格价格
+    activity: {}, // 团购活动
+    grouponId: 0, // 团购ID
+    grouponNum: 0, // 团购人数
+    grouponAction: 'create', // 团购操作
     combinationHeadId: null, // 拼团团长编号
   });
 
@@ -261,7 +262,7 @@
     // 加载商品信息
     const { data: spu } = await SpuApi.getSpuDetail(activity.spuId);
     state.goodsId = spu.id;
-    activity.products.forEach(product => {
+    activity.products.forEach((product) => {
       spu.price = Math.min(spu.price, product.combinationPrice); // 设置 SPU 的最低价格
     });
     // 关闭骨架屏
@@ -475,8 +476,7 @@
   }
 
   .groupon-box {
-    background: v-bind(grouponBg)
-      no-repeat;
+    background: v-bind(grouponBg) no-repeat;
     background-size: 100% 100%;
   }
 

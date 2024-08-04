@@ -41,10 +41,7 @@
           <view class="no-box ss-flex ss-col-center ss-row-between">
             <text class="order-code">订单编号：{{ item.bizId }}</text>
             <text class="order-state">
-              {{
-                item.status === 0 ? '待结算'
-                  : item.status === 1 ? '已结算' : '已取消'
-              }}
+              {{ item.status === 0 ? '待结算' : item.status === 1 ? '已结算' : '已取消' }}
               ( 佣金 {{ fen2yuan(item.price) }} 元 )
             </text>
           </view>
@@ -77,7 +74,7 @@
   import sheep from '@/sheep';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import { reactive } from 'vue';
-  import _ from 'lodash';
+  import _ from 'lodash-es';
   import { onPageScroll } from '@dcloudio/uni-app';
   import { resetPagination } from '@/sheep/util';
   import BrokerageApi from '@/sheep/api/trade/brokerage';

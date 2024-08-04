@@ -162,7 +162,7 @@
   import { reactive } from 'vue';
   import { onLoad } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import { isEmpty } from 'lodash';
+  import { isEmpty } from 'lodash-es';
   import OrderApi from '@/sheep/api/trade/order';
   import CouponApi from '@/sheep/api/promotion/coupon';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
@@ -223,7 +223,7 @@
       pointStatus: false, // TODO 芋艿：需要支持【积分选择】
       combinationActivityId: state.orderPayload.combinationActivityId,
       combinationHeadId: state.orderPayload.combinationHeadId,
-      seckillActivityId: state.orderPayload.seckillActivityId
+      seckillActivityId: state.orderPayload.seckillActivityId,
     });
     if (code !== 0) {
       return;
@@ -250,7 +250,7 @@
       pointStatus: false, // TODO 芋艿：需要支持【积分选择】
       combinationActivityId: state.orderPayload.combinationActivityId,
       combinationHeadId: state.orderPayload.combinationHeadId,
-      seckillActivityId: state.orderPayload.seckillActivityId
+      seckillActivityId: state.orderPayload.seckillActivityId,
     });
     if (code !== 0) {
       return;

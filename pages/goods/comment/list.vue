@@ -30,7 +30,7 @@
   import CommentApi from '@/sheep/api/product/comment';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import { reactive } from 'vue';
-  import _ from 'lodash';
+  import _ from 'lodash-es';
   import commentItem from '../components/detail/comment-item.vue';
 
   const state = reactive({

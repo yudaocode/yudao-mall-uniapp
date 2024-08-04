@@ -8,7 +8,7 @@
           <view class="title">充值金额</view>
           <view class="num" :class="item.refundStatus === 10 ? 'danger-color' : 'success-color'">
             {{ fen2yuan(item.payPrice) }} 元
-            <text v-if="item.bonusPrice > 0">（赠送 {{ fen2yuan(item.bonusPrice)}} 元）</text>
+            <text v-if="item.bonusPrice > 0">（赠送 {{ fen2yuan(item.bonusPrice) }} 元）</text>
           </view>
         </view>
         <view class="status-box item ss-flex ss-col-center ss-row-between">
@@ -30,7 +30,9 @@
         </view>
         <view class="time-box item ss-flex ss-col-center ss-row-between">
           <text class="item-title">充值时间</text>
-          <view class="time"> {{ sheep.$helper.timeFormat(item.payTime, 'yyyy-mm-dd hh:MM:ss') }}</view>
+          <view class="time">
+            {{ sheep.$helper.timeFormat(item.payTime, 'yyyy-mm-dd hh:MM:ss') }}</view
+          >
         </view>
       </view>
     </view>
@@ -53,7 +55,7 @@
 <script setup>
   import { reactive } from 'vue';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
-  import _ from 'lodash';
+  import _ from 'lodash-es';
   import PayWalletApi from '@/sheep/api/pay/wallet';
   import sheep from '@/sheep';
   import { fen2yuan } from '../../sheep/hooks/useGoods';

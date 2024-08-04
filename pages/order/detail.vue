@@ -252,7 +252,7 @@
   import sheep from '@/sheep';
   import { onLoad } from '@dcloudio/uni-app';
   import { reactive } from 'vue';
-  import { isEmpty } from 'lodash';
+  import { isEmpty } from 'lodash-es';
   import {
     fen2yuan,
     formatOrderStatus,
@@ -371,7 +371,7 @@
   // 评价
   function onComment(id) {
     sheep.$router.go('/pages/goods/comment/add', {
-      id
+      id,
     });
   }
 
