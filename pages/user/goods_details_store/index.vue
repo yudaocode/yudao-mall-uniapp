@@ -1,48 +1,50 @@
 <template>
-  <view class="storeBox" ref="container">
-    <view class="storeBox-box" v-for="(item, index) in state.storeList" :key="index" @tap="checked(item)">
-      <view class="store-img">
-        <image :src="item.logo" class="img"/>
-      </view>
-      <view class="store-cent-left">
-        <view class="store-name">{{ item.name }}</view>
-        <view class="store-address line1">
-          {{ item.areaName }}{{ ', ' + item.detailAddress }}
+  <s-layout title="选择自提门店" :bgStyle="{ color: '#FFF' }">
+    <view class="storeBox" ref="container">
+      <view class="storeBox-box" v-for="(item, index) in state.storeList" :key="index" @tap="checked(item)">
+        <view class="store-img">
+          <image :src="item.logo" class="img" />
         </view>
-      </view>
-      <view class="row-right ss-flex-col ss-col-center">
-        <view>
-          <!-- #ifdef H5 -->
-          <a class="store-phone" :href="'tel:' + item.phone">
-            <view class="iconfont">
-              <view class="ss-rest-button">
-                <text class="_icon-forward" />
-              </view>
-            </view>
-          </a>
-          <!-- #endif -->
-          <!-- #ifdef MP -->
-          <view class="store-phone" @click="call(item.phone)">
-            <view class="iconfont">
-              <view class="ss-rest-button">
-                <text class="_icon-forward" />
-              </view>
-            </view>
+        <view class="store-cent-left">
+          <view class="store-name">{{ item.name }}</view>
+          <view class="store-address line1">
+            {{ item.areaName }}{{ ', ' + item.detailAddress }}
           </view>
-          <!-- #endif -->
         </view>
-        <view class="store-distance ss-flex ss-row-center" @tap="showMaoLocation(item)">
-          <text class="addressTxt" v-if="item.distance">距离{{ item.distance.toFixed(2) }}千米</text>
-          <text class="addressTxt" v-else>查看地图</text>
-          <view class="iconfont">
-            <view class="ss-rest-button">
-              <text class="_icon-forward" />
+        <view class="row-right ss-flex-col ss-col-center">
+          <view>
+            <!-- #ifdef H5 -->
+            <a class="store-phone" :href="'tel:' + item.phone">
+              <view class="iconfont">
+                <view class="ss-rest-button">
+                  <text class="_icon-forward" />
+                </view>
+              </view>
+            </a>
+            <!-- #endif -->
+            <!-- #ifdef MP -->
+            <view class="store-phone" @click="call(item.phone)">
+              <view class="iconfont">
+                <view class="ss-rest-button">
+                  <text class="_icon-forward" />
+                </view>
+              </view>
+            </view>
+            <!-- #endif -->
+          </view>
+          <view class="store-distance ss-flex ss-row-center" @tap="showMaoLocation(item)">
+            <text class="addressTxt" v-if="item.distance">距离{{ item.distance.toFixed(2) }}千米</text>
+            <text class="addressTxt" v-else>查看地图</text>
+            <view class="iconfont">
+              <view class="ss-rest-button">
+                <text class="_icon-forward" />
+              </view>
             </view>
           </view>
         </view>
       </view>
     </view>
-  </view>
+  </s-layout>
 </template>
 
 <script setup>
@@ -82,24 +84,24 @@
     //     getList();
     //   });
     // } else {
-      // #endif
-      uni.getLocation({
-        type: 'gcj02',
-        success: (res) => {
-          try {
-            state.user_latitude = res.latitude;
-            state.user_longitude = res.longitude;
-            uni.setStorageSync(LATITUDE, res.latitude);
-            uni.setStorageSync(LONGITUDE, res.longitude);
-          } catch {
-          }
-          getList();
-        },
-        complete: () => {
-          getList();
-        },
-      });
-      // #ifdef H5
+    // #endif
+    uni.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        try {
+          state.user_latitude = res.latitude;
+          state.user_longitude = res.longitude;
+          uni.setStorageSync(LATITUDE, res.latitude);
+          uni.setStorageSync(LONGITUDE, res.longitude);
+        } catch {
+        }
+        getList();
+      },
+      complete: () => {
+        getList();
+      },
+    });
+    // #ifdef H5
     // }
     // #endif
   };
@@ -114,17 +116,17 @@
     //     console.log('success');
     //   });
     // } else {
-      // #endif
-      uni.openLocation({
-        latitude: Number(e.latitude),
-        longitude: Number(e.longitude),
-        name: e.name,
-        address: `${e.areaName}-${e.detailAddress}`,
-        success: function() {
-          console.log('success');
-        },
-      });
-      // #ifdef H5
+    // #endif
+    uni.openLocation({
+      latitude: Number(e.latitude),
+      longitude: Number(e.longitude),
+      name: e.name,
+      address: `${e.areaName}-${e.detailAddress}`,
+      success: function() {
+        console.log('success');
+      },
+    });
+    // #ifdef H5
     // }
     // #endif
   };
@@ -134,7 +136,7 @@
    */
   const checked = (addressInfo) => {
     uni.$emit('SELECT_PICK_UP_INFO', {
-      addressInfo
+      addressInfo,
     });
     sheep.$router.back();
   };
