@@ -1,33 +1,33 @@
 <!-- 装修基础组件：宫格导航 -->
 <template>
   <uni-grid :showBorder="Boolean(data.border)" :column="data.column">
-    <uni-grid-item
-      v-for="(item, index) in data.list"
-      :key="index"
-      @tap="sheep.$router.go(item.url)"
-    >
-      <view class="grid-item-box ss-flex ss-flex-col ss-row-center ss-col-center">
-        <view class="img-box">
-          <view
-            class="tag-box"
-            v-if="item.badge.show"
-            :style="[{ background: item.badge.bgColor, color: item.badge.textColor }]"
-          >
-            {{ item.badge.text }}
+    <view v-for="(item, index) in data.list"
+          :key="index"
+          @tap="sheep.$router.go(item.url)">
+      <uni-grid-item>
+        <view class="grid-item-box ss-flex ss-flex-col ss-row-center ss-col-center">
+          <view class="img-box">
+            <view
+              class="tag-box"
+              v-if="item.badge.show"
+              :style="[{ background: item.badge.bgColor, color: item.badge.textColor }]"
+            >
+              {{ item.badge.text }}
+            </view>
+            <image class="menu-image" :src="sheep.$url.cdn(item.iconUrl)"></image>
           </view>
-          <image class="menu-image" :src="sheep.$url.cdn(item.iconUrl)"></image>
-        </view>
 
-        <view class="title-box ss-flex ss-flex-col ss-row-center ss-col-center">
-          <view class="grid-text" :style="[{ color: item.titleColor }]">
-            {{ item.title }}
-          </view>
-          <view class="grid-tip" :style="[{ color: item.subtitleColor }]">
-            {{ item.subtitle }}
+          <view class="title-box ss-flex ss-flex-col ss-row-center ss-col-center">
+            <view class="grid-text" :style="[{ color: item.titleColor }]">
+              {{ item.title }}
+            </view>
+            <view class="grid-tip" :style="[{ color: item.subtitleColor }]">
+              {{ item.subtitle }}
+            </view>
           </view>
         </view>
-      </view>
-    </uni-grid-item>
+      </uni-grid-item>
+    </view>
   </uni-grid>
 </template>
 

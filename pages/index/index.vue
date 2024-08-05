@@ -9,7 +9,6 @@
 		</s-layout>
 	</view>
 </template>
-
 <script setup>
 	import {
 		computed

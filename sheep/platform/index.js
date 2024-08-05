@@ -15,6 +15,7 @@ import { isWxBrowser } from '@/sheep/helper/utils';
 // #endif
 import wechat from './provider/wechat/index.js';
 import apple from './provider/apple';
+import alipay from './provider/alipay/index';
 import share from './share';
 import Pay from './pay';
 
@@ -53,6 +54,12 @@ platform = 'miniProgram';
 provider = 'wechat';
 // #endif
 
+// #ifdef MP-ALIPAY
+name = 'AlipayMiniProgram';
+platform = 'miniProgram';
+provider = 'alipay';
+// #endif
+
 if (isEmpty(name)) {
   uni.showToast({
     title: '暂不支持该平台',
@@ -64,14 +71,20 @@ if (isEmpty(name)) {
 const load = () => {
   if (provider === 'wechat') {
     wechat.load();
+  }else if (provider === 'alipay') {
+    alipay.load();
+  } else {
+    console.log('未知平台', provider);
   }
 };
 
 // 使用厂商独占sdk name = 'wechat' | 'alipay' | 'apple'
 const useProvider = (_provider = '') => {
+  console.error('useProvider', _provider, provider)
   if (_provider === '') _provider = provider;
   if (_provider === 'wechat') return wechat;
   if (_provider === 'apple') return apple;
+  if (_provider === 'alipay') return alipay;
 };
 
 // 支付服务转发

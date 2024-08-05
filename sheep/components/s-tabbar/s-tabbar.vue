@@ -10,22 +10,21 @@
       :midTabBar="tabbar.mode === 2"
       :customStyle="tabbarStyle"
     >
-      <su-tabbar-item
-        v-for="(item, index) in tabbar.items"
-        :key="item.text"
-        :text="item.text"
-        :name="item.url"
-        :isCenter="getTabbarCenter(index)"
-        :centerImage="sheep.$url.cdn(item.iconUrl)"
-        @tap="sheep.$router.go(item.url)"
-      >
-        <template v-slot:active-icon>
-          <image class="u-page__item__slot-icon" :src="sheep.$url.cdn(item.activeIconUrl)"></image>
-        </template>
-        <template v-slot:inactive-icon>
-          <image class="u-page__item__slot-icon" :src="sheep.$url.cdn(item.iconUrl)"></image>
-        </template>
-      </su-tabbar-item>
+      <view v-for="(item, index) in tabbar.items" :key="item.text" @tap="sheep.$router.go(item.url)">
+        <su-tabbar-item
+          :text="item.text"
+          :name="item.url"
+          :isCenter="getTabbarCenter(index)"
+          :centerImage="sheep.$url.cdn(item.iconUrl)"
+        >
+          <template v-slot:active-icon>
+            <image class="u-page__item__slot-icon" :src="sheep.$url.cdn(item.activeIconUrl)"></image>
+          </template>
+          <template v-slot:inactive-icon>
+            <image class="u-page__item__slot-icon" :src="sheep.$url.cdn(item.iconUrl)"></image>
+          </template>
+        </su-tabbar-item>
+      </view>
     </su-tabbar>
   </view>
 </template>
