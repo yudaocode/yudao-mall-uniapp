@@ -5,6 +5,7 @@
   >
     <view class="page-main" :style="[bgMain]">
       <!-- 顶部导航栏-情况1：默认通用顶部导航栏 -->
+      <!--<view>{{navbar}}{{navbarMode}}</view>-->
       <su-navbar
         v-if="navbar === 'normal'"
         :title="title"
@@ -17,11 +18,18 @@
       />
 
       <!-- 顶部导航栏-情况2：装修组件导航栏-标准 -->
+      <!--#ifndef MP-ALIPAY-->
       <s-custom-navbar
         v-else-if="navbar === 'custom' && navbarMode === 'normal'"
         :data="navbarStyle"
         :showLeftButton="showLeftButton"
       />
+      <!--#endif-->
+
+      <!--#ifdef MP-ALIPAY-->
+      <!--  -->
+      <!--#endif-->
+
       <view class="page-body" :style="[bgBody]">
         <!-- 顶部导航栏-情况3：沉浸式头部 -->
         <su-inner-navbar v-if="navbar === 'inner'" :title="title" />
@@ -29,7 +37,6 @@
           v-if="navbar === 'inner'"
           :style="[{ paddingTop: sheep.$platform.navbar + 'px' }]"
         ></view>
-
         <!-- 顶部导航栏-情况4：装修组件导航栏-沉浸式 -->
         <s-custom-navbar v-if="navbar === 'custom' && navbarMode === 'inner'" :data="navbarStyle" :showLeftButton="showLeftButton" />
 
@@ -201,6 +208,8 @@
     if (!isEmpty(shareInfo.value)) {
       sheep.$platform.share.updateShareInfo(shareInfo.value);
     }
+
+    console.log("导航栏模式",navbarMode.value,props.navbar.value)
   });
 </script>
 

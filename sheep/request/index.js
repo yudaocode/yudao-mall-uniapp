@@ -6,7 +6,6 @@
 import Request from 'luch-request';
 import { baseUrl, apiPath, tenantId } from '@/sheep/config';
 import $store from '@/sheep/store';
-import $platform from '@/sheep/platform';
 import {
 	showAuthModal
 } from '@/sheep/hooks/useModal';
@@ -54,7 +53,7 @@ const http = new Request({
 	header: {
 		Accept: 'text/json',
 		'Content-Type': 'application/json;charset=UTF-8',
-		platform: $platform.name,
+		platform: 'test',
 	},
 	// #ifdef APP-PLUS
 	sslVerify: false,

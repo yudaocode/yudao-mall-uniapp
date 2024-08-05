@@ -259,7 +259,7 @@
     }
 
     return {
-      height: height + 'rpx',
+      height: height + 'rpx' + ' !important',
     };
   });
 
