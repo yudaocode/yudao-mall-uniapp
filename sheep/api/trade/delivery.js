@@ -7,6 +7,14 @@ const DeliveryApi = {
       url: `/trade/delivery/express/list`,
       method: 'get',
     });
+  },
+  // 获得自提门店列表
+  getDeliveryPickUpStoreList: (params) => {
+    return request({
+      url: `/trade/delivery/pick-up-store/list`,
+      method: 'GET',
+      params
+    });
   }
 };
 

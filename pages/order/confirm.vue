@@ -1,13 +1,7 @@
 <template>
   <s-layout title="确认订单">
-    <!-- TODO：这个判断先删除 v-if="state.orderInfo.need_address === 1" -->
-    <view class="bg-white address-box ss-m-b-14 ss-r-b-10" @tap="onSelectAddress">
-      <s-address-item :item="state.addressInfo" :hasBorderBottom="false">
-        <view class="ss-rest-button">
-          <text class="_icon-forward" />
-        </view>
-      </s-address-item>
-    </view>
+    <!-- 头部地址选择【配送地址】【自提地址】 -->
+    <AddressSelection></AddressSelection>
 
     <!-- 商品信息 -->
     <view class="order-card-box ss-m-b-14">
@@ -161,6 +155,7 @@
 <script setup>
   import { reactive } from 'vue';
   import { onLoad } from '@dcloudio/uni-app';
+  import AddressSelection from '@/pages/order/addressSelection.vue';
   import sheep from '@/sheep';
   import { isEmpty } from 'lodash';
   import OrderApi from '@/sheep/api/trade/order';
