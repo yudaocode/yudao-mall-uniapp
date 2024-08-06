@@ -56,13 +56,14 @@ export const TimeStatusEnum = {
     END: '已结束',
 }
 
-// TODO 订阅模版枚举
-export const SubscribeTemplate = {
-  WALLET_RECHARGER_PAID: "充值成功通知",
-  DELIVERY_ORDER: "订单发货通知",
-  COMBINATION_RESULT: "拼团结果通知"
+/**
+ * 微信小程序的订阅模版
+ */
+export const WxaSubscribeTemplate = {
+  TRADE_ORDER_DELIVERY: "订单发货通知",
+  PROMOTION_COMBINATION_SUCCESS: "拼团结果通知",
+  PAY_WALLET_RECHARGER_SUCCESS: "充值成功通知",
 }
-
 
 export const getTimeStatusEnum = (startTime, endTime) => {
     const now = dayjs();

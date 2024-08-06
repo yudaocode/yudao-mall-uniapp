@@ -49,9 +49,8 @@
         </button>
       </view>
 
-      <!-- TODO 芋艿：订阅 -->
       <!-- #ifdef MP -->
-      <view class="subscribe-box ss-flex ss-m-t-44" v-if="showSubscribeBtn">
+      <view class="subscribe-box ss-flex ss-m-t-44" v-if="showSubscribeBtn && state.orderType === 'goods'">
         <image class="subscribe-img" :src="sheep.$url.static('/static/img/shop/order/cargo.png')" />
         <view class="subscribe-title ss-m-r-48 ss-m-l-16">获取实时发货信息与订单状态</view>
         <view class="subscribe-start" @tap="subscribeMessage">立即订阅</view>
@@ -69,7 +68,7 @@
   import PayOrderApi from '@/sheep/api/pay/order';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import OrderApi from '@/sheep/api/trade/order';
-  import { SubscribeTemplate } from '@/sheep/util/const';
+  import { WxaSubscribeTemplate } from '@/sheep/util/const';
 
   const state = reactive({
     id: 0, // 支付单号
@@ -146,7 +145,6 @@
   }
 
   function onOrder() {
-    // TODO 芋艿：待测试
     if (state.orderType === 'recharge') {
       sheep.$router.redirect('/pages/pay/recharge-log');
     } else {
@@ -154,14 +152,16 @@
     }
   }
 
-  // TODO 芋艿：待测试
   // #ifdef MP
   const showSubscribeBtn = ref(false) // 默认隐藏
   const SUBSCRIBE_BTN_STATUS_STORAGE_KEY = "subscribe_btn_status"
   function subscribeMessage() {
-    let event = [SubscribeTemplate.DELIVERY_ORDER];
+    if (state.orderType !== 'goods') {
+      return;
+    }
+    const event = [WxaSubscribeTemplate.TRADE_ORDER_DELIVERY];
     if (state.tradeOrder.type === 3) {
-      event.push(SubscribeTemplate.COMBINATION_RESULT);
+      event.push(WxaSubscribeTemplate.PROMOTION_COMBINATION_SUCCESS);
     }
     sheep.$platform.useProvider('wechat').subscribeMessage(event, () => {
       // 订阅后记录一下订阅状态
