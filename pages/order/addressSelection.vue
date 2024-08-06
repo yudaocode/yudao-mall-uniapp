@@ -52,22 +52,41 @@
 </template>
 
 <script setup>
-  import { reactive } from 'vue';
+  import { computed } from 'vue';
   import sheep from '@/sheep';
   import { isEmpty } from 'lodash';
 
-  const state = reactive({
-    addressInfo: {}, // 选择的收货地址
-    deliveryType: 1, // 收货方式 1 - 快递配送；2 - 门店自提
-    isPickUp: true, // 门店自提是否开启 TODO puhui999: 默认开启，看看后端有开关的话接入
-    pickUpInfo: {}, // 选择的自提门店信息
+  const props = defineProps({
+    modelValue: {
+      type: Object,
+      default() {},
+    }
   });
+  const emits = defineEmits(['update:modelValue']);
+
+  // computed 解决父子组件双向数据同步
+  const state = computed({
+    get(){
+      return new Proxy(props.modelValue, {
+        set(obj, name, val) {
+          emits('update:modelValue', {
+            ...obj,
+            [name]: val,
+          });
+          return true;
+        }
+      })
+    },
+    set(val){
+      emits('update:modelValue', val);
+    }
+  })
 
   // 选择地址
   function onSelectAddress() {
     let emitName = 'SELECT_ADDRESS'
     let addressPage = '/pages/user/address/list'
-    if (state.deliveryType === 2){
+    if (state.value.deliveryType === 2){
       emitName = 'SELECT_PICK_UP_INFO'
       addressPage = '/pages/user/goods_details_store/index'
     }
@@ -80,18 +99,18 @@
   // 更改收货人地址&计算订单信息
   async function changeConsignee(addressInfo = {}) {
     if (!isEmpty(addressInfo)) {
-      if (state.deliveryType === 1){
-        state.addressInfo = addressInfo;
+      if (state.value.deliveryType === 1){
+        state.value.addressInfo = addressInfo;
       }
-      if (state.deliveryType === 2){
-        state.pickUpInfo = addressInfo;
+      if (state.value.deliveryType === 2){
+        state.value.pickUpInfo = addressInfo;
       }
     }
   }
 
   // 收货方式切换
   const switchDeliveryType = (type) =>{
-    state.deliveryType = type;
+    state.value.deliveryType = type;
   }
 </script>
 
