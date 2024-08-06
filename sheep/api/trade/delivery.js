@@ -13,9 +13,19 @@ const DeliveryApi = {
     return request({
       url: `/trade/delivery/pick-up-store/list`,
       method: 'GET',
-      params
+      params,
     });
-  }
+  },
+  // 获得自提门店
+  getDeliveryPickUpStore: (id) => {
+    return request({
+      url: `/trade/delivery/pick-up-store/get`,
+      method: 'GET',
+      params: {
+        id,
+      },
+    });
+  },
 };
 
 export default DeliveryApi;
