@@ -113,7 +113,7 @@
 	import detailCommentCard from './components/detail/detail-comment-card.vue';
 	import detailContentCard from './components/detail/detail-content-card.vue';
 	import detailActivityTip from './components/detail/detail-activity-tip.vue';
-	import { isEmpty } from 'lodash';
+	import { isEmpty } from 'lodash-es';
   import SpuApi from '@/sheep/api/product/spu';
 
 	onPageScroll(() => {});

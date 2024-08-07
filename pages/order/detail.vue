@@ -259,7 +259,7 @@
   import sheep from '@/sheep';
   import { onLoad } from '@dcloudio/uni-app';
   import { reactive, ref } from 'vue';
-  import { isEmpty } from 'lodash';
+  import { isEmpty } from 'lodash-es';
   import {
     fen2yuan,
     formatOrderStatus,

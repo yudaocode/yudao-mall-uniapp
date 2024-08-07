@@ -55,7 +55,7 @@
 <script setup>
   import { computed } from 'vue';
   import sheep from '@/sheep';
-  import { isEmpty } from 'lodash';
+  import { isEmpty } from 'lodash-es';
 
   const props = defineProps({
     modelValue: {
