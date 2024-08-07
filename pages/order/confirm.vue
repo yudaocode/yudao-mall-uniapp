@@ -1,7 +1,7 @@
 <template>
   <s-layout title="确认订单">
     <!-- 头部地址选择【配送地址】【自提地址】 -->
-    <AddressSelection v-model="addressState"></AddressSelection>
+    <AddressSelection v-model="addressState" />
 
     <!-- 商品信息 -->
     <view class="order-card-box ss-m-b-14">
@@ -40,9 +40,6 @@
             </text>
           </view>
         </view>
-        <!-- TODO 芋艿：接入积分 -->
-        <!-- TODO puhui999: v-if="state.orderInfo.type === 0 && state.orderPayload.order_type === 'normal'" -->
-        <!-- TODO puhui999: 没有搞懂 order_type 和  orderInfo.type 的区别和作用暂时不考虑 order_type 条件-->
         <view
           class="order-item ss-flex ss-col-center ss-row-between"
           v-if="state.orderInfo.type === 0"
@@ -62,6 +59,7 @@
             </checkbox-group>
           </view>
         </view>
+        <!-- 快递配置时，信息的展示 -->
         <view class="order-item ss-flex ss-col-center ss-row-between" v-if='addressState.deliveryType === 1'>
           <view class="item-title">运费</view>
           <view class="ss-flex ss-col-center">
@@ -71,6 +69,7 @@
             <view class='item-value ss-m-r-24' v-else>免运费</view>
           </view>
         </view>
+        <!-- 门店自提时，需要填写姓名和手机号 -->
         <view class="order-item ss-flex ss-col-center ss-row-between" v-if='addressState.deliveryType === 2'>
           <view class="item-title">联系人</view>
           <view class="ss-flex ss-col-center">

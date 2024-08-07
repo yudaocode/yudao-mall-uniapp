@@ -157,10 +157,7 @@
         items: [{
           skuId: e.id,
           count: e.goods_num
-        }],
-        // TODO 芋艿：后续清理掉这 2 参数
-        deliveryType: 1,
-        pointStatus: false,
+        }]
       }),
     });
 	}

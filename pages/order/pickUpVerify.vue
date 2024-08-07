@@ -18,7 +18,7 @@
       </view>
       <view class="num">{{ orderInfo.pickUpVerifyCode }}</view>
       <view class="rules">
-        <!-- TODO puhui999: 需要后端放回 -->
+        <!-- TODO puhui999: 需要后端放回：使用 receiveTime 即可 -->
 <!--        <view class="item">-->
 <!--          <view class="rulesTitle flex flex-wrap align-center">-->
 <!--            核销时间-->

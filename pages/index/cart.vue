@@ -124,12 +124,7 @@
 		}
 		sheep.$router.go('/pages/order/confirm', {
 			data: JSON.stringify({
-				// order_type: 'goods',
-				// goods_list,
-				items,
-				// from: 'cart',
-				deliveryType: 1,
-				pointStatus: false,
+				items
 			}),
 		});
 	}

@@ -1,3 +1,4 @@
+<!-- 下单界面，收货地址 or 自提门店的选择组件 -->
 <template>
   <view class="allAddress" :style="state.isPickUp ? '':'padding-top:10rpx;'">
     <view class="nav flex flex-wrap">
@@ -6,7 +7,7 @@
       <view class="item font-color" :class="state.deliveryType === 2 ? 'on' : 'on2'"
             @tap="switchDeliveryType(2)" v-if='state.isPickUp' />
     </view>
-    <!-- 收货地址的选择 -->
+    <!-- 情况一：收货地址的选择 -->
     <view class='address flex flex-wrap flex-center ss-row-between' @tap='onSelectAddress' v-if='state.deliveryType === 1'
           :style="state.isPickUp ? '':'border-top-left-radius: 14rpx;border-top-right-radius: 14rpx;'">
       <view class='addressCon' v-if="state.addressInfo.name">
@@ -27,7 +28,7 @@
         </view>
       </view>
     </view>
-    <!-- 门店的选择 -->
+    <!-- 情况二：门店的选择 -->
     <view class='address flex flex-wrap flex-center ss-row-between' v-else @tap="onSelectAddress">
         <view class='addressCon' v-if="state.pickUpInfo.name">
           <view class='name'>{{ state.pickUpInfo.name }}
@@ -46,7 +47,7 @@
         </view>
     </view>
     <view class='line'>
-      <image :src="sheep.$url.static('/static/images/line.png', 'local')"></image>
+      <image :src="sheep.$url.static('/static/images/line.png', 'local')" />
     </view>
   </view>
 </template>
