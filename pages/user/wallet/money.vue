@@ -13,7 +13,9 @@
           />
         </view>
         <view class="ss-flex ss-row-between ss-col-center ss-m-t-64">
-          <view class="money-num">{{ state.showMoney ? fen2yuan(userWallet.balance) : '*****' }}</view>
+          <view class="money-num">{{
+            state.showMoney ? fen2yuan(userWallet.balance) : '*****'
+          }}</view>
           <button class="ss-reset-button topup-btn" @tap="sheep.$router.go('/pages/pay/recharge')">
             充值
           </button>
@@ -24,7 +26,12 @@
     <su-sticky>
       <!-- 统计 -->
       <view class="filter-box ss-p-x-30 ss-flex ss-col-center ss-row-between">
-        <uni-datetime-picker v-model="state.data" type="daterange" @change="onChangeTime" :end="state.today">
+        <uni-datetime-picker
+          v-model="state.data"
+          type="daterange"
+          @change="onChangeTime"
+          :end="state.today"
+        >
           <button class="ss-reset-button date-btn">
             <text>{{ dateFilterText }}</text>
             <text class="cicon-drop-down ss-seldate-icon"></text>
@@ -82,7 +89,7 @@
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import dayjs from 'dayjs';
-  import _ from 'lodash';
+  import _ from 'lodash-es';
   import PayWalletApi from '@/sheep/api/pay/wallet';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import { resetPagination } from '@/sheep/util';
@@ -98,7 +105,7 @@
       list: [],
       total: 0,
       pageNo: 1,
-      pageSize: 8
+      pageSize: 8,
     },
     summary: {
       totalIncome: 0,
@@ -155,7 +162,7 @@
   // 获得钱包统计
   async function getSummary() {
     const { data, code } = await PayWalletApi.getWalletTransactionSummary({
-      'createTime': [state.date[0] + ' 00:00:00', state.date[1] + ' 23:59:59'],
+      createTime: [state.date[0] + ' 00:00:00', state.date[1] + ' 23:59:59'],
     });
     if (code !== 0) {
       return;
@@ -226,8 +233,7 @@
         position: absolute;
         top: 0;
         left: 0;
-        background: v-bind(headerBg)
-          no-repeat;
+        background: v-bind(headerBg) no-repeat;
         pointer-events: none;
       }
 

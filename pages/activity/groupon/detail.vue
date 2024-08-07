@@ -1,6 +1,11 @@
 <!-- 拼团订单的详情 -->
 <template>
-  <s-layout title="拼团详情" class="detail-wrap" :navbar="state.data && !state.loading ? 'inner': 'normal'" :onShareAppMessage="shareInfo">
+  <s-layout
+    title="拼团详情"
+    class="detail-wrap"
+    :navbar="state.data && !state.loading ? 'inner' : 'normal'"
+    :onShareAppMessage="shareInfo"
+  >
     <view v-if="state.loading"></view>
     <view v-if="state.data && !state.loading">
       <!-- 团长信息 + 活动信息 -->
@@ -22,7 +27,7 @@
           priceColor="#E1212B"
           @tap="
             sheep.$router.go('/pages/goods/groupon', {
-              id: state.data.headRecord.activityId
+              id: state.data.headRecord.activityId,
             })
           "
           :style="[{ top: Number(statusBarHeight + 108) + 'rpx' }]"
@@ -71,7 +76,9 @@
           </view>
           <view class="countdown-title ss-flex" v-else>
             还差
-            <view class="num">{{ state.data.headRecord.userSize - state.data.headRecord.userCount }}人</view>
+            <view class="num"
+              >{{ state.data.headRecord.userSize - state.data.headRecord.userCount }}人</view
+            >
             拼团成功
             <view class="ss-flex countdown-time">
               <view class="countdown-h ss-flex ss-row-center">{{ endTime.h }}</view>
@@ -109,7 +116,11 @@
             </view>
           </view>
           <!-- 还有几个坑位 -->
-          <view class="default-avatar ss-m-r-24 ss-m-b-20" v-for="item in state.remainNumber" :key="item">
+          <view
+            class="default-avatar ss-m-r-24 ss-m-b-20"
+            v-for="item in state.remainNumber"
+            :key="item"
+          >
             <image
               :src="sheep.$url.static('/static/img/shop/avatar/unknown.png')"
               class="avatar-img"
@@ -154,11 +165,7 @@
         </view>
         <view v-else class="ss-flex ss-row-center">
           <view v-if="state.data.orderId">
-            <button
-              class="ss-reset-button join-btn"
-              :disabled="endTime.ms <= 0"
-              @tap="onShare"
-            >
+            <button class="ss-reset-button join-btn" :disabled="endTime.ms <= 0" @tap="onShare">
               邀请好友来拼团
             </button>
           </view>
@@ -198,8 +205,8 @@
   import { onLoad } from '@dcloudio/uni-app';
   import { useDurationTime } from '@/sheep/hooks/useGoods';
   import { showShareModal } from '@/sheep/hooks/useModal';
-  import { isEmpty } from 'lodash';
-  import CombinationApi from "@/sheep/api/promotion/combination";
+  import { isEmpty } from 'lodash-es';
+  import CombinationApi from '@/sheep/api/promotion/combination';
 
   const headerBg = sheep.$url.css('/static/img/shop/user/withdraw_bg.png');
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
@@ -295,7 +302,9 @@
       state.remainNumber = remainNumber > 0 ? remainNumber : 0;
 
       // 获取活动信息
-      const { data: activity } = await CombinationApi.getCombinationActivity(data.headRecord.activityId);
+      const { data: activity } = await CombinationApi.getCombinationActivity(
+        data.headRecord.activityId,
+      );
       state.activity = activity;
     } else {
       state.data = null;
@@ -316,8 +325,7 @@
   .recharge-box {
     position: relative;
     margin-bottom: 120rpx;
-    background: v-bind(headerBg) center/750rpx 100%
-        no-repeat,
+    background: v-bind(headerBg) center/750rpx 100% no-repeat,
       linear-gradient(115deg, #f44739 0%, #ff6600 100%);
     border-radius: 0 0 5% 5%;
     height: 100rpx;

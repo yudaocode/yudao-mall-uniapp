@@ -69,10 +69,7 @@
 
         <!-- 功能卡片 -->
         <view class="detail-cell-card detail-card ss-flex-col">
-          <detail-cell-sku
-            :sku="state.selectedSku"
-            @tap="state.showSelectSku = true"
-          />
+          <detail-cell-sku :sku="state.selectedSku" @tap="state.showSelectSku = true" />
         </view>
         <!-- 规格与数量弹框 -->
         <s-select-seckill-sku
@@ -107,7 +104,9 @@
           <button v-else class="ss-reset-button origin-price-btn ss-flex-col">
             <view
               class="no-original"
-              :class="state.goodsInfo.stock === 0 || timeStatusEnum !== TimeStatusEnum.STARTED ? '' : ''"
+              :class="
+                state.goodsInfo.stock === 0 || timeStatusEnum !== TimeStatusEnum.STARTED ? '' : ''
+              "
             >
               秒杀价
             </view>
@@ -136,11 +135,11 @@
 </template>
 
 <script setup>
-  import {reactive, computed, ref} from 'vue';
+  import { reactive, computed, ref } from 'vue';
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import {isEmpty, min} from 'lodash';
-  import {useDurationTime, formatGoodsSwiper, fen2yuan} from '@/sheep/hooks/useGoods';
+  import { isEmpty, min } from 'lodash-es';
+  import { useDurationTime, formatGoodsSwiper, fen2yuan } from '@/sheep/hooks/useGoods';
   import detailNavbar from './components/detail/detail-navbar.vue';
   import detailCellSku from './components/detail/detail-cell-sku.vue';
   import detailTabbar from './components/detail/detail-tabbar.vue';
@@ -148,15 +147,13 @@
   import detailCommentCard from './components/detail/detail-comment-card.vue';
   import detailContentCard from './components/detail/detail-content-card.vue';
   import detailProgress from './components/detail/detail-progress.vue';
-  import SeckillApi from "@/sheep/api/promotion/seckill";
-  import SpuApi from "@/sheep/api/product/spu";
-  import {getTimeStatusEnum, TimeStatusEnum} from "@/sheep/util/const";
+  import SeckillApi from '@/sheep/api/promotion/seckill';
+  import SpuApi from '@/sheep/api/product/spu';
+  import { getTimeStatusEnum, TimeStatusEnum } from '@/sheep/util/const';
 
   const headerBg = sheep.$url.css('/static/img/shop/goods/seckill-bg.png');
   const btnBg = sheep.$url.css('/static/img/shop/goods/seckill-btn.png');
-  const disabledBtnBg = sheep.$url.css(
-    '/static/img/shop/goods/activity-btn-disabled.png',
-  );
+  const disabledBtnBg = sheep.$url.css('/static/img/shop/goods/activity-btn-disabled.png');
   const seckillBg = sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png');
   const grouponBg = sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png');
 
@@ -221,36 +218,40 @@
     );
   });
 
-  const activity = ref()
-  const timeStatusEnum = ref('')
+  const activity = ref();
+  const timeStatusEnum = ref('');
   // 查询活动
   const getActivity = async (id) => {
-    const { data } = await SeckillApi.getSeckillActivity(id)
-    activity.value = data
-    timeStatusEnum.value = getTimeStatusEnum(activity.startTime, activity.endTime)
+    const { data } = await SeckillApi.getSeckillActivity(id);
+    activity.value = data;
+    timeStatusEnum.value = getTimeStatusEnum(activity.startTime, activity.endTime);
 
     // 查询商品
-    await getSpu(data.spuId)
-  }
+    await getSpu(data.spuId);
+  };
 
   const getSpu = async (id) => {
-    const { data } = await SpuApi.getSpuDetail(id)
+    const { data } = await SpuApi.getSpuDetail(id);
     // 模拟
-    data.activity_type = 'seckill'
-    state.goodsInfo = data
+    data.activity_type = 'seckill';
+    state.goodsInfo = data;
     // 处理轮播图
     state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.sliderPicUrls);
 
     // 默认显示最低价
-    state.goodsInfo.price = min([state.goodsInfo.price, ...activity.value.products.map(spu => spu.seckillPrice)])
+    state.goodsInfo.price = min([
+      state.goodsInfo.price,
+      ...activity.value.products.map((spu) => spu.seckillPrice),
+    ]);
 
     // 价格、库存使用活动的
-    data.skus.forEach(sku => {
-      const product = activity.value.products.find(product => product.skuId === sku.id);
+    data.skus.forEach((sku) => {
+      const product = activity.value.products.find((product) => product.skuId === sku.id);
       if (product) {
         sku.price = product.seckillPrice;
         sku.stock = Math.min(sku.stock, product.stock);
-      } else { // 找不到可能是没配置，则不能发起秒杀
+      } else {
+        // 找不到可能是没配置，则不能发起秒杀
         sku.stock = 0;
       }
       // 设置限购数量
@@ -264,7 +265,7 @@
     });
 
     state.skeletonLoading = false;
-  }
+  };
 
   onLoad((options) => {
     // 非法参数
@@ -274,7 +275,7 @@
     }
 
     // 查询活动
-    getActivity(options.id)
+    getActivity(options.id);
   });
 </script>
 

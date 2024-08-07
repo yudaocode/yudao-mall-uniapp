@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import $share from '@/sheep/platform/share';
-import { clone, cloneDeep } from 'lodash';
+import { clone, cloneDeep } from 'lodash-es';
 import cart from './cart';
 import app from './app';
 import { showAuthModal } from '@/sheep/hooks/useModal';
@@ -68,12 +68,12 @@ const user = defineStore({
 
     // 获取订单、优惠券等其他资产信息
     getNumData() {
-      OrderApi.getOrderCount().then(res => {
+      OrderApi.getOrderCount().then((res) => {
         if (res.code === 0) {
           this.numData.orderCount = res.data;
         }
       });
-      CouponApi.getUnusedCouponCount().then(res => {
+      CouponApi.getUnusedCouponCount().then((res) => {
         if (res.code === 0) {
           this.numData.unusedCouponCount = res.data;
         }
@@ -143,20 +143,22 @@ const user = defineStore({
       }
 
       // 绑定推广员
-      $share.bindBrokerageUser()
+      $share.bindBrokerageUser();
     },
 
     // 登出系统
     async logout() {
       this.resetUserData();
       return !this.isLogin;
-    }
+    },
   },
   persist: {
     enabled: true,
-    strategies: [{
-      key: 'user-store',
-    }]
+    strategies: [
+      {
+        key: 'user-store',
+      },
+    ],
   },
 });
 

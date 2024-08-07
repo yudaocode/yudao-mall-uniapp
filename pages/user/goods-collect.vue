@@ -5,7 +5,8 @@
       <!-- 头部 -->
       <view class="cart-header ss-flex ss-col-center ss-row-between ss-p-x-30">
         <view class="header-left ss-flex ss-col-center ss-font-26">
-          共 <text class="goods-number ui-TC-Main ss-flex">{{ state.pagination.total }}</text> 件商品
+          共
+          <text class="goods-number ui-TC-Main ss-flex">{{ state.pagination.total }}</text> 件商品
         </view>
         <view class="header-right">
           <button
@@ -77,7 +78,8 @@
           <view class="footer-right">
             <button
               class="ss-reset-button ui-BG-Main-Gradient pay-btn ss-font-28 ui-Shadow-Main"
-              @tap="onCancel">
+              @tap="onCancel"
+            >
               取消收藏
             </button>
           </view>
@@ -100,7 +102,7 @@
   import sheep from '@/sheep';
   import { reactive } from 'vue';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
-  import _ from 'lodash';
+  import _ from 'lodash-es';
   import FavoriteApi from '@/sheep/api/product/favorite';
   import { resetPagination } from '@/sheep/util';
 
@@ -129,7 +131,7 @@
     if (code !== 0) {
       return;
     }
-    state.pagination.list = _.concat(state.pagination.list, data.list)
+    state.pagination.list = _.concat(state.pagination.list, data.list);
     state.pagination.total = data.total;
     state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
   }
@@ -174,7 +176,7 @@
   // 加载更多
   function loadMore() {
     if (state.loadStatus === 'noMore') {
-      return
+      return;
     }
     state.pagination.pageNo++;
     getData();

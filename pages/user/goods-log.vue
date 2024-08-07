@@ -81,11 +81,13 @@
           </view>
           <view class="footer-right ss-flex">
             <button
-              :class="['ss-reset-button  pay-btn ss-font-28 ',
-                  {
-                    'ui-BG-Main-Gradient': state.selectedSpuIdList.length > 0,
-                    'ui-Shadow-Main': state.selectedSpuIdList.length > 0
-                  }]"
+              :class="[
+                'ss-reset-button  pay-btn ss-font-28 ',
+                {
+                  'ui-BG-Main-Gradient': state.selectedSpuIdList.length > 0,
+                  'ui-Shadow-Main': state.selectedSpuIdList.length > 0,
+                },
+              ]"
               @tap="onDelete"
             >
               删除足迹
@@ -120,9 +122,9 @@
   import sheep from '@/sheep';
   import { reactive } from 'vue';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
-  import _ from 'lodash';
-  import SpuHistoryApi from "@/sheep/api/product/history";
-  import {cloneDeep} from "@/sheep/helper/utils";
+  import _ from 'lodash-es';
+  import SpuHistoryApi from '@/sheep/api/product/history';
+  import { cloneDeep } from '@/sheep/helper/utils';
 
   const sys_navBar = sheep.$platform.navbar;
   const pagination = {

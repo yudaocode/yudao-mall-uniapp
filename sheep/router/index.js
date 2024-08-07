@@ -1,6 +1,6 @@
 import $store from '@/sheep/store';
 import { showAuthModal, showShareModal } from '@/sheep/hooks/useModal';
-import { isNumber, isString, isEmpty, startsWith, isObject, isNil, clone } from 'lodash';
+import { isNumber, isString, isEmpty, startsWith, isObject, isNil, clone } from 'lodash-es';
 import throttle from '@/sheep/helper/throttle';
 
 const _go = (
