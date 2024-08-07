@@ -45,7 +45,7 @@
           <template #default>
             <button
               class="ss-reset-button card-btn ss-flex ss-row-center ss-col-center"
-              :class=" item.status !== 1 ? 'disabled-btn': ''"
+              :class="item.status !== 1 ? 'disabled-btn' : ''"
               :disabled="item.status !== 1"
               @click.stop="sheep.$router.go('/pages/coupon/detail', { couponId: item.id })"
             >
@@ -56,9 +56,14 @@
       </view>
     </template>
 
-    <uni-load-more v-if="state.pagination.total > 0" :status="state.loadStatus" :content-text="{
+    <uni-load-more
+      v-if="state.pagination.total > 0"
+      :status="state.loadStatus"
+      :content-text="{
         contentdown: '上拉加载更多',
-      }" @tap="loadMore" />
+      }"
+      @tap="loadMore"
+    />
   </s-layout>
 </template>
 
@@ -66,7 +71,7 @@
   import sheep from '@/sheep';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import { reactive } from 'vue';
-  import _ from 'lodash';
+  import _ from 'lodash-es';
   import { resetPagination } from '@/sheep/util';
   import CouponApi from '@/sheep/api/promotion/coupon';
 
@@ -78,7 +83,7 @@
       list: [],
       total: 0,
       pageNo: 1,
-      pageSize: 5
+      pageSize: 5,
     },
     loadStatus: '',
   });
@@ -106,9 +111,9 @@
   function onTabsChange(e) {
     state.currentTab = e.index;
     state.type = e.value;
-    resetPagination(state.pagination)
+    resetPagination(state.pagination);
     if (state.currentTab === 0) {
-    	getData();
+      getData();
     } else {
       getCoupon();
     }
@@ -135,7 +140,7 @@
     const { data, code } = await CouponApi.getCouponPage({
       pageNo: state.pagination.pageNo,
       pageSize: state.pagination.pageSize,
-      status: state.type
+      status: state.type,
     });
     if (code !== 0) {
       return;
@@ -177,13 +182,13 @@
     // 领劵中心
     if (Option.type === 'all' || !Option.type) {
       getData();
-    // 我的优惠劵
+      // 我的优惠劵
     } else {
       Option.type === 'geted'
         ? (state.currentTab = 1)
         : Option.type === 'used'
-          ? (state.currentTab = 2)
-          : (state.currentTab = 3);
+        ? (state.currentTab = 2)
+        : (state.currentTab = 3);
       state.type = state.currentTab;
       getCoupon();
     }

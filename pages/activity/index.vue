@@ -63,7 +63,7 @@
   import { reactive } from 'vue';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import _ from 'lodash';
+  import _ from 'lodash-es';
   import RewardActivityApi from '@/sheep/api/promotion/rewardActivity';
   import { formatRewardActivityRule } from '@/sheep/hooks/useGoods';
   import SpuApi from '@/sheep/api/product/spu';
@@ -118,7 +118,7 @@
     const { code, data } = await SpuApi.getSpuPage({
       pageNo: state.pagination.pageNo,
       pageSize: state.pagination.pageSize,
-      ...params
+      ...params,
     });
     if (code !== 0) {
       return;

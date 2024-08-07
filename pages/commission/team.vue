@@ -235,7 +235,7 @@
   import sheep from '@/sheep';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import { computed, reactive, ref } from 'vue';
-  import _ from 'lodash';
+  import _ from 'lodash-es';
   import { onPageScroll } from '@dcloudio/uni-app';
   import BrokerageApi from '@/sheep/api/trade/brokerage';
 

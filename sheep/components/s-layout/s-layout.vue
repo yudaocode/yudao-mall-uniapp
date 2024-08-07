@@ -31,7 +31,11 @@
         ></view>
 
         <!-- 顶部导航栏-情况4：装修组件导航栏-沉浸式 -->
-        <s-custom-navbar v-if="navbar === 'custom' && navbarMode === 'inner'" :data="navbarStyle" :showLeftButton="showLeftButton" />
+        <s-custom-navbar
+          v-if="navbar === 'custom' && navbarMode === 'inner'"
+          :data="navbarStyle"
+          :showLeftButton="showLeftButton"
+        />
 
         <!-- 页面内容插槽 -->
         <slot />
@@ -58,7 +62,7 @@
    */
   import { computed, reactive, ref } from 'vue';
   import sheep from '@/sheep';
-  import { isEmpty } from 'lodash';
+  import { isEmpty } from 'lodash-es';
   import { onShow } from '@dcloudio/uni-app';
   // #ifdef MP-WEIXIN
   import { onShareAppMessage } from '@dcloudio/uni-app';

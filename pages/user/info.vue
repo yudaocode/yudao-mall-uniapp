@@ -26,7 +26,8 @@
             <button
               class="ss-reset-button avatar-action-btn"
               open-type="chooseAvatar"
-              @chooseavatar="onChooseAvatar">
+              @chooseavatar="onChooseAvatar"
+            >
               修改
             </button>
             <!-- #endif -->
@@ -154,10 +155,7 @@
         </view>
         <view class="ss-flex ss-col-center">
           <view class="info ss-flex ss-col-center" v-if="state.thirdInfo">
-            <image
-              class="avatar ss-m-r-20"
-              :src="sheep.$url.cdn(state.thirdInfo.avatar)"
-            />
+            <image class="avatar ss-m-r-20" :src="sheep.$url.cdn(state.thirdInfo.avatar)" />
             <text class="name">{{ state.thirdInfo.nickname }}</text>
           </view>
           <view class="bind-box ss-m-l-20">
@@ -185,7 +183,7 @@
 <script setup>
   import { computed, reactive, onBeforeMount } from 'vue';
   import sheep from '@/sheep';
-  import { clone } from 'lodash';
+  import { clone } from 'lodash-es';
   import { showAuthModal } from '@/sheep/hooks/useModal';
   import FileApi from '@/sheep/api/infra/file';
   import UserApi from '@/sheep/api/member/user';
@@ -198,14 +196,15 @@
 
   const placeholderStyle = 'color:#BBBBBB;font-size:28rpx;line-height:normal';
 
-  const sexRadioMap = [{
+  const sexRadioMap = [
+    {
       name: '男',
       value: '1',
     },
     {
       name: '女',
       value: '2',
-    }
+    },
   ];
 
   const userInfo = computed(() => sheep.$store('user').userInfo);
@@ -279,7 +278,7 @@
 
   // 保存信息
   async function onSubmit() {
-	 const { code } = await UserApi.updateUser({
+    const { code } = await UserApi.updateUser({
       avatar: state.model.avatar,
       nickname: state.model.nickname,
       sex: state.model.sex,

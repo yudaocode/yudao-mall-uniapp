@@ -18,9 +18,7 @@
       <view class="address-text">
         {{ props.item.detailAddress }}
       </view>
-      <view class="person-text">
-        {{ props.item.name }} {{ props.item.mobile }}
-      </view>
+      <view class="person-text"> {{ props.item.name }} {{ props.item.mobile }} </view>
     </view>
     <view v-else>
       <view class="address-text ss-m-b-10">请选择收货地址</view>
@@ -47,7 +45,7 @@
    * @slot 								 - 默认插槽
    */
   import sheep from '@/sheep';
-  import { isEmpty } from 'lodash';
+  import { isEmpty } from 'lodash-es';
   const props = defineProps({
     item: {
       type: Object,

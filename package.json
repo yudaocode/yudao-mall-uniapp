@@ -90,6 +90,7 @@
   "dependencies": {
     "dayjs": "^1.11.7",
     "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "luch-request": "^3.0.8",
     "pinia": "^2.0.33",
     "pinia-plugin-persist-uni": "^1.2.0",

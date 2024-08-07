@@ -11,7 +11,11 @@
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
-      <image class="xs-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFit"></image>
+      <image
+        class="xs-img-box"
+        :src="sheep.$url.cdn(data.image || data.picUrl)"
+        mode="aspectFit"
+      ></image>
       <view
         v-if="goodsFields.title?.show || goodsFields.name?.show || goodsFields.price?.show"
         class="xs-goods-content ss-flex-col ss-row-around"
@@ -39,14 +43,21 @@
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
-      <image class="sm-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFill"></image>
+      <image
+        class="sm-img-box"
+        :src="sheep.$url.cdn(data.image || data.picUrl)"
+        mode="aspectFill"
+      ></image>
 
       <view
         v-if="goodsFields.title?.show || goodsFields.name?.show || goodsFields.price?.show"
         class="sm-goods-content"
         :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]"
       >
-        <view v-if="goodsFields.title?.show || goodsFields.name?.show" class="sm-goods-title ss-line-1 ss-m-b-16">
+        <view
+          v-if="goodsFields.title?.show || goodsFields.name?.show"
+          class="sm-goods-title ss-line-1 ss-m-b-16"
+        >
           {{ data.title || data.name }}
         </view>
         <view
@@ -65,7 +76,11 @@
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
-      <image class="md-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="widthFix"></image>
+      <image
+        class="md-img-box"
+        :src="sheep.$url.cdn(data.image || data.picUrl)"
+        mode="widthFix"
+      ></image>
       <view
         class="md-goods-content ss-flex-col ss-row-around ss-p-b-20 ss-p-t-20 ss-p-x-16"
         :id="elId"
@@ -106,7 +121,10 @@
           </view>
 
           <view
-            v-if="(goodsFields.original_price?.show||goodsFields.marketPrice?.show) &&( data.original_price > 0|| data.marketPrice > 0)"
+            v-if="
+              (goodsFields.original_price?.show || goodsFields.marketPrice?.show) &&
+              (data.original_price > 0 || data.marketPrice > 0)
+            "
             class="goods-origin-price ss-m-t-16 font-OPPOSANS ss-flex"
             :style="[{ color: originPriceColor }]"
           >
@@ -141,7 +159,11 @@
       <view v-if="grouponTag" class="groupon-tag ss-flex ss-row-center">
         <view class="tag-icon">拼团</view>
       </view>
-      <image class="lg-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFill"></image>
+      <image
+        class="lg-img-box"
+        :src="sheep.$url.cdn(data.image || data.picUrl)"
+        mode="aspectFill"
+      ></image>
       <view class="lg-goods-content ss-flex-1 ss-flex-col ss-row-between ss-p-b-10 ss-p-t-20">
         <view>
           <view
@@ -177,7 +199,10 @@
               {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
             </view>
             <view
-              v-if="(goodsFields.original_price?.show||goodsFields.marketPrice?.show) &&( data.original_price > 0|| data.marketPrice > 0)"
+              v-if="
+                (goodsFields.original_price?.show || goodsFields.marketPrice?.show) &&
+                (data.original_price > 0 || data.marketPrice > 0)
+              "
               class="goods-origin-price ss-flex ss-col-bottom font-OPPOSANS"
               :style="[{ color: originPriceColor }]"
             >
@@ -192,9 +217,7 @@
       </view>
 
       <slot name="cart">
-        <view class="buy-box ss-flex ss-col-center ss-row-center" v-if="buttonShow">
-          去购买
-        </view>
+        <view class="buy-box ss-flex ss-col-center ss-row-center" v-if="buttonShow"> 去购买 </view>
       </slot>
     </view>
 
@@ -204,7 +227,11 @@
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
 
-      <image class="sl-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFill"></image>
+      <image
+        class="sl-img-box"
+        :src="sheep.$url.cdn(data.image || data.picUrl)"
+        mode="aspectFill"
+      ></image>
 
       <view class="sl-goods-content">
         <view>
@@ -241,7 +268,10 @@
               {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
             </view>
             <view
-              v-if="(goodsFields.original_price?.show||goodsFields.marketPrice?.show) &&( data.original_price > 0|| data.marketPrice > 0)"
+              v-if="
+                (goodsFields.original_price?.show || goodsFields.marketPrice?.show) &&
+                (data.original_price > 0 || data.marketPrice > 0)
+              "
               class="goods-origin-price ss-m-t-16 font-OPPOSANS ss-flex"
               :style="[{ color: originPriceColor }]"
             >
@@ -296,7 +326,7 @@
   import { fen2yuan, formatSales } from '@/sheep/hooks/useGoods';
   import { formatStock } from '@/sheep/hooks/useGoods';
   import goodsCollectVue from '@/pages/user/goods-collect.vue';
-  import { isArray } from 'lodash';
+  import { isArray } from 'lodash-es';
 
   // 数据
   const state = reactive({});

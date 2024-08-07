@@ -1,31 +1,31 @@
 <!-- 秒杀商品的 SKU 选择，和 s-select-sku.vue 类似 -->
 <template>
-	<!-- 规格弹窗 -->
-	<su-popup :show="show" round="10" @close="emits('close')">
-		<!-- SKU 信息 -->
-		<view class="ss-modal-box bg-white ss-flex-col">
-			<view class="modal-header ss-flex ss-col-center">
-				<!-- 规格图 -->
-				<view class="header-left ss-m-r-30">
-					<image
-						class="sku-image"
-						:src="sheep.$url.cdn(state.selectedSku.picUrl || state.goodsInfo.picUrl)"
-						mode="aspectFill"
-					>
-					</image>
-				</view>
-				<view class="header-right ss-flex-col ss-row-between ss-flex-1">
-					<!-- 名称 -->
-					<view class="goods-title ss-line-2">{{ state.goodsInfo.name }}</view>
-					<view class="header-right-bottom ss-flex ss-col-center ss-row-between">
-						<!-- 价格 -->
-						<view class="price-text">
-							{{ fen2yuan(state.selectedSku.price || state.goodsInfo.price) }}
-						</view>
-						<!-- 秒杀价格标签 -->
-						<view class="tig ss-flex ss-col-center">
-							<view class="tig-icon ss-flex ss-col-center ss-row-center">
-	              <text class="cicon-alarm"></text>
+  <!-- 规格弹窗 -->
+  <su-popup :show="show" round="10" @close="emits('close')">
+    <!-- SKU 信息 -->
+    <view class="ss-modal-box bg-white ss-flex-col">
+      <view class="modal-header ss-flex ss-col-center">
+        <!-- 规格图 -->
+        <view class="header-left ss-m-r-30">
+          <image
+            class="sku-image"
+            :src="sheep.$url.cdn(state.selectedSku.picUrl || state.goodsInfo.picUrl)"
+            mode="aspectFill"
+          >
+          </image>
+        </view>
+        <view class="header-right ss-flex-col ss-row-between ss-flex-1">
+          <!-- 名称 -->
+          <view class="goods-title ss-line-2">{{ state.goodsInfo.name }}</view>
+          <view class="header-right-bottom ss-flex ss-col-center ss-row-between">
+            <!-- 价格 -->
+            <view class="price-text">
+              {{ fen2yuan(state.selectedSku.price || state.goodsInfo.price) }}
+            </view>
+            <!-- 秒杀价格标签 -->
+            <view class="tig ss-flex ss-col-center">
+              <view class="tig-icon ss-flex ss-col-center ss-row-center">
+                <text class="cicon-alarm"></text>
               </view>
               <view class="tig-title">秒杀价</view>
             </view>
@@ -91,8 +91,8 @@
   // 按钮状态： active,nostock
   import { computed, reactive, watch } from 'vue';
   import sheep from '@/sheep';
-  import {convertProductPropertyList, fen2yuan} from "@/sheep/hooks/useGoods";
-  import {min} from "lodash";
+  import { convertProductPropertyList, fen2yuan } from '@/sheep/hooks/useGoods';
+  import { min } from 'lodash-es';
   const emits = defineEmits(['change', 'addCart', 'buy', 'close']);
   const props = defineProps({
     modelValue: {
@@ -107,7 +107,7 @@
     singleLimitCount: {
       type: Number,
       default: 1,
-    }
+    },
   });
   const state = reactive({
     goodsInfo: computed(() => props.modelValue),
@@ -120,7 +120,7 @@
   const skuList = computed(() => {
     let skuPrices = state.goodsInfo.skus;
     for (let price of skuPrices) {
-      price.value_id_array = price.properties.map((item) => item.valueId)
+      price.value_id_array = price.properties.map((item) => item.valueId);
     }
     return skuPrices;
   });
@@ -228,7 +228,7 @@
       // 如果当前 property id 不存在于有库存的 SKU 中，则禁用
       for (let valueIndex in propertyList[propertyIndex]['values']) {
         propertyList[propertyIndex]['values'][valueIndex]['disabled'] =
-            noChooseValueIds.indexOf(propertyList[propertyIndex]['values'][valueIndex]['id']) < 0; // true 禁用 or false 不禁用
+          noChooseValueIds.indexOf(propertyList[propertyIndex]['values'][valueIndex]['id']) < 0; // true 禁用 or false 不禁用
       }
     }
   };
@@ -258,7 +258,10 @@
   const onSelectSku = (propertyId, valueId) => {
     // 清空已选择
     let isChecked = true; // 选中 or 取消选中
-    if (state.currentPropertyArray[propertyId] !== undefined && state.currentPropertyArray[propertyId] === valueId) {
+    if (
+      state.currentPropertyArray[propertyId] !== undefined &&
+      state.currentPropertyArray[propertyId] === valueId
+    ) {
       // 点击已被选中的，删除并填充 ''
       isChecked = false;
       state.currentPropertyArray.splice(propertyId, 1, '');

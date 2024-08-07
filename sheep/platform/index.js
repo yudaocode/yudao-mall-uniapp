@@ -9,7 +9,7 @@
  * @param {Object} device - 设备信息
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash-es';
 // #ifdef H5
 import { isWxBrowser } from '@/sheep/helper/utils';
 // #endif

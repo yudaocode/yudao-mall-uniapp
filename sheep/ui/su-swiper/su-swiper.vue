@@ -88,7 +88,7 @@
 
   import { reactive, computed } from 'vue';
   import sheep from '@/sheep';
-  import { clone } from 'lodash';
+  import { clone } from 'lodash-es';
 
   // 数据
   const state = reactive({
@@ -196,11 +196,11 @@
   const onPreview = () => {
     if (!props.isPreview) return;
     let previewImage = clone(props.list);
-    previewImage.forEach((item,index) => {
-      if(item.type === 'video') {
+    previewImage.forEach((item, index) => {
+      if (item.type === 'video') {
         previewImage.splice(index, 1);
       }
-    })
+    });
     uni.previewImage({
       urls:
         previewImage.length < 1
