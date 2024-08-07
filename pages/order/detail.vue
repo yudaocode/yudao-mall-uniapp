@@ -175,6 +175,10 @@
         <text class="title">优惠劵金额</text>
         <text class="detail">-¥{{ fen2yuan(state.orderInfo.couponPrice) }}</text>
       </view>
+      <view class="notice-item ss-flex ss-row-between" v-if="state.orderInfo.pointPrice > 0">
+        <text class="title">积分抵扣</text>
+        <text class="detail">-¥{{ fen2yuan(state.orderInfo.pointPrice) }}</text>
+      </view>
       <view class="notice-item ss-flex ss-row-between" v-if="state.orderInfo.discountPrice > 0">
         <text class="title">活动优惠</text>
         <text class="detail">¥{{ fen2yuan(state.orderInfo.discountPrice) }}</text>
