@@ -41,17 +41,25 @@
           </view>
         </view>
         <!-- TODO 芋艿：接入积分 -->
+        <!-- TODO puhui999: v-if="state.orderInfo.type === 0 && state.orderPayload.order_type === 'normal'" -->
+        <!-- TODO puhui999: 没有搞懂 order_type 和  orderInfo.type 的区别和作用暂时不考虑 order_type 条件-->
         <view
           class="order-item ss-flex ss-col-center ss-row-between"
-          v-if="state.orderPayload.order_type === 'score'"
+          v-if="state.orderInfo.type === 0"
         >
-          <view class="item-title">扣除积分</view>
+          <view class="item-title">积分抵扣</view>
           <view class="ss-flex ss-col-center">
+            {{ state.pointStatus ? '剩余积分' : '当前积分' }}
             <image
               :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
               class="score-img"
             />
-            <text class="item-value ss-m-r-24">{{ state.orderInfo.score_amount }}</text>
+            <text class="item-value ss-m-r-24">
+              {{ state.pointStatus ? state.orderInfo.totalPoint - state.orderInfo.usePoint : (state.orderInfo.totalPoint || 0) }}
+            </text>
+            <checkbox-group @change="changeIntegral">
+              <checkbox :checked='state.pointStatus' :disabled="!state.orderInfo.totalPoint || state.orderInfo.totalPoint <= 0" />
+            </checkbox-group>
           </view>
         </view>
         <view class="order-item ss-flex ss-col-center ss-row-between" v-if='addressState.deliveryType === 1'>
@@ -195,6 +203,8 @@
     showCoupon: false, // 是否展示优惠劵
     couponInfo: [], // 优惠劵列表
     showDiscount: false, // 是否展示营销活动
+    // ========== 积分 ==========
+    pointStatus: false, //是否使用积分
   });
 
   const addressState = ref({
@@ -205,6 +215,15 @@
     receiverName: '', // 收件人名称
     receiverMobile: '', // 收件人手机
   });
+
+  // ========== 积分 ==========
+  /**
+   * 使用积分抵扣
+   */
+  const changeIntegral = async () => {
+    state.pointStatus = !state.pointStatus;
+    await getOrderInfo();
+  };
 
   // 选择优惠券
   async function onSelectCoupon(couponId) {
@@ -251,7 +270,7 @@
       pickUpStoreId: addressState.value.pickUpInfo.id,//自提门店编号
       receiverName: addressState.value.receiverName,// 选择门店自提时，该字段为联系人名
       receiverMobile: addressState.value.receiverMobile,// 选择门店自提时，该字段为联系人手机
-      pointStatus: false, // TODO 芋艿：需要支持【积分选择】
+      pointStatus: state.pointStatus,
       combinationActivityId: state.orderPayload.combinationActivityId,
       combinationHeadId: state.orderPayload.combinationHeadId,
       seckillActivityId: state.orderPayload.seckillActivityId,
@@ -281,10 +300,10 @@
       pickUpStoreId: addressState.value.pickUpInfo.id,//自提门店编号
       receiverName: addressState.value.receiverName,// 选择门店自提时，该字段为联系人名
       receiverMobile: addressState.value.receiverMobile,// 选择门店自提时，该字段为联系人手机
-      pointStatus: false, // TODO 芋艿：需要支持【积分选择】
+      pointStatus: state.pointStatus,
       combinationActivityId: state.orderPayload.combinationActivityId,
       combinationHeadId: state.orderPayload.combinationHeadId,
-      seckillActivityId: state.orderPayload.seckillActivityId
+      seckillActivityId: state.orderPayload.seckillActivityId,
     });
     if (code !== 0) {
       return;
