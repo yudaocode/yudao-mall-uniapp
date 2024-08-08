@@ -156,7 +156,8 @@
       data: JSON.stringify({
         items: [{
           skuId: e.id,
-          count: e.goods_num
+          count: e.goods_num,
+		  categoryId: state.goodsInfo.categoryId
         }]
       }),
     });
