@@ -12,26 +12,23 @@ export const TerminalEnum = {
 };
 
 /**
- * 将Uniapp提供的平台转换为后端所需的Terminal值
- * @param platformType Uniapp提供的平台类型
+ * 将 uni-app 提供的平台转换为后端所需的 terminal值
+ *
+ * @return 终端
  */
-export const getTerminalEnumByUniPlatform = (platformType) => {
-  let terminal;
+export const getTerminal = () => {
+  const platformType = uni.getSystemInfoSync().uniPlatform;
   // 与后端terminal枚举一一对应
   switch (platformType) {
     case 'app':
-      terminal = TerminalEnum.APP;
-      break;
+      return TerminalEnum.APP;
     case 'web':
-      terminal = TerminalEnum.H5;
-      break;
+      return TerminalEnum.H5;
     case 'mp-weixin':
-      terminal = TerminalEnum.WECHAT_MINI_PROGRAM;
-      break;
+      return TerminalEnum.WECHAT_MINI_PROGRAM;
     default:
-      terminal = TerminalEnum.UNKNOWN;
+      return TerminalEnum.UNKNOWN;
   }
-  return terminal;
 };
 
 // ========== MALL - 营销模块 ==========
