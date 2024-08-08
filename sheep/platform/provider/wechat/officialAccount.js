@@ -103,5 +103,5 @@ export default {
   unbind,
   getInfo,
   getOpenid,
-  jssdk: $wxsdk,
+  jsWxSdk: $wxsdk,
 };
