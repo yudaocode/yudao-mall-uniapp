@@ -4,13 +4,12 @@
  */
 
 import Request from 'luch-request';
-import { baseUrl, apiPath, tenantId } from '@/sheep/config';
+import { apiPath, baseUrl, tenantId } from '@/sheep/config';
 import $store from '@/sheep/store';
 import $platform from '@/sheep/platform';
-import {
-	showAuthModal
-} from '@/sheep/hooks/useModal';
+import { showAuthModal } from '@/sheep/hooks/useModal';
 import AuthUtil from '@/sheep/api/member/auth';
+import { getTerminalEnumByUniPlatform } from '@/sheep/util/const';
 
 const options = {
 	// 显示操作成功消息 默认不显示
@@ -93,13 +92,14 @@ http.interceptors.request.use(
     // 增加 token 令牌、terminal 终端、tenant 租户的请求头
 		const token = getAccessToken();
 		if (token) {
-      config.header['Authorization'] = token;
-    }
-		// TODO 芋艿：特殊处理
+			config.header['Authorization'] = token;
+		}
+
+		const terminalType = uni.getSystemInfoSync().uniPlatform
+		config.header['terminal'] = getTerminalEnumByUniPlatform(terminalType);
+
     config.header['Accept'] = '*/*';
     config.header['tenant-id'] = tenantId;
-    config.header['terminal'] = '20';
-    // config.header['Authorization'] = 'Bearer test247';
 		return config;
 	},
 	(error) => {
