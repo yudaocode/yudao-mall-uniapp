@@ -1,9 +1,10 @@
 /**
  * 本模块封装微信浏览器下的一些方法。
  * 更多微信网页开发sdk方法,详见:https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/JS-SDK.html
+ * 有 the permission value is offline verifying 报错请参考 @see https://segmentfault.com/a/1190000042289419 解决
  */
 
-import jweixin, { ready } from 'weixin-js-sdk';
+import jweixin from 'weixin-js-sdk';
 import $helper from '@/sheep/helper';
 import AuthUtil from '@/sheep/api/member/auth';
 
@@ -38,7 +39,7 @@ export default {
         timestamp: data.timestamp,
         nonceStr: data.nonceStr,
         signature: data.signature,
-        jsApiList: ['chooseWXPay'], // TODO 芋艿：后续可以设置更多权限；
+        jsApiList: ['chooseWXPay', 'openLocation', 'getLocation','updateTimelineShareData','scanQRCode'], // TODO 芋艿：后续可以设置更多权限；
         openTagList: data.openTagList
       });
     }
@@ -137,9 +138,10 @@ export default {
   openLocation(data, callback) {
     this.isReady(() => {
       jweixin.openLocation({
-        //根据传入的坐标打开地图
-        latitude: data.latitude,
-        longitude: data.longitude,
+        ...data,
+        success: function (res) {
+          console.log(res);
+        }
       });
     });
   },
