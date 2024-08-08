@@ -32,7 +32,7 @@
             </view>
             <!-- #endif -->
           </view>
-          <view class="store-distance ss-flex ss-row-center" @tap="showMaoLocation(item)">
+          <view class="store-distance ss-flex ss-row-center" @tap.stop="showMaoLocation(item)">
             <text class="addressTxt" v-if="item.distance">距离{{ item.distance.toFixed(2) }}千米</text>
             <text class="addressTxt" v-else>查看地图</text>
             <view class="iconfont">
@@ -55,13 +55,11 @@
 
   const LONGITUDE = 'user_longitude';
   const LATITUDE = 'user_latitude';
-  const MAPKEY = 'mapKey';
   const state = reactive({
     loaded: false,
     loading: false,
     storeList: [],
     system_store: {},
-    // mapKey: cookie.get(MAPKEY),
     locationShow: false,
     user_latitude: 0,
     user_longitude: 0,
@@ -73,61 +71,62 @@
     });
   };
   const selfLocation = () => {
-    // TODO h5 地图
     // #ifdef H5
-    // if (state.$wechat.isWeixin()) {
-    //   state.$wechat.location().then(res => {
-    //     state.user_latitude = res.latitude;
-    //     state.user_longitude = res.longitude;
-    //     uni.setStorageSync(LATITUDE, res.latitude);
-    //     uni.setStorageSync(LONGITUDE, res.longitude);
-    //     getList();
-    //   });
-    // } else {
-    // #endif
-    uni.getLocation({
-      type: 'gcj02',
-      success: (res) => {
-        try {
-          state.user_latitude = res.latitude;
-          state.user_longitude = res.longitude;
-          uni.setStorageSync(LATITUDE, res.latitude);
-          uni.setStorageSync(LONGITUDE, res.longitude);
-        } catch {
-        }
+    const jsWxSdk = sheep.$platform.useProvider('wechat').jsWxSdk;
+    if (jsWxSdk.isWechat()) {
+      jsWxSdk.getLocation((res) => {
+        console.log(res);
+        state.user_latitude = res.latitude;
+        state.user_longitude = res.longitude;
+        uni.setStorageSync(LATITUDE, res.latitude);
+        uni.setStorageSync(LONGITUDE, res.longitude);
         getList();
-      },
-      complete: () => {
-        getList();
-      },
-    });
-    // #ifdef H5
-    // }
+      });
+    } else {
+      // #endif
+      uni.getLocation({
+        type: 'gcj02',
+        success: (res) => {
+          try {
+            state.user_latitude = res.latitude;
+            state.user_longitude = res.longitude;
+            uni.setStorageSync(LATITUDE, res.latitude);
+            uni.setStorageSync(LONGITUDE, res.longitude);
+          } catch {
+          }
+          getList();
+        },
+        complete: () => {
+          getList();
+        },
+      });
+      // #ifdef H5
+    }
     // #endif
   };
   const showMaoLocation = (e) => {
-    // TODO h5 地图
     // #ifdef H5
-    // if (state.$wechat.isWeixin()) {
-    //   state.$wechat.seeLocation({
-    //     latitude: Number(e.latitude),
-    //     longitude: Number(e.longitude),
-    //   }).then(res => {
-    //     console.log('success');
-    //   });
-    // } else {
-    // #endif
-    uni.openLocation({
-      latitude: Number(e.latitude),
-      longitude: Number(e.longitude),
-      name: e.name,
-      address: `${e.areaName}-${e.detailAddress}`,
-      success: function() {
-        console.log('success');
-      },
-    });
-    // #ifdef H5
-    // }
+    const jsWxSdk = sheep.$platform.useProvider('wechat').jsWxSdk;
+    if (jsWxSdk.isWechat()) {
+      jsWxSdk.openLocation({
+        latitude: Number(e.latitude),
+        longitude: Number(e.longitude),
+        name: e.name,
+        address: `${e.areaName}-${e.detailAddress}`
+      });
+    } else {
+      // #endif
+      uni.openLocation({
+        latitude: Number(e.latitude),
+        longitude: Number(e.longitude),
+        name: e.name,
+        address: `${e.areaName}-${e.detailAddress}`,
+        success: function() {
+          console.log('success');
+        },
+      });
+      // #ifdef H5
+    }
     // #endif
   };
 
