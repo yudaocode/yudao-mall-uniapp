@@ -131,8 +131,16 @@
     getGoodsList();
   }
 
-  onLoad(async () => {
+  onLoad(async (params) => {
     await getList();
+	// 从主页点进来的时候自动选中左侧一级菜单
+	const cateList = state.categoryList
+	for (let index = 0; index < cateList.length;index++) {
+		if (cateList[index].id == params.id) {
+			state.activeMenu = index
+			break;
+		}
+	}
     // 如果是 first 风格，需要加载商品分页
     if (state.style === 'first_one' || state.style === 'first_two') {
       onMenu(0);
