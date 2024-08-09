@@ -135,9 +135,9 @@
     await getList();
 	// 从主页点进来的时候自动选中左侧一级菜单
 	const cateList = state.categoryList
-	for (let index = 0; index < cateList.length;index++) {
+	for (let index = 0; index < cateList.length; index++) {
 		if (cateList[index].id == params.id) {
-			state.activeMenu = index
+			onMenu(index);
 			break;
 		}
 	}
