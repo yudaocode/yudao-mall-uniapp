@@ -107,6 +107,7 @@
 				skuId: item.sku.id,
 				count: item.count,
 				cartId: item.id,
+				categoryId: item.spu.categoryId
 			})
 			goods_list.push({
 				// goods_id: item.goods_id,
