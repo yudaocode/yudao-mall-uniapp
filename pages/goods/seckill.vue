@@ -63,7 +63,7 @@
             <detail-progress :percent="state.percent" />
           </view>
 
-          <view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo?.name }}</view>
+          <view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo.name || '' }}</view>
           <view class="subtitle-text ss-line-1">{{ state.goodsInfo.introduction }}</view>
         </view>
 
@@ -135,7 +135,7 @@
 </template>
 
 <script setup>
-  import { reactive, computed, ref } from 'vue';
+  import { reactive, computed, ref, unref } from 'vue';
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import { isEmpty, min } from 'lodash-es';
@@ -198,7 +198,7 @@
 
   // 分享信息 TODO 芋艿：待接入
   const shareInfo = computed(() => {
-    if (isEmpty(activity)) return {};
+    if (isEmpty(unref(activity))) return {};
     return sheep.$platform.share.getShareInfo(
       {
         title: activity.value.name,

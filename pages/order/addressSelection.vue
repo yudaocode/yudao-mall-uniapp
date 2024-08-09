@@ -86,7 +86,7 @@
   // 选择地址
   function onSelectAddress() {
     let emitName = 'SELECT_ADDRESS'
-    let addressPage = '/pages/user/address/list'
+    let addressPage = '/pages/user/address/list?type=select';
     if (state.value.deliveryType === 2){
       emitName = 'SELECT_PICK_UP_INFO'
       addressPage = '/pages/user/goods_details_store/index'
