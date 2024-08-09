@@ -133,14 +133,12 @@
 
   onLoad(async (params) => {
     await getList();
-	// 从主页点进来的时候自动选中左侧一级菜单
-	const cateList = state.categoryList
-	for (let index = 0; index < cateList.length; index++) {
-		if (cateList[index].id == params.id) {
-			onMenu(index);
-			break;
-		}
-	}
+	
+	// 首页点击分类的处理：查找满足条件的分类
+	const foundCategory = state.categoryList.find(category => category.id == params.id);
+	// 如果找到则调用 onMenu 自动勾选相应分类，否则调用 onMenu(0) 勾选第一个分类
+	onMenu(foundCategory ? state.categoryList.indexOf(foundCategory) : 0);
+	
     // 如果是 first 风格，需要加载商品分页
     if (state.style === 'first_one' || state.style === 'first_two') {
       onMenu(0);
