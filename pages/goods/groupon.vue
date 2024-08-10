@@ -199,6 +199,7 @@
 
   /**
    * 去参团
+   *
    * @param record 团长的团购记录
    */
   function onJoinGroupon(record) {
@@ -227,7 +228,6 @@
   }
 
   // 分享信息
-  // TODO @芋艿：分享的接入
   const shareInfo = computed(() => {
     if (isEmpty(state.activity)) return {};
     return sheep.$platform.share.getShareInfo(
@@ -262,9 +262,21 @@
     // 加载商品信息
     const { data: spu } = await SpuApi.getSpuDetail(activity.spuId);
     state.goodsId = spu.id;
+    // 默认显示最低价
     activity.products.forEach((product) => {
       spu.price = Math.min(spu.price, product.combinationPrice); // 设置 SPU 的最低价格
     });
+    // 价格、库存使用活动的
+    spu.skus.forEach((sku) => {
+      const product = activity.products.find((product) => product.skuId === sku.id);
+      if (product) {
+        sku.price = product.combinationPrice;
+      } else {
+        // 找不到可能是没配置，则不能发起秒杀
+        sku.stock = 0;
+      }
+    });
+
     // 关闭骨架屏
     state.skeletonLoading = false;
     if (code === 0) {
