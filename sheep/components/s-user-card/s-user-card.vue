@@ -1,6 +1,6 @@
 <!-- 装修用户组件：用户卡片 -->
 <template>
-	<view class="ss-user-info-wrap ss-p-t-50">
+	<view class="ss-user-info-wrap ss-p-t-50"  :style="[style, { marginLeft: `${data.space}px` }]">
 		<view class="ss-flex ss-col-center ss-row-between ss-m-b-20">
 			<view class="left-box ss-flex ss-col-center ss-m-l-36">
 				<view class="avatar-box ss-m-r-24">
@@ -70,9 +70,15 @@
 	const isLogin = computed(() => sheep.$store('user').isLogin);
 	// 接收参数
 	const props = defineProps({
-		background: {
-			type: String,
-			default: '',
+		// 装修数据
+		data: {
+		  type: Object,
+		  default: () => ({}),
+		},
+		// 装修样式
+		styles: {
+		  type: Object,
+		  default: () => ({}),
 		},
 		// 头像
 		avatar: {
@@ -96,7 +102,19 @@
 			default: '1',
 		},
 	});
-
+	// 设置背景样式
+	const style = computed(() => {
+	  // 直接从 props.styles 解构
+	  const { bgType, bgImg, bgColor } = props.styles; 
+	
+	  // 根据 bgType 返回相应的样式
+	  return {
+		background: bgType === 'img'
+			? `url(${bgImg}) no-repeat top center / 100% 100%`
+			: bgColor
+		};
+	});
+	// 绑定手机号
 	function onBind() {
 		showAuthModal('changeMobile');
 	}
