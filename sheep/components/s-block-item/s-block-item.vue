@@ -51,7 +51,7 @@
     <!-- 用户组件：用户订单 -->
     <s-order-card v-if="type === 'UserOrder'" :data="data" :styles="styles" />
     <!-- 用户组件：用户资产 -->
-    <s-wallet-card v-if="type === 'UserWallet'" />
+    <s-wallet-card v-if="type === 'UserWallet'" :data="data" :styles="styles" />
     <!-- 用户组件：用户卡券 -->
     <s-coupon-card v-if="type === 'UserCoupon'" />
   </view>
