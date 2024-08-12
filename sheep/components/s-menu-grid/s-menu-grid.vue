@@ -1,6 +1,6 @@
 <!-- 装修基础组件：宫格导航 -->
 <template>
-	<view :style="[style, { marginLeft: `${data.space}px` }]">
+	<view :style="[bgStyle, { marginLeft: `${data.space}px` }]">
 		<uni-grid :showBorder="Boolean(data.border)" :column="data.column">
 			<uni-grid-item v-for="(item, index) in data.list" :key="index" @tap="sheep.$router.go(item.url)">
 				<view class="grid-item-box ss-flex ss-flex-col ss-row-center ss-col-center">
@@ -46,7 +46,7 @@
 		},
 	});
 	// 设置背景样式
-	const style = computed(() => {
+	const bgStyle = computed(() => {
 		// 直接从 props.styles 解构
 		const {
 			bgType,

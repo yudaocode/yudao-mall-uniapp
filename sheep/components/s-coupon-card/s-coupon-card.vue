@@ -1,6 +1,6 @@
 <!-- 装修用户组件：用户卡券 -->
 <template>
-	<view class="ss-coupon-menu-wrap ss-flex ss-col-center" :style="[style, { marginLeft: `${data.space}px` }]">
+	<view class="ss-coupon-menu-wrap ss-flex ss-col-center" :style="[bgStyle, { marginLeft: `${data.space}px` }]">
 		<view class="menu-item ss-flex-col ss-row-center ss-col-center" v-for="item in props.list" :key="item.title"
 			@tap="sheep.$router.go(item.path, { type: item.type })"
 			:class="item.type === 'all' ? 'menu-wallet' : 'ss-flex-1'">
@@ -65,7 +65,7 @@
 		},
 	});
 	// 设置背景样式
-	const style = computed(() => {
+	const bgStyle = computed(() => {
 	  // 直接从 props.styles 解构
 	  const { bgType, bgImg, bgColor } = props.styles; 
 	
