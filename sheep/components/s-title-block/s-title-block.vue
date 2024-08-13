@@ -49,7 +49,6 @@
 	});
 	// 设置背景样式
 	const bgStyle = computed(() => {
-		console.log(props.data)
 		// 直接从 props.styles 解构
 		const {
 			bgType,
