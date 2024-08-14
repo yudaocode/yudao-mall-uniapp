@@ -181,11 +181,11 @@
         </view>
       </view>
 
-      <!-- TODO 芋艿：这里暂时没接入 -->
-      <view v-if="state.data.goods">
+      <view v-if="!isEmpty(state.goodsInfo)">
+        <!-- 规格与数量弹框 -->
         <s-select-groupon-sku
           :show="state.showSelectSku"
-          :goodsInfo="state.data.goods"
+          :goodsInfo="state.goodsInfo"
           :grouponAction="state.grouponAction"
           :grouponNum="state.grouponNum"
           @buy="onBuy"
@@ -193,6 +193,7 @@
           @close="state.showSelectSku = false"
         />
       </view>
+
     </view>
 
     <s-empty v-if="!state.data && !state.loading" icon="/static/goods-empty.png" />
@@ -207,21 +208,24 @@
   import { showShareModal } from '@/sheep/hooks/useModal';
   import { isEmpty } from 'lodash-es';
   import CombinationApi from '@/sheep/api/promotion/combination';
+  import SpuApi from '@/sheep/api/product/spu';
 
   const headerBg = sheep.$url.css('/static/img/shop/user/withdraw_bg.png');
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   const state = reactive({
     data: {}, // 拼团详情
-    loading: true,
-    grouponAction: 'create',
-    showSelectSku: false,
-    grouponNum: 0,
-    number: 0,
-    activity: {},
+    goodsId: 0, // 商品ID
+    goodsInfo: {}, // 商品信息
+    showSelectSku: false, // 显示规格弹框
+    selectedSkuPrice: {}, // 选中的规格价格
+    activity: {}, // 团购活动
+    grouponId: 0, // 团购ID
+    grouponNum: 0, // 团购人数
+    grouponAction: 'create', // 团购操作
     combinationHeadId: null, // 拼团团长编号
+    loading: true,
   });
 
-  // todo 芋艿：分享要再接下
   const shareInfo = computed(() => {
     if (isEmpty(state.data)) return {};
     return sheep.$platform.share.getShareInfo(
@@ -250,33 +254,33 @@
     });
   }
 
-  // 去开团 TODO 芋艿：这里没接入
+  // 去开团
   function onCreateGroupon() {
     state.grouponAction = 'create';
     state.grouponId = 0;
     state.showSelectSku = true;
   }
 
-  // 规格变更 TODO 芋艿：这里没接入
+  // 规格变更
   function onSkuChange(e) {
     state.selectedSkuPrice = e;
   }
 
-  // 立即参团 TODO 芋艿：这里没接入
+  // 立即参团
   function onJoinGroupon() {
     state.grouponAction = 'join';
-    state.grouponId = state.data.activityId;
-    state.combinationHeadId = state.data.id;
-    state.grouponNum = state.data.num;
+    state.grouponId = state.data.headRecord.activityId;
+    state.combinationHeadId = state.data.headRecord.id;
+    state.grouponNum = state.data.headRecord.userSize;
     state.showSelectSku = true;
   }
 
-  // 立即购买 TODO 芋艿：这里没接入
+  // 立即购买
   function onBuy(sku) {
     sheep.$router.go('/pages/order/confirm', {
       data: JSON.stringify({
         order_type: 'goods',
-        combinationActivityId: state.data.activity.id,
+        combinationActivityId: state.activity.id,
         combinationHeadId: state.combinationHeadId,
         items: [
           {
@@ -305,6 +309,14 @@
         data.headRecord.activityId,
       );
       state.activity = activity;
+      state.grouponNum = activity.userSize;
+      // 加载商品信息
+      const { data: spu } = await SpuApi.getSpuDetail(activity.spuId);
+      state.goodsId = spu.id;
+      activity.products.forEach((product) => {
+        spu.price = Math.min(spu.price, product.combinationPrice); // 设置 SPU 的最低价格
+      });
+      state.goodsInfo = spu;
     } else {
       state.data = null;
     }
