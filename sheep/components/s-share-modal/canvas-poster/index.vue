@@ -66,7 +66,7 @@
     css: {
       // 根节点若无尺寸，自动获取父级节点
       width: sheep.$platform.device.windowWidth * 0.9,
-      height: 550,
+      height: 600,
     },
     views: [],
   });
