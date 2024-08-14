@@ -196,7 +196,7 @@
     });
   }
 
-  // 分享信息 TODO 芋艿：待接入
+  // 分享信息
   const shareInfo = computed(() => {
     if (isEmpty(unref(activity))) return {};
     return sheep.$platform.share.getShareInfo(
@@ -220,6 +220,7 @@
 
   const activity = ref();
   const timeStatusEnum = ref('');
+
   // 查询活动
   const getActivity = async (id) => {
     const { data } = await SeckillApi.getSeckillActivity(id);
@@ -230,9 +231,9 @@
     await getSpu(data.spuId);
   };
 
+  // 查询商品
   const getSpu = async (id) => {
     const { data } = await SpuApi.getSpuDetail(id);
-    // 模拟
     data.activity_type = 'seckill';
     state.goodsInfo = data;
     // 处理轮播图

@@ -157,7 +157,7 @@
         items: [{
           skuId: e.id,
           count: e.goods_num,
-		  categoryId: state.goodsInfo.categoryId
+		      categoryId: state.goodsInfo.categoryId
         }]
       }),
     });
