@@ -203,7 +203,7 @@
   import { computed, reactive } from 'vue';
   import sheep from '@/sheep';
   import { onLoad } from '@dcloudio/uni-app';
-  import { useDurationTime } from '@/sheep/hooks/useGoods';
+  import { fen2yuan, useDurationTime } from '@/sheep/hooks/useGoods';
   import { showShareModal } from '@/sheep/hooks/useModal';
   import { isEmpty } from 'lodash-es';
   import CombinationApi from '@/sheep/api/promotion/combination';
@@ -231,15 +231,14 @@
         desc: state.data.goods?.subtitle,
         params: {
           page: '5',
-          query: state.data.id,
+          query: state.data.headRecord.id,
         },
       },
       {
         type: 'groupon', // 邀请拼团海报
         title: state.data.headRecord.spuName, // 商品标题
         image: sheep.$url.cdn(state.data.headRecord.picUrl), // 商品主图
-        price: state.data.goods?.price, // 商品价格
-        original_price: state.data.goods?.original_price, // 商品原价
+        price: fen2yuan(state.data.headRecord.combinationPrice), // 商品价格
       },
     );
   });
