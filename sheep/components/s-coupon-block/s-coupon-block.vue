@@ -1,7 +1,7 @@
 <!-- 装修营销组件：优惠券  -->
 <template>
 	<scroll-view class="scroll-box" scroll-x scroll-anchoring :style="[bgStyle, { marginLeft: `${data.space}px` }]">
-		<view class="coupon-box ss-flex" :style="columns === 2 ? couponBoxStyleTwo : couponBoxStyleNormal">
+		<view class="coupon-box ss-flex" :style="couponList.length === 2 ? couponBoxStyleTwo : couponBoxStyleNormal">
 			<view class="coupon-item" :style="[couponBg, { marginLeft: `${data.space}px` }]"
 				v-for="(item, index) in couponList" :key="index">
 				<su-coupon :size="SIZE_LIST[columns - 1]" :textColor="data.textColor" background="" :couponId="item.id"
