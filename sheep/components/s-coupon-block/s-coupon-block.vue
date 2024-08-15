@@ -1,7 +1,7 @@
 <!-- 装修营销组件：优惠券  -->
 <template>
 	<scroll-view class="scroll-box" scroll-x scroll-anchoring :style="[bgStyle, { marginLeft: `${data.space}px` }]">
-		<view class="coupon-box ss-flex">
+		<view class="coupon-box ss-flex" :style="columns === 2 ? couponBoxStyleTwo : couponBoxStyleNormal">
 			<view class="coupon-item" :style="[couponBg, { marginLeft: `${data.space}px` }]"
 				v-for="(item, index) in couponList" :key="index">
 				<su-coupon :size="SIZE_LIST[columns - 1]" :textColor="data.textColor" background="" :couponId="item.id"
@@ -62,6 +62,16 @@
 	const btnStyles = {
 		background: button.bgColor,
 		color: button.color,
+	};
+	// 两列优惠券时的排版方式
+	const couponBoxStyleNormal = {
+		'display': 'flex',
+		'justify-content': 'space-between'
+	};
+	// 非两列优惠券时的排版方式
+	const couponBoxStyleTwo = {
+		'display': 'flex',
+		'justify-content': 'space-around'
 	};
 	// 设置背景样式
 	const bgStyle = computed(() => {
@@ -138,36 +148,29 @@
 </script>
 
 <style lang="scss" scoped>
-	.scroll-box {
-		.coupon-box {
-			display: flex;
-			justify-content: space-between;
+	.card-btn {
+		width: 140rpx;
+		height: 50rpx;
+		border-radius: 25rpx;
+		font-size: 24rpx;
+		line-height: 50rpx;
 
-			.card-btn {
-				width: 140rpx;
-				height: 50rpx;
-				border-radius: 25rpx;
+		&.vertical {
+			width: 50rpx;
+			height: 140rpx;
+			margin: auto 20rpx auto 0;
+
+			.btn-text {
 				font-size: 24rpx;
-				line-height: 50rpx;
-
-				&.vertical {
-					width: 50rpx;
-					height: 140rpx;
-					margin: auto 20rpx auto 0;
-
-					.btn-text {
-						font-size: 24rpx;
-						text-align: center;
-						writing-mode: vertical-lr;
-					}
-				}
+				text-align: center;
+				writing-mode: vertical-lr;
 			}
+		}
+	}
 
-			.coupon-item {
-				&:nth-of-type(1) {
-					margin-left: 0 !important;
-				}
-			}
+	.coupon-item {
+		&:nth-of-type(1) {
+			margin-left: 0 !important;
 		}
 	}
 </style>
