@@ -170,7 +170,6 @@
         <text class="title">运费</text>
         <text class="detail">￥{{ fen2yuan(state.orderInfo.deliveryPrice) }}</text>
       </view>
-      <!-- TODO 芋艿：优惠劵抵扣、积分抵扣 -->
       <view class="notice-item ss-flex ss-row-between" v-if="state.orderInfo.couponPrice > 0">
         <text class="title">优惠劵金额</text>
         <text class="detail">-¥{{ fen2yuan(state.orderInfo.couponPrice) }}</text>
@@ -325,7 +324,7 @@
     });
   }
 
-  // 确认收货 TODO 芋艿：待测试
+  // 确认收货
   async function onConfirm(orderId, ignore = false) {
     // 需开启确认收货组件
     // todo: 芋艿：待接入微信

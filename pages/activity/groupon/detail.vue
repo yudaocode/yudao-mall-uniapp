@@ -313,10 +313,21 @@
       // 加载商品信息
       const { data: spu } = await SpuApi.getSpuDetail(activity.spuId);
       state.goodsId = spu.id;
+      // 默认显示最低价
       activity.products.forEach((product) => {
         spu.price = Math.min(spu.price, product.combinationPrice); // 设置 SPU 的最低价格
       });
       state.goodsInfo = spu;
+      // 价格、库存使用活动的
+      spu.skus.forEach((sku) => {
+        const product = activity.products.find((product) => product.skuId === sku.id);
+        if (product) {
+          sku.price = product.combinationPrice;
+        } else {
+          // 找不到可能是没配置，则不能发起秒杀
+          sku.stock = 0;
+        }
+      });
     } else {
       state.data = null;
     }

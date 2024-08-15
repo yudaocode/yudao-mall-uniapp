@@ -78,7 +78,7 @@ export default {
     });
   },
 
-  //获取微信收货地址 TODO 芋艿：未测试
+  // 获取微信收货地址
   openAddress(callback) {
     this.isReady(() => {
       jweixin.openAddress({
