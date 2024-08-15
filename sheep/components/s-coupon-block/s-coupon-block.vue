@@ -141,7 +141,7 @@
 	.scroll-box {
 		.coupon-box {
 			display: flex;
-			justify-content: space-around;
+			justify-content: space-between;
 
 			.card-btn {
 				width: 140rpx;
