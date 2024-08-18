@@ -80,7 +80,7 @@
         <!-- 功能卡片 -->
         <view class="detail-cell-card detail-card ss-flex-col">
           <!-- 规格 -->
-          <detail-cell-sku :sku="state.selectedSkuPrice" @tap="state.showSelectSku = true" />
+          <detail-cell-sku :sku="state.selectedSku" @tap="state.showSelectSku = true" />
         </view>
 
         <!-- 参团列表 -->
@@ -90,6 +90,7 @@
         <s-select-groupon-sku
           :show="state.showSelectSku"
           :goodsInfo="state.goodsInfo"
+		  :selectedSku="state.selectedSku"
           :grouponAction="state.grouponAction"
           :grouponNum="state.grouponNum"
           @buy="onBuy"
@@ -125,7 +126,7 @@
             :disabled="state.goodsInfo.stock === 0 || state.activity.status !== 0"
           >
             <view class="btn-price">{{
-              fen2yuan(state.activity.price || state.goodsInfo.price)
+              fen2yuan(state.selectedSku.price * state.selectedSku.count || state.activity.price * state.selectedSku.count || state.goodsInfo.price * state.selectedSku.count || state.goodsInfo.price)
             }}</view>
             <view v-if="state.activity.startTime > new Date().getTime()">未开始</view>
             <view v-else-if="state.activity.endTime <= new Date().getTime()">已结束</view>
@@ -168,7 +169,7 @@
     goodsInfo: {}, // 商品信息
     goodsSwiper: [], // 商品轮播图
     showSelectSku: false, // 显示规格弹框
-    selectedSkuPrice: {}, // 选中的规格价格
+    selectedSku: {}, // 选中的规格属性
     activity: {}, // 团购活动
     grouponId: 0, // 团购ID
     grouponNum: 0, // 团购人数
@@ -183,7 +184,7 @@
 
   // 规格变更
   function onSkuChange(e) {
-    state.selectedSkuPrice = e;
+    state.selectedSku = e;
   }
 
   function onSkuClose() {

@@ -22,7 +22,7 @@
             </view>
           </view>
           <view class="header-right-bottom ss-flex ss-col-center ss-row-between">
-            <view class="price-text"> {{ fen2yuan(goodsInfo.price) }}</view>
+            <view class="price-text"> {{ fen2yuan(state.selectedSku.price || goodsInfo.price || state.selectedSku.marketPrice) }}</view>
 
             <view class="stock-text ss-m-l-20">
               库存{{ state.selectedSku.stock || goodsInfo.stock }}件
@@ -63,7 +63,7 @@
               <view class="btn-title">{{ grouponNum + '人团' }}</view>
             </button>
             <button class="ss-reset-button btn-tox ss-flex-col" @tap="onBuy">
-              <view class="btn-price">{{ fen2yuan(goodsInfo.price) }}</view>
+              <view class="btn-price">{{ fen2yuan(state.selectedSku.price * state.selectedSku.count || goodsInfo.price * state.selectedSku.count || state.selectedSku.marketPrice * state.selectedSku.count || goodsInfo.price) }}</view>
               <view v-if="grouponAction === 'create'">立即开团</view>
               <view v-else-if="grouponAction === 'join'">参与拼团</view>
             </button>
