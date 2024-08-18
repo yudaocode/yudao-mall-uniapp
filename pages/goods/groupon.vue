@@ -169,7 +169,7 @@
     goodsInfo: {}, // 商品信息
     goodsSwiper: [], // 商品轮播图
     showSelectSku: false, // 显示规格弹框
-    selectedSku: {}, // 选中的规格价格
+    selectedSku: {}, // 选中的规格属性
     activity: {}, // 团购活动
     grouponId: 0, // 团购ID
     grouponNum: 0, // 团购人数
