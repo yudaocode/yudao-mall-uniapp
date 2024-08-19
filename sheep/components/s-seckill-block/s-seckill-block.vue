@@ -133,6 +133,10 @@
 		activity.products.forEach((product) => {
 			spu.price = Math.min(spu.price, product.seckillPrice); // 设置 SPU 的最低价格
 		});
+    // 将活动库存赋值给商品库存
+    spu.stock = activity.stock
+    // 活动总库存 - 活动库存 = 销量
+    spu.salesCount = activity.totalStock - activity.stock
 		productList.value = [spu];
 	});
 </script>

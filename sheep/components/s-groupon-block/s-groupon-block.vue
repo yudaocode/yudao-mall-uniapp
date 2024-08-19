@@ -128,6 +128,8 @@
 		activity.products.forEach((product) => {
 			spu.price = Math.min(spu.price, product.combinationPrice); // 设置 SPU 的最低价格
 		});
+    // 将活动总限购数量赋值给库存
+    spu.stock = activity.totalLimitCount
 		productList.value = [spu];
 	});
 </script>
