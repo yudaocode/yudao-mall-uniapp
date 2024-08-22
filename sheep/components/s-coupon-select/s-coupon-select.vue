@@ -6,7 +6,7 @@
       <scroll-view class="model-content" scroll-y :scroll-with-animation="false" :enable-back-to-top="true">
         <!--可使用的优惠券区域-->
         <view class="subtitle ss-m-l-20">可使用优惠券</view>
-        <view v-for="(item, index) in state.couponInfo" :key="index">
+        <view v-for="(item, index) in state.couponInfo.filter(coupon => coupon.match)" :key="index">
           <s-coupon-list :data="item" type="user" :disabled="false">
             <template v-slot:reason>
               <view class="ss-flex ss-m-t-24">
