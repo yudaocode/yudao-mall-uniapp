@@ -6,7 +6,7 @@
       <scroll-view class="model-content" scroll-y :scroll-with-animation="false" :enable-back-to-top="true">
         <!--可使用的优惠券区域-->
         <view class="subtitle ss-m-l-20">可使用优惠券</view>
-        <view v-for="(item, index) in state.couponInfo.filter(coupon => coupon.match)" :key="index">
+        <view v-for="(item, index) in state.couponInfo" :key="index">
           <s-coupon-list :data="item" type="user" :disabled="false">
             <template v-slot:reason>
               <view class="ss-flex ss-m-t-24">
@@ -64,13 +64,13 @@
 
   const state = reactive({
     couponInfo: computed(() => props.modelValue), // 优惠劵列表
-    couponId: 0, // 选中的优惠劵编号
+    couponId: undefined, // 选中的优惠劵编号
   });
 
   // 选中优惠劵
   function radioChange(couponId) {
     if (state.couponId === couponId) {
-      state.couponId = 0;
+      state.couponId = undefined;
     } else {
       state.couponId = couponId;
     }

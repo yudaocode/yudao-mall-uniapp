@@ -185,7 +185,7 @@
 </template>
 
 <script setup>
-  import { reactive, ref } from 'vue';
+  import { reactive, ref, watch } from 'vue';
   import { onLoad } from '@dcloudio/uni-app';
   import AddressSelection from '@/pages/order/addressSelection.vue';
   import sheep from '@/sheep';
@@ -208,7 +208,7 @@
 
   const addressState = ref({
     addressInfo: {}, // 选择的收货地址
-    deliveryType: 1, // 收货方式 1 - 快递配送；2 - 门店自提
+    deliveryType: 1, // 收货方式：1-快递配送，2-门店自提
     isPickUp: true, // 门店自提是否开启 TODO puhui999: 默认开启，看看后端有开关的话接入
     pickUpInfo: {}, // 选择的自提门店信息
     receiverName: '', // 收件人名称
@@ -226,7 +226,7 @@
 
   // 选择优惠券
   async function onSelectCoupon(couponId) {
-    state.orderPayload.couponId = couponId || 0;
+    state.orderPayload.couponId = couponId;
     await getOrderInfo();
     state.showCoupon = false;
   }
@@ -335,6 +335,14 @@
     state.orderPayload = JSON.parse(options.data);
     await getOrderInfo();
     await getCoupons();
+  });
+
+  // 使用 watch 监听地址和配送方式的变化
+  watch(addressState, async (newAddress, oldAddress) => {
+    // 如果收货地址或配送方式有变化，则重新计算价格
+    if (newAddress.addressInfo.id !== oldAddress.addressInfo.id || newAddress.deliveryType !== oldAddress.deliveryType) {
+      await getOrderInfo();
+    }
   });
 </script>
 
