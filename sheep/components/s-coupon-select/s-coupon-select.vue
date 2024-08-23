@@ -64,13 +64,13 @@
 
   const state = reactive({
     couponInfo: computed(() => props.modelValue), // 优惠劵列表
-    couponId: 0, // 选中的优惠劵编号
+    couponId: undefined, // 选中的优惠劵编号
   });
 
   // 选中优惠劵
   function radioChange(couponId) {
     if (state.couponId === couponId) {
-      state.couponId = 0;
+      state.couponId = undefined;
     } else {
       state.couponId = couponId;
     }
