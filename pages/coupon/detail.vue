@@ -57,7 +57,7 @@
               <view>优惠券类型</view>
               <view>{{ state.coupon.discountType === 1 ? '满减券' : '折扣券' }}</view>
             </view>
-            <!-- TODO 芋艿：可优化，增加优惠劵的描述 -->
+            <!-- TODO 芋艿：【优惠劵】可优化，增加优惠劵的描述 -->
             <uni-collapse>
               <uni-collapse-item title="优惠券说明" v-if="state.coupon.description">
                 <view class="content ss-p-b-20">

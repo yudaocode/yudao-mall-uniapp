@@ -30,7 +30,7 @@
 							<uni-easyinput :inputBorder="false" type="textarea" maxlength="120" autoHeight
 								v-model="state.commentList[index].content"
 								placeholder="宝贝满足你的期待吗？说说你的使用心得，分享给想买的他们吧~" />
-              <!-- TODO 芋艿：文件上传 -->
+              <!-- TODO 卢越：【评论】文件上传 -->
 							<view class="img-box">
 								<s-uploader v-model:url="state.commentList[index].images" fileMediatype="image"
 									limit="9" mode="grid" :imageStyles="{ width: '168rpx', height: '168rpx' }" />
@@ -40,7 +40,7 @@
 				</view>
 			</view>
 		</view>
-    <!-- TODO 芋艿：是否匿名 -->
+    <!-- TODO 卢越：【评论】是否匿名 -->
 
 		<su-fixed bottom placeholder>
 			<view class="foot_box ss-flex ss-row-center ss-col-center">

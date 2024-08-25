@@ -182,7 +182,6 @@
     }, 1000);
 	}
 
-	//  TODO 芋艿：待测试
 	const shareInfo = computed(() => {
 		if (isEmpty(state.goodsInfo)) return {};
 		return sheep.$platform.share.getShareInfo({
@@ -251,7 +250,7 @@
           state.activityList.push(activity);
         } else if (activity.type === 5) { // 情况二：满减送
           state.activityInfo.push(activity);
-        } else { // 情况三：限时折扣 TODO 芋艿
+        } else { // 情况三：限时折扣 TODO puhui999：【折扣】
           console.log('待实现！优先级不高');
         }
       })

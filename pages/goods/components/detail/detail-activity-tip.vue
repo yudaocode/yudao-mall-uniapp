@@ -2,7 +2,6 @@
   <su-fixed bottom placeholder :val="44">
     <view>
       <view v-for="activity in props.activityList" :key="activity.id">
-        <!-- TODO 芋艿：拼团 -->
         <view
           class="activity-box ss-p-x-38 ss-flex ss-row-between ss-col-center"
           :class="activity.type === 1 ? 'seckill-box' : 'groupon-box'"
@@ -14,7 +13,6 @@
                 :src="sheep.$url.static('/static/img/shop/goods/seckill-icon.png')"
                 class="activity-icon"
               />
-              <!-- TODO 芋艿：拼团 -->
               <image
                 v-else-if="activity.type === 3"
                 :src="sheep.$url.static('/static/img/shop/goods/groupon-icon.png')"
@@ -33,7 +31,6 @@
 <script setup>
   import sheep from '@/sheep';
 
-  // TODO 芋艿：这里要迁移下；
   const seckillBg = sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png');
   const grouponBg = sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png');
 

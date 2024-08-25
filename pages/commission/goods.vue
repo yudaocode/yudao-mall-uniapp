@@ -76,7 +76,7 @@
     shareInfo: {},
   });
 
-  // TODO 芋艿：分享的接入
+  // TODO @puhui999：【分享】接入
   function onShareGoods(goodsInfo) {
     state.shareInfo = $share.getShareInfo(
       {

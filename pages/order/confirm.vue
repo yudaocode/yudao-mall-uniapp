@@ -122,7 +122,7 @@
         >
           <view class="item-title">活动优惠</view>
           <view class="ss-flex ss-col-center">
-            <!--                @tap="state.showDiscount = true" TODO 芋艿：后续要把优惠信息打进去 -->
+            <!--                @tap="state.showDiscount = true" TODO puhui999：【折扣】后续要把优惠信息打进去 -->
             <text class="item-value text-red">
               -￥{{ fen2yuan(state.orderInfo.price.discountPrice) }}
             </text>
@@ -158,7 +158,7 @@
       @close="state.showCoupon = false"
     />
 
-    <!-- 满额折扣弹框 TODO 芋艿：后续要把优惠信息打进去 -->
+    <!-- 满额折扣弹框 TODO @puhui999：【折扣】后续要把优惠信息打进去 -->
     <s-discount-list
       v-model="state.orderInfo"
       :show="state.showDiscount"

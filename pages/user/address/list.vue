@@ -64,7 +64,6 @@
   };
 
   // 导入微信地址
-  // TODO 芋艿：未测试
   function importWechatAddress() {
     let wechatAddress = {};
     // #ifdef MP
