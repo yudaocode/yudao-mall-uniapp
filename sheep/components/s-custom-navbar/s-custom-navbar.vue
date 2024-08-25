@@ -44,9 +44,9 @@
    *
    * @property {Number | String}  alwaysShow = [0,1]			    - 是否常驻
    * @property {Number | String}  styleType = [inner]			   	- 是否沉浸式
-   * @property {String | Number} type 		 					- 标题背景模式
-   * @property {String} color 		 							- 页面背景色
-   * @property {String} src 		 								- 页面背景图片
+   * @property {String | Number} type              - 标题背景模式
+   * @property {String} color                  - 页面背景色
+   * @property {String} src                    - 页面背景图片
    */
   import { computed, unref } from 'vue';
   import sheep from '@/sheep';
@@ -77,7 +77,7 @@
   });
   const navList = computed(() => {
     // #ifdef MP
-    return props.data.mapCells || [];
+    return props.data.mpCells || [];
     // #endif
     return props.data.otherCells || [];
   });
@@ -117,11 +117,12 @@
   const bgStyles = computed(() => {
     return {
       background:
-          props.data.bgType === 'img' && props.data.bgImg
+        props.data.bgType === 'img' && props.data.bgImg
           ? `url(${sheep.$url.cdn(props.data.bgImg)}) no-repeat top center / 100% 100%`
-          : props.data.bgColor
+          : props.data.bgColor,
     };
   });
+
   // 左侧按钮：返回上一页或首页
   function onClickLeft() {
     if (hasHistory) {
@@ -130,6 +131,7 @@
       sheep.$router.go('/pages/index/index');
     }
   }
+
   // 右侧按钮：打开快捷菜单
   function onClickRight() {
     showMenuTools();
@@ -147,44 +149,53 @@
       top: 50%;
       transform: translateY(-50%);
     }
+
     .nav-icon {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
       left: 20rpx;
+
       .inner-icon-box {
         border: 1px solid rgba(#fff, 0.4);
         background: none !important;
       }
+
       .icon-box {
         background: #ffffff;
-        box-shadow: 0px 0px 4rpx rgba(51, 51, 51, 0.08),
-          0px 4rpx 6rpx 2rpx rgba(102, 102, 102, 0.12);
+        box-shadow: 0px 0px 4rpx rgba(51, 51, 51, 0.08), 0px 4rpx 6rpx 2rpx rgba(102, 102, 102, 0.12);
         border-radius: 30rpx;
         width: 134rpx;
         height: 56rpx;
         margin-left: 8rpx;
+
         .line {
           width: 2rpx;
           height: 24rpx;
           background: #e5e5e7;
         }
+
         .sicon-back {
           font-size: 32rpx;
         }
+
         .sicon-home {
           font-size: 32rpx;
         }
+
         .sicon-more {
           font-size: 32rpx;
         }
+
         .icon-button {
           width: 67rpx;
           height: 56rpx;
+
           &-left:hover {
             background: rgba(0, 0, 0, 0.16);
             border-radius: 30rpx 0px 0px 30rpx;
           }
+
           &-right:hover {
             background: rgba(0, 0, 0, 0.16);
             border-radius: 0px 30rpx 30rpx 0px;
