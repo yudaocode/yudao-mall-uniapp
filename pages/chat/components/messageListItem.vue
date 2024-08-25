@@ -4,12 +4,20 @@
     <view class="message-item ss-flex-col scroll-item">
       <view class="ss-flex ss-row-center ss-col-center">
         <!-- 日期 -->
-        <view v-if="message.contentType !== KeFuMessageContentTypeEnum.SYSTEM && showTime(message, messageIndex)"
-              class="date-message">
+        <view
+          v-if="
+            message.contentType !== KeFuMessageContentTypeEnum.SYSTEM &&
+            showTime(message, messageIndex)
+          "
+          class="date-message"
+        >
           {{ formatDate(message.createTime) }}
         </view>
         <!-- 系统消息 -->
-        <view v-if="message.contentType === KeFuMessageContentTypeEnum.SYSTEM" class="system-message">
+        <view
+          v-if="message.contentType === KeFuMessageContentTypeEnum.SYSTEM"
+          class="system-message"
+        >
           {{ message.content }}
         </view>
       </view>
@@ -18,32 +26,35 @@
         v-if="message.contentType !== KeFuMessageContentTypeEnum.SYSTEM"
         class="ss-flex ss-col-top"
         :class="[
-              message.senderType === UserTypeEnum.ADMIN
-                ? `ss-row-left`
-                : message.senderType === UserTypeEnum.MEMBER
-                ? `ss-row-right`
-                : '',
-            ]"
+          message.senderType === UserTypeEnum.ADMIN
+            ? `ss-row-left`
+            : message.senderType === UserTypeEnum.MEMBER
+            ? `ss-row-right`
+            : '',
+        ]"
       >
         <!-- 客服头像 -->
         <image
           v-show="message.senderType === UserTypeEnum.ADMIN"
           class="chat-avatar ss-m-r-24"
           :src="
-                sheep.$url.cdn(message.senderAvatar) ||
-                sheep.$url.static('/static/img/shop/chat/default.png')
-              "
+            sheep.$url.cdn(message.senderAvatar) ||
+            sheep.$url.static('/static/img/shop/chat/default.png')
+          "
           mode="aspectFill"
         ></image>
         <!-- 内容 -->
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.TEXT">
-          <view class="message-box" :class="{'admin': message.senderType === UserTypeEnum.ADMIN}">
+          <view class="message-box" :class="{ admin: message.senderType === UserTypeEnum.ADMIN }">
             <mp-html :content="replaceEmoji(message.content)" />
           </view>
         </template>
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.IMAGE">
-          <view class="message-box" :class="{'admin': message.senderType === UserTypeEnum.ADMIN}"
-                :style="{ width: '200rpx' }">
+          <view
+            class="message-box"
+            :class="{ admin: message.senderType === UserTypeEnum.ADMIN }"
+            :style="{ width: '200rpx' }"
+          >
             <su-image
               class="message-img"
               isPreview
@@ -59,29 +70,23 @@
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.PRODUCT">
           <GoodsItem
             :goodsData="getMessageContent(message)"
-            @tap="
-                    sheep.$router.go('/pages/goods/index', {
-                      id: getMessageContent(message).id,
-                    })
-                  "
+            @tap="sheep.$router.go('/pages/goods/index', { id: getMessageContent(message).spuId })"
           />
         </template>
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.ORDER">
           <OrderItem
             :orderData="getMessageContent(message)"
-            @tap="
-                  sheep.$router.go('/pages/order/detail', {
-                    id: getMessageContent(message).id,
-                  })
-                "
+            @tap="sheep.$router.go('/pages/order/detail', { id: getMessageContent(message).id })"
           />
         </template>
         <!-- user头像 -->
         <image
           v-if="message.senderType === UserTypeEnum.MEMBER"
           class="chat-avatar ss-m-l-24"
-          :src="sheep.$url.cdn(message.senderAvatar) ||
-                sheep.$url.static('/static/img/shop/chat/default.png')"
+          :src="
+            sheep.$url.cdn(message.senderAvatar) ||
+            sheep.$url.static('/static/img/shop/chat/default.png')
+          "
           mode="aspectFill"
         >
         </image>
@@ -104,7 +109,7 @@
     // 消息
     message: {
       type: Object,
-      default: ()=>({}),
+      default: () => ({}),
     },
     // 消息索引
     messageIndex: {
@@ -112,10 +117,10 @@
       default: 0,
     },
     // 消息列表
-    messageList:{
+    messageList: {
       type: Array,
       default: () => [],
-    }
+    },
   });
   const getMessageContent = computed(() => (item) => JSON.parse(item.content)); // 解析消息内容
 
