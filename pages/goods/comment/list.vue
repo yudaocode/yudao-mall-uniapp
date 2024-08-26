@@ -1,6 +1,6 @@
 <!-- 商品评论的分页 -->
 <template>
-  <s-layout title="全部评价">
+  <s-layout title="全部评论">
     <su-tabs
       :list="state.type"
       :scrollable="false"
