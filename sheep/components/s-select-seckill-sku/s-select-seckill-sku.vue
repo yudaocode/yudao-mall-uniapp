@@ -5,7 +5,7 @@
     <!-- SKU 信息 -->
     <view class="ss-modal-box bg-white ss-flex-col">
       <view class="modal-header ss-flex ss-col-center">
-        <!-- 规格图 -->
+        <!-- 规格图片 -->
         <view class="header-left ss-m-r-30">
           <image
             class="sku-image"
@@ -124,10 +124,6 @@
     }
     return skuPrices;
   });
-
-  if (!state.goodsInfo.is_sku) {
-    state.selectedSku = state.goodsInfo.skus[0];
-  }
 
   watch(
     () => state.selectedSku,
