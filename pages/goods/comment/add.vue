@@ -33,15 +33,21 @@
               <!-- TODO 卢越：【评论】文件上传 -->
 							<view class="img-box">
 								<s-uploader v-model:url="state.commentList[index].images" fileMediatype="image"
-									limit="9" mode="grid" :imageStyles="{ width: '168rpx', height: '168rpx' }" />
+									limit="9" mode="grid" :imageStyles="{ width: '168rpx', height: '168rpx' }" @success="(payload) => uploadSuccess(payload, index)" />
 							</view>
 						</view>
+            <view class="checkbox-container">
+              <checkbox-group @change="(event) => toggleAnonymous(index, event)">
+                <label>
+                  <checkbox value="anonymousChecked" />
+                  匿名评论
+                </label>
+              </checkbox-group>
+            </view>
 					</view>
 				</view>
 			</view>
 		</view>
-    <!-- TODO 卢越：【评论】是否匿名 -->
-
 		<su-fixed bottom placeholder>
 			<view class="foot_box ss-flex ss-row-center ss-col-center">
 				<button class="ss-reset-button post-btn ui-BG-Main-Gradient ui-Shadow-Main" @tap="onSubmit">
@@ -55,7 +61,7 @@
 <script setup>
 	import sheep from '@/sheep';
 	import { onLoad } from '@dcloudio/uni-app';
-	import { reactive } from 'vue';
+  import { reactive, ref } from 'vue';
   import OrderApi from '@/sheep/api/trade/order';
 
 	const state = reactive({
@@ -64,14 +70,39 @@
 		id: null
 	});
 
-	async function onSubmit() {
+  /**
+   * 切换是否匿名
+   *
+   * @param commentIndex  当前评论下标
+   * @param event 复选框事件
+   */
+  function toggleAnonymous(commentIndex, event) {
+    state.commentList[commentIndex].anonymous = event.detail.value[0] === 'anonymousChecked';
+  }
+
+  /**
+   * 发布评论
+   *
+   * @returns {Promise<void>}
+   */
+  async function onSubmit() {
     // 顺序提交评论
     for (const comment of state.commentList) {
       await OrderApi.createOrderItemComment(comment);
     }
     // 都评论好，返回
     sheep.$router.back();
-	}
+  }
+
+  /**
+   * 图片添加到表单
+   *
+   * @param payload 上传成功后的回调数据
+   * @param commentIndex  当前评论的下标
+   */
+  function uploadSuccess(payload, commentIndex) {
+    state.commentList[commentIndex].picUrls = state.commentList[commentIndex].images;
+  }
 
 	onLoad(async (options) => {
     if (!options.id) {
@@ -134,6 +165,10 @@
 			margin-top: 20rpx;
 		}
 	}
+
+  .checkbox-container{
+    padding: 10rpx;
+  }
 
 	.post-btn {
 		width: 690rpx;
