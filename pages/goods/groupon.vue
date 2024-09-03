@@ -265,7 +265,7 @@
     state.goodsId = spu.id;
     // 默认显示最低价
     activity.products.forEach((product) => {
-      spu.price = Math.min(spu.price, product.combinationPrice); // 设置 SPU 的最低价格
+      state.activity.price = Math.min(spu.price, product.combinationPrice); // 设置 SPU 的最低价格
     });
     // 价格、库存使用活动的
     spu.skus.forEach((sku) => {
