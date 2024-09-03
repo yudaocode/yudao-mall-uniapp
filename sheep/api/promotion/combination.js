@@ -31,6 +31,17 @@ const CombinationApi = {
     });
   },
 
+  // 获得拼团活动明细列表
+  getCombinationActivityDetailList: (combinationActivityIds) => {
+    return request({
+      url: '/promotion/combination-activity/get-detail-list',
+      method: 'GET',
+      params: {
+        combinationActivityIds
+      },
+    });
+  },
+
   // 获得最近 n 条拼团记录（团长发起的）
   getHeadCombinationRecordList: (activityId, status, count) => {
     return request({

@@ -186,7 +186,8 @@ const bindBrokerageUser = async (val= undefined) => {
     }
     await BrokerageApi.bindBrokerageUser({ bindUserId: shareId });
     uni.removeStorageSync('shareId');
-  } catch {
+  } catch (e) {
+    console.error(e);
   }
 };
 

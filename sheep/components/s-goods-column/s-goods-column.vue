@@ -155,7 +155,7 @@
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
-      <view v-if="seckillTag" class="seckill-tag ss-flex ss-row-center"> 秒杀 </view>
+      <view v-if="seckillTag" class="seckill-tag ss-flex ss-row-center">秒杀</view>
       <view v-if="grouponTag" class="groupon-tag ss-flex ss-row-center">
         <view class="tag-icon">拼团</view>
       </view>
@@ -285,9 +285,9 @@
         </view>
       </view>
 
-      <slot name="cart"
-        ><view class="buy-box ss-flex ss-col-center ss-row-center">去购买</view></slot
-      >
+      <slot name="cart">
+        <view class="buy-box ss-flex ss-col-center ss-row-center">去购买</view>
+      </slot>
     </view>
   </view>
 </template>
@@ -297,35 +297,34 @@
    * 商品卡片
    *
    * @property {Array} size = [xs | sm | md | lg | sl ] 			 	- 列表数据
-   * @property {String} tag 											- md及以上才有
-   * @property {String} img 											- 图片
-   * @property {String} background 									- 背景色
-   * @property {String} topRadius 									- 上圆角
-   * @property {String} bottomRadius 									- 下圆角
-   * @property {String} title 										- 标题
-   * @property {String} titleColor 									- 标题颜色
+   * @property {String} tag                      - md及以上才有
+   * @property {String} img                      - 图片
+   * @property {String} background                  - 背景色
+   * @property {String} topRadius                  - 上圆角
+   * @property {String} bottomRadius                  - 下圆角
+   * @property {String} title                    - 标题
+   * @property {String} titleColor                  - 标题颜色
    * @property {Number} titleWidth = 0								- 标题宽度，默认0，单位rpx
-   * @property {String} subTitle 										- 副标题
-   * @property {String} subTitleColor									- 副标题颜色
-   * @property {String} subTitleBackground 							- 副标题背景
-   * @property {String | Number} price 								- 价格
-   * @property {String} priceColor 									- 价格颜色
-   * @property {String | Number} originPrice 							- 原价/划线价
-   * @property {String} originPriceColor 								- 原价颜色
-   * @property {String | Number} sales 								- 销售数量
-   * @property {String} salesColor									- 销售数量颜色
+   * @property {String} subTitle                    - 副标题
+   * @property {String} subTitleColor                  - 副标题颜色
+   * @property {String} subTitleBackground              - 副标题背景
+   * @property {String | Number} price                - 价格
+   * @property {String} priceColor                  - 价格颜色
+   * @property {String | Number} originPrice              - 原价/划线价
+   * @property {String} originPriceColor                - 原价颜色
+   * @property {String | Number} sales                - 销售数量
+   * @property {String} salesColor                  - 销售数量颜色
    *
    * @slots activity												 	- 活动插槽
    * @slots cart														- 购物车插槽，默认包含文字，背景色，文字颜色 || 图片 || 行为
    *
-   * @event {Function()} click 										- 点击卡片
+   * @event {Function()} click                    - 点击卡片
    *
    */
   import { computed, reactive, getCurrentInstance, onMounted, nextTick } from 'vue';
   import sheep from '@/sheep';
   import { fen2yuan, formatSales } from '@/sheep/hooks/useGoods';
   import { formatStock } from '@/sheep/hooks/useGoods';
-  import goodsCollectVue from '@/pages/user/goods-collect.vue';
   import { isArray } from 'lodash-es';
 
   // 数据
@@ -354,11 +353,11 @@
     },
     tagStyle: {
       type: Object,
-      default: {},
+      default: () => ({}),
     },
     data: {
       type: Object,
-      default: {},
+      default: () => ({}),
     },
     size: {
       type: String,
@@ -451,6 +450,7 @@
   // 获取卡片实时高度
   const { proxy } = getCurrentInstance();
   const elId = `sheep_${Math.ceil(Math.random() * 10e5).toString(36)}`;
+
   function getGoodsPriceCardWH() {
     if (props.size === 'md') {
       const view = uni.createSelectorQuery().in(proxy);
@@ -469,6 +469,7 @@
       });
     }
   }
+
   onMounted(() => {
     nextTick(() => {
       getGoodsPriceCardWH();
@@ -482,11 +483,13 @@
     left: 0;
     top: 0;
     z-index: 2;
+
     .tag-icon {
       width: 72rpx;
       height: 44rpx;
     }
   }
+
   .seckill-tag {
     position: absolute;
     left: 0;
@@ -501,6 +504,7 @@
     color: #ffffff;
     line-height: 32rpx;
   }
+
   .groupon-tag {
     position: absolute;
     left: 0;
@@ -515,14 +519,17 @@
     color: #ffffff;
     line-height: 32rpx;
   }
+
   .goods-img {
     width: 100%;
     height: 100%;
     background-color: #f5f5f5;
   }
+
   .price-unit {
     margin-right: -4px;
   }
+
   .sales-text {
     display: table;
     font-size: 24rpx;
@@ -586,10 +593,12 @@
       width: 100%;
       height: 208rpx;
     }
+
     .sm-goods-content {
       padding: 20rpx 16rpx;
       box-sizing: border-box;
     }
+
     .sm-goods-title {
       font-size: 26rpx;
       color: #333;
@@ -619,6 +628,7 @@
       color: #333;
       width: 100%;
     }
+
     .md-goods-subtitle {
       font-size: 24rpx;
       font-weight: 400;
@@ -669,6 +679,7 @@
       // line-height: 36rpx;
       // width: 410rpx;
     }
+
     .lg-goods-subtitle {
       font-size: 24rpx;
       font-weight: 400;
@@ -695,6 +706,7 @@
       font-size: 24rpx;
       color: #ffffff;
     }
+
     .tag-box {
       width: 100%;
     }
@@ -708,10 +720,12 @@
     z-index: 1;
     width: 100%;
     background-color: $white;
+
     .sl-goods-content {
       padding: 20rpx 20rpx;
       box-sizing: border-box;
     }
+
     .sl-img-box {
       width: 100%;
       height: 360rpx;
@@ -722,6 +736,7 @@
       color: #333;
       font-weight: 500;
     }
+
     .sl-goods-subtitle {
       font-size: 24rpx;
       font-weight: 400;

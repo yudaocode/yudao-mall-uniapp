@@ -75,7 +75,6 @@
     const jsWxSdk = sheep.$platform.useProvider('wechat').jsWxSdk;
     if (jsWxSdk.isWechat()) {
       jsWxSdk.getLocation((res) => {
-        console.log(res);
         state.user_latitude = res.latitude;
         state.user_longitude = res.longitude;
         uni.setStorageSync(LATITUDE, res.latitude);
@@ -92,7 +91,8 @@
             state.user_longitude = res.longitude;
             uni.setStorageSync(LATITUDE, res.latitude);
             uni.setStorageSync(LONGITUDE, res.longitude);
-          } catch {
+          } catch (e) {
+            console.error(e);
           }
           getList();
         },
@@ -172,7 +172,7 @@
       state.user_latitude = uni.getStorageSync(LATITUDE);
       state.user_longitude = uni.getStorageSync(LONGITUDE);
     } catch (e) {
-      // error
+      console.error(e)
     }
   });
 </script>

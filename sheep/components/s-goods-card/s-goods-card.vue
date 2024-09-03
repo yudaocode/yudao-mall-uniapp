@@ -147,7 +147,7 @@
     TWO_COL: 'twoCol',
     // 单列小图
     ONE_COL_SMALL_IMG: 'oneColSmallImg',
-  }
+  };
 
   const state = reactive({
     goodsList: [],
@@ -157,16 +157,16 @@
   const props = defineProps({
     data: {
       type: Object,
-      default() {},
+      default: () => ({})
     },
     styles: {
       type: Object,
-      default() {},
+      default: () => ({})
     },
   });
 
-  const { layoutType, btnBuy, spuIds } = props.data ?? {};
-  const { marginLeft, marginRight } = props.styles ?? {};
+  const { layoutType, btnBuy, spuIds } = props.data || {};
+  const { marginLeft, marginRight } = props.styles || {};
 
   // 购买按钮样式
   const buyStyle = computed(() => {
@@ -215,6 +215,7 @@
     // 计数
     count++;
   }
+
   //endregion
 
   /**
@@ -232,7 +233,7 @@
     // 加载商品列表
     state.goodsList = await getGoodsListByIds(spuIds.join(','));
     // 只有双列布局时需要
-    if (layoutType === LayoutTypeEnum.TWO_COL){
+    if (layoutType === LayoutTypeEnum.TWO_COL) {
       // 分列
       calculateGoodsColumn();
     }
@@ -247,11 +248,13 @@
   .goods-list-box {
     width: 50%;
     box-sizing: border-box;
+
     .left-list {
       &:nth-last-child(1) {
         margin-bottom: 0 !important;
       }
     }
+
     .right-list {
       &:nth-last-child(1) {
         margin-bottom: 0 !important;
