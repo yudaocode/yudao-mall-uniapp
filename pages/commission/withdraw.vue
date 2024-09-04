@@ -98,8 +98,14 @@
         v-show="state.accountInfo.type === '2'"
       >
         <view class="unit" />
-        <!--银入输入改为下拉-->
-        <picker @change="bankChange" :value="state.accountInfo.bankName" :range="state.bankList" range-key="label" style="width:100%">
+        <!-- <uni-easyinput
+          :inputBorder="false"
+          class="ss-flex-1 ss-p-l-10"
+          v-model="state.accountInfo.bankName"
+          placeholder="请输入提现银行"
+        /> -->
+		<!--银行改为下拉选择-->
+		<picker @change="bankChange" :value="state.accountInfo.bankName" :range="state.bankList" range-key="label" style="width:100%">
 			<uni-easyinput
 				:inputBorder="false"																   
 				:value="state.selectedBankName"
@@ -109,6 +115,7 @@
 				:styles="{disableColor:'#fff',borderColor:'#fff',color:'#333!important'}"
 				 />
 		</picker>
+	
       </view>
       <!-- 开户地址 -->
       <view class="card-title" v-show="state.accountInfo.type === '2'">开户地址</view>
@@ -182,19 +189,19 @@
     frozenDays: 0, // 冻结天数
     minPrice: 0, // 最低提现金额
     withdrawTypes: [], // 提现方式
-    bankList:[], //银行字典数据
-	selectedBankName:"",//选中的银行名称
+	bankList:[], //银行字典数据
+	selectedBankName:"",//选中的银行名称	
   });
 
   // 打开提现方式的弹窗
   const onAccountSelect = (e) => {
-    state.accountSelect = e;
+    state.accountSelect = e;	
   };
 
   // 提交提现
   const onConfirm = async () => {
     // 参数校验
-    debugger;
+    //debugger;
     if (
       !state.accountInfo.price ||
       state.accountInfo.price > state.brokerageInfo.price ||
@@ -241,7 +248,7 @@
     if (data) {
       state.minPrice = data.brokerageWithdrawMinPrice || 0;
       state.frozenDays = data.brokerageFrozenDays || 0;
-      state.withdrawTypes = data.brokerageWithdrawTypes;
+      state.withdrawTypes = data.brokerageWithdrawTypes;	
     }
   }
 
@@ -252,23 +259,19 @@
       state.brokerageInfo = data;
     }
   }
-
+  
   //获取提现银行配置字典	
   async function getDictDataListByType(){	   
 	  let { code, data } = await DictApi.getDictDataListByType('brokerage_bank_name');	  
 	  if (code !== 0) {
 	    return;
 	  } 
-	  if(data && data.length > 0) {
-		data.map(item=>{
-			item.text = item.label;
-		})
+	  if(data && data.length > 0) {		
 	  	state.bankList = data;
 	  }
   }
-
-  //银行下拉选择
-   function bankChange(e){
+  
+  function bankChange(e){
 	  console.log(e);
 	  let value = e.target.value;
 	  state.accountInfo.bankName = value;
@@ -282,7 +285,7 @@
   onBeforeMount(() => {
     getWithdrawRules();
     getBrokerageUser();
-    getDictDataListByType();//获取银行配置字典
+	getDictDataListByType();//获取银行字典数据
   })
 </script>
 
