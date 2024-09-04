@@ -98,12 +98,17 @@
         v-show="state.accountInfo.type === '2'"
       >
         <view class="unit" />
-        <uni-easyinput
-          :inputBorder="false"
-          class="ss-flex-1 ss-p-l-10"
-          v-model="state.accountInfo.bankName"
-          placeholder="请输入提现银行"
-        />
+        <!--银入输入改为下拉-->
+        <picker @change="bankChange" :value="state.accountInfo.bankName" :range="state.bankList" range-key="label" style="width:100%">
+			<uni-easyinput
+				:inputBorder="false"																   
+				:value="state.selectedBankName"
+				placeholder="请选择银行"
+				suffixIcon="right"
+				disabled
+				:styles="{disableColor:'#fff',borderColor:'#fff',color:'#333!important'}"
+				 />
+		</picker>
       </view>
       <!-- 开户地址 -->
       <view class="card-title" v-show="state.accountInfo.type === '2'">开户地址</view>
@@ -152,6 +157,7 @@
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import TradeConfigApi from '@/sheep/api/trade/config';
   import BrokerageApi from '@/sheep/api/trade/brokerage';
+  import DictApi from '@/sheep/api/system/dict';
 
   const headerBg = sheep.$url.css('/static/img/shop/user/withdraw_bg.png');
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
@@ -176,6 +182,8 @@
     frozenDays: 0, // 冻结天数
     minPrice: 0, // 最低提现金额
     withdrawTypes: [], // 提现方式
+    bankList:[], //银行字典数据
+	selectedBankName:"",//选中的银行名称
   });
 
   // 打开提现方式的弹窗
@@ -245,9 +253,36 @@
     }
   }
 
+  //获取提现银行配置字典	
+  async function getDictDataListByType(){	   
+	  let { code, data } = await DictApi.getDictDataListByType('brokerage_bank_name');	  
+	  if (code !== 0) {
+	    return;
+	  } 
+	  if(data && data.length > 0) {
+		data.map(item=>{
+			item.text = item.label;
+		})
+	  	state.bankList = data;
+	  }
+  }
+
+  //银行下拉选择
+   function bankChange(e){
+	  console.log(e);
+	  let value = e.target.value;
+	  state.accountInfo.bankName = value;
+	  let curr = state.bankList?.filter(item=>{		 
+		  return item.value == value
+	  })[0];
+	  console.log(curr);
+	  state.selectedBankName = curr.label;
+  }
+
   onBeforeMount(() => {
     getWithdrawRules();
-    getBrokerageUser()
+    getBrokerageUser();
+    getDictDataListByType();//获取银行配置字典
   })
 </script>
 
