@@ -32,12 +32,12 @@ const CombinationApi = {
   },
 
   // 获得拼团活动明细列表
-  getCombinationActivityDetailList: (combinationActivityIds) => {
+  getCombinationActivityDetailList: (ids) => {
     return request({
-      url: '/promotion/combination-activity/get-detail-list',
+      url: '/promotion/combination-activity/detail-list',
       method: 'GET',
       params: {
-        combinationActivityIds
+        ids,
       },
     });
   },
@@ -58,9 +58,9 @@ const CombinationApi = {
   // 获得我的拼团记录分页
   getCombinationRecordPage: (params) => {
     return request({
-      url: "/promotion/combination-record/page",
+      url: '/promotion/combination-record/page',
       method: 'GET',
-      params
+      params,
     });
   },
 
