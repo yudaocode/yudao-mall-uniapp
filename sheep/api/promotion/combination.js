@@ -34,7 +34,7 @@ const CombinationApi = {
   // 获得拼团活动明细列表
   getCombinationActivityDetailList: (ids) => {
     return request({
-      url: '/promotion/combination-activity/detail-list',
+      url: '/promotion/combination-activity/list-by-ids',
       method: 'GET',
       params: {
         ids,
