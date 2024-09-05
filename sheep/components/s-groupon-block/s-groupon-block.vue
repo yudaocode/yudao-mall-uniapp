@@ -23,7 +23,7 @@
           :subTitleColor="data.fields.introduction.color"
           :topRadius="data.borderRadiusTop"
           :bottomRadius="data.borderRadiusBottom"
-          @click="sheep.$router.go('/pages/goods/index', { id: item.id })"
+          @click="sheep.$router.go('/pages/goods/groupon', { id: item.activityId })"
         >
           <!-- 购买按钮 -->
           <template v-slot:cart>
@@ -35,7 +35,40 @@
       </view>
     </view>
 
-    <!-- 布局2. 双列（每一列：上图，下内容）-->
+    <!-- 布局2. 单列小图（左图，右内容） -->
+    <view
+      v-if="layoutType === LayoutTypeEnum.ONE_COL_SMALL_IMG && state.spuList.length"
+      class="goods-lg-box"
+    >
+      <view
+        class="goods-box"
+        :style="[{ marginBottom: data.space + 'px' }]"
+        v-for="item in state.spuList"
+        :key="item.id"
+      >
+        <s-goods-column
+          class="goods-card"
+          size="lg"
+          :goodsFields="data.fields"
+          :data="item"
+          :tagStyle="data.badge"
+          :titleColor="data.fields.name?.color"
+          :subTitleColor="data.fields.introduction.color"
+          :topRadius="data.borderRadiusTop"
+          :bottomRadius="data.borderRadiusBottom"
+          @tap="sheep.$router.go('/pages/goods/groupon', { id: item.activityId })"
+        >
+          <!-- 购买按钮 -->
+          <template v-slot:cart>
+            <button class="ss-reset-button cart-btn" :style="[buyStyle]">
+              {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
+            </button>
+          </template>
+        </s-goods-column>
+      </view>
+    </view>
+
+    <!-- 布局3. 双列（每一列：上图，下内容）-->
     <view
       v-if="layoutType === LayoutTypeEnum.TWO_COL && state.spuList.length"
       class="goods-md-wrap ss-flex ss-flex-wrap ss-col-top"
@@ -58,7 +91,7 @@
             :topRadius="data.borderRadiusTop"
             :bottomRadius="data.borderRadiusBottom"
             :titleWidth="330 - marginLeft - marginRight"
-            @click="sheep.$router.go('/pages/goods/index', { id: item.id })"
+            @click="sheep.$router.go('/pages/goods/groupon', { id: item.activityId })"
             @getHeight="calculateGoodsColumn($event, 'left')"
           >
             <!-- 购买按钮 -->
@@ -88,7 +121,7 @@
             :topRadius="data.borderRadiusTop"
             :bottomRadius="data.borderRadiusBottom"
             :titleWidth="330 - marginLeft - marginRight"
-            @click="sheep.$router.go('/pages/goods/index', { id: item.id })"
+            @click="sheep.$router.go('/pages/goods/groupon', { id: item.activityId })"
             @getHeight="calculateGoodsColumn($event, 'right')"
           >
             <!-- 购买按钮 -->
@@ -99,39 +132,6 @@
             </template>
           </s-goods-column>
         </view>
-      </view>
-    </view>
-
-    <!-- 布局3. 单列小图（左图，右内容） -->
-    <view
-      v-if="layoutType === LayoutTypeEnum.ONE_COL_SMALL_IMG && state.spuList.length"
-      class="goods-lg-box"
-    >
-      <view
-        class="goods-box"
-        :style="[{ marginBottom: data.space + 'px' }]"
-        v-for="item in state.spuList"
-        :key="item.id"
-      >
-        <s-goods-column
-          class="goods-card"
-          size="lg"
-          :goodsFields="data.fields"
-          :data="item"
-          :tagStyle="data.badge"
-          :titleColor="data.fields.name?.color"
-          :subTitleColor="data.fields.introduction.color"
-          :topRadius="data.borderRadiusTop"
-          :bottomRadius="data.borderRadiusBottom"
-          @tap="sheep.$router.go('/pages/goods/index', { id: item.id })"
-        >
-          <!-- 购买按钮 -->
-          <template v-slot:cart>
-            <button class="ss-reset-button cart-btn" :style="[buyStyle]">
-              {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
-            </button>
-          </template>
-        </s-goods-column>
       </view>
     </view>
   </view>
@@ -257,16 +257,16 @@
 
     // 循环活动列表
     activityList.forEach((activity) => {
-      // 获取活动商品的最低价格
-      activity.products.forEach((product) => {
-        const combinationPrice = product.combinationPrice || Infinity;
-
-        // 找到对应的 spu 并更新价格
-        const spu = state.spuList.find((spu) => activity.spuId === spu.id);
-        if (spu) {
-          spu.price = Math.min(combinationPrice, spu.price || Infinity);
-        }
-      });
+      // 提取活动价格
+      const combinationPrice = activity.combinationPrice || Infinity;
+      // 查找对应的 spu 并更新价格
+      const spu = state.spuList.find((spu) => activity.spuId === spu.id);
+      if (spu) {
+        // 赋值最低价格
+        spu.price = Math.min(combinationPrice, spu.price);
+        // 赋值活动ID，为了点击跳转详情页
+        spu.activityId = activity.id;
+      }
     });
 
     // 只有双列布局时需要
