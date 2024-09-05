@@ -144,6 +144,7 @@
   import sheep from '@/sheep';
   import CombinationApi from '@/sheep/api/promotion/combination';
   import SpuApi from '@/sheep/api/product/spu';
+  import spu from '@/sheep/api/product/spu';
 
   // 布局类型
   const LayoutTypeEnum = {
@@ -241,21 +242,35 @@
    * @param ids 商品编号列表
    * @return {Promise<undefined>} 商品列表
    */
-  async function getSpuDetail(spuId) {
-    const { data: spu } = await SpuApi.getSpuDetail(spuId)
+  async function getSpuDetail(ids) {
+    const { data: spu } = await SpuApi.getSpuDetail(ids);
     return spu;
   }
 
 
   // 初始化
   onMounted(async () => {
-    // 加载商品列表
+    // 加载活动列表
     const activityList = await getCombinationActivityDetailList(activityIds.join(','));
-    // 创建 SPU 请求的 Promise 数组
-    const spuPromises = activityList.map(activity => getSpuDetail(activity.spuId));
-    // 等待所有 SPU 请求完成
-    // 处理 spuList
-    state.spuList = await Promise.all(spuPromises);
+    // 循环获取活动商品SPU详情并添加到spuList
+    for (const activity of activityList) {
+      state.spuList.push(await getSpuDetail(activity.spuId));
+    }
+
+
+    // 循环活动列表
+    activityList.forEach(activity => {
+      // 获取活动商品的最低价格
+      activity.products.forEach(product => {
+        const combinationPrice = product.combinationPrice || Infinity;
+
+        // 找到对应的 spu 并更新价格
+        const spu = state.spuList.find(spu => activity.spuId === spu.id);
+        if (spu) {
+          spu.price = Math.min(combinationPrice, spu.price || Infinity);
+        }
+      });
+    });
 
     // 只有双列布局时需要
     if (layoutType === LayoutTypeEnum.TWO_COL) {
@@ -273,11 +288,13 @@
   .goods-list-box {
     width: 50%;
     box-sizing: border-box;
+
     .left-list {
       &:nth-last-child(1) {
         margin-bottom: 0 !important;
       }
     }
+
     .right-list {
       &:nth-last-child(1) {
         margin-bottom: 0 !important;
