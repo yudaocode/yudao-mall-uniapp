@@ -6,9 +6,9 @@ const DictApi = {
     return request({
       url: `/system/dict-data/type`,
       method: 'GET',
-	  params: {
-	    type,
-	  },
+      params: {
+        type,
+      },
     });
   },
 };

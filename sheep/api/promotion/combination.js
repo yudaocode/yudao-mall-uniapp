@@ -2,14 +2,6 @@ import request from '@/sheep/request';
 
 // 拼团 API
 const CombinationApi = {
-  // 获得拼团活动列表
-  getCombinationActivityList: (count) => {
-    return request({
-      url: '/promotion/combination-activity/list',
-      method: 'GET',
-      params: { count },
-    });
-  },
 
   // 获得拼团活动分页
   getCombinationActivityPage: (params) => {
