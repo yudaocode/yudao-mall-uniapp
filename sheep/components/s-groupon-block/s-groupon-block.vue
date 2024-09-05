@@ -3,7 +3,10 @@
   <!-- 商品卡片 -->
   <view>
     <!-- 布局1. 单列大图（上图，下内容）-->
-    <view v-if="layoutType === LayoutTypeEnum.ONE_COL_BIG_IMG && state.spuList.length" class="goods-sl-box">
+    <view
+      v-if="layoutType === LayoutTypeEnum.ONE_COL_BIG_IMG && state.spuList.length"
+      class="goods-sl-box"
+    >
       <view
         class="goods-box"
         v-for="item in state.spuList"
@@ -100,7 +103,10 @@
     </view>
 
     <!-- 布局3. 单列小图（左图，右内容） -->
-    <view v-if="layoutType === LayoutTypeEnum.ONE_COL_SMALL_IMG && state.spuList.length" class="goods-lg-box">
+    <view
+      v-if="layoutType === LayoutTypeEnum.ONE_COL_SMALL_IMG && state.spuList.length"
+      class="goods-lg-box"
+    >
       <view
         class="goods-box"
         :style="[{ marginBottom: data.space + 'px' }]"
@@ -135,12 +141,7 @@
   /**
    * 商品卡片
    */
-  import {
-    computed,
-    onMounted,
-    reactive,
-    ref,
-  } from 'vue';
+  import { computed, onMounted, reactive, ref } from 'vue';
   import sheep from '@/sheep';
   import CombinationApi from '@/sheep/api/promotion/combination';
   import SpuApi from '@/sheep/api/product/spu';
@@ -164,13 +165,11 @@
   const props = defineProps({
     data: {
       type: Object,
-      default() {
-      },
+      default() {},
     },
     styles: {
       type: Object,
-      default() {
-      },
+      default() {},
     },
   });
 
@@ -247,7 +246,6 @@
     return spu;
   }
 
-
   // 初始化
   onMounted(async () => {
     // 加载活动列表
@@ -257,15 +255,14 @@
       state.spuList.push(await getSpuDetail(activity.spuId));
     }
 
-
     // 循环活动列表
-    activityList.forEach(activity => {
+    activityList.forEach((activity) => {
       // 获取活动商品的最低价格
-      activity.products.forEach(product => {
+      activity.products.forEach((product) => {
         const combinationPrice = product.combinationPrice || Infinity;
 
         // 找到对应的 spu 并更新价格
-        const spu = state.spuList.find(spu => activity.spuId === spu.id);
+        const spu = state.spuList.find((spu) => activity.spuId === spu.id);
         if (spu) {
           spu.price = Math.min(combinationPrice, spu.price || Infinity);
         }

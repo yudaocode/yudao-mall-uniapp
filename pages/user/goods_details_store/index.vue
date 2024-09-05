@@ -1,7 +1,12 @@
 <template>
   <s-layout title="选择自提门店" :bgStyle="{ color: '#FFF' }">
     <view class="storeBox" ref="container">
-      <view class="storeBox-box" v-for="(item, index) in state.storeList" :key="index" @tap="checked(item)">
+      <view
+        class="storeBox-box"
+        v-for="(item, index) in state.storeList"
+        :key="index"
+        @tap="checked(item)"
+      >
         <view class="store-img">
           <image :src="item.logo" class="img" />
         </view>
@@ -33,7 +38,9 @@
             <!-- #endif -->
           </view>
           <view class="store-distance ss-flex ss-row-center" @tap.stop="showMaoLocation(item)">
-            <text class="addressTxt" v-if="item.distance">距离{{ item.distance.toFixed(2) }}千米</text>
+            <text class="addressTxt" v-if="item.distance"
+              >距离{{ item.distance.toFixed(2) }}千米</text
+            >
             <text class="addressTxt" v-else>查看地图</text>
             <view class="iconfont">
               <view class="ss-rest-button">
@@ -112,7 +119,7 @@
         latitude: Number(e.latitude),
         longitude: Number(e.longitude),
         name: e.name,
-        address: `${e.areaName}-${e.detailAddress}`
+        address: `${e.areaName}-${e.detailAddress}`,
       });
     } else {
       // #endif
@@ -121,7 +128,7 @@
         longitude: Number(e.longitude),
         name: e.name,
         address: `${e.areaName}-${e.detailAddress}`,
-        success: function() {
+        success: function () {
           console.log('success');
         },
       });
@@ -172,7 +179,7 @@
       state.user_latitude = uni.getStorageSync(LATITUDE);
       state.user_longitude = uni.getStorageSync(LONGITUDE);
     } catch (e) {
-      console.error(e)
+      console.error(e);
     }
   });
 </script>
@@ -180,7 +187,7 @@
   .line1 {
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap
+    white-space: nowrap;
   }
 
   .geoPage {

@@ -37,7 +37,7 @@ const CombinationApi = {
       url: '/promotion/combination-activity/detail-list',
       method: 'GET',
       params: {
-        ids
+        ids,
       },
     });
   },
@@ -58,9 +58,9 @@ const CombinationApi = {
   // 获得我的拼团记录分页
   getCombinationRecordPage: (params) => {
     return request({
-      url: "/promotion/combination-record/page",
+      url: '/promotion/combination-record/page',
       method: 'GET',
-      params
+      params,
     });
   },
 

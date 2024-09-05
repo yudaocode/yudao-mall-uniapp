@@ -178,7 +178,7 @@ const decryptSpm = (spm) => {
 };
 
 // 绑定推广员
-const bindBrokerageUser = async (val= undefined) => {
+const bindBrokerageUser = async (val = undefined) => {
   try {
     const shareId = val || uni.getStorageSync('shareId');
     if (!shareId) {

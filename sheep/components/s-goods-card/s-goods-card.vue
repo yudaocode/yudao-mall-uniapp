@@ -3,7 +3,10 @@
   <!-- 商品卡片 -->
   <view>
     <!-- 布局1. 单列大图（上图，下内容）-->
-    <view v-if="layoutType === LayoutTypeEnum.ONE_COL_BIG_IMG && state.goodsList.length" class="goods-sl-box">
+    <view
+      v-if="layoutType === LayoutTypeEnum.ONE_COL_BIG_IMG && state.goodsList.length"
+      class="goods-sl-box"
+    >
       <view
         class="goods-box"
         v-for="item in state.goodsList"
@@ -100,7 +103,10 @@
     </view>
 
     <!-- 布局3. 单列小图（左图，右内容） -->
-    <view v-if="layoutType === LayoutTypeEnum.ONE_COL_SMALL_IMG && state.goodsList.length" class="goods-lg-box">
+    <view
+      v-if="layoutType === LayoutTypeEnum.ONE_COL_SMALL_IMG && state.goodsList.length"
+      class="goods-lg-box"
+    >
       <view
         class="goods-box"
         :style="[{ marginBottom: data.space + 'px' }]"
@@ -157,11 +163,11 @@
   const props = defineProps({
     data: {
       type: Object,
-      default: () => ({})
+      default: () => ({}),
     },
     styles: {
       type: Object,
-      default: () => ({})
+      default: () => ({}),
     },
   });
 
