@@ -90,7 +90,7 @@
         <s-select-groupon-sku
           :show="state.showSelectSku"
           :goodsInfo="state.goodsInfo"
-		  :selectedSku="state.selectedSku"
+          :selectedSku="state.selectedSku"
           :grouponAction="state.grouponAction"
           :grouponNum="state.grouponNum"
           @buy="onBuy"
@@ -126,7 +126,12 @@
             :disabled="state.goodsInfo.stock === 0 || state.activity.status !== 0"
           >
             <view class="btn-price">{{
-              fen2yuan(state.selectedSku.price * state.selectedSku.count || state.activity.price * state.selectedSku.count || state.goodsInfo.price * state.selectedSku.count || state.goodsInfo.price)
+              fen2yuan(
+                state.selectedSku.price * state.selectedSku.count ||
+                  state.activity.price * state.selectedSku.count ||
+                  state.goodsInfo.price * state.selectedSku.count ||
+                  state.goodsInfo.price,
+              )
             }}</view>
             <view v-if="state.activity.startTime > new Date().getTime()">未开始</view>
             <view v-else-if="state.activity.endTime <= new Date().getTime()">已结束</view>
@@ -263,10 +268,12 @@
     // 加载商品信息
     const { data: spu } = await SpuApi.getSpuDetail(activity.spuId);
     state.goodsId = spu.id;
+
     // 默认显示最低价
-    activity.products.forEach((product) => {
-      state.activity.price = Math.min(spu.price, product.combinationPrice); // 设置 SPU 的最低价格
-    });
+    spu.price = activity.products.reduce((min, product) => {
+      return Math.min(min, product.combinationPrice || Infinity);
+    }, Infinity);
+
     // 价格、库存使用活动的
     spu.skus.forEach((sku) => {
       const product = activity.products.find((product) => product.skuId === sku.id);

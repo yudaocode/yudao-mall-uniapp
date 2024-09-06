@@ -23,6 +23,17 @@ const CombinationApi = {
     });
   },
 
+  // 获得拼团活动明细列表
+  getCombinationActivityDetailList: (ids) => {
+    return request({
+      url: '/promotion/combination-activity/list-by-ids',
+      method: 'GET',
+      params: {
+        ids
+      },
+    });
+  },
+
   // 获得最近 n 条拼团记录（团长发起的）
   getHeadCombinationRecordList: (activityId, status, count) => {
     return request({

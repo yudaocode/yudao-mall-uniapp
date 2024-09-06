@@ -3,7 +3,7 @@
   "appid": "__UNI__460BC4C",
   "description": "基于 uni-app + Vue3 技术驱动的在线商城系统，内含诸多功能与丰富的活动，期待您的使用和反馈。",
   "versionName": "2.1.0",
-  "versionCode": 183,
+  "versionCode": "183",
   "transformPx": false,
   "app-plus": {
     "usingComponents": true,
@@ -188,7 +188,8 @@
     "setting": {
       "urlCheck": false,
       "minified": true,
-      "postcss": true
+      "postcss": false,
+      "es6": false
     },
     "optimization": {
       "subPackages": true
