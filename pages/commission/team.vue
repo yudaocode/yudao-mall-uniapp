@@ -1,8 +1,29 @@
 <!-- 页面 TODO 芋艿：该页面的实现代码需要优化，包括 js 和 css，以及相关的样式设计 -->
 <template>
   <s-layout title="我的团队" :class="state.scrollTop ? 'team-wrap' : ''" navbar="inner">
+  <view
+	    class="header-box"
+	    :style="[
+	      {
+	        marginTop: '-' + Number(statusBarHeight + 88) + 'rpx',
+	        paddingTop: Number(statusBarHeight + 108) + 'rpx',
+	      },
+	    ]"
+	  >
+	    <!-- 推广数据总览 -->
+	    <view class="team-data-box ss-flex ss-col-center ss-row-between" style="width: 100%">
+	      <view class="data-card" style="width: 100%">
+	        <view class="total-item" style="width: 100%">
+	          <view class="item-title" style="text-align: center">推广人数</view>
+	          <view class="total-num" style="text-align: center">
+	            {{ state.summary.firstBrokerageUserCount + state.summary.secondBrokerageUserCount || 0 }}
+	          </view>
+	        </view>
+	      </view>
+	    </view>
+	  </view>
     <view class="promoter-list">
-      <view
+      <!--<view
         class="promoterHeader bg-color"
         style="backgroundcolor: #e93323 !important; height: 218rpx; color: #fff"
       >
@@ -21,9 +42,9 @@
           </view>
           <view class="iconfont icon-tuandui" />
         </view>
-      </view>
-      <view style="padding: 0 30rpx">
-        <view class="nav acea-row row-around l1">
+      </view>-->
+      <view style="padding: 0 20rpx">
+        <view class="nav acea-row row-around l1" style="margin-top:20rpx;">
           <view :class="state.level == 1 ? 'item on' : 'item'" @click="setType(1)">
             一级({{ state.summary.firstBrokerageUserCount || 0 }})
           </view>
@@ -152,7 +173,7 @@
             </view>
           </block>
           <block v-if="state.pagination.list.length === 0">
-            <view style="text-align: center">暂无推广人数</view>
+            <view style="text-align: center;margin-top:30rpx;">暂无推广人数</view>
           </block>
         </view>
       </view>
@@ -456,7 +477,7 @@
   .promoter-list .nav .item.on {
     border-bottom: 5rpx solid;
     // $theme-color
-    color: red;
+    color: var(--ui-BG-Main);
     // $theme-color
   }
 
