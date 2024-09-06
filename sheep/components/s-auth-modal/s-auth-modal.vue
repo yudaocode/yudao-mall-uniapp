@@ -152,7 +152,11 @@
     }
     const loginRes = await sheep.$platform.useProvider(provider).login();
     if (loginRes) {
+      const userInfo = await sheep.$store('user').getInfo();
       closeAuthModal();
+      // 如果用户已经有头像和昵称,不要每次登录都要重新上传头像。	   
+	  if(userInfo.avatar && userInfo.nickname) return;
+      
       // 触发小程序授权信息弹框
       // #ifdef MP-WEIXIN
       showAuthModal('mpAuthorization');
