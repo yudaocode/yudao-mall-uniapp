@@ -1,4 +1,4 @@
-<!-- 装修商品组件：商品卡片 -->
+<!-- 装修商品组件：【拼团】商品卡片 -->
 <template>
   <!-- 商品卡片 -->
   <view>
@@ -232,7 +232,7 @@
    * @return {Promise<undefined>} 商品列表
    */
   async function getCombinationActivityDetailList(ids) {
-    const { data } = await CombinationApi.getCombinationActivityDetailList(ids);
+    const { data } = await CombinationApi.getCombinationActivityListByIds(ids);
     return data;
   }
 

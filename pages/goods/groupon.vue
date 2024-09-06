@@ -105,7 +105,6 @@
       <detail-content-card class="detail-content-selector" :content="state.goodsInfo.description" />
 
       <!-- 商品tabbar -->
-      <!-- TODO: 已售罄、预热 判断 设计-->
       <detail-tabbar v-model="state.goodsInfo">
         <view class="buy-box ss-flex ss-col-center ss-p-r-20">
           <button

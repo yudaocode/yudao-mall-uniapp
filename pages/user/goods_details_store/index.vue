@@ -38,9 +38,9 @@
             <!-- #endif -->
           </view>
           <view class="store-distance ss-flex ss-row-center" @tap.stop="showMaoLocation(item)">
-            <text class="addressTxt" v-if="item.distance"
-              >距离{{ item.distance.toFixed(2) }}千米</text
-            >
+            <text class="addressTxt" v-if="item.distance">
+              距离{{ item.distance.toFixed(2) }}千米
+            </text>
             <text class="addressTxt" v-else>查看地图</text>
             <view class="iconfont">
               <view class="ss-rest-button">
