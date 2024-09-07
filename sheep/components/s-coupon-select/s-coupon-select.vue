@@ -1,19 +1,28 @@
 <!-- 订单确认的优惠劵选择弹窗 -->
 <template>
-  <su-popup :show="show" type="bottom" round="20" @close="emits('close')" showClose backgroundColor="#f2f2f2">
+  <su-popup
+    :show="show"
+    type="bottom"
+    round="20"
+    @close="emits('close')"
+    showClose
+    backgroundColor="#f2f2f2"
+  >
     <view class="model-box">
       <view class="title ss-m-t-16 ss-m-l-20 ss-flex">优惠券</view>
-      <scroll-view class="model-content" scroll-y :scroll-with-animation="false" :enable-back-to-top="true">
+      <scroll-view
+        class="model-content"
+        scroll-y
+        :scroll-with-animation="false"
+        :enable-back-to-top="true"
+      >
         <!--可使用的优惠券区域-->
         <view class="subtitle ss-m-l-20">可使用优惠券</view>
-        <view v-for="(item, index) in state.couponInfo.filter(coupon => coupon.match)" :key="index">
+        <view
+          v-for="(item, index) in state.couponInfo.filter((coupon) => coupon.match)"
+          :key="index"
+        >
           <s-coupon-list :data="item" type="user" :disabled="false">
-            <template v-slot:reason>
-              <view class="ss-flex ss-m-t-24">
-                <view class="reason-title">可用原因：</view>
-                <view class="reason-desc">{{ item.description || '已达到使用门槛' }}</view>
-              </view>
-            </template>
             <template #default>
               <label class="ss-flex ss-col-center" @tap="radioChange(item.id)">
                 <radio
@@ -28,12 +37,12 @@
         </view>
         <!--不可使用的优惠券区域-->
         <view class="subtitle ss-m-t-40 ss-m-l-20">不可使用优惠券</view>
-        <view v-for="item in state.couponInfo.filter(coupon => !coupon.match)" :key="item.id">
+        <view v-for="item in state.couponInfo.filter((coupon) => !coupon.match)" :key="item.id">
           <s-coupon-list :data="item" type="user" :disabled="true">
             <template v-slot:reason>
               <view class="ss-flex ss-m-t-24">
                 <view class="reason-title"> 不可用原因：</view>
-                <view class="reason-desc">{{ item.description || '未达到使用门槛' }}</view>
+                <view class="reason-desc">{{ item.mismatchReason || '未达到使用门槛' }}</view>
               </view>
             </template>
           </s-coupon-list>
@@ -49,10 +58,10 @@
   import { computed, reactive } from 'vue';
 
   const props = defineProps({
-    modelValue: { // 优惠劵列表
+    modelValue: {
+      // 优惠劵列表
       type: Object,
-      default() {
-      },
+      default() {},
     },
     show: {
       type: Boolean,

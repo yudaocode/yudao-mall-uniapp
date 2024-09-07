@@ -52,25 +52,38 @@
               class="score-img"
             />
             <text class="item-value ss-m-r-24">
-              {{ state.pointStatus ? state.orderInfo.totalPoint - state.orderInfo.usePoint : (state.orderInfo.totalPoint || 0) }}
+              {{
+                state.pointStatus
+                  ? state.orderInfo.totalPoint - state.orderInfo.usePoint
+                  : state.orderInfo.totalPoint || 0
+              }}
             </text>
             <checkbox-group @change="changeIntegral">
-              <checkbox :checked='state.pointStatus' :disabled="!state.orderInfo.totalPoint || state.orderInfo.totalPoint <= 0" />
+              <checkbox
+                :checked="state.pointStatus"
+                :disabled="!state.orderInfo.totalPoint || state.orderInfo.totalPoint <= 0"
+              />
             </checkbox-group>
           </view>
         </view>
         <!-- 快递配置时，信息的展示 -->
-        <view class="order-item ss-flex ss-col-center ss-row-between" v-if='addressState.deliveryType === 1'>
+        <view
+          class="order-item ss-flex ss-col-center ss-row-between"
+          v-if="addressState.deliveryType === 1"
+        >
           <view class="item-title">运费</view>
           <view class="ss-flex ss-col-center">
             <text class="item-value ss-m-r-24" v-if="state.orderInfo.price.deliveryPrice > 0">
               +￥{{ fen2yuan(state.orderInfo.price.deliveryPrice) }}
             </text>
-            <view class='item-value ss-m-r-24' v-else>免运费</view>
+            <view class="item-value ss-m-r-24" v-else>免运费</view>
           </view>
         </view>
         <!-- 门店自提时，需要填写姓名和手机号 -->
-        <view class="order-item ss-flex ss-col-center ss-row-between" v-if='addressState.deliveryType === 2'>
+        <view
+          class="order-item ss-flex ss-col-center ss-row-between"
+          v-if="addressState.deliveryType === 2"
+        >
           <view class="item-title">联系人</view>
           <view class="ss-flex ss-col-center">
             <uni-easyinput
@@ -82,7 +95,10 @@
             />
           </view>
         </view>
-        <view class="order-item ss-flex ss-col-center ss-row-between" v-if='addressState.deliveryType === 2'>
+        <view
+          class="order-item ss-flex ss-col-center ss-row-between"
+          v-if="addressState.deliveryType === 2"
+        >
           <view class="item-title">联系电话</view>
           <view class="ss-flex ss-col-center">
             <uni-easyinput
@@ -190,7 +206,6 @@
   import AddressSelection from '@/pages/order/addressSelection.vue';
   import sheep from '@/sheep';
   import OrderApi from '@/sheep/api/trade/order';
-  import CouponApi from '@/sheep/api/promotion/coupon';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
 
   const state = reactive({
@@ -266,9 +281,9 @@
       remark: state.orderPayload.remark,
       deliveryType: addressState.value.deliveryType,
       addressId: addressState.value.addressInfo.id, // 收件地址编号
-      pickUpStoreId: addressState.value.pickUpInfo.id,//自提门店编号
-      receiverName: addressState.value.receiverName,// 选择门店自提时，该字段为联系人名
-      receiverMobile: addressState.value.receiverMobile,// 选择门店自提时，该字段为联系人手机
+      pickUpStoreId: addressState.value.pickUpInfo.id, //自提门店编号
+      receiverName: addressState.value.receiverName, // 选择门店自提时，该字段为联系人名
+      receiverMobile: addressState.value.receiverMobile, // 选择门店自提时，该字段为联系人手机
       pointStatus: state.pointStatus,
       combinationActivityId: state.orderPayload.combinationActivityId,
       combinationHeadId: state.orderPayload.combinationHeadId,
@@ -296,9 +311,9 @@
       couponId: state.orderPayload.couponId,
       deliveryType: addressState.value.deliveryType,
       addressId: addressState.value.addressInfo.id, // 收件地址编号
-      pickUpStoreId: addressState.value.pickUpInfo.id,//自提门店编号
-      receiverName: addressState.value.receiverName,// 选择门店自提时，该字段为联系人名
-      receiverMobile: addressState.value.receiverMobile,// 选择门店自提时，该字段为联系人手机
+      pickUpStoreId: addressState.value.pickUpInfo.id, //自提门店编号
+      receiverName: addressState.value.receiverName, // 选择门店自提时，该字段为联系人名
+      receiverMobile: addressState.value.receiverMobile, // 选择门店自提时，该字段为联系人手机
       pointStatus: state.pointStatus,
       combinationActivityId: state.orderPayload.combinationActivityId,
       combinationHeadId: state.orderPayload.combinationHeadId,
@@ -308,22 +323,10 @@
       return;
     }
     state.orderInfo = data;
+    state.couponInfo = data.coupons;
     // 设置收货地址
     if (state.orderInfo.address) {
       addressState.value.addressInfo = state.orderInfo.address;
-    }
-  }
-
-  // 获取可用优惠券
-  async function getCoupons() {
-    const { code, data } = await CouponApi.getMatchCouponList(
-      state.orderInfo.price.payPrice,
-      state.orderInfo.items.map((item) => item.spuId),
-      state.orderPayload.items.map((item) => item.skuId),
-      state.orderPayload.items.map((item) => item.categoryId),
-    );
-    if (code === 0) {
-      state.couponInfo = data;
     }
   }
 
@@ -334,13 +337,15 @@
     }
     state.orderPayload = JSON.parse(options.data);
     await getOrderInfo();
-    await getCoupons();
   });
 
   // 使用 watch 监听地址和配送方式的变化
   watch(addressState, async (newAddress, oldAddress) => {
     // 如果收货地址或配送方式有变化，则重新计算价格
-    if (newAddress.addressInfo.id !== oldAddress.addressInfo.id || newAddress.deliveryType !== oldAddress.deliveryType) {
+    if (
+      newAddress.addressInfo.id !== oldAddress.addressInfo.id ||
+      newAddress.deliveryType !== oldAddress.deliveryType
+    ) {
       await getOrderInfo();
     }
   });

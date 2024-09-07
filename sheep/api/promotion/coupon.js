@@ -79,23 +79,6 @@ const CouponApi = {
       },
     });
   },
-  // 获得匹配指定商品的优惠劵列表
-  getMatchCouponList: (price, spuIds, skuIds, categoryIds) => {
-    return request({
-      url: '/promotion/coupon/match-list',
-      method: 'GET',
-      params: {
-        price,
-        spuIds: spuIds.join(','),
-        skuIds: skuIds.join(','),
-        categoryIds: categoryIds.join(','),
-      },
-      custom: {
-        showError: false,
-        showLoading: false, // 避免影响 settlementOrder 结算的结果
-      },
-    });
-  }
 };
 
 export default CouponApi;
