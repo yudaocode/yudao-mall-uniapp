@@ -7,7 +7,7 @@
             @scrolltoupper="onScrollToUpper" @query="queryList">
     <template #top>
       <!-- 撑一下顶部导航 -->
-      <view style="height: 45px"></view>
+      <view :style="{ height: sys_navBar + 'px' }"></view>
     </template>
     <!-- style="transform: scaleY(-1)"必须写，否则会导致列表倒置！！！ -->
     <!-- 注意不要直接在chat-item组件标签上设置style，因为在微信小程序中是无效的，请包一层view -->
@@ -33,7 +33,9 @@
   import { reactive, ref } from 'vue';
   import KeFuApi from '@/sheep/api/promotion/kefu';
   import { isEmpty } from '@/sheep/helper/utils';
-
+  import sheep from '@/sheep';
+  
+  const sys_navBar = sheep.$platform.navbar;
   const messageList = ref([]); // 消息列表
   const showNewMessageTip = ref(false); // 显示有新消息提示
   const backToTopStyle = reactive({
@@ -67,7 +69,7 @@
   };
   /** 刷新消息列表 */
   const refreshMessageList = (message = undefined) => {
-    if (queryParams.pageNo != 1 && message !== undefined) {
+    if (message !== undefined) {
       showNewMessageTip.value = true;
       // 追加数据
       pagingRef.value.addChatRecordData([message], false);
@@ -87,8 +89,6 @@
       return;
     }
     showNewMessageTip.value = false;
-    // 到底重置消息列表
-    refreshMessageList();
   };
   defineExpose({ getMessageList, refreshMessageList });
 </script>
