@@ -90,7 +90,6 @@
         <s-select-groupon-sku
           :show="state.showSelectSku"
           :goodsInfo="state.goodsInfo"
-          :selectedSku="state.selectedSku"
           :grouponAction="state.grouponAction"
           :grouponNum="state.grouponNum"
           @buy="onBuy"

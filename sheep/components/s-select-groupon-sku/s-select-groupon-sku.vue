@@ -5,7 +5,11 @@
     <view class="ss-modal-box bg-white ss-flex-col">
       <view class="modal-header ss-flex ss-col-center">
         <view class="header-left ss-m-r-30">
-          <image class="sku-image" :src="sheep.$url.cdn(state.selectedSku.picUrl || goodsInfo.picUrl)" mode="aspectFill" />
+          <image
+            class="sku-image"
+            :src="sheep.$url.cdn(state.selectedSku.picUrl || goodsInfo.picUrl)"
+            mode="aspectFill"
+          />
         </view>
         <view class="header-right ss-flex-col ss-row-between ss-flex-1">
           <view class="goods-title ss-line-2">
@@ -22,7 +26,13 @@
             </view>
           </view>
           <view class="header-right-bottom ss-flex ss-col-center ss-row-between">
-            <view class="price-text"> {{ fen2yuan(state.selectedSku.price || goodsInfo.price || state.selectedSku.marketPrice) }}</view>
+            <view class="price-text">
+              {{
+                fen2yuan(
+                  state.selectedSku.price || goodsInfo.price || state.selectedSku.marketPrice,
+                )
+              }}</view
+            >
 
             <view class="stock-text ss-m-l-20">
               库存{{ state.selectedSku.stock || goodsInfo.stock }}件
@@ -35,22 +45,35 @@
           <view class="sku-item ss-m-b-20" v-for="property in propertyList" :key="property.id">
             <view class="label-text ss-m-b-20">{{ property.name }}</view>
             <view class="ss-flex ss-col-center ss-flex-wrap">
-              <button class="ss-reset-button spec-btn" v-for="value in property.values" :class="[
+              <button
+                class="ss-reset-button spec-btn"
+                v-for="value in property.values"
+                :class="[
                   {
                     'checked-btn': state.currentPropertyArray[property.id] === value.id,
                   },
                   {
                     'disabled-btn': value.disabled === true,
                   },
-                ]" :key="value.id" :disabled="value.disabled === true" @tap="onSelectSku(property.id, value.id)">
+                ]"
+                :key="value.id"
+                :disabled="value.disabled === true"
+                @tap="onSelectSku(property.id, value.id)"
+              >
                 {{ value.name }}
               </button>
             </view>
           </view>
           <view class="buy-num-box ss-flex ss-col-center ss-row-between">
             <view class="label-text">购买数量</view>
-            <su-number-box :min="1" :max="state.selectedSku.stock" :step="1"
-                           v-model="state.selectedSku.count" @change="onNumberChange($event)" activity="groupon" />
+            <su-number-box
+              :min="1"
+              :max="state.selectedSku.stock"
+              :step="1"
+              v-model="state.selectedSku.count"
+              @change="onNumberChange($event)"
+              activity="groupon"
+            />
           </view>
         </scroll-view>
       </view>
@@ -63,7 +86,16 @@
               <view class="btn-title">{{ grouponNum + '人团' }}</view>
             </button>
             <button class="ss-reset-button btn-tox ss-flex-col" @tap="onBuy">
-              <view class="btn-price">{{ fen2yuan(state.selectedSku.price * state.selectedSku.count || goodsInfo.price * state.selectedSku.count || state.selectedSku.marketPrice * state.selectedSku.count || goodsInfo.price) }}</view>
+              <view class="btn-price">
+                {{
+                  fen2yuan(
+                    state.selectedSku.price * state.selectedSku.count ||
+                      goodsInfo.price * state.selectedSku.count ||
+                      state.selectedSku.marketPrice * state.selectedSku.count ||
+                      goodsInfo.price,
+                  )
+                }}
+              </view>
               <view v-if="grouponAction === 'create'">立即开团</view>
               <view v-else-if="grouponAction === 'join'">参与拼团</view>
             </button>
@@ -77,7 +109,7 @@
 <script setup>
   import { computed, reactive, watch } from 'vue';
   import sheep from '@/sheep';
-  import {convertProductPropertyList, fen2yuan} from '@/sheep/hooks/useGoods';
+  import { convertProductPropertyList, fen2yuan } from '@/sheep/hooks/useGoods';
 
   const headerBg = sheep.$url.css('/static/img/shop/goods/groupon-btn-long.png');
   const emits = defineEmits(['change', 'addCart', 'buy', 'close', 'ladder']);
@@ -88,7 +120,7 @@
     },
     goodsInfo: {
       type: Object,
-      default () {},
+      default() {},
     },
     grouponAction: {
       type: String,
@@ -111,7 +143,7 @@
   const skuList = computed(() => {
     let skuPrices = props.goodsInfo.skus;
     for (let price of skuPrices) {
-      price.value_id_array = price.properties.map((item) => item.valueId)
+      price.value_id_array = price.properties.map((item) => item.valueId);
     }
     return skuPrices;
   });
@@ -120,7 +152,8 @@
     () => state.selectedSku,
     (newVal) => {
       emits('change', newVal);
-    }, {
+    },
+    {
       immediate: true, // 立即执行
       deep: true, // 深度监听
     },
@@ -215,7 +248,7 @@
       // 如果当前 property id 不存在于有库存的 SKU 中，则禁用
       for (let valueIndex in propertyList[propertyIndex]['values']) {
         propertyList[propertyIndex]['values'][valueIndex]['disabled'] =
-            noChooseValueIds.indexOf(propertyList[propertyIndex]['values'][valueIndex]['id']) < 0; // true 禁用 or false 不禁用
+          noChooseValueIds.indexOf(propertyList[propertyIndex]['values'][valueIndex]['id']) < 0; // true 禁用 or false 不禁用
       }
     }
   }
@@ -245,7 +278,10 @@
   function onSelectSku(propertyId, valueId) {
     // 清空已选择
     let isChecked = true; // 选中 or 取消选中
-    if (state.currentPropertyArray[propertyId] !== undefined && state.currentPropertyArray[propertyId] === valueId) {
+    if (
+      state.currentPropertyArray[propertyId] !== undefined &&
+      state.currentPropertyArray[propertyId] === valueId
+    ) {
       // 点击已被选中的，删除并填充 ''
       isChecked = false;
       state.currentPropertyArray.splice(propertyId, 1, '');
