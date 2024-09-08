@@ -145,7 +145,6 @@
   import sheep from '@/sheep';
   import CombinationApi from '@/sheep/api/promotion/combination';
   import SpuApi from '@/sheep/api/product/spu';
-  import spu from '@/sheep/api/product/spu';
 
   // 布局类型
   const LayoutTypeEnum = {
