@@ -122,7 +122,11 @@
             </text>
             <text
               class="item-value"
-              :class="state.couponInfo.length > 0 ? 'text-red' : 'text-disabled'"
+              :class="
+                state.couponInfo.filter((coupon) => coupon.match).length > 0
+                  ? 'text-red'
+                  : 'text-disabled'
+              "
               v-else
             >
               {{
