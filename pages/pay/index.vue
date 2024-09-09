@@ -174,6 +174,12 @@
       return
     }
     state.payMethods = getPayMethods(data)
+    state.payMethods.find(item => {
+      if (item.value && !item.disabled) {
+        state.payment = item.value;
+        return true;
+      }
+    });
   }
 
   onLoad((options) => {
