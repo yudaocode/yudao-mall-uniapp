@@ -76,7 +76,7 @@
     if (props.type === 'coupon') {
       return false;
     }
-    return props.data.status !== 1;
+    return props.disabled;
   });
 
   // 接受参数

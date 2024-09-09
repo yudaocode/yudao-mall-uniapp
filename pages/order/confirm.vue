@@ -122,11 +122,17 @@
             </text>
             <text
               class="item-value"
-              :class="state.couponInfo.length > 0 ? 'text-red' : 'text-disabled'"
+              :class="
+                state.couponInfo.filter((coupon) => coupon.match).length > 0
+                  ? 'text-red'
+                  : 'text-disabled'
+              "
               v-else
             >
               {{
-                state.couponInfo.length > 0 ? state.couponInfo.length + ' 张可用' : '暂无可用优惠券'
+                state.couponInfo.filter((coupon) => coupon.match).length > 0
+                  ? state.couponInfo.filter((coupon) => coupon.match).length + ' 张可用'
+                  : '暂无可用优惠券'
               }}
             </text>
             <text class="_icon-forward item-icon" />

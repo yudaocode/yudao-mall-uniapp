@@ -1,4 +1,4 @@
-import request from "@/sheep/request";
+import request from '@/sheep/request';
 
 const SeckillApi = {
   // 获得秒杀时间段列表
@@ -16,6 +16,17 @@ const SeckillApi = {
     return request({ url: 'promotion/seckill-activity/page', method: 'GET', params });
   },
 
+  // 获得秒杀活动列表，基于活动编号数组
+  getSeckillActivityListByIds: (ids) => {
+    return request({
+      url: '/promotion/seckill-activity/list-by-ids',
+      method: 'GET',
+      params: {
+        ids,
+      },
+    });
+  },
+
   /**
    * 获得秒杀活动明细
    * @param {number} id 秒杀活动编号
@@ -25,9 +36,9 @@ const SeckillApi = {
     return request({
       url: 'promotion/seckill-activity/get-detail',
       method: 'GET',
-      params: { id }
+      params: { id },
     });
-  }
-}
+  },
+};
 
 export default SeckillApi;
