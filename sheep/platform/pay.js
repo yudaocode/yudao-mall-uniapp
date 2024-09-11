@@ -327,7 +327,6 @@ export function getPayMethods(channels) {
     || (platform === 'App' && channels.includes('wx_app'))) {
     wechatMethod.disabled = false;
   }
-  wechatMethod.disabled = false; // TODO 芋艿：临时测试
 
   // 2. 处理【支付宝支付】
   const alipayMethod = payMethods[1];
