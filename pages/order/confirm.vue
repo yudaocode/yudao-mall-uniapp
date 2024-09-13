@@ -212,6 +212,7 @@
   import AddressSelection from '@/pages/order/addressSelection.vue';
   import sheep from '@/sheep';
   import OrderApi from '@/sheep/api/trade/order';
+  import TradeConfigApi from '@/sheep/api/trade/config';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
 
   const state = reactive({
@@ -230,7 +231,7 @@
   const addressState = ref({
     addressInfo: {}, // 选择的收货地址
     deliveryType: 1, // 收货方式：1-快递配送，2-门店自提
-    isPickUp: true, // 门店自提是否开启 TODO puhui999: 默认开启，看看后端有开关的话接入
+    isPickUp: true, // 门店自提是否开启
     pickUpInfo: {}, // 选择的自提门店信息
     receiverName: '', // 收件人名称
     receiverMobile: '', // 收件人手机
@@ -343,6 +344,11 @@
     }
     state.orderPayload = JSON.parse(options.data);
     await getOrderInfo();
+    // 获取交易配置
+    const { data, code } = await TradeConfigApi.getTradeConfig();
+    if (code === 0) {
+      addressState.value.isPickUp = data.deliveryPickUpEnabled;
+    }
   });
 
   // 使用 watch 监听地址和配送方式的变化
