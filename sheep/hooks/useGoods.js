@@ -1,7 +1,11 @@
-import { ref } from 'vue';
+import {
+  ref
+} from 'vue';
 import dayjs from 'dayjs';
 import $url from '@/sheep/url';
-import { formatDate } from '@/sheep/util';
+import {
+  formatDate
+} from '@/sheep/util';
 
 /**
  * 格式化销量
@@ -80,7 +84,10 @@ export function formatGoodsSwiper(urlList) {
     const isVideo = VIDEO_SUFFIX_LIST.some(suffix => url.includes(suffix));
     const type = isVideo ? 'video' : 'image'
     const src = $url.cdn(url);
-    return { type, src }
+    return {
+      type,
+      src
+    }
   }) || [];
 }
 
@@ -94,9 +101,9 @@ export function formatOrderColor(order) {
   if (order.status === 0) {
     return 'info-color';
   }
-  if (order.status === 10
-    || order.status === 20
-    || (order.status === 30 && !order.commentStatus)) {
+  if (order.status === 10 ||
+    order.status === 20 ||
+    (order.status === 30 && !order.commentStatus)) {
     return 'warning-color';
   }
   if (order.status === 30 && order.commentStatus) {
@@ -387,3 +394,92 @@ export function formatRewardActivityRule(activity, rule) {
   }
   return '';
 }
+// 新增将时间搓转换为开始时间-结束时间的格式
+export function formatDateRange(startTimestamp, endTimestamp) {
+  // 定义一个辅助函数来格式化时间戳为 YYYY.MM.DD 格式
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始，所以需要+1
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}.${month}.${day}`;
+  };
+
+  // 格式化开始和结束时间
+  const start = formatDate(startTimestamp);
+  const end = formatDate(endTimestamp);
+
+  // 返回格式化的日期范围
+  return `${start}-${end}`;
+}
+
+//处理活动信息
+export function handList(orders) {
+  const typeMap = {
+    '1': '秒杀活动',
+    '2': '砍价活动',
+    '3': '拼团活动',
+    '4': '限时折扣',
+    '5': '满减送',
+    '6': '会员折扣',
+    '7': '优惠券',
+    '8': '积分'
+  };
+
+  // 给每个订单对象添加 typeName 属性
+  let updatedOrders = orders.map(order => {
+    return {
+      ...order, // 展开现有的订单对象属性
+      typeName: typeMap[order.type] // 添加 typeName 属性
+    };
+  });
+  return updatedOrders
+};
+//根据skuid来修改价格并添加时间
+export function handListPrice(array,array2) {
+  // 将 array2 转换为一个以 skuId 为键的对象，以便于快速查找
+  const array2Map = array2.reduce((acc, item) => {
+    acc[item.skuId] = { price: item.price, type: item.type,endTime:item.endTime };
+    return acc;
+  }, {});
+
+  // 遍历 array 数组并更新 price 和 type
+  array.forEach(item => {
+    if (array2Map[item.id]) {
+      item.oldPrice = item.price
+      // 如果在 array2Map 中找到了对应的 skuId（即 id）
+      item.price = array2Map[item.id].price;
+      item.type = array2Map[item.id].type;
+      item.endTime = array2Map[item.id].endTime;
+    }
+  });
+
+  // 返回更新后的 array
+  return array;
+};
+
+//处理活动数据
+export function handActitList(rules) {
+  const rules2 = {
+    reduc: rules.map(item => ({
+      discountPrice: item.discountPrice,
+      limit: item.limit,
+      bull: true // 默认为 true
+    })),
+    cou: rules.map(item => ({
+      discountPrice: item.discountPrice,
+      value: item.couponCounts.reduce((acc, count) => acc + count, 0), // 计算 couponCounts 中各项之和
+      bull: item.givePoint // 对应 givePoint
+    })),
+    ship: rules.map(item => ({
+      discountPrice: item.discountPrice,
+      bull: item.freeDelivery // 对应 freeDelivery
+    })),
+    scor: rules.map(item => ({
+      discountPrice: item.discountPrice,
+      value: item.point, // 直接使用 point
+      bull: item.givePoint // 对应 givePoint
+    }))
+  };
+  return rules2
+};

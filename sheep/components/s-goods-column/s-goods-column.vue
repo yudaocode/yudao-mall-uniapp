@@ -2,38 +2,29 @@
 <template>
   <view class="ss-goods-wrap">
     <!-- xs卡片：横向紧凑型，一行放两个，图片左内容右边  -->
-    <view
-      v-if="size === 'xs'"
-      class="xs-goods-card ss-flex ss-col-stretch"
-      :style="[elStyles]"
-      @tap="onClick"
-    >
+    <view v-if="size === 'xs'" class="xs-goods-card ss-flex ss-col-stretch" :style="[elStyles]" @tap="onClick">
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
-      <image
-        class="xs-img-box"
-        :src="sheep.$url.cdn(data.image || data.picUrl)"
-        mode="aspectFit"
-      ></image>
-      <view
-        v-if="goodsFields.title?.show || goodsFields.name?.show || goodsFields.price?.show"
-        class="xs-goods-content ss-flex-col ss-row-around"
-      >
-        <view
-          v-if="goodsFields.title?.show || goodsFields.name?.show"
-          class="xs-goods-title ss-line-1"
-          :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]"
-        >
+      <image class="xs-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFit"></image>
+      <view v-if="goodsFields.title?.show || goodsFields.name?.show || goodsFields.price?.show"
+            class="xs-goods-content ss-flex-col ss-row-around">
+        <view v-if="goodsFields.title?.show || goodsFields.name?.show" class="xs-goods-title ss-line-1"
+              :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]">
           {{ data.title || data.name }}
         </view>
-        <view
-          v-if="goodsFields.price?.show"
-          class="xs-goods-price font-OPPOSANS"
-          :style="[{ color: goodsFields.price.color }]"
-        >
+        <!-- 这里是新加的会员价和限时优惠 -->
+        <view class="iconBox" v-if="data.discountPrice || data.vipPrice || data.reward">
+          <view class="card" v-if="iconShow">{{iconShow}}</view>
+          <view class="card2" v-if="data.reward">{{data.reward.rewardActivity}}</view>
+        </view>
+        <!-- 这里是新加的会员价和限时优惠结束 -->
+        <view v-if="goodsFields.price?.show" class="xs-goods-price font-OPPOSANS"
+              :style="[{ color: goodsFields.price.color }]">
           <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-          {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+          <text v-if="iconShow=='限时优惠'">{{fen2yuan(data.discountPrice)}}</text>
+          <text v-else-if="iconShow=='会员价'">{{fen2yuan(data.vipPrice)}}</text>
+          <text v-else>{{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}</text>
         </view>
       </view>
     </view>
@@ -43,30 +34,26 @@
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
-      <image
-        class="sm-img-box"
-        :src="sheep.$url.cdn(data.image || data.picUrl)"
-        mode="aspectFill"
-      ></image>
+      <image class="sm-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFill"></image>
 
-      <view
-        v-if="goodsFields.title?.show || goodsFields.name?.show || goodsFields.price?.show"
-        class="sm-goods-content"
-        :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]"
-      >
-        <view
-          v-if="goodsFields.title?.show || goodsFields.name?.show"
-          class="sm-goods-title ss-line-1 ss-m-b-16"
-        >
+      <view v-if="goodsFields.title?.show || goodsFields.name?.show || goodsFields.price?.show"
+            class="sm-goods-content" :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]">
+        <view v-if="goodsFields.title?.show || goodsFields.name?.show"
+              class="sm-goods-title ss-line-1 ss-m-b-16">
           {{ data.title || data.name }}
         </view>
-        <view
-          v-if="goodsFields.price?.show"
-          class="sm-goods-price font-OPPOSANS"
-          :style="[{ color: goodsFields.price.color }]"
-        >
+        <!-- 这里是新加的会员价和限时优惠 -->
+        <view class="iconBox" v-if="data.discountPrice || data.vipPrice || data.reward">
+          <view class="card" v-if="iconShow">{{iconShow}}</view>
+          <view class="card2" v-if="data.reward">{{data.reward.rewardActivity}}</view>
+        </view>
+        <!-- 这里是新加的会员价和限时优惠结束 -->
+        <view v-if="goodsFields.price?.show" class="sm-goods-price font-OPPOSANS"
+              :style="[{ color: goodsFields.price.color }]">
           <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-          {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+          <text v-if="iconShow=='限时优惠'">{{fen2yuan(data.discountPrice)}}</text>
+          <text v-else-if="iconShow=='会员价'">{{fen2yuan(data.vipPrice)}}</text>
+          <text v-else>{{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}</text>
         </view>
       </view>
     </view>
@@ -76,58 +63,43 @@
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
-      <image
-        class="md-img-box"
-        :src="sheep.$url.cdn(data.image || data.picUrl)"
-        mode="widthFix"
-      ></image>
-      <view
-        class="md-goods-content ss-flex-col ss-row-around ss-p-b-20 ss-p-t-20 ss-p-x-16"
-        :id="elId"
-      >
-        <view
-          v-if="goodsFields.title?.show || goodsFields.name?.show"
-          class="md-goods-title ss-line-1"
-          :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]"
-        >
+      <image class="md-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="widthFix"></image>
+      <view class="md-goods-content ss-flex-col ss-row-around ss-p-b-20 ss-p-t-20 ss-p-x-16" :id="elId">
+        <view v-if="goodsFields.title?.show || goodsFields.name?.show" class="md-goods-title ss-line-1"
+              :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]">
           {{ data.title || data.name }}
         </view>
-        <view
-          v-if="goodsFields.subtitle?.show || goodsFields.introduction?.show"
-          class="md-goods-subtitle ss-m-t-16 ss-line-1"
-          :style="[{ color: subTitleColor, background: subTitleBackground }]"
-        >
+        <view v-if="goodsFields.subtitle?.show || goodsFields.introduction?.show"
+              class="md-goods-subtitle ss-m-t-16 ss-line-1"
+              :style="[{ color: subTitleColor, background: subTitleBackground }]">
           {{ data.subtitle || data.introduction }}
         </view>
         <slot name="activity">
           <view v-if="data.promos?.length" class="tag-box ss-flex-wrap ss-flex ss-col-center">
-            <view
-              class="activity-tag ss-m-r-10 ss-m-t-16"
-              v-for="item in data.promos"
-              :key="item.id"
-            >
+            <view class="activity-tag ss-m-r-10 ss-m-t-16" v-for="item in data.promos" :key="item.id">
               {{ item.title }}
             </view>
           </view>
         </slot>
+        <!-- 这里是新加的会员价和限时优惠 -->
+        <view class="iconBox" v-if="data.discountPrice || data.vipPrice || data.reward">
+          <view class="card" v-if="iconShow">{{iconShow}}</view>
+          <view class="card2" v-if="data.reward">{{data.reward.rewardActivity}}</view>
+        </view>
+        <!-- 这里是新加的会员价和限时优惠结束 -->
         <view class="ss-flex ss-col-bottom">
-          <view
-            v-if="goodsFields.price?.show"
-            class="md-goods-price ss-m-t-16 font-OPPOSANS ss-m-r-10"
-            :style="[{ color: goodsFields.price.color }]"
-          >
+          <view v-if="goodsFields.price?.show" class="md-goods-price ss-m-t-16 font-OPPOSANS ss-m-r-10"
+                :style="[{ color: goodsFields.price.color }]">
             <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-            {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+            <text v-if="iconShow=='限时优惠'">{{fen2yuan(data.discountPrice)}}</text>
+            <text v-else-if="iconShow=='会员价'">{{fen2yuan(data.vipPrice)}}</text>
+            <text v-else>{{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}</text>
           </view>
 
-          <view
-            v-if="
+          <view v-if="
               (goodsFields.original_price?.show || goodsFields.marketPrice?.show) &&
               (data.original_price > 0 || data.marketPrice > 0)
-            "
-            class="goods-origin-price ss-m-t-16 font-OPPOSANS ss-flex"
-            :style="[{ color: originPriceColor }]"
-          >
+            " class="goods-origin-price ss-m-t-16 font-OPPOSANS ss-flex" :style="[{ color: originPriceColor }]">
             <text class="price-unit ss-font-20">{{ priceUnit }}</text>
             <view class="ss-m-l-8">{{ fen2yuan(data.marketPrice) }}</view>
           </view>
@@ -146,12 +118,7 @@
     </view>
 
     <!-- lg卡片：横向型，一行放一个，图片左内容右边  -->
-    <view
-      v-if="size === 'lg'"
-      class="lg-goods-card ss-flex ss-col-stretch"
-      :style="[elStyles]"
-      @tap="onClick"
-    >
+    <view v-if="size === 'lg'" class="lg-goods-card ss-flex ss-col-stretch" :style="[elStyles]" @tap="onClick">
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
@@ -159,25 +126,16 @@
       <view v-if="grouponTag" class="groupon-tag ss-flex ss-row-center">
         <view class="tag-icon">拼团</view>
       </view>
-      <image
-        class="lg-img-box"
-        :src="sheep.$url.cdn(data.image || data.picUrl)"
-        mode="aspectFill"
-      ></image>
+      <image class="lg-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFill"></image>
       <view class="lg-goods-content ss-flex-1 ss-flex-col ss-row-between ss-p-b-10 ss-p-t-20">
         <view>
-          <view
-            v-if="goodsFields.title?.show || goodsFields.name?.show"
-            class="lg-goods-title ss-line-2"
-            :style="[{ color: titleColor }]"
-          >
+          <view v-if="goodsFields.title?.show || goodsFields.name?.show" class="lg-goods-title ss-line-2"
+                :style="[{ color: titleColor }]">
             {{ data.title || data.name }}
           </view>
-          <view
-            v-if="goodsFields.subtitle?.show || goodsFields.introduction?.show"
-            class="lg-goods-subtitle ss-m-t-10 ss-line-1"
-            :style="[{ color: subTitleColor, background: subTitleBackground }]"
-          >
+          <view v-if="goodsFields.subtitle?.show || goodsFields.introduction?.show"
+                class="lg-goods-subtitle ss-m-t-10 ss-line-1"
+                :style="[{ color: subTitleColor, background: subTitleBackground }]">
             {{ data.subtitle || data.introduction }}
           </view>
         </view>
@@ -189,25 +147,27 @@
               </view>
             </view>
           </slot>
+          <!-- 这里是新加的会员价和限时优惠 -->
+          <view class="iconBox" v-if="data.discountPrice || data.vipPrice || data.reward">
+            <view class="card" v-if="iconShow">{{iconShow}}</view>
+            <view class="card2" v-if="data.reward">{{data.reward.rewardActivity}}</view>
+          </view>
+          <!-- 这里是新加的会员价和限时优惠结束 -->
           <view class="ss-flex ss-col-bottom ss-m-t-10">
-            <view
-              v-if="goodsFields.price?.show"
-              class="lg-goods-price ss-m-r-12 ss-flex ss-col-bottom font-OPPOSANS"
-              :style="[{ color: goodsFields.price.color }]"
-            >
+            <view v-if="goodsFields.price?.show"
+                  class="lg-goods-price ss-m-r-12 ss-flex ss-col-bottom font-OPPOSANS"
+                  :style="[{ color: goodsFields.price.color }]">
               <text class="ss-font-24">{{ priceUnit }}</text>
               {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
             </view>
-            <view
-              v-if="
+            <view v-if="
                 (goodsFields.original_price?.show || goodsFields.marketPrice?.show) &&
                 (data.original_price > 0 || data.marketPrice > 0)
-              "
-              class="goods-origin-price ss-flex ss-col-bottom font-OPPOSANS"
-              :style="[{ color: originPriceColor }]"
-            >
+              " class="goods-origin-price ss-flex ss-col-bottom font-OPPOSANS" :style="[{ color: originPriceColor }]">
               <text class="price-unit ss-font-20">{{ priceUnit }}</text>
-              <view class="ss-m-l-8">{{ fen2yuan(data.marketPrice) }}</view>
+              <text v-if="iconShow=='限时优惠'">{{fen2yuan(data.discountPrice)}}</text>
+              <text v-else-if="iconShow=='会员价'">{{fen2yuan(data.vipPrice)}}</text>
+              <text v-else>{{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}</text>
             </view>
           </view>
           <view class="ss-m-t-8 ss-flex ss-col-center ss-flex-wrap">
@@ -227,54 +187,45 @@
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
 
-      <image
-        class="sl-img-box"
-        :src="sheep.$url.cdn(data.image || data.picUrl)"
-        mode="aspectFill"
-      ></image>
+      <image class="sl-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFill"></image>
 
       <view class="sl-goods-content">
         <view>
-          <view
-            v-if="goodsFields.title?.show || goodsFields.name?.show"
-            class="sl-goods-title ss-line-1"
-            :style="[{ color: titleColor }]"
-          >
+          <view v-if="goodsFields.title?.show || goodsFields.name?.show" class="sl-goods-title ss-line-1"
+                :style="[{ color: titleColor }]">
             {{ data.title || data.name }}
           </view>
-          <view
-            v-if="goodsFields.subtitle?.show || goodsFields.introduction?.show"
-            class="sl-goods-subtitle ss-m-t-16"
-            :style="[{ color: subTitleColor, background: subTitleBackground }]"
-          >
+          <view v-if="goodsFields.subtitle?.show || goodsFields.introduction?.show"
+                class="sl-goods-subtitle ss-m-t-16"
+                :style="[{ color: subTitleColor, background: subTitleBackground }]">
             {{ data.subtitle || data.introduction }}
           </view>
         </view>
         <view>
           <slot name="activity">
             <view v-if="data.promos?.length" class="tag-box ss-flex ss-col-center ss-flex-wrap">
-              <view
-                class="activity-tag ss-m-r-10 ss-m-t-16"
-                v-for="item in data.promos"
-                :key="item.id"
-              >
+              <view class="activity-tag ss-m-r-10 ss-m-t-16" v-for="item in data.promos" :key="item.id">
                 {{ item.title }}
               </view>
             </view>
           </slot>
+          <!-- 这里是新加的会员价和限时优惠 -->
+          <view class="iconBox" v-if="data.discountPrice || data.vipPrice || data.reward">
+            <view class="card" v-if="iconShow">{{iconShow}}</view>
+            <view class="card2" v-if="data.reward">{{data.reward.rewardActivity}}</view>
+          </view>
+          <!-- 这里是新加的会员价和限时优惠结束 -->
           <view v-if="goodsFields.price?.show" class="ss-flex ss-col-bottom font-OPPOSANS">
             <view class="sl-goods-price ss-m-r-12" :style="[{ color: goodsFields.price.color }]">
               <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-              {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+              <text v-if="iconShow=='限时优惠'">{{fen2yuan(data.discountPrice)}}</text>
+              <text v-else-if="iconShow=='会员价'">{{fen2yuan(data.vipPrice)}}</text>
+              <text v-else>{{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}</text>
             </view>
-            <view
-              v-if="
+            <view v-if="
                 (goodsFields.original_price?.show || goodsFields.marketPrice?.show) &&
                 (data.original_price > 0 || data.marketPrice > 0)
-              "
-              class="goods-origin-price ss-m-t-16 font-OPPOSANS ss-flex"
-              :style="[{ color: originPriceColor }]"
-            >
+              " class="goods-origin-price ss-m-t-16 font-OPPOSANS ss-flex" :style="[{ color: originPriceColor }]">
               <text class="price-unit ss-font-20">{{ priceUnit }}</text>
               <view class="ss-m-l-8">{{ fen2yuan(data.marketPrice) }}</view>
             </view>
@@ -285,9 +236,9 @@
         </view>
       </view>
 
-      <slot name="cart"
-        ><view class="buy-box ss-flex ss-col-center ss-row-center">去购买</view></slot
-      >
+      <slot name="cart">
+        <view class="buy-box ss-flex ss-col-center ss-row-center">去购买</view>
+      </slot>
     </view>
   </view>
 </template>
@@ -321,13 +272,26 @@
    * @event {Function()} click 										- 点击卡片
    *
    */
-  import { computed, reactive, getCurrentInstance, onMounted, nextTick } from 'vue';
+  import {
+    computed,
+    reactive,
+    getCurrentInstance,
+    onMounted,
+    nextTick,
+    ref
+  } from 'vue';
   import sheep from '@/sheep';
-  import { fen2yuan, formatSales } from '@/sheep/hooks/useGoods';
-  import { formatStock } from '@/sheep/hooks/useGoods';
+  import {
+    fen2yuan,
+    formatSales
+  } from '@/sheep/hooks/useGoods';
+  import {
+    formatStock
+  } from '@/sheep/hooks/useGoods';
   import goodsCollectVue from '@/pages/user/goods-collect.vue';
-  import { isArray } from 'lodash-es';
-
+  import {
+    isArray
+  } from 'lodash-es';
   // 数据
   const state = reactive({});
 
@@ -335,20 +299,32 @@
   const props = defineProps({
     goodsFields: {
       type: [Array, Object],
-      default() {
+      default () {
         return {
           // 商品价格
-          price: { show: true },
+          price: {
+            show: true
+          },
           // 库存
-          stock: { show: true },
+          stock: {
+            show: true
+          },
           // 商品名称
-          name: { show: true },
+          name: {
+            show: true
+          },
           // 商品介绍
-          introduction: { show: true },
+          introduction: {
+            show: true
+          },
           // 市场价
-          marketPrice: { show: true },
+          marketPrice: {
+            show: true
+          },
           // 销量
-          salesCount: { show: true },
+          salesCount: {
+            show: true
+          },
         };
       },
     },
@@ -417,7 +393,25 @@
       default: false,
     },
   });
+  //判断限时优惠和会员价标签内容暂时导致页面出错，又舍不得丢，等着把新的数据整合到商品信息中，也用起来
+  const iconShow = handle()
 
+  function handle() {
+    if (props.data.discountPrice === null && props.data.vipPrice === null) {
+      // 如果两个值都为 null，则不展示任何内容
+      return '';
+    } else if (props.data.discountPrice === null) {
+      // 如果 discountPrice 为 null，展示 vipPrice
+      return '会员价';
+    } else if (props.data.vipPrice === null) {
+      // 如果 vipPrice 为 null，展示 discountPrice
+      return '限时优惠';
+    } else if (props.data.discountPrice < props.data.vipPrice) {
+      return '限时优惠';
+    } else if (props.data.discountPrice > props.data.vipPrice) {
+      return '会员价';
+    }
+  }
   // 组件样式
   const elStyles = computed(() => {
     return {
@@ -449,12 +443,18 @@
   };
 
   // 获取卡片实时高度
-  const { proxy } = getCurrentInstance();
+  const {
+    proxy
+  } = getCurrentInstance();
   const elId = `sheep_${Math.ceil(Math.random() * 10e5).toString(36)}`;
+
   function getGoodsPriceCardWH() {
     if (props.size === 'md') {
       const view = uni.createSelectorQuery().in(proxy);
-      view.select(`#${elId}`).fields({ size: true, scrollOffset: true });
+      view.select(`#${elId}`).fields({
+        size: true,
+        scrollOffset: true
+      });
       view.exec((data) => {
         let totalHeight = 0;
         const goodsPriceCard = data[0];
@@ -482,11 +482,13 @@
     left: 0;
     top: 0;
     z-index: 2;
+
     .tag-icon {
       width: 72rpx;
       height: 44rpx;
     }
   }
+
   .seckill-tag {
     position: absolute;
     left: 0;
@@ -501,6 +503,7 @@
     color: #ffffff;
     line-height: 32rpx;
   }
+
   .groupon-tag {
     position: absolute;
     left: 0;
@@ -515,14 +518,17 @@
     color: #ffffff;
     line-height: 32rpx;
   }
+
   .goods-img {
     width: 100%;
     height: 100%;
     background-color: #f5f5f5;
   }
+
   .price-unit {
     margin-right: -4px;
   }
+
   .sales-text {
     display: table;
     font-size: 24rpx;
@@ -586,10 +592,12 @@
       width: 100%;
       height: 208rpx;
     }
+
     .sm-goods-content {
       padding: 20rpx 16rpx;
       box-sizing: border-box;
     }
+
     .sm-goods-title {
       font-size: 26rpx;
       color: #333;
@@ -619,6 +627,7 @@
       color: #333;
       width: 100%;
     }
+
     .md-goods-subtitle {
       font-size: 24rpx;
       font-weight: 400;
@@ -669,6 +678,7 @@
       // line-height: 36rpx;
       // width: 410rpx;
     }
+
     .lg-goods-subtitle {
       font-size: 24rpx;
       font-weight: 400;
@@ -695,6 +705,7 @@
       font-size: 24rpx;
       color: #ffffff;
     }
+
     .tag-box {
       width: 100%;
     }
@@ -708,10 +719,12 @@
     z-index: 1;
     width: 100%;
     background-color: $white;
+
     .sl-goods-content {
       padding: 20rpx 20rpx;
       box-sizing: border-box;
     }
+
     .sl-img-box {
       width: 100%;
       height: 360rpx;
@@ -722,6 +735,7 @@
       color: #333;
       font-weight: 500;
     }
+
     .sl-goods-subtitle {
       font-size: 24rpx;
       font-weight: 400;
@@ -747,5 +761,32 @@
       font-size: 24rpx;
       color: #ffffff;
     }
+  }
+
+  .card {
+    width: fit-content;
+    height: fit-content;
+    padding: 2rpx 10rpx;
+    background-color: red;
+    color: #ffffff;
+    font-size: 24rpx;
+  }
+
+  .card2 {
+    width: fit-content;
+    height: fit-content;
+    padding: 2rpx 10rpx;
+    background-color: rgb(255, 242, 241);
+    color: #ff2621;
+    font-size: 24rpx;
+    margin-left: 5rpx;
+  }
+
+  .iconBox {
+    width: 100%;
+    height: fit-content;
+    margin-top: 10rpx;
+    display: flex;
+    justify-content: flex-start;
   }
 </style>

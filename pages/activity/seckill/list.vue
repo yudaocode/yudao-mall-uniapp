@@ -2,10 +2,7 @@
 <template>
   <s-layout navbar="inner" :bgStyle="{ color: 'rgb(245,28,19)' }">
     <!--顶部背景图-->
-    <view
-        class="page-bg"
-        :style="[{ marginTop: '-' + Number(statusBarHeight + 88) + 'rpx' }]"
-    ></view>
+    <view class="page-bg" :style="[{ marginTop: '-' + Number(statusBarHeight + 88) + 'rpx' }]"></view>
     <!-- 时间段轮播图 -->
     <view class="header" v-if="activeTimeConfig?.sliderPicUrls?.length > 0">
       <swiper indicator-dots="true" autoplay="true" :circular="true" interval="3000" duration="1500"
@@ -26,13 +23,12 @@
       </view>
       <scroll-view class="time-list" :scroll-into-view="activeTimeElId" scroll-x scroll-with-animation>
         <view v-for="(config, index) in timeConfigList" :key="index"
-              :class="['item', { active: activeTimeIndex === index}]"
-              :id="`timeItem${index}`"
-              @tap="handleChangeTimeConfig(index)">
+              :class="['item', { active: activeTimeIndex === index}]" :id="`timeItem${index}`"
+              @tap="handleChangeTimeConfig(index,config.id)">
           <!-- 活动起始时间 -->
           <view class="time">{{ config.startTime }}</view>
           <!-- 活动状态 -->
-          <view class="status">{{ config.status }}</view>
+          <view class="status">{{ config?.status }}</view>
         </view>
       </scroll-view>
     </view>
@@ -57,69 +53,89 @@
       </view>
 
       <!-- 活动列表 -->
-      <scroll-view
-        class="scroll-box"
-        :style="{ height: pageHeight + 'rpx' }"
-        scroll-y="true"
-        :scroll-with-animation="false"
-        :enable-back-to-top="true"
-      >
+      <scroll-view class="scroll-box" :style="{ height: pageHeight + 'rpx' }" scroll-y="true"
+                   :scroll-with-animation="false" :enable-back-to-top="true">
         <view class="goods-box ss-m-b-20" v-for="activity in activityList" :key="activity.id">
-          <s-goods-column
-            size="lg"
-            :data="{ ...activity, price: activity.seckillPrice }"
-            :goodsFields="goodsFields"
-            :seckillTag="true"
-            @click="sheep.$router.go('/pages/goods/seckill', { id: activity.id })"
-          >
+          <s-goods-column size="lg" :data="{ ...activity, price: activity.seckillPrice }"
+                          :goodsFields="goodsFields" :seckillTag="true">
             <!-- 抢购进度 -->
             <template #activity>
-              <view class="limit">限量 <text class="ss-m-l-5">{{ activity.stock}} {{activity.unitName}}</text></view>
+              <view class="limit">限量 <text class="ss-m-l-5">{{ activity.stock}}
+                {{activity.unitName}}</text></view>
               <su-progress :percentage="activity.percent" strokeWidth="10" textInside isAnimate />
             </template>
             <!-- 抢购按钮 -->
             <template #cart>
-              <button :class="['ss-reset-button cart-btn', { disabled: activeTimeConfig.status === TimeStatusEnum.END }]">
-                <span v-if="activeTimeConfig?.status === TimeStatusEnum.WAIT_START">未开始</span>
-                <span v-else-if="activeTimeConfig?.status === TimeStatusEnum.STARTED">马上抢</span>
-                <span v-else>已结束</span>
+              <button
+                :class="['ss-reset-button cart-btn', { disabled: activeTimeConfig?.status === TimeStatusEnum.END}]"
+                v-if="activeTimeConfig?.status === TimeStatusEnum.WAIT_START">
+                <span>未开始</span>
+              </button>
+              <button
+                :class="['ss-reset-button cart-btn', { disabled: activeTimeConfig?.status === TimeStatusEnum.END}]"
+                @click="sheep.$router.go('/pages/goods/seckill', { id: activity.id })"
+                v-else-if='activeTimeConfig?.status === TimeStatusEnum.STARTED'>
+                <span>马上抢</span>
+              </button>
+              <button
+                :class="['ss-reset-button cart-btn', { disabled: activeTimeConfig?.status === TimeStatusEnum.END}]"
+                v-else>
+                <span>已结束</span>
               </button>
             </template>
           </s-goods-column>
         </view>
-        <uni-load-more
-          v-if="activityTotal > 0"
-          :status="loadStatus"
-          :content-text="{
+        <uni-load-more v-if="activityTotal > 0" :status="loadStatus" :content-text="{
             contentdown: '上拉加载更多',
-          }"
-          @tap="loadMore"
-        />
+          }" @tap="loadMore" />
       </scroll-view>
     </view>
   </s-layout>
 </template>
 <script setup>
-  import {reactive, computed, ref, nextTick} from 'vue';
-  import { onLoad, onReachBottom } from '@dcloudio/uni-app';
+  import {
+    reactive,
+    computed,
+    ref,
+    nextTick
+  } from 'vue';
+  import {
+    onLoad,
+    onReachBottom
+  } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import { useDurationTime } from '@/sheep/hooks/useGoods';
+  import {
+    useDurationTime
+  } from '@/sheep/hooks/useGoods';
   import SeckillApi from "@/sheep/api/promotion/seckill";
   import dayjs from "dayjs";
-  import {TimeStatusEnum} from "@/sheep/util/const";
+  import {
+    TimeStatusEnum
+  } from "@/sheep/util/const";
 
   // 计算页面高度
-  const { safeAreaInsets, safeArea } = sheep.$platform.device;
+  const {
+    safeAreaInsets,
+    safeArea
+  } = sheep.$platform.device;
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   const pageHeight = (safeArea.height + safeAreaInsets.bottom) * 2 + statusBarHeight - sheep.$platform.navbar - 350;
   const headerBg = sheep.$url.css('/static/img/shop/goods/seckill-header.png');
 
   // 商品控件显示的字段（不显示库存、销量。改为显示自定义的进度条）
   const goodsFields = {
-    name: { show: true },
-    introduction: { show: true },
-    price: { show: true },
-    marketPrice: { show: true },
+    name: {
+      show: true
+    },
+    introduction: {
+      show: true
+    },
+    price: {
+      show: true
+    },
+    marketPrice: {
+      show: true
+    },
   };
 
   //#region 时间段
@@ -127,25 +143,32 @@
   const timeConfigList = ref([])
   // 查询时间段
   const getSeckillConfigList = async () => {
-    const { data } = await SeckillApi.getSeckillConfigList()
+    const {
+      data
+    } = await SeckillApi.getSeckillConfigList()
     const now = dayjs();
     const today = now.format('YYYY-MM-DD')
+    const select = ref([])
     // 判断时间段的状态
     data.forEach((config, index) => {
       const startTime = dayjs(`${today} ${config.startTime}`)
       const endTime = dayjs(`${today} ${config.endTime}`)
+      select.value[index] = config.id;
       if (now.isBefore(startTime)) {
         config.status = TimeStatusEnum.WAIT_START;
+        // select.value[index] = config.id;
       } else if (now.isAfter(endTime)) {
         config.status = TimeStatusEnum.END;
+        // select.value[index] = config.id;
       } else {
         config.status = TimeStatusEnum.STARTED;
-        activeTimeIndex.value = index;
+        // select.value[index] = config.id;
+        activeTimeIndex.value = index
       }
     })
     timeConfigList.value = data
     // 默认选中进行中的活动
-    handleChangeTimeConfig(activeTimeIndex.value);
+    handleChangeTimeConfig(activeTimeIndex.value, select.value[activeTimeIndex.value]);
     // 滚动到进行中的时间段
     scrollToTimeConfig(activeTimeIndex.value)
   }
@@ -159,11 +182,12 @@
   // 切换时间段
   const activeTimeIndex = ref(0) // 当前选中的时间段的索引
   const activeTimeConfig = computed(() => timeConfigList.value[activeTimeIndex.value]) // 当前选中的时间段
-  const handleChangeTimeConfig = (index) => {
+  const handleChangeTimeConfig = (index, id) => {
     activeTimeIndex.value = index
 
     // 查询活动列表
     activityPageParams.pageNo = 1
+    activityPageParams.configId = id;
     activityList.value = []
     getActivityList();
   }
@@ -182,7 +206,7 @@
 
   // 查询活动列表
   const activityPageParams = reactive({
-    id: 0, // 时间段 ID
+    configId: 0, // 时间段 ID
     pageNo: 1, // 页码
     pageSize: 5, // 每页数量
   })
@@ -191,7 +215,9 @@
   const loadStatus = ref('') // 页面加载状态
   async function getActivityList() {
     loadStatus.value = 'loading';
-    const { data } = await SeckillApi.getSeckillActivityPage(activityPageParams)
+    const {
+      data
+    } = await SeckillApi.getSeckillActivityPage(activityPageParams)
     data.list.forEach(activity => {
       // 计算抢购进度
       activity.percent = parseInt(100 * (activity.totalStock - activity.stock) / activity.totalStock);
@@ -235,7 +261,8 @@
     margin: -276rpx auto 0 auto;
     border-radius: 14rpx;
     overflow: hidden;
-    swiper{
+
+    swiper {
       height: 330rpx !important;
       border-radius: 14rpx;
       overflow: hidden;
@@ -246,7 +273,8 @@
       height: 100%;
       border-radius: 14rpx;
       overflow: hidden;
-      img{
+
+      img {
         border-radius: 14rpx;
       }
     }
@@ -257,10 +285,12 @@
     width: 75rpx;
     height: 70rpx;
   }
+
   // 时间段列表
   .time-list {
     width: 596rpx;
     white-space: nowrap;
+
     // 时间段
     .item {
       display: inline-block;
@@ -270,17 +300,20 @@
       box-sizing: border-box;
       margin-right: 30rpx;
       width: 130rpx;
+
       // 开始时间
       .time {
         font-size: 36rpx;
         font-weight: 600;
         color: #333;
       }
+
       // 选中的时间段
       &.active {
         .time {
           color: var(--ui-BG-Main);
         }
+
         // 状态
         .status {
           height: 30rpx;
@@ -301,6 +334,7 @@
     margin: 0 20rpx 0 20rpx;
     background: #fff;
     border-radius: 20rpx 20rpx 0 0;
+
     .content-header {
       width: 100%;
       border-radius: 20rpx 20rpx 0 0;
@@ -312,6 +346,7 @@
         height: 64rpx;
         background: rgba($color: #fff, $alpha: 0.66);
         border-radius: 32px;
+
         // 场次倒计时内容
         .countdown-title {
           font-size: 28rpx;
@@ -319,10 +354,12 @@
           color: #333333;
           line-height: 28rpx;
         }
+
         // 场次倒计时
         .countdown-time {
           font-size: 28rpx;
           color: rgba(#ed3c30, 0.23);
+
           // 场次倒计时：小时部分
           .countdown-h {
             font-size: 24rpx;
@@ -334,6 +371,7 @@
             background: rgba(#ed3c30, 0.23);
             border-radius: 6rpx;
           }
+
           // 场次倒计时：分钟、秒
           .countdown-num {
             font-size: 24rpx;
@@ -348,12 +386,15 @@
         }
       }
     }
+
     // 活动列表
     .scroll-box {
       height: 900rpx;
+
       // 活动
       .goods-box {
         position: relative;
+
         // 抢购按钮
         .cart-btn {
           position: absolute;
@@ -373,6 +414,7 @@
             color: #fff;
           }
         }
+
         // 秒杀限量商品数
         .limit {
           font-size: 22rpx;

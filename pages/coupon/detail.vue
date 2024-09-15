@@ -36,10 +36,10 @@
               <text v-else>
                 {{
                   state.coupon.status === 1
-                    ? '立即使用'
+                    ? '可使用'
                     : state.coupon.status === 2
-                    ? '已使用'
-                    : '已过期'
+                      ? '已使用'
+                      : '已过期'
                 }}
               </text>
             </button>
@@ -282,11 +282,11 @@
 
   .detail-wrap {
     background: linear-gradient(
-      180deg,
-      var(--ui-BG-Main),
-      var(--ui-BG-Main-gradient),
-      var(--ui-BG-Main),
-      #fff
+        180deg,
+        var(--ui-BG-Main),
+        var(--ui-BG-Main-gradient),
+        var(--ui-BG-Main),
+        #fff
     );
   }
 
