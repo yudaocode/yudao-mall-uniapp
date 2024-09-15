@@ -23,7 +23,7 @@
           :subTitleColor="data.fields.introduction.color"
           :topRadius="data.borderRadiusTop"
           :bottomRadius="data.borderRadiusBottom"
-          @click="sheep.$router.go('/pages/goods/groupon', { id: item.activityId })"
+          @click="sheep.$router.go('/pages/goods/seckill', { id: item.activityId })"
         >
           <!-- 购买按钮 -->
           <template v-slot:cart>
@@ -56,7 +56,7 @@
           :subTitleColor="data.fields.introduction.color"
           :topRadius="data.borderRadiusTop"
           :bottomRadius="data.borderRadiusBottom"
-          @tap="sheep.$router.go('/pages/goods/groupon', { id: item.activityId })"
+          @tap="sheep.$router.go('/pages/goods/seckill', { id: item.activityId })"
         >
           <!-- 购买按钮 -->
           <template v-slot:cart>
@@ -91,7 +91,7 @@
             :topRadius="data.borderRadiusTop"
             :bottomRadius="data.borderRadiusBottom"
             :titleWidth="330 - marginLeft - marginRight"
-            @click="sheep.$router.go('/pages/goods/groupon', { id: item.activityId })"
+            @click="sheep.$router.go('/pages/goods/seckill', { id: item.activityId })"
             @getHeight="calculateGoodsColumn($event, 'left')"
           >
             <!-- 购买按钮 -->
@@ -121,7 +121,7 @@
             :topRadius="data.borderRadiusTop"
             :bottomRadius="data.borderRadiusBottom"
             :titleWidth="330 - marginLeft - marginRight"
-            @click="sheep.$router.go('/pages/goods/groupon', { id: item.activityId })"
+            @click="sheep.$router.go('/pages/goods/seckill', { id: item.activityId })"
             @getHeight="calculateGoodsColumn($event, 'right')"
           >
             <!-- 购买按钮 -->
