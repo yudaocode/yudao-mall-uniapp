@@ -118,7 +118,7 @@
 </template>
 
 <script setup>
-  import { reactive } from 'vue';
+  import { reactive,ref } from 'vue';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import _ from 'lodash-es';
@@ -277,7 +277,15 @@
     if (code !== 0) {
       return;
     }
-    state.pagination.list = _.concat(state.pagination.list, data.list);
+    // 使用 map 提取每个对象的 id 属性
+    const ids = data.list.map(item => item.id);
+    // 使用 join 方法将 id 数组连接成一个用逗号分隔的字符串
+    const idsString = ids.join(',');
+    // 获取结算信息
+    settleData.value = await getSettlementByIds(idsString)
+    // 处理获得的数据
+    const ms = enrichDataWithSkus(data.list,settleData.value)
+    state.pagination.list = _.concat(state.pagination.list, ms);
     state.pagination.total = data.total;
     state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
     mountMasonry();
@@ -290,6 +298,55 @@
     }
     state.pagination.pageNo++;
     getList(state.currentSort, state.currentOrder);
+  }
+
+  //获取结算信息
+  const settleData = ref()
+  async function getSettlementByIds(ids) {
+    const { data } = await SpuApi.getSettlementProduct(ids);
+    return data;
+  }
+
+  //计算展示价格的函数
+  function enrichDataWithSkus(data, array) {
+    // 创建一个映射，以 id 为键，存储 data 数组中的对象
+    const dataMap = new Map(data.map(item => [item.id, { ...item }]));
+
+    // 遍历 array 数组
+    array.forEach(item => {
+      // 初始化 discountPrice 和 vipPrice 为 null
+      let discountPrice = null;
+      let vipPrice = null;
+      let foundType4 = false;
+      let foundType6 = false;
+
+      // 遍历 skus 数组，寻找 type 为 4 和 6 的首个条目
+      item.skus.forEach(sku => {
+        if (!foundType4 && sku.type === 4) {
+          discountPrice = sku.price;
+          foundType4 = true;
+        }
+        if (!foundType6 && sku.type === 6) {
+          vipPrice = sku.price;
+          foundType6 = true;
+        }
+
+        // 如果已经找到 type 为 4 和 6 的条目，则不需要继续遍历
+        if (foundType4 && foundType6) {
+          return;
+        }
+      });
+
+      // 更新 dataMap 中对应的对象
+      if (dataMap.has(item.id)) {
+        dataMap.get(item.id).discountPrice = discountPrice;
+        dataMap.get(item.id).vipPrice = vipPrice;
+        dataMap.get(item.id).reward = item.reward;
+      }
+    });
+
+    // 返回更新后的数据数组
+    return Array.from(dataMap.values());
   }
 
   onLoad((options) => {

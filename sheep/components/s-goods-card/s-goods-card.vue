@@ -135,7 +135,7 @@
   /**
    * 商品卡片
    */
-  import { computed, reactive, onMounted } from 'vue';
+  import { computed, reactive, onMounted, ref } from 'vue';
   import sheep from '@/sheep';
   import SpuApi from '@/sheep/api/product/spu';
 
@@ -227,10 +227,61 @@
     return data;
   }
 
+  //获取结算信息
+  const settleData = ref()
+  async function getSettlementByIds(ids) {
+    const { data } = await SpuApi.getSettlementProduct(ids);
+    return data;
+  }
+
+  //计算展示价格的函数
+  async function enrichDataWithSkus(data, array) {
+    // 创建一个映射，以 id 为键，存储 data 数组中的对象
+    const dataMap = new Map(data.map(item => [item.id, { ...item }]));
+
+    // 遍历 array 数组
+    array.forEach(item => {
+      // 初始化 discountPrice 和 vipPrice 为 null
+      let discountPrice = null;
+      let vipPrice = null;
+      let foundType4 = false;
+      let foundType6 = false;
+
+      // 遍历 skus 数组，寻找 type 为 4 和 6 的首个条目
+      item.skus.forEach(sku => {
+        if (!foundType4 && sku.type === 4) {
+          discountPrice = sku.price;
+          foundType4 = true;
+        }
+        if (!foundType6 && sku.type === 6) {
+          vipPrice = sku.price;
+          foundType6 = true;
+        }
+
+        // 如果已经找到 type 为 4 和 6 的条目，则不需要继续遍历
+        if (foundType4 && foundType6) {
+          return;
+        }
+      });
+
+      // 更新 dataMap 中对应的对象
+      if (dataMap.has(item.id)) {
+        dataMap.get(item.id).discountPrice = discountPrice;
+        dataMap.get(item.id).vipPrice = vipPrice;
+        dataMap.get(item.id).reward = item.reward;
+      }
+    });
+
+    // 返回更新后的数据数组
+    return Array.from(dataMap.values());
+  }
+
   // 初始化
   onMounted(async () => {
     // 加载商品列表
-    state.goodsList = await getGoodsListByIds(spuIds.join(','));
+    const ms = await getGoodsListByIds(spuIds.join(','));
+    settleData.value = await getSettlementByIds(spuIds.join(','))
+    state.goodsList = await enrichDataWithSkus(ms,settleData.value)
     // 只有双列布局时需要
     if (layoutType === LayoutTypeEnum.TWO_COL){
       // 分列

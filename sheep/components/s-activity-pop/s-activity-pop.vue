@@ -2,22 +2,100 @@
 <template>
   <su-popup :show="show" type="bottom" round="20" @close="emits('close')" showClose>
     <view class="model-box">
-      <view class="title ss-m-t-16 ss-m-l-20 ss-flex">营销活动</view>
-      <scroll-view
-        class="model-content ss-m-t-50"
-        scroll-y
-        :scroll-with-animation="false"
-        :enable-back-to-top="true"
-      >
-        <view v-for="item in state.activityInfo" :key="item.id">
-          <view class="ss-flex ss-col-top ss-m-b-40" @tap="onGoodsList(item)">
-            <view class="model-content-tag ss-flex ss-row-center">满减</view>
-            <view class="ss-m-l-20 model-content-title ss-flex-1">
-              <view class="ss-m-b-24" v-for="rule in state.activityMap[item.id]?.rules" :key="rule">
-                {{ formatRewardActivityRule(state.activityMap[item.id], rule) }}
+      <view class="title ss-m-t-16 ss-m-l-20 ss-flex">优惠</view>
+      <view v-if="state.activityMap[state.activityInfo[0]?.id]?.reduc">
+        <view class="titleLi">促销</view>
+        <scroll-view class="model-content" scroll-y :scroll-with-animation="false" :enable-back-to-top="true">
+          <view class="actBox">
+            <view class="boxCont ss-flex ss-col-top ss-m-b-40" @tap="onGoodsList(state.activityInfo[0])">
+              <view class="model-content-tag ss-flex ss-row-center">满减</view>
+              <view class="model-content-title">
+                <view class="contBu">
+                  <text v-for="(item,index) in state.activityMap[state.activityInfo[0]?.id]?.reduc"
+                        :key="index">满{{fen2yuan(item.discountPrice)}}元减{{fen2yuan(item.limit)}}元;</text>
+                </view>
+                <view class="ss-m-b-24 cotBu-txt">
+                  {{formatDateRange(state.activityInfo[0]?.startTime,state.activityInfo[0]?.endTime)}}
+                </view>
+              </view>
+              <text class="cicon-forward" />
+            </view>
+          </view>
+          <view class="actBox">
+            <view class="boxCont ss-flex ss-col-top ss-m-b-40" @tap="onGoodsList(state.activityInfo[0])">
+              <view class="model-content-tag ss-flex ss-row-center">包邮</view>
+              <view class="model-content-title">
+                <view class="contBu">
+                  <text v-for="(item,index) in state.activityMap[state.activityInfo[0]?.id]?.ship"
+                        :key="index" v-show="item.bull">满{{fen2yuan(item.discountPrice)}}元包邮;</text>
+                </view>
+                <view class="ss-m-b-24 cotBu-txt">
+                  {{formatDateRange(state.activityInfo[0]?.startTime,state.activityInfo[0]?.endTime)}}
+                </view>
+              </view>
+              <text class="cicon-forward" />
+            </view>
+          </view>
+          <view class="actBox">
+            <view class="boxCont ss-flex ss-col-top ss-m-b-40" @tap="onGoodsList(state.activityInfo[0])">
+              <view class="model-content-tag ss-flex ss-row-center">送积分</view>
+              <view class="model-content-title">
+                <view class="contBu">
+                  <text v-for="(item,index) in state.activityMap[state.activityInfo[0]?.id]?.scor"
+                        :key="index"
+                        v-show="item.bull">满{{fen2yuan(item.discountPrice)}}元送{{item.value}}积分;</text>
+                </view>
+                <view class="ss-m-b-24 cotBu-txt">
+                  {{formatDateRange(state.activityInfo[0]?.startTime,state.activityInfo[0]?.endTime)}}
+                </view>
+              </view>
+              <text class="cicon-forward" />
+            </view>
+          </view>
+          <view class="actBox">
+            <view class="boxCont ss-flex ss-col-top ss-m-b-40" @tap="onGoodsList(state.activityInfo[0])">
+              <view class="model-content-tag ss-flex ss-row-center">送优惠券</view>
+              <view class="model-content-title">
+                <view class="contBu">
+                  <text v-for="(item,index) in state.activityMap[state.activityInfo[0]?.id]?.cou"
+                        :key="index"
+                        v-show="item.bull">满{{fen2yuan(item.discountPrice)}}元送{{item.value}}张优惠券;</text>
+                </view>
+                <view class="ss-m-b-24 cotBu-txt">
+                  {{formatDateRange(state.activityInfo[0]?.startTime,state.activityInfo[0]?.endTime)}}
+                </view>
+              </view>
+              <text class="cicon-forward" />
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+      <view class="titleLi">可领优惠券</view>
+      <scroll-view class="model-content" scroll-y :scroll-with-animation="false" :enable-back-to-top="true">
+        <view class="actBox" v-for="item in state.couponInfo" :key="item.id">
+          <view class="boxCont ss-flex ss-col-top ss-m-b-40">
+            <view class="model-content-tag2">
+              <view class="usePrice">
+                ￥{{fen2yuan(item.discountPrice)}}
+              </view>
+              <view class="impose">
+                满￥{{fen2yuan(item.usePrice)}}可用
               </view>
             </view>
-            <text class="cicon-forward" />
+            <view class="model-content-title2">
+              <view class="contBu">
+                {{item.name}}
+              </view>
+              <view class="ss-m-b-24 cotBu-txt">
+                {{item.validityType==1?formatDateRange(item.validStartTime,item.validEndTime) : '领取后'+item.fixedStartTerm+'-'+item.fixedEndTerm +'天可用'}}
+              </view>
+            </view>
+            <view class="coupon" @click.stop="getBuy(item.id)" v-if="item.canTake">
+              立即领取
+            </view>
+            <view class="coupon2" v-else>
+              已领取
+            </view>
           </view>
         </view>
       </scroll-view>
@@ -26,14 +104,21 @@
 </template>
 <script setup>
   import sheep from '@/sheep';
-  import { computed, reactive, watch } from 'vue';
+  import {
+    computed,
+    reactive,
+    watch
+  } from 'vue';
   import RewardActivityApi from '@/sheep/api/promotion/rewardActivity';
-  import { formatRewardActivityRule } from '@/sheep/hooks/useGoods';
-
+  import {
+    fen2yuan,
+    formatDateRange,
+    handActitList
+  } from '@/sheep/hooks/useGoods';
   const props = defineProps({
     modelValue: {
       type: Object,
-      default() {},
+      default () {},
     },
     show: {
       type: Boolean,
@@ -42,10 +127,10 @@
   });
   const emits = defineEmits(['close']);
   const state = reactive({
-    activityInfo: computed(() => props.modelValue),
-    activityMap: {}
+    activityInfo: computed(() => props.modelValue.activityInfo),
+    activityMap: {},
+    couponInfo: computed(() => props.modelValue.couponInfo)
   });
-
   watch(
     () => props.show,
     () => {
@@ -56,12 +141,16 @@
             if (res.code !== 0) {
               return;
             }
-            state.activityMap[activity.id] = res.data;
+            state.activityMap[activity.id] = handActitList(res.data.rules);
           })
         });
       }
     },
   );
+  // 领取优惠劵
+  const getBuy = (id) => {
+    emits('get', id);
+  };
 
   function onGoodsList(e) {
     sheep.$router.go('/pages/activity/index', {
@@ -72,34 +161,141 @@
 <style lang="scss" scoped>
   .model-box {
     height: 60vh;
+
     .title {
+      justify-content: center;
       font-size: 36rpx;
       height: 80rpx;
       font-weight: bold;
       color: #333333;
     }
   }
+
   .model-content {
+    height: fit-content;
+    max-height: 350rpx;
     padding: 0 20rpx;
     box-sizing: border-box;
+    margin-top: 20rpx;
+
     .model-content-tag {
-      background: rgba(#ff6911, 0.1);
-      font-size: 24rpx;
+      // background: rgba(#ff6911, 0.1);
+      font-size: 35rpx;
       font-weight: 500;
       color: #ff6911;
-      line-height: 42rpx;
-      width: 68rpx;
-      height: 32rpx;
-      border-radius: 5rpx;
+      line-height: 150rpx;
+      width: 200rpx;
+      height: 150rpx;
+      text-align: center;
+
+      // border-radius: 5rpx;
     }
+
     .model-content-title {
+      width: 450rpx;
+      height: 150rpx;
       font-size: 26rpx;
       font-weight: 500;
       color: #333333;
+      overflow: hidden;
     }
+
     .cicon-forward {
       font-size: 28rpx;
       color: #999999;
+      margin: 0 auto;
     }
+  }
+
+  // 新增的
+  .titleLi {
+    margin: 10rpx 0 10rpx 20rpx;
+    font-size: 26rpx;
+  }
+
+  .actBox {
+    width: 700rpx;
+    height: 150rpx;
+    background-color: #fff2f2;
+    margin: 10rpx auto;
+    border-radius: 10rpx;
+  }
+
+  .boxCont {
+    width: 700rpx;
+    height: 150rpx;
+    align-items: center;
+  }
+
+  .contBu {
+    height: 80rpx;
+    line-height: 80rpx;
+    overflow: hidden;
+    font-size: 30rpx;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+  }
+
+  .cotBu-txt {
+    height: 70rpx;
+    line-height: 70rpx;
+    font-size: 25rpx;
+    color: #999999;
+  }
+
+  .model-content-tag2 {
+    font-size: 35rpx;
+    font-weight: 500;
+    color: #ff6911;
+    width: 200rpx;
+    height: 150rpx;
+    text-align: center;
+  }
+
+  .usePrice {
+    width: 200rpx;
+    height: 90rpx;
+    line-height: 100rpx;
+    // background-color: red;
+  }
+
+  .impose {
+    width: 200rpx;
+    height: 50rpx;
+    // line-height: 75rpx;
+    font-size: 23rpx;
+    // background-color: gold;
+  }
+
+  .model-content-title2 {
+    width: 330rpx;
+    height: 150rpx;
+    font-size: 26rpx;
+    font-weight: 500;
+    color: #333333;
+    overflow: hidden;
+  }
+
+  .coupon {
+    width: 150rpx;
+    height: 50rpx;
+    line-height: 50rpx;
+    background-color: rgb(255, 68, 68);
+    color: white;
+    border-radius: 30rpx;
+    text-align: center;
+    font-size: 25rpx;
+  }
+
+  .coupon2 {
+    width: 150rpx;
+    height: 50rpx;
+    line-height: 50rpx;
+    background-color: rgb(203, 192, 191);
+    color: white;
+    border-radius: 30rpx;
+    text-align: center;
+    font-size: 25rpx;
   }
 </style>
