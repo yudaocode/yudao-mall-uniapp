@@ -54,7 +54,7 @@
                 <view class="origin-price ss-flex ss-col-center" v-if="state.goodsInfo.price">
                   单买价：
                   <view class="origin-price-text">
-                    {{ fen2yuan(state.goodsInfo.price) }}
+                    {{ fen2yuan(state.goodsInfo.marketPrice) }}
                   </view>
                 </view>
               </view>
