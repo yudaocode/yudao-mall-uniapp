@@ -217,6 +217,7 @@
 
   onPageScroll(() => {});
   import countDown from '@/sheep/components/countDown/index.vue';
+  import OrderApi from '@/sheep/api/trade/order';
 
   const bgColor = {
     bgColor: '#E93323',
@@ -323,7 +324,7 @@
   }
 
   async function getSettlementByIds(ids) {
-    let { data, code } = await SpuApi.getSettlementProduct(ids);
+    let { data, code } = await OrderApi.getSettlementProduct(ids);
     if (code !== 0 || data.length !== 1) {
       return;
     }

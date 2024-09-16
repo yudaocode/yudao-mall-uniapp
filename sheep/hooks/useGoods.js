@@ -382,3 +382,27 @@ export function convertProductPropertyList(skus) {
   }
   return result;
 }
+
+export function appendSettlementProduct(spus, settlementInfos) {
+  if (!settlementInfos || settlementInfos.length === 0) {
+    return;
+  }
+  for (const spu of spus) {
+    const settlementInfo = settlementInfos.find((info) => info.spuId === spu.id);
+    if (!settlementInfo) {
+      return;
+    }
+    // 选择价格最小的 SKU 设置到 SPU 上
+    const settlementSku = settlementInfo.skus
+      .filter((sku) => sku.promotionPrice > 0)
+      .reduce((prev, curr) => (prev.promotionPrice < curr.promotionPrice ? prev : curr));
+    if (settlementSku) {
+      spu.promotionType = settlementSku.promotionType;
+      spu.promotionPrice = settlementSku.promotionPrice;
+    }
+    // 设置【满减送】活动
+    if (settlementInfo.rewardActivity) {
+      spu.rewardActivity = settlementInfo.rewardActivity;
+    }
+  }
+}

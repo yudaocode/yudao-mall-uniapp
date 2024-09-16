@@ -53,6 +53,18 @@ const OrderApi = {
       },
     });
   },
+  // 获得商品结算信息
+  getSettlementProduct: (spuIds) => {
+    return request({
+      url: '/trade/order/settlement-product',
+      method: 'GET',
+      params: { spuIds },
+      custom: {
+        showLoading: false,
+        showError: false,
+      },
+    });
+  },
   // 创建订单
   createOrder: (data) => {
     return request({

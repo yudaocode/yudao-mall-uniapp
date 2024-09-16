@@ -11,11 +11,7 @@
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
-      <image
-        class="xs-img-box"
-        :src="sheep.$url.cdn(data.image || data.picUrl)"
-        mode="aspectFit"
-      ></image>
+      <image class="xs-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFit" />
       <view
         v-if="goodsFields.title?.show || goodsFields.name?.show || goodsFields.price?.show"
         class="xs-goods-content ss-flex-col ss-row-around"
@@ -27,23 +23,24 @@
         >
           {{ data.title || data.name }}
         </view>
-        <!-- 这里是新加的会员价和限时优惠 -->
-        <view class="iconBox" v-if="data.discountPrice || data.vipPrice || data.reward">
-          <view class="card" v-if="iconShow">{{ iconShow }}</view>
-          <view class="card2" v-if="data.reward">{{ data.reward.ruleDescriptions[0] }}</view>
+        <!-- 活动信息 -->
+        <view class="iconBox" v-if="data.promotionType > 0 || data.rewardActivity">
+          <view class="card" v-if="discountText">{{ discountText }}</view>
+          <view class="card2" v-if="data.rewardActivity">
+            {{ data.rewardActivity.ruleDescriptions[0] }}
+          </view>
         </view>
-        <!-- 这里是新加的会员价和限时优惠结束 -->
         <view
           v-if="goodsFields.price?.show"
           class="xs-goods-price font-OPPOSANS"
           :style="[{ color: goodsFields.price.color }]"
         >
           <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-          <text v-if="iconShow == '限时优惠'">{{ fen2yuan(data.discountPrice) }}</text>
-          <text v-else-if="iconShow == '会员价'">{{ fen2yuan(data.vipPrice) }}</text>
-          <text v-else>{{
-            isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price)
-          }}</text>
+          <!-- 活动价格 -->
+          <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+          <text v-else>
+            {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+          </text>
         </view>
       </view>
     </view>
@@ -70,23 +67,24 @@
         >
           {{ data.title || data.name }}
         </view>
-        <!-- 这里是新加的会员价和限时优惠 -->
-        <view class="iconBox" v-if="data.discountPrice || data.vipPrice || data.reward">
-          <view class="card" v-if="iconShow">{{ iconShow }}</view>
-          <view class="card2" v-if="data.reward">{{ data.reward.ruleDescriptions[0] }}</view>
+        <!-- 活动信息 -->
+        <view class="iconBox" v-if="data.promotionType > 0 || data.rewardActivity">
+          <view class="card" v-if="discountText">{{ discountText }}</view>
+          <view class="card2" v-if="data.rewardActivity">
+            {{ data.rewardActivity.ruleDescriptions[0] }}
+          </view>
         </view>
-        <!-- 这里是新加的会员价和限时优惠结束 -->
         <view
           v-if="goodsFields.price?.show"
           class="sm-goods-price font-OPPOSANS"
           :style="[{ color: goodsFields.price.color }]"
         >
           <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-          <text v-if="iconShow == '限时优惠'">{{ fen2yuan(data.discountPrice) }}</text>
-          <text v-else-if="iconShow == '会员价'">{{ fen2yuan(data.vipPrice) }}</text>
-          <text v-else>{{
-            isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price)
-          }}</text>
+          <!-- 活动价格 -->
+          <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+          <text v-else>
+            {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+          </text>
         </view>
       </view>
     </view>
@@ -94,13 +92,9 @@
     <!-- md卡片：竖向，一行放两个，图上内容下 -->
     <view v-if="size === 'md'" class="md-goods-card ss-flex-col" :style="[elStyles]" @tap="onClick">
       <view v-if="tagStyle.show" class="tag-icon-box">
-        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
+        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)" />
       </view>
-      <image
-        class="md-img-box"
-        :src="sheep.$url.cdn(data.image || data.picUrl)"
-        mode="widthFix"
-      ></image>
+      <image class="md-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="widthFix" />
       <view
         class="md-goods-content ss-flex-col ss-row-around ss-p-b-20 ss-p-t-20 ss-p-x-16"
         :id="elId"
@@ -130,12 +124,13 @@
             </view>
           </view>
         </slot>
-        <!-- 这里是新加的会员价和限时优惠 -->
-        <view class="iconBox" v-if="data.discountPrice || data.vipPrice || data.reward">
-          <view class="card" v-if="iconShow">{{ iconShow }}</view>
-          <view class="card2" v-if="data.reward">{{ data.reward.ruleDescriptions[0] }}</view>
+        <!-- 活动信息 -->
+        <view class="iconBox" v-if="data.promotionType > 0 || data.rewardActivity">
+          <view class="card" v-if="discountText">{{ discountText }}</view>
+          <view class="card2" v-if="data.rewardActivity">
+            {{ data.rewardActivity.ruleDescriptions[0] }}
+          </view>
         </view>
-        <!-- 这里是新加的会员价和限时优惠结束 -->
         <view class="ss-flex ss-col-bottom">
           <view
             v-if="goodsFields.price?.show"
@@ -143,13 +138,12 @@
             :style="[{ color: goodsFields.price.color }]"
           >
             <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-            <text v-if="iconShow == '限时优惠'">{{ fen2yuan(data.discountPrice) }}</text>
-            <text v-else-if="iconShow == '会员价'">{{ fen2yuan(data.vipPrice) }}</text>
-            <text v-else>{{
-              isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price)
-            }}</text>
+            <!-- 活动价格 -->
+            <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+            <text v-else>
+              {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+            </text>
           </view>
-
           <view
             v-if="
               (goodsFields.original_price?.show || goodsFields.marketPrice?.show) &&
@@ -193,7 +187,7 @@
         class="lg-img-box"
         :src="sheep.$url.cdn(data.image || data.picUrl)"
         mode="aspectFill"
-      ></image>
+      />
       <view class="lg-goods-content ss-flex-1 ss-flex-col ss-row-between ss-p-b-10 ss-p-t-20">
         <view>
           <view
@@ -219,12 +213,13 @@
               </view>
             </view>
           </slot>
-          <!-- 这里是新加的会员价和限时优惠 -->
-          <view class="iconBox" v-if="data.discountPrice || data.vipPrice || data.reward">
-            <view class="card" v-if="iconShow">{{ iconShow }}</view>
-            <view class="card2" v-if="data.reward">{{ data.reward.ruleDescriptions[0] }}</view>
+          <!-- 活动信息 -->
+          <view class="iconBox" v-if="data.promotionType > 0 || data.rewardActivity">
+            <view class="card" v-if="discountText">{{ discountText }}</view>
+            <view class="card2" v-if="data.rewardActivity">
+              {{ data.rewardActivity.ruleDescriptions[0] }}
+            </view>
           </view>
-          <!-- 这里是新加的会员价和限时优惠结束 -->
           <view class="ss-flex ss-col-bottom ss-m-t-10">
             <view
               v-if="goodsFields.price?.show"
@@ -243,11 +238,11 @@
               :style="[{ color: originPriceColor }]"
             >
               <text class="price-unit ss-font-20">{{ priceUnit }}</text>
-              <text v-if="iconShow == '限时优惠'">{{ fen2yuan(data.discountPrice) }}</text>
-              <text v-else-if="iconShow == '会员价'">{{ fen2yuan(data.vipPrice) }}</text>
-              <text v-else>{{
-                isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price)
-              }}</text>
+              <!-- 活动价格 -->
+              <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+              <text v-else>
+                {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+              </text>
             </view>
           </view>
           <view class="ss-m-t-8 ss-flex ss-col-center ss-flex-wrap">
@@ -264,15 +259,13 @@
     <!-- sl卡片：竖向型，一行放一个，图片上内容下边 -->
     <view v-if="size === 'sl'" class="sl-goods-card ss-flex-col" :style="[elStyles]" @tap="onClick">
       <view v-if="tagStyle.show" class="tag-icon-box">
-        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
+        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)" />
       </view>
-
       <image
         class="sl-img-box"
         :src="sheep.$url.cdn(data.image || data.picUrl)"
         mode="aspectFill"
-      ></image>
-
+      />
       <view class="sl-goods-content">
         <view>
           <view
@@ -302,20 +295,21 @@
               </view>
             </view>
           </slot>
-          <!-- 这里是新加的会员价和限时优惠 -->
-          <view class="iconBox" v-if="data.discountPrice || data.vipPrice || data.reward">
-            <view class="card" v-if="iconShow">{{ iconShow }}</view>
-            <view class="card2" v-if="data.reward">{{ data.reward.ruleDescriptions[0] }}</view>
+          <!-- 活动信息 -->
+          <view class="iconBox" v-if="data.promotionType > 0 || data.rewardActivity">
+            <view class="card" v-if="discountText">{{ discountText }}</view>
+            <view class="card2" v-if="data.rewardActivity">
+              {{ data.rewardActivity.ruleDescriptions[0] }}
+            </view>
           </view>
-          <!-- 这里是新加的会员价和限时优惠结束 -->
           <view v-if="goodsFields.price?.show" class="ss-flex ss-col-bottom font-OPPOSANS">
             <view class="sl-goods-price ss-m-r-12" :style="[{ color: goodsFields.price.color }]">
               <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-              <text v-if="iconShow == '限时优惠'">{{ fen2yuan(data.discountPrice) }}</text>
-              <text v-else-if="iconShow == '会员价'">{{ fen2yuan(data.vipPrice) }}</text>
-              <text v-else>{{
-                isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price)
-              }}</text>
+              <!-- 活动价格 -->
+              <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+              <text v-else>
+                {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+              </text>
             </view>
             <view
               v-if="
@@ -371,14 +365,11 @@
    * @event {Function()} click 										- 点击卡片
    *
    */
-  import { computed, reactive, getCurrentInstance, onMounted, nextTick, ref } from 'vue';
+  import { computed, getCurrentInstance, onMounted, nextTick } from 'vue';
   import sheep from '@/sheep';
   import { fen2yuan, formatSales } from '@/sheep/hooks/useGoods';
   import { formatStock } from '@/sheep/hooks/useGoods';
-  import goodsCollectVue from '@/pages/user/goods-collect.vue';
   import { isArray } from 'lodash-es';
-  // 数据
-  const state = reactive({});
 
   // 接收参数
   const props = defineProps({
@@ -478,25 +469,18 @@
       default: false,
     },
   });
-  //判断限时优惠和会员价标签内容暂时导致页面出错，又舍不得丢，等着把新的数据整合到商品信息中，也用起来
-  const iconShow = handle();
 
-  function handle() {
-    if (props.data.discountPrice === null && props.data.vipPrice === null) {
-      // 如果两个值都为 null，则不展示任何内容
-      return '';
-    } else if (props.data.discountPrice === null) {
-      // 如果 discountPrice 为 null，展示 vipPrice
-      return '会员价';
-    } else if (props.data.vipPrice === null) {
-      // 如果 vipPrice 为 null，展示 discountPrice
+  // 优惠文案
+  const discountText = computed(() => {
+    const promotionType = props.data.promotionType;
+    if (promotionType === 4) {
       return '限时优惠';
-    } else if (props.data.discountPrice < props.data.vipPrice) {
-      return '限时优惠';
-    } else if (props.data.discountPrice > props.data.vipPrice) {
+    } else if (promotionType === 6) {
       return '会员价';
     }
-  }
+    return undefined;
+  });
+
   // 组件样式
   const elStyles = computed(() => {
     return {
