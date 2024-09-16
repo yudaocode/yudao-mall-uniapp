@@ -2,11 +2,21 @@
 <template>
   <s-layout navbar="inner" :bgStyle="{ color: 'rgb(245,28,19)' }">
     <!--顶部背景图-->
-    <view class="page-bg" :style="[{ marginTop: '-' + Number(statusBarHeight + 88) + 'rpx' }]"></view>
+    <view
+      class="page-bg"
+      :style="[{ marginTop: '-' + Number(statusBarHeight + 88) + 'rpx' }]"
+    ></view>
     <!-- 时间段轮播图 -->
     <view class="header" v-if="activeTimeConfig?.sliderPicUrls?.length > 0">
-      <swiper indicator-dots="true" autoplay="true" :circular="true" interval="3000" duration="1500"
-              indicator-color="rgba(255,255,255,0.6)" indicator-active-color="#fff">
+      <swiper
+        indicator-dots="true"
+        autoplay="true"
+        :circular="true"
+        interval="3000"
+        duration="1500"
+        indicator-color="rgba(255,255,255,0.6)"
+        indicator-active-color="#fff"
+      >
         <block v-for="(picUrl, index) in activeTimeConfig.sliderPicUrls" :key="index">
           <swiper-item class="borRadius14">
             <image :src="picUrl" class="slide-image borRadius14" lazy-load />
@@ -19,12 +29,24 @@
       <!-- 左侧图标 -->
       <view class="time-icon">
         <!-- TODO 芋艿：图片统一维护 -->
-        <image class="ss-w-100 ss-h-100" src="http://mall.yudao.iocoder.cn/static/images/priceTag.png" />
+        <image
+          class="ss-w-100 ss-h-100"
+          src="http://mall.yudao.iocoder.cn/static/images/priceTag.png"
+        />
       </view>
-      <scroll-view class="time-list" :scroll-into-view="activeTimeElId" scroll-x scroll-with-animation>
-        <view v-for="(config, index) in timeConfigList" :key="index"
-              :class="['item', { active: activeTimeIndex === index}]" :id="`timeItem${index}`"
-              @tap="handleChangeTimeConfig(index,config.id)">
+      <scroll-view
+        class="time-list"
+        :scroll-into-view="activeTimeElId"
+        scroll-x
+        scroll-with-animation
+      >
+        <view
+          v-for="(config, index) in timeConfigList"
+          :key="index"
+          :class="['item', { active: activeTimeIndex === index }]"
+          :id="`timeItem${index}`"
+          @tap="handleChangeTimeConfig(index, config.id)"
+        >
           <!-- 活动起始时间 -->
           <view class="time">{{ config.startTime }}</view>
           <!-- 活动状态 -->
@@ -38,7 +60,10 @@
       <!-- 活动倒计时 -->
       <view class="content-header ss-flex-col ss-col-center ss-row-center">
         <view class="content-header-box ss-flex ss-row-center">
-          <view class="countdown-box ss-flex" v-if="activeTimeConfig?.status === TimeStatusEnum.STARTED">
+          <view
+            class="countdown-box ss-flex"
+            v-if="activeTimeConfig?.status === TimeStatusEnum.STARTED"
+          >
             <view class="countdown-title ss-m-r-12">距结束</view>
             <view class="ss-flex countdown-time">
               <view class="ss-flex countdown-h">{{ countDown.h }}</view>
@@ -53,148 +78,157 @@
       </view>
 
       <!-- 活动列表 -->
-      <scroll-view class="scroll-box" :style="{ height: pageHeight + 'rpx' }" scroll-y="true"
-                   :scroll-with-animation="false" :enable-back-to-top="true">
+      <scroll-view
+        class="scroll-box"
+        :style="{ height: pageHeight + 'rpx' }"
+        scroll-y="true"
+        :scroll-with-animation="false"
+        :enable-back-to-top="true"
+      >
         <view class="goods-box ss-m-b-20" v-for="activity in activityList" :key="activity.id">
-          <s-goods-column size="lg" :data="{ ...activity, price: activity.seckillPrice }"
-                          :goodsFields="goodsFields" :seckillTag="true">
+          <s-goods-column
+            size="lg"
+            :data="{ ...activity, price: activity.seckillPrice }"
+            :goodsFields="goodsFields"
+            :seckillTag="true"
+          >
             <!-- 抢购进度 -->
             <template #activity>
-              <view class="limit">限量 <text class="ss-m-l-5">{{ activity.stock}}
-                {{activity.unitName}}</text></view>
+              <view class="limit">
+                限量
+                <text class="ss-m-l-5">{{ activity.stock }} {{ activity.unitName }}</text>
+              </view>
               <su-progress :percentage="activity.percent" strokeWidth="10" textInside isAnimate />
             </template>
             <!-- 抢购按钮 -->
             <template #cart>
               <button
-                :class="['ss-reset-button cart-btn', { disabled: activeTimeConfig?.status === TimeStatusEnum.END}]"
-                v-if="activeTimeConfig?.status === TimeStatusEnum.WAIT_START">
+                :class="[
+                  'ss-reset-button cart-btn',
+                  { disabled: activeTimeConfig?.status === TimeStatusEnum.END },
+                ]"
+                v-if="activeTimeConfig?.status === TimeStatusEnum.WAIT_START"
+              >
                 <span>未开始</span>
               </button>
               <button
-                :class="['ss-reset-button cart-btn', { disabled: activeTimeConfig?.status === TimeStatusEnum.END}]"
+                :class="[
+                  'ss-reset-button cart-btn',
+                  { disabled: activeTimeConfig?.status === TimeStatusEnum.END },
+                ]"
                 @click="sheep.$router.go('/pages/goods/seckill', { id: activity.id })"
-                v-else-if='activeTimeConfig?.status === TimeStatusEnum.STARTED'>
+                v-else-if="activeTimeConfig?.status === TimeStatusEnum.STARTED"
+              >
                 <span>马上抢</span>
               </button>
               <button
-                :class="['ss-reset-button cart-btn', { disabled: activeTimeConfig?.status === TimeStatusEnum.END}]"
-                v-else>
+                :class="[
+                  'ss-reset-button cart-btn',
+                  { disabled: activeTimeConfig?.status === TimeStatusEnum.END },
+                ]"
+                v-else
+              >
                 <span>已结束</span>
               </button>
             </template>
           </s-goods-column>
         </view>
-        <uni-load-more v-if="activityTotal > 0" :status="loadStatus" :content-text="{
+        <uni-load-more
+          v-if="activityTotal > 0"
+          :status="loadStatus"
+          :content-text="{
             contentdown: '上拉加载更多',
-          }" @tap="loadMore" />
+          }"
+          @tap="loadMore"
+        />
       </scroll-view>
     </view>
   </s-layout>
 </template>
 <script setup>
-  import {
-    reactive,
-    computed,
-    ref,
-    nextTick
-  } from 'vue';
-  import {
-    onLoad,
-    onReachBottom
-  } from '@dcloudio/uni-app';
+  import { reactive, computed, ref, nextTick } from 'vue';
+  import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import {
-    useDurationTime
-  } from '@/sheep/hooks/useGoods';
-  import SeckillApi from "@/sheep/api/promotion/seckill";
-  import dayjs from "dayjs";
-  import {
-    TimeStatusEnum
-  } from "@/sheep/util/const";
+  import { useDurationTime } from '@/sheep/hooks/useGoods';
+  import SeckillApi from '@/sheep/api/promotion/seckill';
+  import dayjs from 'dayjs';
+  import { TimeStatusEnum } from '@/sheep/util/const';
 
   // 计算页面高度
-  const {
-    safeAreaInsets,
-    safeArea
-  } = sheep.$platform.device;
+  const { safeAreaInsets, safeArea } = sheep.$platform.device;
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
-  const pageHeight = (safeArea.height + safeAreaInsets.bottom) * 2 + statusBarHeight - sheep.$platform.navbar - 350;
+  const pageHeight =
+    (safeArea.height + safeAreaInsets.bottom) * 2 + statusBarHeight - sheep.$platform.navbar - 350;
   const headerBg = sheep.$url.css('/static/img/shop/goods/seckill-header.png');
 
   // 商品控件显示的字段（不显示库存、销量。改为显示自定义的进度条）
   const goodsFields = {
     name: {
-      show: true
+      show: true,
     },
     introduction: {
-      show: true
+      show: true,
     },
     price: {
-      show: true
+      show: true,
     },
     marketPrice: {
-      show: true
+      show: true,
     },
   };
 
   //#region 时间段
   // 时间段列表
-  const timeConfigList = ref([])
+  const timeConfigList = ref([]);
   // 查询时间段
   const getSeckillConfigList = async () => {
-    const {
-      data
-    } = await SeckillApi.getSeckillConfigList()
+    const { data } = await SeckillApi.getSeckillConfigList();
     const now = dayjs();
-    const today = now.format('YYYY-MM-DD')
-    const select = ref([])
+    const today = now.format('YYYY-MM-DD');
+    const select = ref([]);
     // 判断时间段的状态
     data.forEach((config, index) => {
-      const startTime = dayjs(`${today} ${config.startTime}`)
-      const endTime = dayjs(`${today} ${config.endTime}`)
+      const startTime = dayjs(`${today} ${config.startTime}`);
+      const endTime = dayjs(`${today} ${config.endTime}`);
       select.value[index] = config.id;
       if (now.isBefore(startTime)) {
         config.status = TimeStatusEnum.WAIT_START;
-        // select.value[index] = config.id;
       } else if (now.isAfter(endTime)) {
         config.status = TimeStatusEnum.END;
-        // select.value[index] = config.id;
       } else {
         config.status = TimeStatusEnum.STARTED;
-        // select.value[index] = config.id;
-        activeTimeIndex.value = index
+        activeTimeIndex.value = index;
       }
-    })
-    timeConfigList.value = data
+    });
+    timeConfigList.value = data;
     // 默认选中进行中的活动
     handleChangeTimeConfig(activeTimeIndex.value, select.value[activeTimeIndex.value]);
     // 滚动到进行中的时间段
-    scrollToTimeConfig(activeTimeIndex.value)
-  }
+    scrollToTimeConfig(activeTimeIndex.value);
+  };
 
   // 滚动到指定时间段
-  const activeTimeElId = ref('') // 当前选中的时间段的元素ID
+  const activeTimeElId = ref(''); // 当前选中的时间段的元素ID
   const scrollToTimeConfig = (index) => {
-    nextTick(() => activeTimeElId.value = `timeItem${index}`)
-  }
+    nextTick(() => (activeTimeElId.value = `timeItem${index}`));
+  };
 
   // 切换时间段
-  const activeTimeIndex = ref(0) // 当前选中的时间段的索引
-  const activeTimeConfig = computed(() => timeConfigList.value[activeTimeIndex.value]) // 当前选中的时间段
+  const activeTimeIndex = ref(0); // 当前选中的时间段的索引
+  const activeTimeConfig = computed(() => timeConfigList.value[activeTimeIndex.value]); // 当前选中的时间段
   const handleChangeTimeConfig = (index, id) => {
-    activeTimeIndex.value = index
+    activeTimeIndex.value = index;
 
     // 查询活动列表
-    activityPageParams.pageNo = 1
+    activityPageParams.pageNo = 1;
     activityPageParams.configId = id;
-    activityList.value = []
+    activityList.value = [];
     getActivityList();
-  }
+  };
 
   // 倒计时
   const countDown = computed(() => {
-    const endTime = activeTimeConfig.value?.endTime
+    const endTime = activeTimeConfig.value?.endTime;
     if (endTime) {
       return useDurationTime(`${dayjs().format('YYYY-MM-DD')} ${endTime}`);
     }
@@ -209,19 +243,19 @@
     configId: 0, // 时间段 ID
     pageNo: 1, // 页码
     pageSize: 5, // 每页数量
-  })
-  const activityTotal = ref(0) // 活动总数
-  const activityList = ref([]) // 活动列表
-  const loadStatus = ref('') // 页面加载状态
+  });
+  const activityTotal = ref(0); // 活动总数
+  const activityList = ref([]); // 活动列表
+  const loadStatus = ref(''); // 页面加载状态
   async function getActivityList() {
     loadStatus.value = 'loading';
-    const {
-      data
-    } = await SeckillApi.getSeckillActivityPage(activityPageParams)
-    data.list.forEach(activity => {
+    const { data } = await SeckillApi.getSeckillActivityPage(activityPageParams);
+    data.list.forEach((activity) => {
       // 计算抢购进度
-      activity.percent = parseInt(100 * (activity.totalStock - activity.stock) / activity.totalStock);
-    })
+      activity.percent = parseInt(
+        (100 * (activity.totalStock - activity.stock)) / activity.totalStock,
+      );
+    });
     activityList.value = activityList.value.concat(...data.list);
     activityTotal.value = data.total;
 
@@ -231,7 +265,7 @@
   // 加载更多
   function loadMore() {
     if (loadStatus.value !== 'noMore') {
-      activityPageParams.pageNo += 1
+      activityPageParams.pageNo += 1;
       getActivityList();
     }
   }
@@ -242,7 +276,7 @@
 
   // 页面初始化
   onLoad(async () => {
-    await getSeckillConfigList()
+    await getSeckillConfigList();
   });
 </script>
 <style lang="scss" scoped>
