@@ -482,7 +482,6 @@
   const iconShow = handle();
 
   function handle() {
-    debugger;
     if (props.data.discountPrice === null && props.data.vipPrice === null) {
       // 如果两个值都为 null，则不展示任何内容
       return '';

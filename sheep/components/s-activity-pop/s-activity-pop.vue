@@ -3,66 +3,32 @@
   <su-popup :show="show" type="bottom" round="20" @close="emits('close')" showClose>
     <view class="model-box">
       <view class="title ss-m-t-16 ss-m-l-20 ss-flex">优惠</view>
-      <view v-if="state.activityMap[state.activityInfo[0]?.id]?.reduc">
+      <view v-if="state.rewardActivity && state.rewardActivity.id > 0">
         <view class="titleLi">促销</view>
-        <scroll-view class="model-content" scroll-y :scroll-with-animation="false" :enable-back-to-top="true">
-          <view class="actBox">
-            <view class="boxCont ss-flex ss-col-top ss-m-b-40" @tap="onGoodsList(state.activityInfo[0])">
+        <scroll-view
+          class="model-content"
+          scroll-y
+          :scroll-with-animation="false"
+          :enable-back-to-top="true"
+        >
+          <view
+            class="actBox"
+            v-for="(item, index) in state.rewardActivity.ruleDescriptions"
+            :key="index"
+          >
+            <view
+              class="boxCont ss-flex ss-col-top ss-m-b-40"
+              @tap="onGoodsList(state.rewardActivity)"
+            >
               <view class="model-content-tag ss-flex ss-row-center">满减</view>
               <view class="model-content-title">
                 <view class="contBu">
-                  <text v-for="(item,index) in state.activityMap[state.activityInfo[0]?.id]?.reduc"
-                        :key="index">满{{fen2yuan(item.discountPrice)}}元减{{fen2yuan(item.limit)}}元;</text>
+                  <text>{{ item }}</text>
                 </view>
                 <view class="ss-m-b-24 cotBu-txt">
-                  {{formatDateRange(state.activityInfo[0]?.startTime,state.activityInfo[0]?.endTime)}}
-                </view>
-              </view>
-              <text class="cicon-forward" />
-            </view>
-          </view>
-          <view class="actBox">
-            <view class="boxCont ss-flex ss-col-top ss-m-b-40" @tap="onGoodsList(state.activityInfo[0])">
-              <view class="model-content-tag ss-flex ss-row-center">包邮</view>
-              <view class="model-content-title">
-                <view class="contBu">
-                  <text v-for="(item,index) in state.activityMap[state.activityInfo[0]?.id]?.ship"
-                        :key="index" v-show="item.bull">满{{fen2yuan(item.discountPrice)}}元包邮;</text>
-                </view>
-                <view class="ss-m-b-24 cotBu-txt">
-                  {{formatDateRange(state.activityInfo[0]?.startTime,state.activityInfo[0]?.endTime)}}
-                </view>
-              </view>
-              <text class="cicon-forward" />
-            </view>
-          </view>
-          <view class="actBox">
-            <view class="boxCont ss-flex ss-col-top ss-m-b-40" @tap="onGoodsList(state.activityInfo[0])">
-              <view class="model-content-tag ss-flex ss-row-center">送积分</view>
-              <view class="model-content-title">
-                <view class="contBu">
-                  <text v-for="(item,index) in state.activityMap[state.activityInfo[0]?.id]?.scor"
-                        :key="index"
-                        v-show="item.bull">满{{fen2yuan(item.discountPrice)}}元送{{item.value}}积分;</text>
-                </view>
-                <view class="ss-m-b-24 cotBu-txt">
-                  {{formatDateRange(state.activityInfo[0]?.startTime,state.activityInfo[0]?.endTime)}}
-                </view>
-              </view>
-              <text class="cicon-forward" />
-            </view>
-          </view>
-          <view class="actBox">
-            <view class="boxCont ss-flex ss-col-top ss-m-b-40" @tap="onGoodsList(state.activityInfo[0])">
-              <view class="model-content-tag ss-flex ss-row-center">送优惠券</view>
-              <view class="model-content-title">
-                <view class="contBu">
-                  <text v-for="(item,index) in state.activityMap[state.activityInfo[0]?.id]?.cou"
-                        :key="index"
-                        v-show="item.bull">满{{fen2yuan(item.discountPrice)}}元送{{item.value}}张优惠券;</text>
-                </view>
-                <view class="ss-m-b-24 cotBu-txt">
-                  {{formatDateRange(state.activityInfo[0]?.startTime,state.activityInfo[0]?.endTime)}}
+                  {{ sheep.$helper.timeFormat(state.rewardActivity.startTime, 'yyyy.mm.dd') }}
+                  -
+                  {{ sheep.$helper.timeFormat(state.rewardActivity.endTime, 'yyyy.mm.dd') }}
                 </view>
               </view>
               <text class="cicon-forward" />
@@ -71,31 +37,33 @@
         </scroll-view>
       </view>
       <view class="titleLi">可领优惠券</view>
-      <scroll-view class="model-content" scroll-y :scroll-with-animation="false" :enable-back-to-top="true">
+      <scroll-view
+        class="model-content"
+        scroll-y
+        :scroll-with-animation="false"
+        :enable-back-to-top="true"
+      >
         <view class="actBox" v-for="item in state.couponInfo" :key="item.id">
           <view class="boxCont ss-flex ss-col-top ss-m-b-40">
             <view class="model-content-tag2">
-              <view class="usePrice">
-                ￥{{fen2yuan(item.discountPrice)}}
-              </view>
-              <view class="impose">
-                满￥{{fen2yuan(item.usePrice)}}可用
-              </view>
+              <view class="usePrice"> ￥{{ fen2yuan(item.discountPrice) }} </view>
+              <view class="impose"> 满￥{{ fen2yuan(item.usePrice) }}可用 </view>
             </view>
             <view class="model-content-title2">
               <view class="contBu">
-                {{item.name}}
+                {{ item.name }}
               </view>
               <view class="ss-m-b-24 cotBu-txt">
-                {{item.validityType==1?formatDateRange(item.validStartTime,item.validEndTime) : '领取后'+item.fixedStartTerm+'-'+item.fixedEndTerm +'天可用'}}
+                {{
+                  item.validityType == 1
+                    ? sheep.$helper.timeFormat(item.validStartTime, 'yyyy.mm.dd') -
+                      sheep.$helper.timeFormat(item.validEndTime, 'yyyy.mm.dd')
+                    : '领取后' + item.fixedStartTerm + '-' + item.fixedEndTerm + '天可用'
+                }}
               </view>
             </view>
-            <view class="coupon" @click.stop="getBuy(item.id)" v-if="item.canTake">
-              立即领取
-            </view>
-            <view class="coupon2" v-else>
-              已领取
-            </view>
+            <view class="coupon" @click.stop="getBuy(item.id)" v-if="item.canTake"> 立即领取 </view>
+            <view class="coupon2" v-else> 已领取 </view>
           </view>
         </view>
       </scroll-view>
@@ -104,21 +72,12 @@
 </template>
 <script setup>
   import sheep from '@/sheep';
-  import {
-    computed,
-    reactive,
-    watch
-  } from 'vue';
-  import RewardActivityApi from '@/sheep/api/promotion/rewardActivity';
-  import {
-    fen2yuan,
-    formatDateRange,
-    handActitList
-  } from '@/sheep/hooks/useGoods';
+  import { computed, reactive } from 'vue';
+  import { fen2yuan } from '@/sheep/hooks/useGoods';
   const props = defineProps({
     modelValue: {
       type: Object,
-      default () {},
+      default() {},
     },
     show: {
       type: Boolean,
@@ -127,26 +86,10 @@
   });
   const emits = defineEmits(['close']);
   const state = reactive({
-    activityInfo: computed(() => props.modelValue.activityInfo),
-    activityMap: {},
-    couponInfo: computed(() => props.modelValue.couponInfo)
+    rewardActivity: computed(() => props.modelValue.rewardActivity),
+    couponInfo: computed(() => props.modelValue.couponInfo),
   });
-  watch(
-    () => props.show,
-    () => {
-      // 展示的情况下，加载每个活动的详细信息
-      if (props.show) {
-        state.activityInfo?.forEach(activity => {
-          RewardActivityApi.getRewardActivity(activity.id).then(res => {
-            if (res.code !== 0) {
-              return;
-            }
-            state.activityMap[activity.id] = handActitList(res.data.rules);
-          })
-        });
-      }
-    },
-  );
+
   // 领取优惠劵
   const getBuy = (id) => {
     emits('get', id);
