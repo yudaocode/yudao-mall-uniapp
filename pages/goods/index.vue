@@ -7,47 +7,30 @@
       <!-- 骨架屏 -->
       <detailSkeleton v-if="state.skeletonLoading" />
       <!-- 下架/售罄提醒 -->
-      <s-empty v-else-if="state.goodsInfo === null" text="商品不存在或已下架" icon="/static/soldout-empty.png" showAction
-               actionText="再逛逛" actionUrl="/pages/goods/list" />
+      <s-empty
+        v-else-if="state.goodsInfo === null"
+        text="商品不存在或已下架"
+        icon="/static/soldout-empty.png"
+        showAction
+        actionText="再逛逛"
+        actionUrl="/pages/goods/list"
+      />
       <block v-else>
         <view class="detail-swiper-selector">
           <!-- 商品轮播图  -->
-          <su-swiper class="ss-m-b-14" isPreview :list="formatGoodsSwiper(state.goodsInfo.sliderPicUrls)"
-                     otStyle="tag" imageMode="widthFix" dotCur="bg-mask-40" :seizeHeight="750" />
-          <!-- 限时折扣 -->
-          <view class="discount" v-if="setShow">
-            <image class="disImg" src="../../static/images/dis.png"></image>
-            <view class="discountCont">
-              <view class="disContT">
-                <view class="disContT1">
-                  <view class="disContT1P">
-                    ￥{{fen2yuan(settleData.price)}}
-                  </view>
-                  <view class="disContT1End">
-                    直降￥{{fen2yuan( state.goodsInfo.price - settleData.price)}}
-                  </view>
-                </view>
-                <view class="disContT2">
-                  限时折扣
-                </view>
-              </view>
-              <view class="disContB">
-                <view class="disContB1">
-                  价格：￥{{fen2yuan(state.goodsInfo.price)}} 丨 剩余：{{settleData.stock}}
-                </view>
-                <view class="disContB2">
-                  距结束仅剩
-                  <countDown :tipText="' '" :bgColor="bgColor" :dayText="':'" :hourText="':'"
-                             :minuteText="':'" :secondText="' '" :datatime="settleData.endTime / 1000"
-                             :isDay="false" />
-                </view>
-              </view>
-            </view>
-          </view>
-          <!-- 限时折扣 -->
+          <su-swiper
+            class="ss-m-b-14"
+            isPreview
+            :list="formatGoodsSwiper(state.goodsInfo.sliderPicUrls)"
+            otStyle="tag"
+            imageMode="widthFix"
+            dotCur="bg-mask-40"
+            :seizeHeight="750"
+          />
+
           <!-- 价格+标题 -->
           <view class="title-card detail-card ss-p-y-40 ss-p-x-20">
-            <view class="ss-flex ss-row-between ss-col-center ss-m-b-26" v-if="!setShow">
+            <view class="ss-flex ss-row-between ss-col-center ss-m-b-26">
               <view class="price-box ss-flex ss-col-bottom">
                 <view class="price-text ss-m-r-16">
                   {{ fen2yuan(state.selectedSku.price || state.goodsInfo.price) }}
@@ -64,16 +47,23 @@
               <!-- 满减送/限时折扣活动的提示 -->
               <div class="tag-content">
                 <view class="tag-box ss-flex">
-                  <view class="tag ss-m-r-10" v-for="promos in state.activityInfo" :key="promos.id"
-                        @tap="onActivity">
+                  <view
+                    class="tag ss-m-r-10"
+                    v-for="promos in state.activityInfo"
+                    :key="promos.id"
+                    @tap="onActivity"
+                  >
                     {{ promos.name }}
                   </view>
                 </view>
               </div>
 
-              <!-- 优惠劵@tap="state.showModel = true" -->
-              <view class="get-coupon-box ss-flex ss-col-center ss-m-l-20" @tap="onActivity"
-                    v-if="state.couponInfo.length">
+              <!-- 优惠劵 -->
+              <view
+                class="get-coupon-box ss-flex ss-col-center ss-m-l-20"
+                @tap="state.showModel = true"
+                v-if="state.couponInfo.length"
+              >
                 <view class="discounts-title ss-m-r-8">领券</view>
                 <text class="cicon-forward"></text>
               </view>
@@ -84,30 +74,51 @@
 
           <!-- 功能卡片 -->
           <view class="detail-cell-card detail-card ss-flex-col">
-            <detail-cell-sku v-model="state.selectedSku.goods_sku_text" :sku="state.selectedSku"
-                             @tap="state.showSelectSku = true" />
+            <detail-cell-sku
+              v-model="state.selectedSku.goods_sku_text"
+              :sku="state.selectedSku"
+              @tap="state.showSelectSku = true"
+            />
           </view>
 
           <!-- 规格与数量弹框 -->
-          <s-select-sku :goodsInfo="state.goodsInfo" :show="state.showSelectSku" @addCart="onAddCart"
-                        @buy="onBuy" @change="onSkuChange" @close="state.showSelectSku = false" />
+          <s-select-sku
+            :goodsInfo="state.goodsInfo"
+            :show="state.showSelectSku"
+            @addCart="onAddCart"
+            @buy="onBuy"
+            @change="onSkuChange"
+            @close="state.showSelectSku = false"
+          />
         </view>
 
         <!-- 评价 -->
         <detail-comment-card class="detail-comment-selector" :goodsId="state.goodsId" />
         <!-- 详情 -->
-        <detail-content-card class="detail-content-selector" :content="state.goodsInfo.description" />
+        <detail-content-card
+          class="detail-content-selector"
+          :content="state.goodsInfo.description"
+        />
 
         <!-- 活动跳转：拼团/秒杀/砍价活动 -->
-        <detail-activity-tip v-if="state.activityList.length > 0" :activity-list="state.activityList" />
+        <detail-activity-tip
+          v-if="state.activityList.length > 0"
+          :activity-list="state.activityList"
+        />
 
         <!-- 详情 tabbar -->
         <detail-tabbar v-model="state.goodsInfo">
           <view class="buy-box ss-flex ss-col-center ss-p-r-20" v-if="state.goodsInfo.stock > 0">
-            <button class="ss-reset-button add-btn ui-Shadow-Main" @tap="state.showSelectSku = true">
+            <button
+              class="ss-reset-button add-btn ui-Shadow-Main"
+              @tap="state.showSelectSku = true"
+            >
               加入购物车
             </button>
-            <button class="ss-reset-button buy-btn ui-Shadow-Main" @tap="state.showSelectSku = true">
+            <button
+              class="ss-reset-button buy-btn ui-Shadow-Main"
+              @tap="state.showSelectSku = true"
+            >
               立即购买
             </button>
           </view>
@@ -117,38 +128,32 @@
         </detail-tabbar>
 
         <!-- 优惠劵弹窗 -->
-        <!-- <s-coupon-get v-model="state.couponInfo" :show="state.showModel" @close="state.showModel = false"
-          @get="onGet" /> -->
+        <s-coupon-get
+          v-model="state.couponInfo"
+          :show="state.showModel"
+          @close="state.showModel = false"
+          @get="onGet"
+        />
 
         <!-- 满减送/限时折扣活动弹窗 -->
-        <s-activity-pop v-model="state" :show="state.showActivityModel"
-                        @close="state.showActivityModel = false" @get="onGet" />
+        <s-activity-pop
+          v-model="state.activityInfo"
+          :show="state.showActivityModel"
+          @close="state.showActivityModel = false"
+        />
       </block>
     </s-layout>
   </view>
 </template>
 
 <script setup>
-  import {
-    reactive,
-    computed,
-    ref
-  } from 'vue';
-  import {
-    onLoad,
-    onPageScroll
-  } from '@dcloudio/uni-app';
+  import { reactive, computed } from 'vue';
+  import { onLoad, onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import CouponApi from '@/sheep/api/promotion/coupon';
   import ActivityApi from '@/sheep/api/promotion/activity';
   import FavoriteApi from '@/sheep/api/product/favorite';
-  import {
-    formatSales,
-    formatGoodsSwiper,
-    fen2yuan,
-    handList,
-    handListPrice
-  } from '@/sheep/hooks/useGoods';
+  import { formatSales, formatGoodsSwiper, fen2yuan } from '@/sheep/hooks/useGoods';
   import detailNavbar from './components/detail/detail-navbar.vue';
   import detailCellSku from './components/detail/detail-cell-sku.vue';
   import detailTabbar from './components/detail/detail-tabbar.vue';
@@ -156,22 +161,11 @@
   import detailCommentCard from './components/detail/detail-comment-card.vue';
   import detailContentCard from './components/detail/detail-content-card.vue';
   import detailActivityTip from './components/detail/detail-activity-tip.vue';
-  import {
-    isEmpty
-  } from 'lodash-es';
+  import { isEmpty } from 'lodash-es';
   import SpuApi from '@/sheep/api/product/spu';
 
-  onPageScroll(() => {
-  });
-  import countDown from '@/sheep/components/countDown/index.vue'
+  onPageScroll(() => {});
 
-  const bgColor = {
-    'bgColor': '#E93323',
-    'Color': '#fff',
-    'width': '44rpx',
-    'timeTxtwidth': '16rpx',
-    'isDay': true
-  }
   const isLogin = computed(() => sheep.$store('user').isLogin);
   const state = reactive({
     goodsId: 0,
@@ -182,19 +176,13 @@
     showModel: false, // 是否展示 Coupon 优惠劵的弹窗
     couponInfo: [], // 可领取的 Coupon 优惠劵的列表
     showActivityModel: false, // 【满减送/限时折扣】是否展示 Activity 营销活动的弹窗
-    activityInfo: [], // 【满减送/限时折扣】可参与的 Activity 营销活动的列表
+    activityInfo: [], // 【满减送/限时折扣】可参与的 Activity 营销活动的列表 TODO 芋艿：正在接入中
     activityList: [], // 【秒杀/拼团/砍价】可参与的 Activity 营销活动的列表
   });
 
   // 规格变更
   function onSkuChange(e) {
-    if (e.type == 4) {
-      settleData.value = e
-      setShow.value = true
-    } else {
-      state.selectedSku = e;
-      setShow.value = false
-    }
+    state.selectedSku = e;
   }
 
   // 添加购物车
@@ -208,17 +196,19 @@
 
   // 立即购买
   function onBuy(e) {
-    if (!e.id) {
+    if (!state.selectedSku.id) {
       sheep.$helper.toast('请选择商品规格');
       return;
     }
     sheep.$router.go('/pages/order/confirm', {
       data: JSON.stringify({
-        items: [{
-          skuId: e.id,
-          count: e.goods_num,
-          categoryId: state.goodsInfo.categoryId
-        }]
+        items: [
+          {
+            skuId: e.id,
+            count: e.goods_num,
+            categoryId: state.goodsInfo.categoryId,
+          },
+        ],
       }),
     });
   }
@@ -230,9 +220,7 @@
 
   // 立即领取
   async function onGet(id) {
-    const {
-      code
-    } = await CouponApi.takeCoupon(id);
+    const { code } = await CouponApi.takeCoupon(id);
     if (code !== 0) {
       return;
     }
@@ -244,67 +232,33 @@
     }, 1000);
   }
 
-  //  TODO 芋艿：待测试
   const shareInfo = computed(() => {
     if (isEmpty(state.goodsInfo)) return {};
-    return sheep.$platform.share.getShareInfo({
-      title: state.goodsInfo.name,
-      image: sheep.$url.cdn(state.goodsInfo.picUrl),
-      desc: state.goodsInfo.introduction,
-      params: {
-        page: '2',
-        query: state.goodsInfo.id,
+    return sheep.$platform.share.getShareInfo(
+      {
+        title: state.goodsInfo.name,
+        image: sheep.$url.cdn(state.goodsInfo.picUrl),
+        desc: state.goodsInfo.introduction,
+        params: {
+          page: '2',
+          query: state.goodsInfo.id,
+        },
       },
-    }, {
-      type: 'goods', // 商品海报
-      title: state.goodsInfo.name, // 商品名称
-      image: sheep.$url.cdn(state.goodsInfo.picUrl), // 商品主图
-      price: fen2yuan(state.goodsInfo.price), // 商品价格
-      original_price: fen2yuan(state.goodsInfo.marketPrice), // 商品原价
-    });
+      {
+        type: 'goods', // 商品海报
+        title: state.goodsInfo.name, // 商品名称
+        image: sheep.$url.cdn(state.goodsInfo.picUrl), // 商品主图
+        price: fen2yuan(state.goodsInfo.price), // 商品价格
+        original_price: fen2yuan(state.goodsInfo.marketPrice), // 商品原价
+      },
+    );
   });
 
   async function getCoupon() {
-    const {
-      code,
-      data
-    } = await CouponApi.getCouponTemplateList(state.goodsId, 2, 10);
+    const { code, data } = await CouponApi.getCouponTemplateList(state.goodsId, 2, 10);
     if (code === 0) {
       state.couponInfo = data;
     }
-  }
-
-  //获取结算信息
-  const setShow = ref(false)
-  const settleData = ref()
-
-  async function getSettlementByIds(ids) {
-    const { data } = await SpuApi.getSettlementProduct(ids);
-    settleData.value = handle(data)
-    state.goodsInfo.skus = handListPrice(state.goodsInfo.skus, data[0].skus)
-  }
-
-  //判断是否有限时折扣信息
-  function handle(array) {
-    let setList = {}
-    array.some(item => {
-      return item.skus.some(items => {
-        if (items.type === 4) {
-          setShow.value = true;
-          setList = items;
-          return true; // 返回true以结束some循环
-        }
-        return false; // 继续遍历
-      });
-    });
-    // 将库存信息加入
-    state.goodsInfo.skus.forEach(item => {
-      if (item.id == setList.skuId) {
-        setList.stock = item.stock
-      }
-    })
-
-    return setList
   }
 
   onLoad((options) => {
@@ -324,6 +278,7 @@
       // 加载到商品
       state.skeletonLoading = false;
       state.goodsInfo = res.data;
+
       // 加载是否收藏
       if (isLogin.value) {
         FavoriteApi.isFavoriteExists(state.goodsId, 'goods').then((res) => {
@@ -338,24 +293,13 @@
     // 2. 加载优惠劵信息
     getCoupon();
 
-    // 3. 加载营销活动信息
+    // 3. 获得单个商品，进行中的拼团、秒杀、砍价活动信息
     ActivityApi.getActivityListBySpuId(state.goodsId).then((res) => {
       if (res.code !== 0) {
         return;
       }
-      let activData = handList(res.data)
-      activData.forEach(activity => {
-        if ([1, 2, 3].includes(activity.type)) { // 情况一：拼团/秒杀/砍价
-          state.activityList.push(activity);
-        } else if (activity.type === 5) { // 情况二：满减送
-          state.activityInfo.push(activity);
-        } else { // 情况三：限时折扣 TODO 芋艿
-          // console.log('待实现！优先级不高');
-        }
-      })
+      state.activityList = res.data;
     });
-    //获取结算信息
-    getSettlementByIds(state.goodsId)
   });
 </script>
 
@@ -503,102 +447,5 @@
       font-weight: 500;
       color: #333333;
     }
-  }
-
-  // 限时折扣
-  .discount {
-    width: 750rpx;
-    height: 100rpx;
-    // background-color: red;
-    overflow: hidden;
-    position: relative;
-  }
-
-  .disImg {
-    width: 750rpx;
-    height: 100rpx;
-    position: absolute;
-    top: 0;
-    z-index: -1;
-  }
-
-  .discountCont {
-    width: 680rpx;
-    height: 90rpx;
-    margin: 10rpx auto 0 auto;
-    // background-color: gold;
-  }
-
-  .disContT {
-    width: 680rpx;
-    height: 50rpx;
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .disContT1 {
-    width: 400rpx;
-    height: 50rpx;
-    // background-color: green;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-  }
-
-  .disContT2 {
-    width: 200rpx;
-    height: 50rpx;
-    line-height: 50rpx;
-    // background-color: gold;
-    font-size: 30rpx;
-    text-align: end;
-    color: white;
-    font-weight: bolder;
-    font-style: oblique 20deg;
-    letter-spacing: .1rem;
-  }
-
-  .disContT1P {
-    color: white;
-    font-weight: bold;
-    font-size: 28rpx;
-  }
-
-  .disContT1End {
-    // width: 180rpx;
-    padding: 0 10rpx;
-    height: 30rpx;
-    line-height: 28rpx;
-    text-align: center;
-    font-weight: bold;
-    background-color: white;
-    color: #ff3000;
-    font-size: 23rpx;
-    border-radius: 20rpx;
-    margin-left: 10rpx;
-  }
-
-  .disContB {
-    width: 680rpx;
-    height: 40rpx;
-    display: flex;
-    justify-content: space-between;
-    font-size: 20rpx;
-    color: white;
-    align-items: center;
-  }
-
-  .disContB1 {
-    width: 300rpx;
-    height: 40rpx;
-    line-height: 40rpx;
-  }
-
-  .disContB2 {
-    width: 300rpx;
-    height: 40rpx;
-    line-height: 40rpx;
-    display: flex;
-    justify-content: flex-end;
   }
 </style>

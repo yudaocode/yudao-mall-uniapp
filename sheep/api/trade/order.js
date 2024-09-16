@@ -1,4 +1,5 @@
 import request from '@/sheep/request';
+import { isEmpty } from '@/sheep/helper/utils';
 
 const OrderApi = {
   // 计算订单信息
@@ -12,6 +13,15 @@ const OrderApi = {
     }
     if (!(data.addressId > 0)) {
       delete data2.addressId;
+    }
+    if (!(data.pickUpStoreId > 0)) {
+      delete data2.pickUpStoreId;
+    }
+    if (isEmpty(data.receiverName)) {
+      delete data2.receiverName;
+    }
+    if (isEmpty(data.receiverMobile)) {
+      delete data2.receiverMobile;
     }
     if (!(data.combinationActivityId > 0)) {
       delete data2.combinationActivityId;

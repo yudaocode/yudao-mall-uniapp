@@ -62,7 +62,7 @@
         </view>
       </view>
 
-      <!-- 签到说明 TODO @科举：这里改成【已累计签到】 -->
+      <!-- 签到说明 TODO @芋艿：【签到】这里改成【已累计签到】；改版，接入 sheepjs  -->
       <view class="bg-white ss-m-t-16 ss-p-t-30 ss-p-b-60 ss-p-x-40">
         <view class="activity-title ss-m-b-30">签到说明</view>
         <view class="activity-des">1、已累计签到{{state.signInfo.totalDay}}天</view>
@@ -110,7 +110,7 @@
     signInfo: {}, // 签到信息
 
     signConfigList: [], // 签到配置列表
-    maxDay: 0, // 最大的签到天数 
+    maxDay: 0, // 最大的签到天数
 
     showModel: false, // 签到弹框
     signResult: {}, // 签到结果

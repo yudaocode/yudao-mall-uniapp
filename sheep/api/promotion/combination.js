@@ -2,15 +2,6 @@ import request from '@/sheep/request';
 
 // 拼团 API
 const CombinationApi = {
-  // 获得拼团活动列表
-  getCombinationActivityList: (count) => {
-    return request({
-      url: '/promotion/combination-activity/list',
-      method: 'GET',
-      params: { count },
-    });
-  },
-
   // 获得拼团活动分页
   getCombinationActivityPage: (params) => {
     return request({
@@ -31,6 +22,17 @@ const CombinationApi = {
     });
   },
 
+  // 获得拼团活动列表，基于活动编号数组
+  getCombinationActivityListByIds: (ids) => {
+    return request({
+      url: '/promotion/combination-activity/list-by-ids',
+      method: 'GET',
+      params: {
+        ids,
+      },
+    });
+  },
+
   // 获得最近 n 条拼团记录（团长发起的）
   getHeadCombinationRecordList: (activityId, status, count) => {
     return request({
@@ -47,9 +49,9 @@ const CombinationApi = {
   // 获得我的拼团记录分页
   getCombinationRecordPage: (params) => {
     return request({
-      url: "/promotion/combination-record/page",
+      url: '/promotion/combination-record/page',
       method: 'GET',
-      params
+      params,
     });
   },
 

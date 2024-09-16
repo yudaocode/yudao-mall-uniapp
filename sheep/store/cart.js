@@ -57,7 +57,13 @@ const cart = defineStore({
 
     // 移除购物车
     async delete(ids) {
-      const { code } = await CartApi.deleteCart(ids.join(','));
+      let idsTemp = '';
+      if (Array.isArray(ids)) {
+        idsTemp = ids.join(',');
+      } else {
+        idsTemp = ids;
+      }
+      const { code } = await CartApi.deleteCart(idsTemp);
       if (code === 0) {
         await this.getList();
       }

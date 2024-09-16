@@ -82,12 +82,12 @@ const groupon = async (poster) => {
       type: 'text',
       text: '2人团',
       css: {
-        color: '#ff0000',
-        fontSize: 30,
+        color: '#fff',
+        fontSize: 12,
         fontFamily: 'OPPOSANS',
         position: 'fixed',
-        left: width * 0.3,
-        top: width * 1.32,
+        left: width * 0.84,
+        top: width * 1.3,
       },
     },
     // #ifndef MP-WEIXIN
@@ -96,7 +96,7 @@ const groupon = async (poster) => {
       text: poster.shareInfo.link,
       css: {
         position: 'fixed',
-        left: width * 0.75,
+        left: width * 0.5,
         top: width * 1.3,
         width: width * 0.2,
         height: width * 0.2,

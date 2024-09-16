@@ -70,8 +70,8 @@
       default() {},
     },
   });
-  const { mode, goodsFields, mpliveIds } = props.data ?? {};
-  const { marginLeft, marginRight } = props.styles ?? {};
+  const { mode, goodsFields, mpliveIds } = props.data || {};
+  const { marginLeft, marginRight } = props.styles || {};
 
   async function getLiveListByIds(ids) {
     const { data } = await sheep.$api.app.mplive.getRoomList(ids);

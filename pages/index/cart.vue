@@ -107,6 +107,7 @@
 				skuId: item.sku.id,
 				count: item.count,
 				cartId: item.id,
+				categoryId: item.spu.categoryId
 			})
 			goods_list.push({
 				// goods_id: item.goods_id,
@@ -124,12 +125,7 @@
 		}
 		sheep.$router.go('/pages/order/confirm', {
 			data: JSON.stringify({
-				// order_type: 'goods',
-				// goods_list,
-				items,
-				// from: 'cart',
-				deliveryType: 1,
-				pointStatus: false,
+				items
 			}),
 		});
 	}

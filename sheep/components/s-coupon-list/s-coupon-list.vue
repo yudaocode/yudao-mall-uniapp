@@ -37,30 +37,22 @@
         <view class="ss-flex ss-row-between ss-m-t-16">
           <view
             class="sellby-text"
-            :class=" isDisable ? 'disabled-color' : 'subtitle-color'"
+            :class="isDisable ? 'disabled-color' : 'subtitle-color'"
             v-if="data.validityType === 2"
           >
             有效期：领取后 {{ data.fixedEndTerm }} 天内可用
           </view>
-          <view
-            class="sellby-text"
-            :class=" isDisable ? 'disabled-color' : 'subtitle-color'"
-            v-else
-          >
+          <view class="sellby-text" :class="isDisable ? 'disabled-color' : 'subtitle-color'" v-else>
             有效期: {{ sheep.$helper.timeFormat(data.validStartTime, 'yyyy-mm-dd') }} 至
             {{ sheep.$helper.timeFormat(data.validEndTime, 'yyyy-mm-dd') }}
           </view>
-          <view
-            class="value-enough"
-            :class="isDisable ? 'disabled-color' : 'subtitle-color'"
-          >
+          <view class="value-enough" :class="isDisable ? 'disabled-color' : 'subtitle-color'">
             满 {{ fen2yuan(data.usePrice) }} 可用
           </view>
         </view>
       </view>
     </view>
 
-    <!-- TODO 芋艿：可优化，增加优惠劵的描述 -->
     <view class="desc ss-flex ss-row-between">
       <view>
         <view class="desc-title">{{ data.description }}</view>
@@ -76,17 +68,15 @@
 </template>
 
 <script setup>
-  import { computed, reactive } from 'vue';
+  import { computed } from 'vue';
   import { fen2yuan } from '../../hooks/useGoods';
   import sheep from '../../index';
-
-  const state = reactive({});
 
   const isDisable = computed(() => {
     if (props.type === 'coupon') {
       return false;
     }
-    return props.data.status !== 1;
+    return props.disabled;
   });
 
   // 接受参数

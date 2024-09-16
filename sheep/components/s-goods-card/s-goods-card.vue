@@ -3,7 +3,10 @@
   <!-- 商品卡片 -->
   <view>
     <!-- 布局1. 单列大图（上图，下内容）-->
-    <view v-if="layoutType === LayoutTypeEnum.ONE_COL_BIG_IMG && state.goodsList.length" class="goods-sl-box">
+    <view
+      v-if="layoutType === LayoutTypeEnum.ONE_COL_BIG_IMG && state.goodsList.length"
+      class="goods-sl-box"
+    >
       <view
         class="goods-box"
         v-for="item in state.goodsList"
@@ -100,7 +103,10 @@
     </view>
 
     <!-- 布局3. 单列小图（左图，右内容） -->
-    <view v-if="layoutType === LayoutTypeEnum.ONE_COL_SMALL_IMG && state.goodsList.length" class="goods-lg-box">
+    <view
+      v-if="layoutType === LayoutTypeEnum.ONE_COL_SMALL_IMG && state.goodsList.length"
+      class="goods-lg-box"
+    >
       <view
         class="goods-box"
         :style="[{ marginBottom: data.space + 'px' }]"
@@ -147,7 +153,7 @@
     TWO_COL: 'twoCol',
     // 单列小图
     ONE_COL_SMALL_IMG: 'oneColSmallImg',
-  }
+  };
 
   const state = reactive({
     goodsList: [],
@@ -157,16 +163,16 @@
   const props = defineProps({
     data: {
       type: Object,
-      default() {},
+      default: () => ({}),
     },
     styles: {
       type: Object,
-      default() {},
+      default: () => ({}),
     },
   });
 
-  const { layoutType, btnBuy, spuIds } = props.data ?? {};
-  const { marginLeft, marginRight } = props.styles ?? {};
+  const { layoutType, btnBuy, spuIds } = props.data || {};
+  const { marginLeft, marginRight } = props.styles || {};
 
   // 购买按钮样式
   const buyStyle = computed(() => {
@@ -215,6 +221,7 @@
     // 计数
     count++;
   }
+
   //endregion
 
   /**
@@ -283,7 +290,7 @@
     settleData.value = await getSettlementByIds(spuIds.join(','))
     state.goodsList = await enrichDataWithSkus(ms,settleData.value)
     // 只有双列布局时需要
-    if (layoutType === LayoutTypeEnum.TWO_COL){
+    if (layoutType === LayoutTypeEnum.TWO_COL) {
       // 分列
       calculateGoodsColumn();
     }
@@ -298,11 +305,13 @@
   .goods-list-box {
     width: 50%;
     box-sizing: border-box;
+
     .left-list {
       &:nth-last-child(1) {
         margin-bottom: 0 !important;
       }
     }
+
     .right-list {
       &:nth-last-child(1) {
         margin-bottom: 0 !important;

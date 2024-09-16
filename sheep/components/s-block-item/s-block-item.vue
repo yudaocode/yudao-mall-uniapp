@@ -9,7 +9,7 @@
     <!-- 基础组件：列表导航 -->
     <s-menu-list v-if="type === 'MenuList'" :data="data" />
     <!-- 基础组件：宫格导航 -->
-    <s-menu-grid v-if="type === 'MenuGrid'" :data="data" />
+    <s-menu-grid v-if="type === 'MenuGrid'" :data="data" :styles="styles" />
     <!-- 基础组件：弹窗广告 -->
     <s-popup-image v-if="type === 'Popover'" :data="data" />
     <!-- 基础组件：悬浮按钮 -->
@@ -47,13 +47,13 @@
     <s-richtext-block v-if="type === 'PromotionArticle'" :data="data" :styles="styles" />
 
     <!-- 用户组件：用户卡片 -->
-    <s-user-card v-if="type === 'UserCard'" />
+    <s-user-card v-if="type === 'UserCard'" :data="data" :styles="styles" />
     <!-- 用户组件：用户订单 -->
-    <s-order-card v-if="type === 'UserOrder'" :data="data" />
+    <s-order-card v-if="type === 'UserOrder'" :data="data" :styles="styles" />
     <!-- 用户组件：用户资产 -->
-    <s-wallet-card v-if="type === 'UserWallet'" />
+    <s-wallet-card v-if="type === 'UserWallet'" :data="data" :styles="styles" />
     <!-- 用户组件：用户卡券 -->
-    <s-coupon-card v-if="type === 'UserCoupon'" />
+    <s-coupon-card v-if="type === 'UserCoupon'" :data="data" :styles="styles" />
   </view>
 </template>
 

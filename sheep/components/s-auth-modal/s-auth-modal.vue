@@ -10,7 +10,11 @@
       />
 
       <!-- 2. 短信登录  smsLogin -->
-      <sms-login v-if="authType === 'smsLogin'" :agreeStatus="state.protocol" @onConfirm="onConfirm" />
+      <sms-login
+        v-if="authType === 'smsLogin'"
+        :agreeStatus="state.protocol"
+        @onConfirm="onConfirm"
+      />
 
       <!-- 3. 忘记密码 resetPassword-->
       <reset-password v-if="authType === 'resetPassword'" />
@@ -32,7 +36,11 @@
         <!-- 7.1 微信小程序的快捷登录 -->
         <view v-if="sheep.$platform.name === 'WechatMiniProgram'" class="ss-flex register-box">
           <view class="register-title">还没有账号?</view>
-          <button class="ss-reset-button login-btn" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">
+          <button
+            class="ss-reset-button login-btn"
+            open-type="getPhoneNumber"
+            @getphonenumber="getPhoneNumber"
+          >
             快捷登录
           </button>
           <view class="circle" />
@@ -81,17 +89,13 @@
           />
           <view class="agreement-text ss-flex ss-col-center ss-m-l-8">
             我已阅读并遵守
-            <view class="tcp-text" @tap.stop="onProtocol('用户协议')">
-              《用户协议》
-            </view>
+            <view class="tcp-text" @tap.stop="onProtocol('用户协议')"> 《用户协议》 </view>
             <view class="agreement-text">与</view>
-            <view class="tcp-text" @tap.stop="onProtocol('隐私协议')">
-              《隐私协议》
-            </view>
+            <view class="tcp-text" @tap.stop="onProtocol('隐私协议')"> 《隐私协议》 </view>
           </view>
         </label>
       </view>
-      <view class="safe-box"/>
+      <view class="safe-box" />
     </view>
   </su-popup>
 </template>
@@ -106,8 +110,6 @@
   import changePassword from './components/change-password.vue';
   import mpAuthorization from './components/mp-authorization.vue';
   import { closeAuthModal, showAuthModal } from '@/sheep/hooks/useModal';
-
-  const appInfo = computed(() => sheep.$store('app').info);
 
   const modalStore = sheep.$store('modal');
   // 授权弹窗类型
@@ -152,7 +154,13 @@
     }
     const loginRes = await sheep.$platform.useProvider(provider).login();
     if (loginRes) {
+      const userInfo = await sheep.$store('user').getInfo();
       closeAuthModal();
+      // 如果用户已经有头像和昵称，不需要再次授权
+      if (userInfo.avatar && userInfo.nickname) {
+        return;
+      }
+
       // 触发小程序授权信息弹框
       // #ifdef MP-WEIXIN
       showAuthModal('mpAuthorization');

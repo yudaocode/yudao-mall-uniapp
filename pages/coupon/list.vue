@@ -107,7 +107,6 @@
     },
   ];
 
-  // TODO yunai:
   function onTabsChange(e) {
     state.currentTab = e.index;
     state.type = e.value;

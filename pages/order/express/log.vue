@@ -12,7 +12,7 @@
           </swiper>
         </uni-swiper-dot>
         <view class="log-card-msg">
-          <!-- TODO 芋艿：优化点：展示状态 -->
+          <!-- TODO 芋艿：【物流】优化点：展示状态 -->
 <!--          <view class="ss-flex ss-m-b-8">-->
 <!--            <view>物流状态：</view>-->
 <!--            <view class="warning-color">{{ state.info.status_text }}</view>-->
@@ -34,7 +34,7 @@
             <view v-if="state.tracks.length - 1 !== index" class="line" />
           </view>
           <view class="log-content-msg">
-            <!-- TODO 芋艿：优化点：展示状态 -->
+            <!-- TODO 芋艿：【物流】优化点：展示状态 -->
 <!--            <view class="log-msg-title ss-m-b-20">-->
 <!--              {{ item.status_text }}-->
 <!--            </view>-->

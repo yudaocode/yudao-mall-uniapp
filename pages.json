@@ -307,6 +307,18 @@
 						"title": "编辑地址"
 					}
 				},
+                {
+                  "path": "goods_details_store/index",
+                  "style": {
+                    "navigationBarTitleText": "自提门店"
+                  },
+                  "meta": {
+                    "auth": true,
+                    "sync": true,
+                    "title": "地址管理",
+                    "group": "用户中心"
+                  }
+                },
 				{
 					"path": "wallet/money",
 					"style": {

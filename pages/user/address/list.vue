@@ -39,8 +39,8 @@
 </template>
 
 <script setup>
-  import { reactive, onBeforeMount } from 'vue';
-  import { onShow } from '@dcloudio/uni-app';
+  import { onBeforeMount, reactive } from 'vue';
+  import { onShow, onLoad } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import { isEmpty } from 'lodash-es';
   import AreaApi from '@/sheep/api/system/area';
@@ -49,10 +49,14 @@
   const state = reactive({
     list: [], // 地址列表
     loading: true,
+    openType: '', // 页面打开类型
   });
 
   // 选择收货地址
   const onSelect = (addressInfo) => {
+    if (state.openType !== 'select'){ // 不作为选择组件时阻断操作
+      return
+    }
     uni.$emit('SELECT_ADDRESS', {
       addressInfo,
     });
@@ -60,7 +64,6 @@
   };
 
   // 导入微信地址
-  // TODO 芋艿：未测试
   function importWechatAddress() {
     let wechatAddress = {};
     // #ifdef MP
@@ -109,6 +112,12 @@
     });
     // #endif
   }
+
+  onLoad((option) => {
+    if (option.type) {
+      state.openType = option.type;
+    }
+  });
 
   onShow(async () => {
     state.list = (await AddressApi.getAddressList()).data;

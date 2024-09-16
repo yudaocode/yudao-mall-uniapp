@@ -45,9 +45,9 @@
         </image>
         <view class="ss-font-30">{{ formatOrderStatus(state.orderInfo) }}</view>
       </view>
-      <view class="ss-font-26 ss-m-x-20 ss-m-b-70">{{
-        formatOrderStatusDescription(state.orderInfo)
-      }}</view>
+      <view class="ss-font-26 ss-m-x-20 ss-m-b-70">
+        {{ formatOrderStatusDescription(state.orderInfo) }}
+      </view>
     </view>
 
     <!-- 收货地址 -->
@@ -126,6 +126,9 @@
       </view>
     </view>
 
+    <!--  自提核销  -->
+    <PickUpVerify :order-info="state.orderInfo" :systemStore="systemStore" ref="pickUpVerifyRef"></PickUpVerify>
+
     <!-- 订单信息 -->
     <view class="notice-box">
       <view class="notice-box__content">
@@ -167,10 +170,13 @@
         <text class="title">运费</text>
         <text class="detail">￥{{ fen2yuan(state.orderInfo.deliveryPrice) }}</text>
       </view>
-      <!-- TODO 芋艿：优惠劵抵扣、积分抵扣 -->
       <view class="notice-item ss-flex ss-row-between" v-if="state.orderInfo.couponPrice > 0">
         <text class="title">优惠劵金额</text>
         <text class="detail">-¥{{ fen2yuan(state.orderInfo.couponPrice) }}</text>
+      </view>
+      <view class="notice-item ss-flex ss-row-between" v-if="state.orderInfo.pointPrice > 0">
+        <text class="title">积分抵扣</text>
+        <text class="detail">-¥{{ fen2yuan(state.orderInfo.pointPrice) }}</text>
       </view>
       <view class="notice-item ss-flex ss-row-between" v-if="state.orderInfo.discountPrice > 0">
         <text class="title">活动优惠</text>
@@ -251,7 +257,7 @@
 <script setup>
   import sheep from '@/sheep';
   import { onLoad } from '@dcloudio/uni-app';
-  import { reactive } from 'vue';
+  import { reactive, ref } from 'vue';
   import { isEmpty } from 'lodash-es';
   import {
     fen2yuan,
@@ -260,6 +266,8 @@
     handleOrderButtons,
   } from '@/sheep/hooks/useGoods';
   import OrderApi from '@/sheep/api/trade/order';
+  import DeliveryApi from '@/sheep/api/trade/delivery';
+  import PickUpVerify from '@/pages/order/pickUpVerify.vue';
 
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   const headerBg = sheep.$url.css('/static/img/shop/order/order_bg.png');
@@ -269,6 +277,9 @@
     merchantTradeNo: '', // 商户订单号
     comeinType: '', // 进入订单详情的来源类型
   });
+
+  // ========== 门店自提（核销） ==========
+  const systemStore = ref({}); // 门店信息
 
   // 复制
   const onCopy = () => {
@@ -294,7 +305,7 @@
     uni.showModal({
       title: '提示',
       content: '确定要取消订单吗?',
-      success: async function (res) {
+      success: async function(res) {
         if (!res.confirm) {
           return;
         }
@@ -313,7 +324,7 @@
     });
   }
 
-  // 确认收货 TODO 芋艿：待测试
+  // 确认收货
   async function onConfirm(orderId, ignore = false) {
     // 需开启确认收货组件
     // todo: 芋艿：待接入微信
@@ -366,6 +377,7 @@
       },
     });
   }
+
   // #endif
 
   // 评价
@@ -374,6 +386,8 @@
       id,
     });
   }
+
+  const pickUpVerifyRef = ref();
 
   async function getOrderDetail(id) {
     // 对详情数据进行适配
@@ -389,6 +403,14 @@
     if (res.code === 0) {
       state.orderInfo = res.data;
       handleOrderButtons(state.orderInfo);
+      // 配送方式：门店自提
+      if (res.data.pickUpStoreId) {
+        const { data } = await DeliveryApi.getDeliveryPickUpStore(res.data.pickUpStoreId);
+        systemStore.value = data || {};
+      }
+      if (state.orderInfo.deliveryType === 2 && state.orderInfo.payStatus) {
+        pickUpVerifyRef.value && pickUpVerifyRef.value.markCode(res.data.pickUpVerifyCode);
+      }
     } else {
       sheep.$router.back();
     }
@@ -429,7 +451,7 @@
     color: rgba(#fff, 0.9);
     width: 100%;
     background: v-bind(headerBg) no-repeat,
-      linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
+    linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
     background-size: 750rpx 100%;
     box-sizing: border-box;
 

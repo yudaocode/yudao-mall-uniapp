@@ -54,7 +54,7 @@
                 <view class="origin-price ss-flex ss-col-center" v-if="state.goodsInfo.price">
                   单买价：
                   <view class="origin-price-text">
-                    {{ fen2yuan(state.goodsInfo.price) }}
+                    {{ fen2yuan(state.goodsInfo.marketPrice) }}
                   </view>
                 </view>
               </view>
@@ -80,7 +80,7 @@
         <!-- 功能卡片 -->
         <view class="detail-cell-card detail-card ss-flex-col">
           <!-- 规格 -->
-          <detail-cell-sku :sku="state.selectedSkuPrice" @tap="state.showSelectSku = true" />
+          <detail-cell-sku :sku="state.selectedSku" @tap="state.showSelectSku = true" />
         </view>
 
         <!-- 参团列表 -->
@@ -104,7 +104,6 @@
       <detail-content-card class="detail-content-selector" :content="state.goodsInfo.description" />
 
       <!-- 商品tabbar -->
-      <!-- TODO: 已售罄、预热 判断 设计-->
       <detail-tabbar v-model="state.goodsInfo">
         <view class="buy-box ss-flex ss-col-center ss-p-r-20">
           <button
@@ -125,7 +124,12 @@
             :disabled="state.goodsInfo.stock === 0 || state.activity.status !== 0"
           >
             <view class="btn-price">{{
-              fen2yuan(state.activity.price || state.goodsInfo.price)
+              fen2yuan(
+                state.selectedSku.price * state.selectedSku.count ||
+                  state.activity.price * state.selectedSku.count ||
+                  state.goodsInfo.price * state.selectedSku.count ||
+                  state.goodsInfo.price,
+              )
             }}</view>
             <view v-if="state.activity.startTime > new Date().getTime()">未开始</view>
             <view v-else-if="state.activity.endTime <= new Date().getTime()">已结束</view>
@@ -168,7 +172,7 @@
     goodsInfo: {}, // 商品信息
     goodsSwiper: [], // 商品轮播图
     showSelectSku: false, // 显示规格弹框
-    selectedSkuPrice: {}, // 选中的规格价格
+    selectedSku: {}, // 选中的规格属性
     activity: {}, // 团购活动
     grouponId: 0, // 团购ID
     grouponNum: 0, // 团购人数
@@ -183,7 +187,7 @@
 
   // 规格变更
   function onSkuChange(e) {
-    state.selectedSkuPrice = e;
+    state.selectedSku = e;
   }
 
   function onSkuClose() {
@@ -199,6 +203,7 @@
 
   /**
    * 去参团
+   *
    * @param record 团长的团购记录
    */
   function onJoinGroupon(record) {
@@ -227,7 +232,6 @@
   }
 
   // 分享信息
-  // TODO @芋艿：分享的接入
   const shareInfo = computed(() => {
     if (isEmpty(state.activity)) return {};
     return sheep.$platform.share.getShareInfo(
@@ -262,9 +266,23 @@
     // 加载商品信息
     const { data: spu } = await SpuApi.getSpuDetail(activity.spuId);
     state.goodsId = spu.id;
-    activity.products.forEach((product) => {
-      spu.price = Math.min(spu.price, product.combinationPrice); // 设置 SPU 的最低价格
+
+    // 默认显示最低价
+    spu.price = activity.products.reduce((min, product) => {
+      return Math.min(min, product.combinationPrice || Infinity);
+    }, Infinity);
+
+    // 价格、库存使用活动的
+    spu.skus.forEach((sku) => {
+      const product = activity.products.find((product) => product.skuId === sku.id);
+      if (product) {
+        sku.price = product.combinationPrice;
+      } else {
+        // 找不到可能是没配置，则不能发起秒杀
+        sku.stock = 0;
+      }
     });
+
     // 关闭骨架屏
     state.skeletonLoading = false;
     if (code === 0) {

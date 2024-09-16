@@ -39,7 +39,6 @@
         <button class="check-btn ss-reset-button" v-if="payResult === 'success'" @tap="onOrder">
           查看订单
         </button>
-        <!-- TODO 芋艿：拼团接入 -->
         <button
           class="check-btn ss-reset-button"
           v-if="payResult === 'success' && state.tradeOrder.type === 3"

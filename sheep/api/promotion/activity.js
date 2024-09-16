@@ -1,7 +1,7 @@
 import request from '@/sheep/request';
 
 const ActivityApi = {
-  // 获得单个商品，近期参与的每个活动
+  // 获得单个商品，进行中的拼团、秒杀、砍价活动信息
   getActivityListBySpuId: (spuId) => {
     return request({
       url: '/promotion/activity/list-by-spu-id',
