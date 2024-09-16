@@ -1,23 +1,24 @@
 <template>
-  <su-popup :show="show" type="bottom" round="20" @close="emits('close')" showClose backgroundColor="#f2f2f2">
+  <su-popup
+    :show="show"
+    type="bottom"
+    round="20"
+    @close="emits('close')"
+    showClose
+    backgroundColor="#f2f2f2"
+  >
     <view class="model-box">
       <view class="title ss-m-t-38 ss-m-l-20 ss-m-b-40">活动优惠</view>
-      <scroll-view class="model-content ss-m-l-20" scroll-y :scroll-with-animation="false"
-                   :enable-back-to-top="true">
+      <scroll-view
+        class="model-content ss-m-l-20"
+        scroll-y
+        :scroll-with-animation="false"
+        :enable-back-to-top="true"
+      >
         <view v-for="(item, index) in state.orderInfo.promotions" :key="index">
-          <view class="ss-flex ss-m-b-40 subtitle">
-            <!-- <view>共{{ item.goods_ids.length }}件，</view>
-            <view v-if="item.activity_type === 'full_discount'">
-              满{{ item.discount_rule.full }}打{{ item.discount_rule.discount }}折,已减
-            </view>
-            <view v-if="item.activity_type === 'full_gift'">满赠</view>
-            <view v-if="item.activity_type === 'full_reduce'">
-              满{{ item.discount_rule.full }}减{{ item.discount_rule.discount }},已减
-            </view>
-            <view class="price-text">￥{{ item.promo_discount_money || '0.00' }}</view> -->
-            <view>
-              {{item.description}}
-            </view>
+          <!-- 不展示积分、优惠劵、会员折扣，因为它们已经单独展示了 -->
+          <view class="ss-flex ss-m-b-40 subtitle" v-if="[1, 2, 3, 4, 5, 6].includes(item.type)">
+            <view> {{ item.description }} </view>
           </view>
         </view>
       </scroll-view>
@@ -28,14 +29,7 @@
   </su-popup>
 </template>
 <script setup>
-  import {
-    computed,
-    reactive
-  } from 'vue';
-  import sheep from '@/sheep';
-  import {
-    fen2yuan
-  } from '@/sheep/hooks/useGoods';
+  import { computed, reactive } from 'vue';
   const props = defineProps({
     promoInfo: {
       type: Array,
@@ -47,7 +41,7 @@
     },
     modelValue: {
       type: Object,
-      default () {},
+      default() {},
     },
     show: {
       type: Boolean,
@@ -58,15 +52,6 @@
   const state = reactive({
     orderInfo: computed(() => props.modelValue),
   });
-  // const getGoodsImg = (e) => {
-  //   let goodsImg = '';
-  //   state.orderInfo.goods_list.forEach((i) => {
-  //     if (e == i.goods_id) {
-  //       goodsImg = i.goods.image;
-  //     }
-  //   });
-  //   return goodsImg;
-  // };
 </script>
 <style lang="scss" scoped>
   .model-box {
