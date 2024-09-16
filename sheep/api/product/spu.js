@@ -14,11 +14,11 @@ const SpuApi = {
     });
   },
   // 获得商品结算信息
-  getSettlementProduct: (ids) => {
+  getSettlementProduct: (spuIds) => {
     return request({
-      url: '/trade/order/settlementProduct',
+      url: '/trade/order/settlement-product',
       method: 'GET',
-      params: { ids },
+      params: { spuIds },
       custom: {
         showLoading: false,
         showError: false,
