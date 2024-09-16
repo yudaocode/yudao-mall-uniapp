@@ -38,8 +38,8 @@
                   state.coupon.status === 1
                     ? '可使用'
                     : state.coupon.status === 2
-                      ? '已使用'
-                      : '已过期'
+                    ? '已使用'
+                    : '已过期'
                 }}
               </text>
             </button>
@@ -57,7 +57,6 @@
               <view>优惠券类型</view>
               <view>{{ state.coupon.discountType === 1 ? '满减券' : '折扣券' }}</view>
             </view>
-            <!-- TODO 芋艿：可优化，增加优惠劵的描述 -->
             <uni-collapse>
               <uni-collapse-item title="优惠券说明" v-if="state.coupon.description">
                 <view class="content ss-p-b-20">
@@ -282,11 +281,11 @@
 
   .detail-wrap {
     background: linear-gradient(
-        180deg,
-        var(--ui-BG-Main),
-        var(--ui-BG-Main-gradient),
-        var(--ui-BG-Main),
-        #fff
+      180deg,
+      var(--ui-BG-Main),
+      var(--ui-BG-Main-gradient),
+      var(--ui-BG-Main),
+      #fff
     );
   }
 
