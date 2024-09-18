@@ -418,15 +418,11 @@ export function handeleData(array) {
 			value: []
 		},
 		{
-			name: '满送',
+			name: '赠品',
 			value: []
 		},
 		{
 			name: '包邮',
-			value: []
-		},
-		{
-			name: '赠品',
 			value: []
 		}
 	]);
@@ -443,9 +439,6 @@ export function handeleData(array) {
 					break;
 				case 3:
 					array2.value[2].value.push(value); // 包邮
-					break;
-				case 4:
-					array2.value[3].value.push(value); // 赠品
 					break;
 				default:
 					break;

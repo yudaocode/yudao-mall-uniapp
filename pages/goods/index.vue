@@ -83,6 +83,11 @@
 										<text v-if="(state.rewardActivity.ruleDescriptions[0])[4]">券 </text>
 										{{(state.rewardActivity.ruleDescriptions[0])[1]}}
 									</view>
+									<view v-if="state.rewardActivity && state.rewardActivity.id > 0"
+										class="tag ss-m-r-10" @tap="onOpenActivity">
+										<text v-if="(state.rewardActivity.ruleDescriptions[0])[1]"></text>
+										{{(state.rewardActivity.ruleDescriptions[0])[1]}}
+									</view>
 								</view>
 							</div>
 							<!-- 领取优惠劵的按钮 -->
