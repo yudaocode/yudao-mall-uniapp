@@ -7,7 +7,7 @@
         <view class="type-text ss-flex ss-row-center">满减：</view>
         <view class="ss-flex-1">
           <view class="tip-content" v-for="item in state.activityInfo.rules" :key="item">
-            {{ item.description[1] }}
+            {{ item.description }}
           </view>
         </view>
         <image class="activity-left-image" src="/static/activity-left.png" />
