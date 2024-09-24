@@ -107,7 +107,7 @@ function normalizeChooseAndUploadFileRes(res, fileType) {
       item.name = item.path.substring(item.path.lastIndexOf('/') + 1);
     }
     if (fileType) {
-      item.type = fileType;
+      item.fileType = fileType;
     }
     item.cloudPath = Date.now() + '_' + index + item.name.substring(item.name.lastIndexOf('.'));
   });
@@ -217,7 +217,7 @@ async function uploadFiles(choosePromise, { onChooseFile, onUploadProgress }) {
         url: presignedInfo.uploadUrl, // 预签名的上传 URL
         method: 'PUT', // 使用 PUT 方法
         header: {
-          'Content-Type': file.type + '/' + file.name.substring(file.name.lastIndexOf('.') + 1), // 设置内容类型
+          'Content-Type': file.fileType + '/' + file.name.substring(file.name.lastIndexOf('.') + 1), // 设置内容类型
         },
         data: fileBuffer, // 文件的路径，适用于小程序
         success: (res) => {
