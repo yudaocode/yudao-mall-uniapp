@@ -94,7 +94,8 @@
     "luch-request": "^3.0.8",
     "pinia": "^2.0.33",
     "pinia-plugin-persist-uni": "^1.2.0",
-    "weixin-js-sdk": "^1.6.0"
+    "weixin-js-sdk": "^1.6.0",
+    "crypto-js": "^4.2.0"
   },
   "devDependencies": {
     "prettier": "^2.8.7",
