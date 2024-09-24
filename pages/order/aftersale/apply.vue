@@ -208,7 +208,7 @@
     state.itemId = parseInt(options.itemId);
 
     // 读取订单信息
-    const { code, data } = await OrderApi.getOrder(state.orderId);
+    const { code, data } = await OrderApi.getOrderDetail(state.orderId);
     if (code !== 0) {
       return;
     }

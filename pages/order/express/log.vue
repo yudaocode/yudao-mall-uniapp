@@ -13,10 +13,10 @@
         </uni-swiper-dot>
         <view class="log-card-msg">
           <!-- TODO 芋艿：【物流】优化点：展示状态 -->
-<!--          <view class="ss-flex ss-m-b-8">-->
-<!--            <view>物流状态：</view>-->
-<!--            <view class="warning-color">{{ state.info.status_text }}</view>-->
-<!--          </view>-->
+          <!--          <view class="ss-flex ss-m-b-8">-->
+          <!--            <view>物流状态：</view>-->
+          <!--            <view class="warning-color">{{ state.info.status_text }}</view>-->
+          <!--          </view>-->
           <view class="ss-m-b-8">快递单号：{{ state.info.logisticsNo }}</view>
           <view>快递公司：{{ state.info.logisticsName }}</view>
         </view>
@@ -35,9 +35,9 @@
           </view>
           <view class="log-content-msg">
             <!-- TODO 芋艿：【物流】优化点：展示状态 -->
-<!--            <view class="log-msg-title ss-m-b-20">-->
-<!--              {{ item.status_text }}-->
-<!--            </view>-->
+            <!--            <view class="log-msg-title ss-m-b-20">-->
+            <!--              {{ item.status_text }}-->
+            <!--            </view>-->
             <view class="log-msg-desc ss-m-b-16">{{ item.content }}</view>
             <view class="log-msg-date ss-m-b-40">
               {{ sheep.$helper.timeFormat(item.time, 'yyyy-mm-dd hh:MM:ss') }}
@@ -78,7 +78,7 @@
   }
 
   async function getOrderDetail(id) {
-    const { data } = await OrderApi.getOrder(id)
+    const { data } = await OrderApi.getOrderDetail(id);
     state.info = data;
   }
 

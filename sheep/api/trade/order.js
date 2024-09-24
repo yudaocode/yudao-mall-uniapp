@@ -73,13 +73,14 @@ const OrderApi = {
       data,
     });
   },
-  // 获得订单
-  getOrder: (id) => {
+  // 获得订单详细：sync 是可选参数
+  getOrderDetail: (id, sync) => {
     return request({
       url: `/trade/order/get-detail`,
       method: 'GET',
       params: {
         id,
+        sync,
       },
       custom: {
         showLoading: false,

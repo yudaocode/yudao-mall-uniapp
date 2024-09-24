@@ -121,7 +121,7 @@
     }
     state.id = options.id;
 
-    const { code, data } = await OrderApi.getOrder(state.id);
+    const { code, data } = await OrderApi.getOrderDetail(state.id);
     if (code !== 0) {
       sheep.$helper.toast('无待评价订单');
       return;
