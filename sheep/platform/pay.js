@@ -270,11 +270,7 @@ export default class SheepPay {
 
   // 支付结果跳转,success:成功，fail:失败
   payResult(resultType) {
-    sheep.$router.redirect('/pages/pay/result', {
-      id: this.id,
-      orderType: this.orderType,
-      payState: resultType,
-    });
+    goPayResult(this.id, this.orderType, resultType);
   }
 
   // 引导绑定微信
@@ -358,4 +354,13 @@ export function getPayMethods(channels) {
     mockMethod.disabled = false;
   }
   return payMethods;
+}
+
+// 支付结果跳转,success:成功，fail:失败
+export function goPayResult(id, orderType, resultType) {
+  sheep.$router.redirect('/pages/pay/result', {
+    id,
+    orderType,
+    payState: resultType,
+  });
 }

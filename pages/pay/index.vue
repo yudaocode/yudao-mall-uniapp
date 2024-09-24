@@ -81,7 +81,7 @@
   import { fen2yuan, useDurationTime } from '@/sheep/hooks/useGoods';
   import PayOrderApi from '@/sheep/api/pay/order';
   import PayChannelApi from '@/sheep/api/pay/channel';
-  import { getPayMethods } from '@/sheep/platform/pay';
+  import { getPayMethods, goPayResult } from '@/sheep/platform/pay';
 
   const userWallet = computed(() => sheep.$store('user').userWallet);
 
@@ -135,12 +135,22 @@
 
   // 状态转换：payOrder.status => payStatus
   function checkPayStatus() {
-    if (state.orderInfo.status === 10
-      || state.orderInfo.status === 20 ) { // 支付成功
+    if (state.orderInfo.status === 10 || state.orderInfo.status === 20) {
+      // 支付成功
       state.payStatus = 2;
+      // 跳转回支付成功页
+      uni.showModal({
+        title: '提示',
+        content: '订单已支付',
+        showCancel: false,
+        success: function () {
+          goPayResult(state.orderInfo.id, state.orderType);
+        },
+      });
       return;
     }
-    if (state.orderInfo.status === 30) { // 支付关闭
+    if (state.orderInfo.status === 30) {
+      // 支付关闭
       state.payStatus = -1;
       return;
     }
@@ -155,26 +165,26 @@
   // 设置支付订单信息
   async function setOrder(id) {
     // 获得支付订单信息
-    const { data, code } = await PayOrderApi.getOrder(id);
+    const { data, code } = await PayOrderApi.getOrder(id, true);
     if (code !== 0 || !data) {
       state.payStatus = -2;
       return;
     }
     state.orderInfo = data;
-    // 获得支付方式
-    await setPayMethods();
     // 设置支付状态
     checkPayStatus();
+    // 获得支付方式
+    await setPayMethods();
   }
 
   // 获得支付方式
   async function setPayMethods() {
-    const { data, code } = await PayChannelApi.getEnableChannelCodeList(state.orderInfo.appId)
+    const { data, code } = await PayChannelApi.getEnableChannelCodeList(state.orderInfo.appId);
     if (code !== 0) {
-      return
+      return;
     }
-    state.payMethods = getPayMethods(data)
-    state.payMethods.find(item => {
+    state.payMethods = getPayMethods(data);
+    state.payMethods.find((item) => {
       if (item.value && !item.disabled) {
         state.payment = item.value;
         return true;
@@ -183,9 +193,11 @@
   }
 
   onLoad((options) => {
-    if (sheep.$platform.name === 'WechatOfficialAccount'
-      && sheep.$platform.os === 'ios'
-      && !sheep.$platform.landingPage.includes('pages/pay/index')) {
+    if (
+      sheep.$platform.name === 'WechatOfficialAccount' &&
+      sheep.$platform.os === 'ios' &&
+      !sheep.$platform.landingPage.includes('pages/pay/index')
+    ) {
       location.reload();
       return;
     }
@@ -213,7 +225,6 @@
     .modal-header {
       position: relative;
       padding: 60rpx 20rpx 40rpx;
-
 
       .money-text {
         color: $red;

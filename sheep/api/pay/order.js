@@ -2,11 +2,11 @@ import request from '@/sheep/request';
 
 const PayOrderApi = {
   // 获得支付订单
-  getOrder: (id) => {
+  getOrder: (id, sync) => {
     return request({
       url: '/pay/order/get',
       method: 'GET',
-      params: { id }
+      params: { id, sync },
     });
   },
   // 提交支付订单
@@ -14,9 +14,9 @@ const PayOrderApi = {
     return request({
       url: '/pay/order/submit',
       method: 'POST',
-      data
+      data,
     });
-  }
+  },
 };
 
 export default PayOrderApi;
