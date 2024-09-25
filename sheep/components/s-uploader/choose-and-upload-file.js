@@ -206,12 +206,10 @@ async function uploadFiles(choosePromise, { onChooseFile, onUploadProgress }) {
   // 如果是前端直连上传
   if (UPLOAD_TYPE.CLIENT === import.meta.env.SHOPRO_UPLOAD_TYPE) {
     for (const file of files) {
-      // 获取二进制文件对象
-      const fileBuffer = await convertToArrayBuffer(file);
-      // 1.1 生成文件名称
-      const fileName = await generateFileName(fileBuffer, file.name);
-      // 1.2 获取文件预签名地址
+      // 1.1 获取文件预签名地址
       const { data: presignedInfo } = await FileApi.getFilePresignedUrl(file.name);
+      // 1.2 获取二进制文件对象
+      const fileBuffer = await convertToArrayBuffer(file);
       // 1.3 上传文件
       await uni.request({
         url: presignedInfo.uploadUrl, // 预签名的上传 URL
@@ -222,10 +220,9 @@ async function uploadFiles(choosePromise, { onChooseFile, onUploadProgress }) {
         data: fileBuffer, // 文件的路径，适用于小程序
         success: (res) => {
           // 1.4. 记录文件信息到后端（异步）
-          createFile(presignedInfo, fileName, file);
+          createFile(presignedInfo, file);
           // 1.5. 重新赋值
           file.url = presignedInfo.url;
-          file.name = fileName;
           console.log('上传成功:', res);
         },
         fail: (err) => {
@@ -259,37 +256,15 @@ function chooseAndUploadFile(
 }
 
 /**
- * 生成文件名称（使用算法SHA256）
- * @param arrayBuffer 二进制文件对象
- * @param fileName  文件名称
- */
-async function generateFileName(arrayBuffer, fileName) {
-  return new Promise((resolve, reject) => {
-    try {
-      // 创建 WordArray
-      const wordArray = CryptoJS.lib.WordArray.create(new Uint8Array(arrayBuffer));
-      // 计算SHA256
-      const sha256 = CryptoJS.SHA256(wordArray).toString();
-      // 拼接后缀
-      const ext = fileName.substring(fileName.lastIndexOf('.'));
-      resolve(`${sha256}${ext}`);
-    } catch (error) {
-      reject(new Error('计算SHA256失败: ' + error.message));
-    }
-  });
-}
-
-/**
  * 创建文件信息
  * @param vo 文件预签名信息
- * @param name 文件名称
  * @param file 文件
  */
-function createFile(vo, name, file) {
+function createFile(vo, file) {
   const fileVo = {
     configId: vo.configId,
     url: vo.url,
-    path: name,
+    path: file.name,
     name: file.name,
     type: file.fileType,
     size: file.size,
