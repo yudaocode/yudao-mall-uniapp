@@ -1,6 +1,5 @@
 'use strict';
 import FileApi from '@/sheep/api/infra/file';
-import CryptoJS from 'crypto-js';
 
 const ERR_MSG_OK = 'chooseAndUploadFile:ok';
 const ERR_MSG_FAIL = 'chooseAndUploadFile:fail';
