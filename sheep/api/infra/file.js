@@ -1,4 +1,5 @@
 import { baseUrl, apiPath, tenantId } from '@/sheep/config';
+import request from '@/sheep/request';
 
 const FileApi = {
   // 上传文件
@@ -38,6 +39,26 @@ const FileApi = {
           uni.hideLoading();
         },
       });
+    });
+  },
+
+  // 获取文件预签名地址
+  getFilePresignedUrl: (path) => {
+    return request({
+      url: '/infra/file/presigned-url',
+      method: 'GET',
+      params: {
+        path,
+      },
+    });
+  },
+
+  // 创建文件
+  createFile: (data) => {
+    return request({
+      url: '/infra/file/create', // 请求的 URL
+      method: 'POST', // 请求方法
+      data: data, // 要发送的数据
     });
   },
 };
