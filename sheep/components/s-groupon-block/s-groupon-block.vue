@@ -261,6 +261,8 @@
       // 查找对应的 spu 并更新价格
       const spu = state.spuList.find((spu) => activity.spuId === spu.id);
       if (spu) {
+        // 赋值活动名称
+        spu.name = activity.name;
         // 赋值最低价格
         spu.price = Math.min(combinationPrice, spu.price);
         // 赋值活动ID，为了点击跳转详情页
