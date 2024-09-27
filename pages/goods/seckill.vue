@@ -7,7 +7,9 @@
     <detailSkeleton v-if="state.skeletonLoading" />
     <!-- 下架/售罄提醒 -->
     <s-empty
-      v-else-if="state.goodsInfo === null || state.goodsInfo.activity_type !== 'seckill'"
+      v-else-if="
+        state.goodsInfo === null || state.goodsInfo.activity_type !== 'seckill' || endTime.ms <= 0
+      "
       text="活动不存在或已结束"
       icon="/static/soldout-empty.png"
       showAction
