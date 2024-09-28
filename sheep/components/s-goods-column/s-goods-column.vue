@@ -254,35 +254,31 @@
               {{ item }}
             </view>
           </view>
-          <view class="ss-flex ss-col-bottom ss-m-t-10">
-            <view
-              v-if="goodsFields.price?.show"
-              class="lg-goods-price ss-m-r-12 ss-flex ss-col-bottom font-OPPOSANS"
-              :style="[{ color: goodsFields.price.color }]"
-            >
-              <text class="ss-font-24">{{ priceUnit }}</text>
-              {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
-            </view>
-            <view
-              v-if="
-                (goodsFields.original_price?.show || goodsFields.marketPrice?.show) &&
-                (data.original_price > 0 || data.marketPrice > 0)
-              "
-              class="goods-origin-price ss-flex ss-col-bottom font-OPPOSANS"
-              :style="[{ color: originPriceColor }]"
-            >
+          <view v-if="goodsFields.price?.show" class="ss-flex ss-col-bottom font-OPPOSANS">
+            <view class="sl-goods-price ss-m-r-12" :style="[{ color: goodsFields.price.color }]">
               <!-- 活动价格 -->
               <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
                 {{ data.point }}积分
                 {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
               </text>
               <template v-else>
-                <text class="price-unit ss-font-20">{{ priceUnit }}</text>
+                <text class="price-unit ss-font-24">{{ priceUnit }}</text>
                 <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
                 <text v-else>
                   {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
                 </text>
               </template>
+            </view>
+            <view
+              v-if="
+                (goodsFields.original_price?.show || goodsFields.marketPrice?.show) &&
+                (data.original_price > 0 || data.marketPrice > 0)
+              "
+              class="goods-origin-price ss-m-t-16 font-OPPOSANS ss-flex"
+              :style="[{ color: originPriceColor }]"
+            >
+              <text class="price-unit ss-font-20">{{ priceUnit }}</text>
+              <view class="ss-m-l-8">{{ fen2yuan(data.marketPrice) }}</view>
             </view>
           </view>
           <view class="ss-m-t-8 ss-flex ss-col-center ss-flex-wrap">
