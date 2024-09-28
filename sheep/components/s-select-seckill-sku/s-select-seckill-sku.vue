@@ -19,8 +19,11 @@
           <view class="goods-title ss-line-2">{{ state.goodsInfo.name }}</view>
           <view class="header-right-bottom ss-flex ss-col-center ss-row-between">
             <!-- 价格 -->
-            <view class="price-text">
-              {{ fen2yuan(state.selectedSku.price || state.goodsInfo.price) }}
+            <view v-if="state.goodsInfo.activity_type === PromotionActivityTypeEnum.POINT.type" class="price-text">
+              {{ getShowPriceText }}
+            </view>
+            <view v-else class="price-text">
+              ￥{{ fen2yuan(state.selectedSku.price || state.goodsInfo.price) }}
             </view>
             <!-- 秒杀价格标签 -->
             <view class="tig ss-flex ss-col-center">
@@ -92,12 +95,15 @@
   import { computed, reactive, watch } from 'vue';
   import sheep from '@/sheep';
   import { convertProductPropertyList, fen2yuan } from '@/sheep/hooks/useGoods';
-  import { min } from 'lodash-es';
+  import { isEmpty, min } from 'lodash-es';
+  import { PromotionActivityTypeEnum } from '@/sheep/util/const';
+
   const emits = defineEmits(['change', 'addCart', 'buy', 'close']);
   const props = defineProps({
     modelValue: {
       type: Object,
-      default() {},
+      default() {
+      },
     },
     show: {
       type: Boolean,
@@ -114,7 +120,14 @@
     selectedSku: {},
     currentPropertyArray: [],
   });
-
+  const getShowPriceText = computed(() => {
+    let priceText = `￥${fen2yuan(state.goodsInfo.price)}`;
+    if (!isEmpty(state.selectedSku)) {
+      const sku = state.selectedSku;
+      priceText = `${sku.point}积分${!sku.pointPrice ? '' : `+￥${fen2yuan(sku.pointPrice)}`}`;
+    }
+    return priceText;
+  });
   const propertyList = convertProductPropertyList(state.goodsInfo.skus);
   // SKU 列表
   const skuList = computed(() => {
@@ -344,11 +357,6 @@
         font-weight: 500;
         color: $red;
         font-family: OPPOSANS;
-
-        &::before {
-          content: '￥';
-          font-size: 24rpx;
-        }
       }
 
       .stock-text {

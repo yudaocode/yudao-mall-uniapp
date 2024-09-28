@@ -277,10 +277,6 @@
         color: #fff;
         line-height: normal;
         font-family: OPPOSANS;
-
-        &::before {
-          font-size: 30rpx;
-        }
       }
     }
 
