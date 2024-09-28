@@ -39,12 +39,18 @@
           class="xs-goods-price font-OPPOSANS"
           :style="[{ color: goodsFields.price.color }]"
         >
-          <text class="price-unit ss-font-24">{{ priceUnit }}</text>
           <!-- 活动价格 -->
-          <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
-          <text v-else>
-            {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+          <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+            {{ data.point }}积分
+            {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
           </text>
+          <template v-else>
+            <text class="price-unit ss-font-24">{{ priceUnit }}</text>
+            <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+            <text v-else>
+              {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+            </text>
+          </template>
         </view>
       </view>
     </view>
@@ -87,12 +93,18 @@
           class="sm-goods-price font-OPPOSANS"
           :style="[{ color: goodsFields.price.color }]"
         >
-          <text class="price-unit ss-font-24">{{ priceUnit }}</text>
           <!-- 活动价格 -->
-          <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
-          <text v-else>
-            {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+          <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+            {{ data.point }}积分
+            {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
           </text>
+          <template v-else>
+            <text class="price-unit ss-font-24">{{ priceUnit }}</text>
+            <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+            <text v-else>
+              {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+            </text>
+          </template>
         </view>
       </view>
     </view>
@@ -149,12 +161,18 @@
             class="md-goods-price ss-m-t-16 font-OPPOSANS ss-m-r-10"
             :style="[{ color: goodsFields.price.color }]"
           >
-            <text class="price-unit ss-font-24">{{ priceUnit }}</text>
             <!-- 活动价格 -->
-            <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
-            <text v-else>
-              {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+            <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+              {{ data.point }}积分
+              {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
             </text>
+            <template v-else>
+              <text class="price-unit ss-font-24">{{ priceUnit }}</text>
+              <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+              <text v-else>
+                {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+              </text>
+            </template>
           </view>
           <view
             v-if="
@@ -253,12 +271,18 @@
               class="goods-origin-price ss-flex ss-col-bottom font-OPPOSANS"
               :style="[{ color: originPriceColor }]"
             >
-              <text class="price-unit ss-font-20">{{ priceUnit }}</text>
               <!-- 活动价格 -->
-              <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
-              <text v-else>
-                {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+              <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+                {{ data.point }}积分
+                {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
               </text>
+              <template v-else>
+                <text class="price-unit ss-font-20">{{ priceUnit }}</text>
+                <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+                <text v-else>
+                  {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+                </text>
+              </template>
             </view>
           </view>
           <view class="ss-m-t-8 ss-flex ss-col-center ss-flex-wrap">
@@ -268,7 +292,7 @@
       </view>
 
       <slot name="cart">
-        <view class="buy-box ss-flex ss-col-center ss-row-center" v-if="buttonShow"> 去购买 </view>
+        <view class="buy-box ss-flex ss-col-center ss-row-center" v-if="buttonShow"> 去购买</view>
       </slot>
     </view>
 
@@ -324,12 +348,18 @@
           </view>
           <view v-if="goodsFields.price?.show" class="ss-flex ss-col-bottom font-OPPOSANS">
             <view class="sl-goods-price ss-m-r-12" :style="[{ color: goodsFields.price.color }]">
-              <text class="price-unit ss-font-24">{{ priceUnit }}</text>
               <!-- 活动价格 -->
-              <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
-              <text v-else>
-                {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+              <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+                {{ data.point }}积分
+                {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
               </text>
+              <template v-else>
+                <text class="price-unit ss-font-24">{{ priceUnit }}</text>
+                <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+                <text v-else>
+                  {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+                </text>
+              </template>
             </view>
             <view
               v-if="
@@ -361,39 +391,41 @@
    * 商品卡片
    *
    * @property {Array} size = [xs | sm | md | lg | sl ] 			 	- 列表数据
-   * @property {String} tag 											- md及以上才有
-   * @property {String} img 											- 图片
-   * @property {String} background 									- 背景色
-   * @property {String} topRadius 									- 上圆角
-   * @property {String} bottomRadius 									- 下圆角
-   * @property {String} title 										- 标题
-   * @property {String} titleColor 									- 标题颜色
+   * @property {String} tag                      - md及以上才有
+   * @property {String} img                      - 图片
+   * @property {String} background                  - 背景色
+   * @property {String} topRadius                  - 上圆角
+   * @property {String} bottomRadius                  - 下圆角
+   * @property {String} title                    - 标题
+   * @property {String} titleColor                  - 标题颜色
    * @property {Number} titleWidth = 0								- 标题宽度，默认0，单位rpx
-   * @property {String} subTitle 										- 副标题
-   * @property {String} subTitleColor									- 副标题颜色
-   * @property {String} subTitleBackground 							- 副标题背景
-   * @property {String | Number} price 								- 价格
-   * @property {String} priceColor 									- 价格颜色
-   * @property {String | Number} originPrice 							- 原价/划线价
-   * @property {String} originPriceColor 								- 原价颜色
-   * @property {String | Number} sales 								- 销售数量
-   * @property {String} salesColor									- 销售数量颜色
+   * @property {String} subTitle                    - 副标题
+   * @property {String} subTitleColor                  - 副标题颜色
+   * @property {String} subTitleBackground              - 副标题背景
+   * @property {String | Number} price                - 价格
+   * @property {String} priceColor                  - 价格颜色
+   * @property {String | Number} originPrice              - 原价/划线价
+   * @property {String} originPriceColor                - 原价颜色
+   * @property {String | Number} sales                - 销售数量
+   * @property {String} salesColor                  - 销售数量颜色
    *
    * @slots activity												 	- 活动插槽
    * @slots cart														- 购物车插槽，默认包含文字，背景色，文字颜色 || 图片 || 行为
    *
-   * @event {Function()} click 										- 点击卡片
+   * @event {Function()} click                    - 点击卡片
    *
    */
-  import { computed, getCurrentInstance, onMounted, nextTick } from 'vue';
+  import { computed, getCurrentInstance, nextTick, onMounted } from 'vue';
   import sheep from '@/sheep';
   import {
     fen2yuan,
+    formatExchange,
     formatSales,
+    formatStock,
     getRewardActivityRuleItemDescriptions,
   } from '@/sheep/hooks/useGoods';
-  import { formatStock } from '@/sheep/hooks/useGoods';
   import { isArray } from 'lodash-es';
+  import { PromotionActivityTypeEnum } from '@/sheep/util/const';
 
   // 接收参数
   const props = defineProps({
@@ -520,10 +552,18 @@
   const salesAndStock = computed(() => {
     let text = [];
     if (props.goodsFields.salesCount?.show) {
-      text.push(formatSales(props.data.sales_show_type, props.data.salesCount));
+      if (props.data.activityType && props.data.activityType === PromotionActivityTypeEnum.POINT.type) {
+        text.push(formatExchange(props.data.sales_show_type, (props.data.pointTotalStock || 0) - (props.data.pointStock || 0)));
+      }else {
+        text.push(formatSales(props.data.sales_show_type, props.data.salesCount));
+      }
     }
     if (props.goodsFields.stock?.show) {
-      text.push(formatStock(props.data.stock_show_type, props.data.stock));
+      if (props.data.activityType && props.data.activityType === PromotionActivityTypeEnum.POINT.type) {
+        text.push(formatStock(props.data.stock_show_type, props.data.pointTotalStock));
+      }else {
+        text.push(formatStock(props.data.stock_show_type, props.data.stock));
+      }
     }
     return text.join(' | ');
   });
@@ -560,6 +600,7 @@
       });
     }
   }
+
   onMounted(() => {
     nextTick(() => {
       getGoodsPriceCardWH();
