@@ -294,6 +294,7 @@
       combinationActivityId: state.orderPayload.combinationActivityId,
       combinationHeadId: state.orderPayload.combinationHeadId,
       seckillActivityId: state.orderPayload.seckillActivityId,
+      pointActivityId: state.orderPayload.pointActivityId,
     });
     if (code !== 0) {
       return;
@@ -324,6 +325,7 @@
       combinationActivityId: state.orderPayload.combinationActivityId,
       combinationHeadId: state.orderPayload.combinationHeadId,
       seckillActivityId: state.orderPayload.seckillActivityId,
+      pointActivityId: state.orderPayload.pointActivityId,
     });
     if (code !== 0) {
       return;

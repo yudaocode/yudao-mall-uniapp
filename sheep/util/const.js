@@ -116,7 +116,7 @@ export const PromotionActivityTypeEnum = {
   },
   POINT: {
     type: 4,
-    name: '',
+    name: '积分商城',
   },
 };
 

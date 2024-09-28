@@ -1,23 +1,24 @@
+<!-- 秒杀商品详情 -->
 <template>
-  <view>
-    <s-layout :onShareAppMessage="state.shareInfo" navbar="goods">
-      <!-- 标题栏 -->
-      <detailNavbar />
-      <detailSkeleton v-if="state.skeletonLoading" />
-      <!-- 空置页 -->
-
-      <s-empty
-        v-else-if="state.goodsInfo === null"
-        text="商品不存在或已下架"
-        icon="/static/soldout-empty.png"
-        showAction
-        actionText="再逛逛"
-        actionUrl="/pages/goods/list"
-      />
-      <block v-else>
-        <!-- 商品轮播图  -->
+  <s-layout :onShareAppMessage="shareInfo" navbar="goods">
+    <!-- 标题栏 -->
+    <detailNavbar />
+    <!-- 骨架屏 -->
+    <detailSkeleton v-if="state.skeletonLoading" />
+    <!-- 下架/售罄提醒 -->
+    <s-empty
+      v-else-if="state.goodsInfo === null || state.goodsInfo.activity_type !== PromotionActivityTypeEnum.POINT.type"
+      text="活动不存在或已结束"
+      icon="/static/soldout-empty.png"
+      showAction
+      actionText="再逛逛"
+      actionUrl="/pages/goods/list"
+    />
+    <block v-else>
+      <view class="detail-swiper-selector">
+        <!-- 商品图轮播 -->
         <su-swiper
-          class="ss-m-b-14 detail-swiper-selector"
+          class="ss-m-b-14"
           isPreview
           :list="state.goodsSwiper"
           dotStyle="tag"
@@ -27,154 +28,213 @@
         />
 
         <!-- 价格+标题 -->
-        <view class="title-card detail-card ss-p-y-40 ss-p-x-20">
-          <view class="ss-flex ss-row-between ss-col-center ss-m-b-18">
-            <view class="price-box ss-flex ss-col-bottom">
-              <view v-if="goodsPrice.price > 0" class="price-text"> ￥{{ goodsPrice.price }} </view>
-              <text v-if="goodsPrice.price > 0 && goodsPrice.score > 0">+</text>
-              <image
-                :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
-                class="score-img"
-              ></image>
-              <view class="score-text ss-m-r-16">
-                {{ goodsPrice.score }}
+        <view class="title-card ss-m-y-14 ss-m-x-20 ss-p-x-20 ss-p-y-34">
+          <view class="price-box ss-flex ss-row-between ss-m-b-18">
+            <view class="ss-flex">
+              <view class="price-text ss-m-r-16">
+                {{ getShowPriceText }}
+              </view>
+              <view class="tig ss-flex ss-col-center">
+                <view class="tig-icon ss-flex ss-col-center ss-row-center">
+                  <text class="cicon-alarm"></text>
+                </view>
+                <view class="tig-title">积分价</view>
               </view>
             </view>
-            <view class="sales-text">
-              {{ formatExchange(state.goodsInfo.sales_show_type, state.goodsInfo.sales) }}
+          </view>
+          <view class="ss-flex ss-row-between ss-m-b-60">
+            <view class="origin-price ss-flex ss-col-center" v-if="state.goodsInfo.marketPrice">
+              原价
+              <view class="origin-price-text">
+                {{ fen2yuan(state.selectedSku.marketPrice || state.goodsInfo.marketPrice) }}
+              </view>
             </view>
           </view>
-          <view class="origin-price-text ss-m-b-60" v-if="state.goodsInfo.original_price">
-            原价：￥{{ state.selectedSkuPrice.original_price || state.goodsInfo.original_price }}
-          </view>
-          <view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo.title }}</view>
-          <view class="subtitle-text ss-line-1">{{ state.goodsInfo.subtitle }}</view>
+
+          <view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo.name || '' }}</view>
+          <view class="subtitle-text ss-line-1">{{ state.goodsInfo.introduction }}</view>
         </view>
 
         <!-- 功能卡片 -->
         <view class="detail-cell-card detail-card ss-flex-col">
-          <detail-cell-sku
-            v-model="state.selectedSkuPrice.goods_sku_text"
-            :skus="state.goodsInfo.skus"
-            @tap="state.showSelectSku = true"
-          />
-          <detail-cell-service v-model="state.goodsInfo.service" />
-          <detail-cell-params v-model="state.goodsInfo.params" />
+          <detail-cell-sku :sku="state.selectedSku" @tap="state.showSelectSku = true" />
         </view>
         <!-- 规格与数量弹框 -->
-        <s-select-sku
-          :goodsInfo="state.goodsInfo"
+        <s-select-seckill-sku
+          v-model="state.goodsInfo"
           :show="state.showSelectSku"
-          :isScore="true"
-          @addCart="onAddCart"
+          :single-limit-count="activity.singleLimitCount"
           @buy="onBuy"
           @change="onSkuChange"
           @close="state.showSelectSku = false"
         />
+      </view>
 
-        <!-- 评价 -->
-        <view class="detail-comment-selector">
-          <detail-comment-card :goodsId="state.goodsId" />
+      <!-- 评价 -->
+      <detail-comment-card class="detail-comment-selector" :goodsId="state.goodsInfo.id" />
+      <!-- 详情 -->
+      <detail-content-card class="detail-content-selector" :content="state.goodsInfo.description" />
+
+      <!-- 详情tabbar -->
+      <detail-tabbar v-model="state.goodsInfo">
+        <view class="buy-box ss-flex ss-col-center ss-p-r-20">
+          <button
+            class="ss-reset-button origin-price-btn ss-flex-col"
+            v-if="state.goodsInfo.marketPrice"
+            @tap="sheep.$router.go('/pages/goods/index', { id: state.goodsInfo.id })"
+          >
+            <view>
+              <view class="btn-price">{{ fen2yuan(state.goodsInfo.marketPrice) }}</view>
+              <view>原价购买</view>
+            </view>
+          </button>
+          <button
+            class="ss-reset-button btn-box ss-flex-col"
+            @tap="state.showSelectSku = true"
+            :class="
+             state.goodsInfo.stock != 0
+                ? 'check-btn-box'
+                : 'disabled-btn-box'
+            "
+            :disabled="state.goodsInfo.stock === 0"
+          >
+            <view class="price-text">
+              {{getShowPriceText}}
+            </view>
+            <view v-if="state.goodsInfo.stock === 0">已售罄</view>
+            <view v-else>立即兑换</view>
+          </button>
         </view>
-
-        <!-- 详情 -->
-        <view class="detail-content-selector"></view>
-        <detail-content-card :content="state.goodsInfo.content" />
-
-        <!-- 详情tabbar -->
-        <detail-tabbar v-model="state.goodsInfo" :shareIcon="false" :collectIcon="false">
-          <!-- TODO: 缺货中 已售罄 判断 设计-->
-          <view class="buy-box ss-flex ss-col-center ss-p-r-20" v-if="state.goodsInfo.stock > 0">
-            <button class="ss-reset-button buy-btn" @tap="state.showSelectSku = true">
-              立即兑换
-            </button>
-          </view>
-          <view class="buy-box ss-flex ss-col-center ss-p-r-20" v-else>
-            <button class="ss-reset-button disabled-btn" disabled> 已兑完 </button>
-          </view>
-        </detail-tabbar>
-      </block>
-    </s-layout>
-  </view>
+      </detail-tabbar>
+    </block>
+  </s-layout>
 </template>
 
 <script setup>
-  import { reactive, computed } from 'vue';
+  import { computed, reactive, ref, unref } from 'vue';
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import { isEmpty } from 'lodash';
-  import { formatExchange, formatGoodsSwiper } from '@/sheep/hooks/useGoods';
+  import { isEmpty } from 'lodash-es';
+  import { fen2yuan, formatGoodsSwiper } from '@/sheep/hooks/useGoods';
   import detailNavbar from './components/detail/detail-navbar.vue';
   import detailCellSku from './components/detail/detail-cell-sku.vue';
-  import detailCellService from './components/detail/detail-cell-service.vue';
-  import detailCellParams from './components/detail/detail-cell-params.vue';
   import detailTabbar from './components/detail/detail-tabbar.vue';
   import detailSkeleton from './components/detail/detail-skeleton.vue';
   import detailCommentCard from './components/detail/detail-comment-card.vue';
   import detailContentCard from './components/detail/detail-content-card.vue';
+  import SpuApi from '@/sheep/api/product/spu';
+  import { PromotionActivityTypeEnum } from '@/sheep/util/const';
+  import PointApi from '@/sheep/api/promotion/point';
 
-  const headerBg = sheep.$url.css('/static/img/shop/goods/score-bg.png');
+  const headerBg = sheep.$url.css('/static/img/shop/goods/seckill-bg.png');
+  const btnBg = sheep.$url.css('/static/img/shop/goods/seckill-btn.png');
+  const disabledBtnBg = sheep.$url.css('/static/img/shop/goods/activity-btn-disabled.png');
   const seckillBg = sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png');
-  const grouponBg = sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png');
+  const grouponBg = sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png');
 
-  onPageScroll(() => {});
-
+  onPageScroll(() => {
+  });
   const state = reactive({
-    goodsId: 0,
     skeletonLoading: true,
     goodsInfo: {},
     showSelectSku: false,
     goodsSwiper: [],
-    selectedSkuPrice: {},
-    shareInfo: {},
+    selectedSku: {},
     showModel: false,
     total: 0,
-    couponInfo: [],
-  });
-
-  const goodsPrice = computed(() => {
-    let price, score;
-    if (isEmpty(state.selectedSkuPrice)) {
-      price = state.goodsInfo.price[0];
-      score = state.goodsInfo.score || 0;
-    } else {
-      price = state.selectedSkuPrice.price;
-      score = state.selectedSkuPrice.score || 0;
-    }
-    return { price, score };
+    price: '',
   });
 
   // 规格变更
   function onSkuChange(e) {
-    state.selectedSkuPrice = e;
+    state.selectedSku = e;
   }
-  // 格式化价格
-  function formatPrice(e) {
-    if (Number(e[0]) > 0) {
-      return e.length === 1 ? e[0] : e.join('~');
-    } else {
-      return '';
-    }
-  }
-  // 添加购物车
-  function onAddCart(e) {
-    sheep.$store('cart').add(e);
-  }
+
   // 立即购买
-  function onBuy(e) {
+  function onBuy(sku) {
     sheep.$router.go('/pages/order/confirm', {
       data: JSON.stringify({
-        order_type: 'score',
-        goods_list: [
+        order_type: 'goods',
+        buy_type: 'point',
+        pointActivityId: activity.value.id,
+        items: [
           {
-            goods_id: e.goods_id,
-            goods_num: e.goods_num,
-            goods_sku_price_id: e.id,
+            skuId: sku.id,
+            count: sku.count,
           },
         ],
       }),
     });
   }
+
+  // 分享信息
+  // TODO puhui999: 下次 fix
+  const shareInfo = computed(() => {
+    if (isEmpty(unref(activity))) return {};
+    return sheep.$platform.share.getShareInfo(
+      {
+        title: activity.value.name,
+        image: sheep.$url.cdn(state.goodsInfo.picUrl),
+        params: {
+          page: '4',
+          query: activity.value.id,
+        },
+      },
+      {
+        type: 'goods', // 商品海报
+        title: activity.value.name, // 商品标题
+        image: sheep.$url.cdn(state.goodsInfo.picUrl), // 商品主图
+        price: state.goodsInfo.price, // 商品价格
+        marketPrice: state.goodsInfo.marketPrice, // 商品原价
+      },
+    );
+  });
+
+  const activity = ref();
+
+  const getShowPriceText = computed(() => {
+    let priceText = `${activity.value.point}积分${!activity.value.price ? '' : `+￥${fen2yuan(activity.value.price)}`}`;
+    if (!isEmpty(state.selectedSku)) {
+      const sku = state.selectedSku;
+      priceText = `${sku.point}积分${!sku.pointPrice ? '' : `+￥${fen2yuan(sku.pointPrice)}`}`;
+    }
+    return priceText;
+  });
+
+  // 查询活动
+  const getActivity = async (id) => {
+    const { data } = await PointApi.getPointActivity(id);
+    activity.value = data;
+    // 查询商品
+    await getSpu(data.spuId);
+  };
+
+  // 查询商品
+  const getSpu = async (id) => {
+    const { data } = await SpuApi.getSpuDetail(id);
+    data.activity_type = PromotionActivityTypeEnum.POINT.type;
+    state.goodsInfo = data;
+    state.goodsInfo.stock = Math.min(data.stock, activity.value.stock);
+    // 处理轮播图
+    state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.sliderPicUrls);
+
+    // 价格、库存使用活动的
+    data.skus.forEach((sku) => {
+      const product = activity.value.products.find((product) => product.skuId === sku.id);
+      if (product) {
+        sku.point = product.point;
+        sku.pointPrice = product.price;
+        sku.stock = Math.min(sku.stock, product.stock);
+        // 设置限购数量
+        sku.limitCount = product.count;
+      } else {
+        // 找不到可能是没配置
+        sku.stock = 0;
+      }
+    });
+
+    state.skeletonLoading = false;
+  };
 
   onLoad((options) => {
     // 非法参数
@@ -182,24 +242,19 @@
       state.goodsInfo = null;
       return;
     }
-    state.goodsId = options.id;
-    // 加载商品信息
-    sheep.$api.app.scoreShop.detail(state.goodsId).then((res) => {
-      state.skeletonLoading = false;
-      if (res.error === 0) {
-        state.goodsInfo = res.data;
-        state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.images);
-      } else {
-        // 未找到商品
-        state.goodsInfo = null;
-      }
-    });
+
+    // 查询活动
+    getActivity(options.id);
   });
 </script>
 
 <style lang="scss" scoped>
+  .disabled-btn-box[disabled] {
+    background-color: transparent;
+  }
+
   .detail-card {
-    background-color: #ffff;
+    background-color: $white;
     margin: 14rpx 20rpx;
     border-radius: 10rpx;
     overflow: hidden;
@@ -209,43 +264,106 @@
   .title-card {
     width: 710rpx;
     box-sizing: border-box;
+    // height: 320rpx;
     background-size: 100% 100%;
     border-radius: 10rpx;
     background-image: v-bind(headerBg);
     background-repeat: no-repeat;
+
     .price-box {
-      .score-img {
-        width: 36rpx;
-        height: 36rpx;
-        margin: 0 4rpx;
-      }
-      .score-text {
-        font-size: 42rpx;
-        font-weight: 500;
-        color: #ff3000;
-        line-height: 36rpx;
-        font-family: OPPOSANS;
-      }
       .price-text {
-        font-size: 42rpx;
+        font-size: 30rpx;
         font-weight: 500;
-        color: #ff3000;
-        line-height: 36rpx;
+        color: #fff;
+        line-height: normal;
         font-family: OPPOSANS;
+
+        &::before {
+          font-size: 30rpx;
+        }
       }
-    }
-    .origin-price-text {
-      font-size: 26rpx;
-      font-weight: 400;
-      text-decoration: line-through;
-      color: $gray-c;
-      font-family: OPPOSANS;
     }
 
-    .sales-text {
+    .origin-price {
+      font-size: 24rpx;
+      font-weight: 400;
+      color: #fff;
+      opacity: 0.7;
+
+      .origin-price-text {
+        text-decoration: line-through;
+
+        font-family: OPPOSANS;
+
+        &::before {
+          content: '￥';
+        }
+      }
+    }
+
+    .tig {
+      border: 2rpx solid #ffffff;
+      border-radius: 4rpx;
+      width: 126rpx;
+      height: 38rpx;
+
+      .tig-icon {
+        width: 40rpx;
+        height: 40rpx;
+        margin-left: -2rpx;
+        background: #ffffff;
+        border-radius: 4rpx 0 0 4rpx;
+
+        .cicon-alarm {
+          font-size: 32rpx;
+          color: #fc6e6f;
+        }
+      }
+
+      .tig-title {
+        width: 86rpx;
+        font-size: 24rpx;
+        font-weight: 500;
+        line-height: normal;
+        color: #ffffff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+
+    .countdown-title {
       font-size: 26rpx;
       font-weight: 500;
-      color: $gray-c;
+      color: #ffffff;
+    }
+
+    .countdown-time {
+      font-size: 26rpx;
+      font-weight: 500;
+      color: #ffffff;
+
+      .countdown-h {
+        font-size: 24rpx;
+        font-family: OPPOSANS;
+        font-weight: 500;
+        color: #ffffff;
+        padding: 0 4rpx;
+        height: 40rpx;
+        background: rgba(#000000, 0.1);
+        border-radius: 6rpx;
+      }
+
+      .countdown-num {
+        font-size: 24rpx;
+        font-family: OPPOSANS;
+        font-weight: 500;
+        color: #ffffff;
+        width: 40rpx;
+        height: 40rpx;
+        background: rgba(#000000, 0.1);
+        border-radius: 6rpx;
+      }
     }
 
     .discounts-box {
@@ -278,31 +396,73 @@
       font-size: 30rpx;
       font-weight: bold;
       line-height: 42rpx;
+      color: #fff;
     }
 
     .subtitle-text {
       font-size: 26rpx;
       font-weight: 400;
-      color: $dark-9;
+      color: #ffffff;
       line-height: 42rpx;
+      opacity: 0.9;
     }
   }
 
   // 购买
   .buy-box {
-    .buy-btn {
-      width: 630rpx;
+    .check-btn-box {
+      width: 248rpx;
       height: 80rpx;
-      border-radius: 40rpx;
-      background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
-      color: $white;
+      font-size: 24rpx;
+      font-weight: 600;
+      margin-left: -36rpx;
+      background-image: v-bind(btnBg);
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      color: #ffffff;
+      line-height: normal;
+      border-radius: 0px 40rpx 40rpx 0px;
     }
-    .disabled-btn {
-      width: 630rpx;
+
+    .disabled-btn-box {
+      width: 248rpx;
       height: 80rpx;
-      border-radius: 40rpx;
-      background: #999999;
-      color: $white;
+      font-size: 24rpx;
+      font-weight: 600;
+      margin-left: -36rpx;
+      background-image: v-bind(disabledBtnBg);
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      color: #999999;
+      line-height: normal;
+      border-radius: 0px 40rpx 40rpx 0px;
+    }
+
+    .btn-price {
+      font-family: OPPOSANS;
+
+      &::before {
+        content: '￥';
+      }
+    }
+
+    .origin-price-btn {
+      width: 236rpx;
+      height: 80rpx;
+      background: rgba(#ff5651, 0.1);
+      color: #ff6000;
+      border-radius: 40rpx 0px 0px 40rpx;
+      line-height: normal;
+      font-size: 24rpx;
+      font-weight: 500;
+
+      .no-original {
+        font-size: 28rpx;
+      }
+
+      .btn-title {
+        font-size: 28rpx;
+      }
     }
   }
 
@@ -349,10 +509,6 @@
   }
 
   .model-box {
-    height: 60vh;
-    .model-content {
-      height: 56vh;
-    }
     .title {
       font-size: 36rpx;
       font-weight: bold;
@@ -364,5 +520,10 @@
       font-weight: 500;
       color: #333333;
     }
+  }
+
+  image {
+    width: 100%;
+    height: 100%;
   }
 </style>
