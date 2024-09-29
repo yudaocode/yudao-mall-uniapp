@@ -120,6 +120,17 @@
 						"group": "商品"
 					}
 				},
+                {
+                    "path": "point",
+                    "style": {
+                      "navigationBarTitleText": "积分商品"
+                    },
+                    "meta": {
+                      "sync": true,
+                      "title": "积分商品",
+                      "group": "商品"
+                    }
+                },
 				{
 					"path": "list",
 					"style": {

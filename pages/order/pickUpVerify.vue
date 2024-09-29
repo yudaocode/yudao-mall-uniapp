@@ -19,15 +19,15 @@
       <view class="num">{{ orderInfo.pickUpVerifyCode }}</view>
       <view class="rules">
         <!-- TODO puhui999: 需要后端放回：使用 receiveTime 即可 -->
-<!--        <view class="item">-->
-<!--          <view class="rulesTitle flex flex-wrap align-center">-->
-<!--            核销时间-->
-<!--          </view>-->
-<!--          <view class="info">-->
-<!--            每日：-->
-<!--            <text class="time">2020-2-+52</text>-->
-<!--          </view>-->
-<!--        </view>-->
+        <view class="item">
+          <view class="rulesTitle flex flex-wrap align-center">
+            核销时间
+          </view>
+          <view class="info">
+            每日：
+            <text class="time">2020-2-+52</text>
+          </view>
+        </view>
         <view class="item">
           <view class="rulesTitle flex flex-wrap align-center">
             <text class="iconfont icon-shuoming1"></text>
@@ -138,7 +138,6 @@
 </script>
 
 <style scoped lang="scss">
-  // TODO puhui999: 样式需要调整有 bug
   .borRadius14 {
     border-radius: 14rpx !important;
   }
