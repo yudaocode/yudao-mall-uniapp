@@ -256,7 +256,7 @@
 
 <script setup>
   import sheep from '@/sheep';
-  import { onLoad } from '@dcloudio/uni-app';
+  import { onLoad, onShow } from '@dcloudio/uni-app';
   import { reactive, ref } from 'vue';
   import { isEmpty } from 'lodash-es';
   import {
@@ -416,6 +416,11 @@
     }
   }
 
+  onShow(async () => {
+    //onShow中获取订单列表,保证跳转后页面为最新状态
+    await getOrderDetail(state.orderInfo.id);
+  })
+
   onLoad(async (options) => {
     let id = 0;
     if (options.id) {
@@ -426,7 +431,7 @@
     if (state.comeinType === 'wechat') {
       state.merchantTradeNo = options.merchant_trade_no;
     }
-    await getOrderDetail(id);
+    state.orderInfo.id = id
   });
 </script>
 

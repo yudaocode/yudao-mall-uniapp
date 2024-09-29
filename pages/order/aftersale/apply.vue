@@ -171,7 +171,7 @@
       uni.showToast({
         title: '申请成功',
       });
-      sheep.$router.go('/pages/order/aftersale/list');
+      sheep.$router.redirect('/pages/order/aftersale/list');
     }
   }
 
