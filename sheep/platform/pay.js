@@ -35,7 +35,7 @@ export default class SheepPay {
         },
         mock: () => {
           this.mockPay();
-        }
+        },
       },
       WechatMiniProgram: {
         wechat: () => {
@@ -49,7 +49,7 @@ export default class SheepPay {
         },
         mock: () => {
           this.mockPay();
-        }
+        },
       },
       App: {
         wechat: () => {
@@ -63,7 +63,7 @@ export default class SheepPay {
         },
         mock: () => {
           this.mockPay();
-        }
+        },
       },
       H5: {
         wechat: () => {
@@ -77,7 +77,7 @@ export default class SheepPay {
         },
         mock: () => {
           this.mockPay();
-        }
+        },
       },
     };
     return payAction[sheep.$platform.name][this.payment]();
@@ -89,7 +89,7 @@ export default class SheepPay {
       let data = {
         id: this.id,
         channelCode: channel,
-        channelExtras: {}
+        channelExtras: {},
       };
       // 特殊逻辑：微信公众号、小程序支付时，必须传入 openid
       if (['wx_pub', 'wx_lite'].includes(channel)) {
@@ -108,8 +108,11 @@ export default class SheepPay {
         // 失败时
         if (res.code !== 0 && res.msg.indexOf('无效的openid') >= 0) {
           // 特殊逻辑：微信公众号、小程序支付时，必须传入 openid 不正确的情况
-          if (res.msg.indexOf('无效的openid') >= 0 // 获取的 openid 不正确时，或者随便输入了个 openid
-            || res.msg.indexOf('下单账号与支付账号不一致') >= 0) { // https://developers.weixin.qq.com/community/develop/doc/00008c53c347804beec82aed051c00
+          if (
+            res.msg.indexOf('无效的openid') >= 0 || // 获取的 openid 不正确时，或者随便输入了个 openid
+            res.msg.indexOf('下单账号与支付账号不一致') >= 0
+          ) {
+            // https://developers.weixin.qq.com/community/develop/doc/00008c53c347804beec82aed051c00
             this.bindWeixin();
           }
         }
@@ -133,30 +136,34 @@ export default class SheepPay {
       },
       fail: (error) => {
         if (error.errMsg.indexOf('chooseWXPay:没有此SDK或暂不支持此SDK模拟') >= 0) {
-          sheep.$helper.toast('发起微信支付失败，原因：可能是微信开发者工具不支持，建议使用微信打开网页后支付');
-          return
+          sheep.$helper.toast(
+            '发起微信支付失败，原因：可能是微信开发者工具不支持，建议使用微信打开网页后支付',
+          );
+          return;
         }
         this.payResult('fail');
       },
     });
   }
 
-  // 浏览器微信 H5 支付 TODO 芋艿：待接入
+  // 浏览器微信 H5 支付 TODO 芋艿：待接入（注意：H5 支付是给普通浏览器，不是微信公众号的支付，绝大多数人用不到，可以忽略）
   async wechatWapPay() {
     const { error, data } = await this.prepay();
     if (error === 0) {
-      const redirect_url = `${getRootUrl()}pages/pay/result?id=${this.id}&payment=${this.payment}&orderType=${this.orderType}`;
+      const redirect_url = `${getRootUrl()}pages/pay/result?id=${this.id}&payment=${
+        this.payment
+      }&orderType=${this.orderType}`;
       location.href = `${data.pay_data.h5_url}&redirect_url=${encodeURIComponent(redirect_url)}`;
     }
   }
 
-  // 支付链接  TODO 芋艿：待接入
+  // 支付链接(支付宝 wap 支付)
   async redirectPay() {
-    let { error, data } = await this.prepay();
-    if (error === 0) {
-      const redirect_url = `${getRootUrl()}pages/pay/result?id=${this.id}&payment=${this.payment}&orderType=${this.orderType}`;
-      location.href = data.pay_data + encodeURIComponent(redirect_url);
+    let { code, data } = await this.prepay('alipay_wap');
+    if (code !== 0) {
+      return;
     }
+    location.href = data.displayContent;
   }
 
   // #endif
@@ -202,26 +209,26 @@ export default class SheepPay {
     code === 0 && this.payResult('success');
   }
 
-  // 支付宝复制链接支付  TODO 芋艿：待接入
+  // 支付宝复制链接支付（通过支付宝 wap 支付实现）
   async copyPayLink() {
-    let that = this;
-    let { error, data } = await this.prepay();
-    if (error === 0) {
-      // 引入showModal 点击确认 复制链接；
-      uni.showModal({
-        title: '支付宝支付',
-        content: '复制链接到外部浏览器',
-        confirmText: '复制链接',
-        success: (res) => {
-          if (res.confirm) {
-            sheep.$helper.copyText(data.pay_data);
-          }
-        },
-      });
+    let { code, data } = await this.prepay('alipay_wap');
+    if (code !== 0) {
+      return;
     }
+    // 引入 showModal 点击确认：复制链接；
+    uni.showModal({
+      title: '支付宝支付',
+      content: '复制链接到外部浏览器',
+      confirmText: '复制链接',
+      success: (res) => {
+        if (res.confirm) {
+          sheep.$helper.copyText(data.displayContent);
+        }
+      },
+    });
   }
 
-  // 支付宝支付  TODO 芋艿：待接入
+  // 支付宝支付（App） TODO 芋艿：待接入【暂时没打包 app，所以没接入，一般人用不到】
   async alipay() {
     let that = this;
     const { error, data } = await this.prepay();
@@ -243,7 +250,7 @@ export default class SheepPay {
     }
   }
 
-  // 微信支付  TODO 芋艿：待接入
+  // 微信支付（App）  TODO 芋艿：待接入：待接入【暂时没打包 app，所以没接入，一般人用不到】
   async wechatAppPay() {
     let that = this;
     let { error, data } = await this.prepay();
@@ -263,11 +270,7 @@ export default class SheepPay {
 
   // 支付结果跳转,success:成功，fail:失败
   payResult(resultType) {
-    sheep.$router.redirect('/pages/pay/result', {
-      id: this.id,
-      orderType: this.orderType,
-      payState: resultType
-    });
+    goPayResult(this.id, this.orderType, resultType);
   }
 
   // 引导绑定微信
@@ -282,7 +285,6 @@ export default class SheepPay {
       },
     });
   }
-
 }
 
 export function getPayMethods(channels) {
@@ -316,23 +318,28 @@ export function getPayMethods(channels) {
       title: '模拟支付',
       value: 'mock',
       disabled: true,
-    }
+    },
   ];
-  const platform = sheep.$platform.name
+  const platform = sheep.$platform.name;
 
   // 1. 处理【微信支付】
   const wechatMethod = payMethods[0];
-  if ((platform === 'WechatOfficialAccount' && channels.includes('wx_pub'))
-    || (platform === 'WechatMiniProgram' && channels.includes('wx_lite'))
-    || (platform === 'App' && channels.includes('wx_app'))) {
+  if (
+    (platform === 'WechatOfficialAccount' && channels.includes('wx_pub')) ||
+    (platform === 'WechatMiniProgram' && channels.includes('wx_lite')) ||
+    (platform === 'App' && channels.includes('wx_app'))
+  ) {
     wechatMethod.disabled = false;
   }
 
   // 2. 处理【支付宝支付】
   const alipayMethod = payMethods[1];
-  if ((platform === 'WechatOfficialAccount' && channels.includes('alipay_wap'))
-    || platform === 'WechatMiniProgram' && channels.includes('alipay_wap')
-    || platform === 'App' && channels.includes('alipay_app')) {
+  if (
+    (platform === 'H5' && channels.includes('alipay_wap')) ||
+    (platform === 'WechatOfficialAccount' && channels.includes('alipay_wap')) ||
+    (platform === 'WechatMiniProgram' && channels.includes('alipay_wap')) ||
+    (platform === 'App' && channels.includes('alipay_app'))
+  ) {
     alipayMethod.disabled = false;
   }
   // 3. 处理【余额支付】
@@ -347,4 +354,13 @@ export function getPayMethods(channels) {
     mockMethod.disabled = false;
   }
   return payMethods;
+}
+
+// 支付结果跳转,success:成功，fail:失败
+export function goPayResult(id, orderType, resultType) {
+  sheep.$router.redirect('/pages/pay/result', {
+    id,
+    orderType,
+    payState: resultType,
+  });
 }

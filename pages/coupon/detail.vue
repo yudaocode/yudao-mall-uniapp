@@ -36,7 +36,7 @@
               <text v-else>
                 {{
                   state.coupon.status === 1
-                    ? '立即使用'
+                    ? '可使用'
                     : state.coupon.status === 2
                     ? '已使用'
                     : '已过期'

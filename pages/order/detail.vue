@@ -127,7 +127,11 @@
     </view>
 
     <!--  自提核销  -->
-    <PickUpVerify :order-info="state.orderInfo" :systemStore="systemStore" ref="pickUpVerifyRef"></PickUpVerify>
+    <PickUpVerify
+      :order-info="state.orderInfo"
+      :systemStore="systemStore"
+      ref="pickUpVerifyRef"
+    ></PickUpVerify>
 
     <!-- 订单信息 -->
     <view class="notice-box">
@@ -305,7 +309,7 @@
     uni.showModal({
       title: '提示',
       content: '确定要取消订单吗?',
-      success: async function(res) {
+      success: async function (res) {
         if (!res.confirm) {
           return;
         }
@@ -394,11 +398,11 @@
     let res;
     if (state.comeinType === 'wechat') {
       // TODO 芋艿：微信场景下
-      res = await OrderApi.getOrder(id, {
+      res = await OrderApi.getOrderDetail(id, {
         merchant_trade_no: state.merchantTradeNo,
       });
     } else {
-      res = await OrderApi.getOrder(id);
+      res = await OrderApi.getOrderDetail(id);
     }
     if (res.code === 0) {
       state.orderInfo = res.data;
@@ -451,7 +455,7 @@
     color: rgba(#fff, 0.9);
     width: 100%;
     background: v-bind(headerBg) no-repeat,
-    linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
+      linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
     background-size: 750rpx 100%;
     box-sizing: border-box;
 

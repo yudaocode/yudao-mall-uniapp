@@ -7,7 +7,7 @@
         <view class="type-text ss-flex ss-row-center">满减：</view>
         <view class="ss-flex-1">
           <view class="tip-content" v-for="item in state.activityInfo.rules" :key="item">
-            {{ formatRewardActivityRule(state.activityInfo, item) }}
+            {{ item.description }}
           </view>
         </view>
         <image class="activity-left-image" src="/static/activity-left.png" />
@@ -65,8 +65,9 @@
   import sheep from '@/sheep';
   import _ from 'lodash-es';
   import RewardActivityApi from '@/sheep/api/promotion/rewardActivity';
-  import { formatRewardActivityRule } from '@/sheep/hooks/useGoods';
   import SpuApi from '@/sheep/api/product/spu';
+  import { appendSettlementProduct } from '@/sheep/hooks/useGoods';
+  import OrderApi from '@/sheep/api/trade/order';
 
   const state = reactive({
     activityId: 0, // 获得编号
@@ -123,6 +124,13 @@
     if (code !== 0) {
       return;
     }
+    // 拼接结算信息（营销）
+    await OrderApi.getSettlementProduct(data.list.map((item) => item.id).join(',')).then((res) => {
+      if (res.code !== 0) {
+        return;
+      }
+      appendSettlementProduct(data.list, res.data);
+    });
     state.pagination.list = _.concat(state.pagination.list, data.list);
     state.pagination.total = data.total;
     state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';

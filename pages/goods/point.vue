@@ -7,7 +7,7 @@
     <detailSkeleton v-if="state.skeletonLoading" />
     <!-- 下架/售罄提醒 -->
     <s-empty
-      v-else-if="state.goodsInfo === null || state.goodsInfo.activity_type !== 'seckill'"
+      v-else-if="state.goodsInfo === null || state.goodsInfo.activity_type !== PromotionActivityTypeEnum.POINT.type"
       text="活动不存在或已结束"
       icon="/static/soldout-empty.png"
       showAction
@@ -32,26 +32,15 @@
           <view class="price-box ss-flex ss-row-between ss-m-b-18">
             <view class="ss-flex">
               <view class="price-text ss-m-r-16">
-                {{ fen2yuan(state.selectedSku.price || state.goodsInfo.price) }}
+                {{ getShowPriceText }}
               </view>
               <view class="tig ss-flex ss-col-center">
                 <view class="tig-icon ss-flex ss-col-center ss-row-center">
                   <text class="cicon-alarm"></text>
                 </view>
-                <view class="tig-title">秒杀价</view>
+                <view class="tig-title">积分价</view>
               </view>
             </view>
-            <view class="countdown-box" v-if="endTime.ms > 0">
-              <view class="countdown-title ss-m-b-20">距结束仅剩</view>
-              <view class="ss-flex countdown-time">
-                <view class="ss-flex countdown-h">{{ endTime.h }}</view>
-                <view class="ss-m-x-4">:</view>
-                <view class="countdown-num ss-flex ss-row-center">{{ endTime.m }}</view>
-                <view class="ss-m-x-4">:</view>
-                <view class="countdown-num ss-flex ss-row-center">{{ endTime.s }}</view>
-              </view>
-            </view>
-            <view class="countdown-title" v-else> 活动已结束 </view>
           </view>
           <view class="ss-flex ss-row-between ss-m-b-60">
             <view class="origin-price ss-flex ss-col-center" v-if="state.goodsInfo.marketPrice">
@@ -60,7 +49,6 @@
                 {{ fen2yuan(state.selectedSku.marketPrice || state.goodsInfo.marketPrice) }}
               </view>
             </view>
-            <detail-progress :percent="state.percent" />
           </view>
 
           <view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo.name || '' }}</view>
@@ -89,7 +77,6 @@
 
       <!-- 详情tabbar -->
       <detail-tabbar v-model="state.goodsInfo">
-        <!-- TODO: 缺货中 已售罄 判断 设计-->
         <view class="buy-box ss-flex ss-col-center ss-p-r-20">
           <button
             class="ss-reset-button origin-price-btn ss-flex-col"
@@ -101,32 +88,21 @@
               <view>原价购买</view>
             </view>
           </button>
-          <button v-else class="ss-reset-button origin-price-btn ss-flex-col">
-            <view
-              class="no-original"
-              :class="
-                state.goodsInfo.stock === 0 || timeStatusEnum !== TimeStatusEnum.STARTED ? '' : ''
-              "
-            >
-              秒杀价
-            </view>
-          </button>
           <button
             class="ss-reset-button btn-box ss-flex-col"
             @tap="state.showSelectSku = true"
             :class="
-              timeStatusEnum === TimeStatusEnum.STARTED && state.goodsInfo.stock != 0
+             state.goodsInfo.stock != 0
                 ? 'check-btn-box'
                 : 'disabled-btn-box'
             "
-            :disabled="state.goodsInfo.stock === 0 || timeStatusEnum !== TimeStatusEnum.STARTED"
+            :disabled="state.goodsInfo.stock === 0"
           >
-            <view class="btn-price">{{ fen2yuan(state.goodsInfo.price) }}</view>
-            <view v-if="timeStatusEnum === TimeStatusEnum.STARTED">
-              <view v-if="state.goodsInfo.stock === 0">已售罄</view>
-              <view v-else>立即秒杀</view>
+            <view class="price-text">
+              {{getShowPriceText}}
             </view>
-            <view v-else>{{ timeStatusEnum }}</view>
+            <view v-if="state.goodsInfo.stock === 0">已售罄</view>
+            <view v-else>立即兑换</view>
           </button>
         </view>
       </detail-tabbar>
@@ -135,21 +111,20 @@
 </template>
 
 <script setup>
-  import { reactive, computed, ref, unref } from 'vue';
+  import { computed, reactive, ref, unref } from 'vue';
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import { isEmpty, min } from 'lodash-es';
-  import { useDurationTime, formatGoodsSwiper, fen2yuan } from '@/sheep/hooks/useGoods';
+  import { isEmpty } from 'lodash-es';
+  import { fen2yuan, formatGoodsSwiper } from '@/sheep/hooks/useGoods';
   import detailNavbar from './components/detail/detail-navbar.vue';
   import detailCellSku from './components/detail/detail-cell-sku.vue';
   import detailTabbar from './components/detail/detail-tabbar.vue';
   import detailSkeleton from './components/detail/detail-skeleton.vue';
   import detailCommentCard from './components/detail/detail-comment-card.vue';
   import detailContentCard from './components/detail/detail-content-card.vue';
-  import detailProgress from './components/detail/detail-progress.vue';
-  import SeckillApi from '@/sheep/api/promotion/seckill';
   import SpuApi from '@/sheep/api/product/spu';
-  import { getTimeStatusEnum, TimeStatusEnum } from '@/sheep/util/const';
+  import { PromotionActivityTypeEnum } from '@/sheep/util/const';
+  import PointApi from '@/sheep/api/promotion/point';
 
   const headerBg = sheep.$url.css('/static/img/shop/goods/seckill-bg.png');
   const btnBg = sheep.$url.css('/static/img/shop/goods/seckill-btn.png');
@@ -157,7 +132,8 @@
   const seckillBg = sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png');
   const grouponBg = sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png');
 
-  onPageScroll(() => {});
+  onPageScroll(() => {
+  });
   const state = reactive({
     skeletonLoading: true,
     goodsInfo: {},
@@ -166,12 +142,7 @@
     selectedSku: {},
     showModel: false,
     total: 0,
-    percent: 0,
     price: '',
-  });
-
-  const endTime = computed(() => {
-    return useDurationTime(activity.value.endTime);
   });
 
   // 规格变更
@@ -184,8 +155,8 @@
     sheep.$router.go('/pages/order/confirm', {
       data: JSON.stringify({
         order_type: 'goods',
-        buy_type: 'seckill',
-        seckillActivityId: activity.value.id,
+        buy_type: 'point',
+        pointActivityId: activity.value.id,
         items: [
           {
             skuId: sku.id,
@@ -197,6 +168,7 @@
   }
 
   // 分享信息
+  // TODO puhui999: 下次 fix
   const shareInfo = computed(() => {
     if (isEmpty(unref(activity))) return {};
     return sheep.$platform.share.getShareInfo(
@@ -219,14 +191,20 @@
   });
 
   const activity = ref();
-  const timeStatusEnum = ref('');
+
+  const getShowPriceText = computed(() => {
+    let priceText = `${activity.value.point}积分${!activity.value.price ? '' : `+￥${fen2yuan(activity.value.price)}`}`;
+    if (!isEmpty(state.selectedSku)) {
+      const sku = state.selectedSku;
+      priceText = `${sku.point}积分${!sku.pointPrice ? '' : `+￥${fen2yuan(sku.pointPrice)}`}`;
+    }
+    return priceText;
+  });
 
   // 查询活动
   const getActivity = async (id) => {
-    const { data } = await SeckillApi.getSeckillActivity(id);
+    const { data } = await PointApi.getPointActivity(id);
     activity.value = data;
-    timeStatusEnum.value = getTimeStatusEnum(activity.value.startTime, activity.value.endTime);
-    state.percent = 100 - (data.stock / data.totalStock) * 100;
     // 查询商品
     await getSpu(data.spuId);
   };
@@ -234,34 +212,24 @@
   // 查询商品
   const getSpu = async (id) => {
     const { data } = await SpuApi.getSpuDetail(id);
-    data.activity_type = 'seckill';
+    data.activity_type = PromotionActivityTypeEnum.POINT.type;
     state.goodsInfo = data;
+    state.goodsInfo.stock = Math.min(data.stock, activity.value.stock);
     // 处理轮播图
     state.goodsSwiper = formatGoodsSwiper(state.goodsInfo.sliderPicUrls);
-
-    // 默认显示最低价
-    state.goodsInfo.price = min([
-      state.goodsInfo.price,
-      ...activity.value.products.map((spu) => spu.seckillPrice),
-    ]);
 
     // 价格、库存使用活动的
     data.skus.forEach((sku) => {
       const product = activity.value.products.find((product) => product.skuId === sku.id);
       if (product) {
-        sku.price = product.seckillPrice;
+        sku.point = product.point;
+        sku.pointPrice = product.price;
         sku.stock = Math.min(sku.stock, product.stock);
+        // 设置限购数量
+        sku.limitCount = product.count;
       } else {
-        // 找不到可能是没配置，则不能发起秒杀
+        // 找不到可能是没配置
         sku.stock = 0;
-      }
-      // 设置限购数量
-      if (activity.value.totalLimitCount > 0 && activity.value.singleLimitCount > 0) {
-        sku.limitCount = Math.min(activity.value.totalLimitCount, activity.value.singleLimitCount);
-      } else if (activity.value.totalLimitCount > 0) {
-        sku.limitCount = activity.value.totalLimitCount;
-      } else if (activity.value.singleLimitCount > 0) {
-        sku.limitCount = activity.value.singleLimitCount;
       }
     });
 
@@ -309,11 +277,6 @@
         color: #fff;
         line-height: normal;
         font-family: OPPOSANS;
-
-        &::before {
-          content: '￥';
-          font-size: 30rpx;
-        }
       }
     }
 

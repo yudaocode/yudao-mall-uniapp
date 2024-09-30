@@ -13,6 +13,18 @@ const SpuApi = {
       },
     });
   },
+  // 获得商品结算信息
+  getSettlementProduct: (spuIds) => {
+    return request({
+      url: '/trade/order/settlement-product',
+      method: 'GET',
+      params: { spuIds },
+      custom: {
+        showLoading: false,
+        showError: false,
+      },
+    });
+  },
   // 获得商品 SPU 分页
   getSpuPage: (params) => {
     return request({

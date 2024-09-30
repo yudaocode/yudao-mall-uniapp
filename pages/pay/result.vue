@@ -126,7 +126,10 @@
         // #endif
         // 特殊：获得商品订单信息
         if (state.orderType === 'goods') {
-          const { data, code } = await OrderApi.getOrder(state.orderInfo.merchantOrderId);
+          const { data, code } = await OrderApi.getOrderDetail(
+            state.orderInfo.merchantOrderId,
+            true,
+          );
           if (code === 0) {
             state.tradeOrder = data;
           }

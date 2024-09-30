@@ -143,8 +143,7 @@
           v-if="state.orderInfo.price.discountPrice > 0"
         >
           <view class="item-title">活动优惠</view>
-          <view class="ss-flex ss-col-center">
-            <!--                @tap="state.showDiscount = true" TODO puhui999：【折扣】后续要把优惠信息打进去 -->
+          <view class="ss-flex ss-col-center" @tap="state.showDiscount = true">
             <text class="item-value text-red">
               -￥{{ fen2yuan(state.orderInfo.price.discountPrice) }}
             </text>
@@ -295,6 +294,7 @@
       combinationActivityId: state.orderPayload.combinationActivityId,
       combinationHeadId: state.orderPayload.combinationHeadId,
       seckillActivityId: state.orderPayload.seckillActivityId,
+      pointActivityId: state.orderPayload.pointActivityId,
     });
     if (code !== 0) {
       return;
@@ -325,6 +325,7 @@
       combinationActivityId: state.orderPayload.combinationActivityId,
       combinationHeadId: state.orderPayload.combinationHeadId,
       seckillActivityId: state.orderPayload.seckillActivityId,
+      pointActivityId: state.orderPayload.pointActivityId,
     });
     if (code !== 0) {
       return;

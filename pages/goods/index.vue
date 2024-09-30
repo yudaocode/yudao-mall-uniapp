@@ -27,10 +27,60 @@
             dotCur="bg-mask-40"
             :seizeHeight="750"
           />
-
+          <!-- 限时折扣/会员价的优惠信息 -->
+          <view
+            class="discount"
+            v-if="
+              state.settlementSku && state.settlementSku.id && state.settlementSku.promotionPrice
+            "
+          >
+            <image class="disImg" :src="sheep.$url.static('/static/img/shop/goods/dis.png')" />
+            <view class="discountCont">
+              <view class="disContT">
+                <view class="disContT1">
+                  <view class="disContT1P">
+                    ￥{{ fen2yuan(state.settlementSku.promotionPrice) }}
+                  </view>
+                  <view class="disContT1End">
+                    直降￥
+                    {{ fen2yuan(state.settlementSku.price - state.settlementSku.promotionPrice) }}
+                  </view>
+                </view>
+                <view class="disContT2" v-if="state.settlementSku.promotionType === 4">
+                  限时折扣
+                </view>
+                <view class="disContT2" v-else-if="state.settlementSku.promotionType === 6">
+                  会员折扣
+                </view>
+              </view>
+              <view class="disContB">
+                <view class="disContB1">
+                  价格：￥{{ fen2yuan(state.settlementSku.price) }} 丨 剩余：
+                  {{ state.settlementSku.stock }}
+                </view>
+                <view class="disContB2" v-if="state.settlementSku.promotionEndTime > 0">
+                  距结束仅剩
+                  <countDown
+                    :tipText="' '"
+                    :bgColor="bgColor"
+                    :dayText="':'"
+                    :hourText="':'"
+                    :minuteText="':'"
+                    :secondText="' '"
+                    :datatime="state.settlementSku.promotionEndTime / 1000"
+                    :isDay="false"
+                  />
+                </view>
+              </view>
+            </view>
+          </view>
           <!-- 价格+标题 -->
-          <view class="title-card detail-card ss-p-y-40 ss-p-x-20">
-            <view class="ss-flex ss-row-between ss-col-center ss-m-b-26">
+          <view class="title-card detail-card ss-p-y-30 ss-p-x-20">
+            <!-- 没有限时折扣/会员价的优惠信息时，展示的价格信息 -->
+            <view
+              class="ss-flex ss-row-between ss-col-center ss-m-b-26"
+              v-if="!state.settlementSku.promotionPrice"
+            >
               <view class="price-box ss-flex ss-col-bottom">
                 <view class="price-text ss-m-r-16">
                   {{ fen2yuan(state.selectedSku.price || state.goodsInfo.price) }}
@@ -44,24 +94,39 @@
               </view>
             </view>
             <view class="discounts-box ss-flex ss-row-between ss-m-b-28">
-              <!-- 满减送/限时折扣活动的提示 -->
+              <!-- 查看优惠劵的描述 -->
+              <view
+                class="tag ss-m-r-10"
+                v-for="coupon in state.couponInfo.slice(0, 1)"
+                :key="coupon.id"
+                @tap="onOpenActivity"
+              >
+                [劵]满{{ fen2yuanSimple(coupon.usePrice) }}元{{
+                  coupon.discountType === 1
+                    ? '减' + fen2yuanSimple(coupon.discountPrice) + '元'
+                    : '打' + formatDiscountPercent(coupon.discountPercent) + '折'
+                }}
+              </view>
+              <!-- 查看满减送的描述 -->
               <div class="tag-content">
                 <view class="tag-box ss-flex">
+                  <!-- 最多打印 3 条，所以需要扣除优惠劵已打印的 -->
                   <view
+                    v-for="item in getRewardActivityRuleItemDescriptions(
+                      state.rewardActivity,
+                    ).slice(0, 3 - state.couponInfo.slice(0, 1).length)"
+                    :key="item"
                     class="tag ss-m-r-10"
-                    v-for="promos in state.activityInfo"
-                    :key="promos.id"
-                    @tap="onActivity"
+                    @tap="onOpenActivity"
                   >
-                    {{ promos.name }}
+                    <text>{{ item }}</text>
                   </view>
                 </view>
               </div>
-
-              <!-- 优惠劵 -->
+              <!-- 领取优惠劵的按钮 -->
               <view
                 class="get-coupon-box ss-flex ss-col-center ss-m-l-20"
-                @tap="state.showModel = true"
+                @tap="onOpenActivity"
                 v-if="state.couponInfo.length"
               >
                 <view class="discounts-title ss-m-r-8">领券</view>
@@ -127,19 +192,12 @@
           </view>
         </detail-tabbar>
 
-        <!-- 优惠劵弹窗 -->
-        <s-coupon-get
-          v-model="state.couponInfo"
-          :show="state.showModel"
-          @close="state.showModel = false"
-          @get="onGet"
-        />
-
         <!-- 满减送/限时折扣活动弹窗 -->
         <s-activity-pop
-          v-model="state.activityInfo"
+          v-model="state"
           :show="state.showActivityModel"
           @close="state.showActivityModel = false"
+          @get="onTakeCoupon"
         />
       </block>
     </s-layout>
@@ -147,13 +205,21 @@
 </template>
 
 <script setup>
-  import { reactive, computed } from 'vue';
+  import { reactive, computed, ref, toRaw } from 'vue';
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import CouponApi from '@/sheep/api/promotion/coupon';
   import ActivityApi from '@/sheep/api/promotion/activity';
   import FavoriteApi from '@/sheep/api/product/favorite';
-  import { formatSales, formatGoodsSwiper, fen2yuan } from '@/sheep/hooks/useGoods';
+  import RewardActivityApi from '@/sheep/api/promotion/rewardActivity';
+  import {
+    formatSales,
+    formatGoodsSwiper,
+    fen2yuan,
+    fen2yuanSimple,
+    formatDiscountPercent,
+    getRewardActivityRuleItemDescriptions,
+  } from '@/sheep/hooks/useGoods';
   import detailNavbar from './components/detail/detail-navbar.vue';
   import detailCellSku from './components/detail/detail-cell-sku.vue';
   import detailTabbar from './components/detail/detail-tabbar.vue';
@@ -165,7 +231,17 @@
   import SpuApi from '@/sheep/api/product/spu';
 
   onPageScroll(() => {});
+  import countDown from '@/sheep/components/countDown/index.vue';
+  import OrderApi from '@/sheep/api/trade/order';
+  import activity from '@/sheep/api/promotion/activity';
 
+  const bgColor = {
+    bgColor: '#E93323',
+    Color: '#fff',
+    width: '44rpx',
+    timeTxtwidth: '16rpx',
+    isDay: true,
+  };
   const isLogin = computed(() => sheep.$store('user').isLogin);
   const state = reactive({
     goodsId: 0,
@@ -173,16 +249,18 @@
     goodsInfo: {}, // SPU 信息
     showSelectSku: false, // 是否展示 SKU 选择弹窗
     selectedSku: {}, // 选中的 SKU
+    settlementSku: {}, // 结算的 SKU：由于 selectedSku 不进行默认选中，所以初始使用结算价格最低的 SKU 作为基础展示
     showModel: false, // 是否展示 Coupon 优惠劵的弹窗
     couponInfo: [], // 可领取的 Coupon 优惠劵的列表
     showActivityModel: false, // 【满减送/限时折扣】是否展示 Activity 营销活动的弹窗
-    activityInfo: [], // 【满减送/限时折扣】可参与的 Activity 营销活动的列表 TODO 芋艿：正在接入中
+    rewardActivity: {}, // 【满减送】活动
     activityList: [], // 【秒杀/拼团/砍价】可参与的 Activity 营销活动的列表
   });
 
   // 规格变更
   function onSkuChange(e) {
     state.selectedSku = e;
+    state.settlementSku = e;
   }
 
   // 添加购物车
@@ -196,7 +274,7 @@
 
   // 立即购买
   function onBuy(e) {
-    if (!state.selectedSku.id) {
+    if (!e.id) {
       sheep.$helper.toast('请选择商品规格');
       return;
     }
@@ -213,13 +291,13 @@
     });
   }
 
-  // 营销活动
-  function onActivity() {
+  // 打开营销弹窗
+  function onOpenActivity() {
     state.showActivityModel = true;
   }
 
-  // 立即领取
-  async function onGet(id) {
+  // 立即领取优惠劵
+  async function onTakeCoupon(id) {
     const { code } = await CouponApi.takeCoupon(id);
     if (code !== 0) {
       return;
@@ -261,6 +339,48 @@
     }
   }
 
+  async function getSettlementByIds(ids) {
+    let { data, code } = await OrderApi.getSettlementProduct(ids);
+    if (code !== 0 || data.length !== 1) {
+      return;
+    }
+    data = data[0];
+
+    // 补充 SKU 的价格信息
+    state.goodsInfo.skus.forEach((sku) => {
+      data.skus.forEach((item) => {
+        if (sku.id === item.id) {
+          sku.promotionType = item.promotionType;
+          sku.promotionPrice = item.promotionPrice;
+          sku.promotionId = item.promotionId;
+          sku.promotionEndTime = item.promotionEndTime;
+        }
+      });
+    });
+
+    // 选择有 promotionPrice 且最小的
+    state.settlementSku = state.goodsInfo.skus
+      .filter((sku) => sku.stock > 0 && sku.promotionPrice > 0)
+      .reduce((prev, curr) => (prev.promotionPrice < curr.promotionPrice ? prev : curr));
+
+    // 设置满减送活动
+    if (data.rewardActivity) {
+      state.rewardActivity = data.rewardActivity;
+      //获取活动时间
+      getActivityTime(state.rewardActivity.id);
+    }
+  }
+
+  //获取活动时间
+  async function getActivityTime(id) {
+    const { code, data } = await RewardActivityApi.getRewardActivity(id);
+    if (code === 0) {
+      // console.log('获取到的活动 数据', data)
+      state.rewardActivity.startTime = data.startTime;
+      state.rewardActivity.endTime = data.endTime;
+    }
+  }
+
   onLoad((options) => {
     // 非法参数
     if (!options.id) {
@@ -278,7 +398,6 @@
       // 加载到商品
       state.skeletonLoading = false;
       state.goodsInfo = res.data;
-
       // 加载是否收藏
       if (isLogin.value) {
         FavoriteApi.isFavoriteExists(state.goodsId, 'goods').then((res) => {
@@ -293,13 +412,15 @@
     // 2. 加载优惠劵信息
     getCoupon();
 
-    // 3. 获得单个商品，进行中的拼团、秒杀、砍价活动信息
+    // 3. 加载营销活动信息
     ActivityApi.getActivityListBySpuId(state.goodsId).then((res) => {
       if (res.code !== 0) {
         return;
       }
       state.activityList = res.data;
     });
+    //获取结算信息
+    getSettlementByIds(state.goodsId);
   });
 </script>
 
@@ -447,5 +568,102 @@
       font-weight: 500;
       color: #333333;
     }
+  }
+
+  // 限时折扣
+  .discount {
+    width: 750rpx;
+    height: 100rpx;
+    // background-color: red;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .disImg {
+    width: 750rpx;
+    height: 100rpx;
+    position: absolute;
+    top: 0;
+    z-index: -1;
+  }
+
+  .discountCont {
+    width: 680rpx;
+    height: 90rpx;
+    margin: 10rpx auto 0 auto;
+    // background-color: gold;
+  }
+
+  .disContT {
+    width: 680rpx;
+    height: 50rpx;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .disContT1 {
+    width: 400rpx;
+    height: 50rpx;
+    // background-color: green;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .disContT2 {
+    width: 200rpx;
+    height: 50rpx;
+    line-height: 50rpx;
+    // background-color: gold;
+    font-size: 30rpx;
+    text-align: end;
+    color: white;
+    font-weight: bolder;
+    font-style: oblique 20deg;
+    letter-spacing: 0.1rem;
+  }
+
+  .disContT1P {
+    color: white;
+    font-weight: bold;
+    font-size: 28rpx;
+  }
+
+  .disContT1End {
+    // width: 180rpx;
+    padding: 0 10rpx;
+    height: 30rpx;
+    line-height: 28rpx;
+    text-align: center;
+    font-weight: bold;
+    background-color: white;
+    color: #ff3000;
+    font-size: 23rpx;
+    border-radius: 20rpx;
+    margin-left: 10rpx;
+  }
+
+  .disContB {
+    width: 680rpx;
+    height: 40rpx;
+    display: flex;
+    justify-content: space-between;
+    font-size: 20rpx;
+    color: white;
+    align-items: center;
+  }
+
+  .disContB1 {
+    width: 300rpx;
+    height: 40rpx;
+    line-height: 40rpx;
+  }
+
+  .disContB2 {
+    width: 300rpx;
+    height: 40rpx;
+    line-height: 40rpx;
+    display: flex;
+    justify-content: flex-end;
   }
 </style>

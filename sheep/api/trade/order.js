@@ -53,6 +53,18 @@ const OrderApi = {
       },
     });
   },
+  // 获得商品结算信息
+  getSettlementProduct: (spuIds) => {
+    return request({
+      url: '/trade/order/settlement-product',
+      method: 'GET',
+      params: { spuIds },
+      custom: {
+        showLoading: false,
+        showError: false,
+      },
+    });
+  },
   // 创建订单
   createOrder: (data) => {
     return request({
@@ -61,13 +73,14 @@ const OrderApi = {
       data,
     });
   },
-  // 获得订单
-  getOrder: (id) => {
+  // 获得订单详细：sync 是可选参数
+  getOrderDetail: (id, sync) => {
     return request({
       url: `/trade/order/get-detail`,
       method: 'GET',
       params: {
         id,
+        sync,
       },
       custom: {
         showLoading: false,

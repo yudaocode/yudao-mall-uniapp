@@ -11,7 +11,7 @@ import { formatDate } from '@/sheep/util';
  */
 export function formatSales(type, num) {
   let prefix = type !== 'exact' && num < 10 ? '销量' : '已售';
-  return formatNum(prefix, type, num)
+  return formatNum(prefix, type, num);
 }
 
 /**
@@ -21,9 +21,8 @@ export function formatSales(type, num) {
  * @return {string} 格式化后的销量字符串
  */
 export function formatExchange(type, num) {
-  return formatNum('已兑换', type, num)
+  return formatNum('已兑换', type, num);
 }
-
 
 /**
  * 格式化库存
@@ -32,7 +31,7 @@ export function formatExchange(type, num) {
  * @return {string} 格式化后的销量字符串
  */
 export function formatStock(type, num) {
-  return formatNum('库存', type, num)
+  return formatNum('库存', type, num);
 }
 
 /**
@@ -43,7 +42,7 @@ export function formatStock(type, num) {
  * @return {string} 格式化后的销量字符串
  */
 export function formatNum(prefix, type, num) {
-  num = (num || 0);
+  num = num || 0;
   // 情况一：精确数值
   if (type === 'exact') {
     return prefix + num;
@@ -67,7 +66,7 @@ export function formatPrice(e) {
 }
 
 // 视频格式后缀列表
-const VIDEO_SUFFIX_LIST = ['.avi', '.mp4']
+const VIDEO_SUFFIX_LIST = ['.avi', '.mp4'];
 
 /**
  * 转换商品轮播的链接列表：根据链接的后缀，判断是视频链接还是图片链接
@@ -76,12 +75,19 @@ const VIDEO_SUFFIX_LIST = ['.avi', '.mp4']
  * @return {{src: string, type: 'video' | 'image' }[]}  转换后的链接列表
  */
 export function formatGoodsSwiper(urlList) {
-  return urlList?.filter(url => url).map((url, key) => {
-    const isVideo = VIDEO_SUFFIX_LIST.some(suffix => url.includes(suffix));
-    const type = isVideo ? 'video' : 'image'
-    const src = $url.cdn(url);
-    return { type, src }
-  }) || [];
+  return (
+    urlList
+      ?.filter((url) => url)
+      .map((url, key) => {
+        const isVideo = VIDEO_SUFFIX_LIST.some((suffix) => url.includes(suffix));
+        const type = isVideo ? 'video' : 'image';
+        const src = $url.cdn(url);
+        return {
+          type,
+          src,
+        };
+      }) || []
+  );
 }
 
 /**
@@ -94,9 +100,7 @@ export function formatOrderColor(order) {
   if (order.status === 0) {
     return 'info-color';
   }
-  if (order.status === 10
-    || order.status === 20
-    || (order.status === 30 && !order.commentStatus)) {
+  if (order.status === 10 || order.status === 20 || (order.status === 30 && !order.commentStatus)) {
     return 'warning-color';
   }
   if (order.status === 30 && order.commentStatus) {
@@ -139,7 +143,7 @@ export function formatOrderStatus(order) {
  */
 export function formatOrderStatusDescription(order) {
   if (order.status === 0) {
-    return `请在 ${ formatDate(order.payExpireTime) } 前完成支付`;
+    return `请在 ${formatDate(order.payExpireTime)} 前完成支付`;
   }
   if (order.status === 10) {
     return '商家未发货，请耐心等待';
@@ -162,24 +166,30 @@ export function formatOrderStatusDescription(order) {
  * @param order 订单
  */
 export function handleOrderButtons(order) {
-  order.buttons = []
-  if (order.type === 3) { // 查看拼团
+  order.buttons = [];
+  if (order.type === 3) {
+    // 查看拼团
     order.buttons.push('combination');
   }
-  if (order.status === 20) { // 确认收货
+  if (order.status === 20) {
+    // 确认收货
     order.buttons.push('confirm');
   }
-  if (order.logisticsId > 0) { // 查看物流
+  if (order.logisticsId > 0) {
+    // 查看物流
     order.buttons.push('express');
   }
-  if (order.status === 0) { // 取消订单 / 发起支付
+  if (order.status === 0) {
+    // 取消订单 / 发起支付
     order.buttons.push('cancel');
     order.buttons.push('pay');
   }
-  if (order.status === 30 && !order.commentStatus) { // 发起评价
+  if (order.status === 30 && !order.commentStatus) {
+    // 发起评价
     order.buttons.push('comment');
   }
-  if (order.status === 40) { // 删除订单
+  if (order.status === 40) {
+    // 删除订单
     order.buttons.push('delete');
   }
 }
@@ -257,10 +267,12 @@ export function formatAfterSaleStatusDescription(afterSale) {
  */
 export function handleAfterSaleButtons(afterSale) {
   afterSale.buttons = [];
-  if ([10, 20, 30].includes(afterSale.status)) { // 取消订单
+  if ([10, 20, 30].includes(afterSale.status)) {
+    // 取消订单
     afterSale.buttons.push('cancel');
   }
-  if (afterSale.status === 20) { // 退货信息
+  if (afterSale.status === 20) {
+    // 退货信息
     afterSale.buttons.push('delivery');
   }
 }
@@ -324,7 +336,28 @@ function getDayjsTime(time) {
  * @returns {string} 元，例如说 1.00 元
  */
 export function fen2yuan(price) {
-  return (price / 100.0).toFixed(2)
+  return (price / 100.0).toFixed(2);
+}
+
+/**
+ * 将分转成元
+ *
+ * 如果没有小数点，则不展示小数点部分
+ *
+ * @param price 分，例如说 100 分
+ * @returns {string} 元，例如说 1 元
+ */
+export function fen2yuanSimple(price) {
+  return fen2yuan(price).replace(/\.?0+$/, '');
+}
+
+/**
+ * 将折扣百分比转化为“打x者”的 x 部分
+ *
+ * @param discountPercent
+ */
+export function formatDiscountPercent(discountPercent) {
+  return (discountPercent / 10.0).toFixed(1).replace(/\.?0+$/, '');
 }
 
 /**
@@ -345,45 +378,122 @@ export function convertProductPropertyList(skus) {
   let result = [];
   for (const sku of skus) {
     if (!sku.properties) {
-      continue
+      continue;
     }
     for (const property of sku.properties) {
       // ① 先处理属性
-      let resultProperty = result.find(item => item.id === property.propertyId)
+      let resultProperty = result.find((item) => item.id === property.propertyId);
       if (!resultProperty) {
         resultProperty = {
           id: property.propertyId,
           name: property.propertyName,
-          values: []
-        }
-        result.push(resultProperty)
+          values: [],
+        };
+        result.push(resultProperty);
       }
       // ② 再处理属性值
-      let resultValue = resultProperty.values.find(item => item.id === property.valueId)
+      let resultValue = resultProperty.values.find((item) => item.id === property.valueId);
       if (!resultValue) {
         resultProperty.values.push({
           id: property.valueId,
-          name: property.valueName
-        })
+          name: property.valueName,
+        });
       }
     }
   }
   return result;
 }
 
-/**
- * 格式化满减送活动的规则
- *
- * @param activity 活动信息
- * @param rule 优惠规格
- * @returns {string} 规格字符串
- */
-export function formatRewardActivityRule(activity, rule) {
-  if (activity.conditionType === 10) {
-    return `满 ${fen2yuan(rule.limit)} 元减 ${fen2yuan(rule.discountPrice)} 元`;
+export function appendSettlementProduct(spus, settlementInfos) {
+  if (!settlementInfos || settlementInfos.length === 0) {
+    return;
   }
-  if (activity.conditionType === 20) {
-    return `满 ${rule.limit} 件减 ${fen2yuan(rule.discountPrice)} 元`;
+  for (const spu of spus) {
+    const settlementInfo = settlementInfos.find((info) => info.spuId === spu.id);
+    if (!settlementInfo) {
+      return;
+    }
+    // 选择价格最小的 SKU 设置到 SPU 上
+    const settlementSku = settlementInfo.skus
+      .filter((sku) => sku.promotionPrice > 0)
+      .reduce((prev, curr) => (prev.promotionPrice < curr.promotionPrice ? prev : curr));
+    if (settlementSku) {
+      spu.promotionType = settlementSku.promotionType;
+      spu.promotionPrice = settlementSku.promotionPrice;
+    }
+    // 设置【满减送】活动
+    if (settlementInfo.rewardActivity) {
+      spu.rewardActivity = settlementInfo.rewardActivity;
+    }
   }
-  return '';
+}
+
+// 获得满减送活动的规则描述（group）
+export function getRewardActivityRuleGroupDescriptions(activity) {
+  if (!activity || !activity.rules || activity.rules.length === 0) {
+    return [];
+  }
+  const result = [
+    { name: '满减', values: [] },
+    { name: '赠品', values: [] },
+    { name: '包邮', values: [] },
+  ];
+  activity.rules.forEach((rule) => {
+    const conditionTypeStr =
+      activity.conditionType === 10 ? `满 ${fen2yuanSimple(rule.limit)} 元` : `满 ${rule.limit} 件`;
+    // 满减
+    if (rule.limit) {
+      result[0].values.push(`${conditionTypeStr} 减 ${fen2yuanSimple(rule.discountPrice)} 元`);
+    }
+    // 赠品
+    if (rule.point || (rule.giveCouponTemplateCounts && rule.giveCouponTemplateCounts.length > 0)) {
+      let tips = [];
+      if (rule.point) {
+        tips.push(`送 ${rule.point} 积分`);
+      }
+      if (rule.giveCouponTemplateCounts && rule.giveCouponTemplateCounts.length > 0) {
+        tips.push(`送 ${rule.giveCouponTemplateCounts.length} 张优惠券`);
+      }
+      result[1].values.push(`${conditionTypeStr} ${tips.join('、')}`);
+    }
+    // 包邮
+    if (rule.freeDelivery) {
+      result[2].values.push(`${conditionTypeStr} 包邮`);
+    }
+  });
+  // 移除 values 为空的元素
+  result.forEach((item) => {
+    if (item.values.length === 0) {
+      result.splice(result.indexOf(item), 1);
+    }
+  });
+  return result;
+}
+
+// 获得满减送活动的规则描述（item）
+export function getRewardActivityRuleItemDescriptions(activity) {
+  if (!activity || !activity.rules || activity.rules.length === 0) {
+    return [];
+  }
+  const result = [];
+  activity.rules.forEach((rule) => {
+    const conditionTypeStr =
+      activity.conditionType === 10 ? `满${fen2yuanSimple(rule.limit)}元` : `满${rule.limit}件`;
+    // 满减
+    if (rule.limit) {
+      result.push(`${conditionTypeStr}减${fen2yuanSimple(rule.discountPrice)}元`);
+    }
+    // 赠品
+    if (rule.point) {
+      result.push(`${conditionTypeStr}送${rule.point}积分`);
+    }
+    if (rule.giveCouponTemplateCounts && rule.giveCouponTemplateCounts.length > 0) {
+      result.push(`${conditionTypeStr}送${rule.giveCouponTemplateCounts.length}张优惠券`);
+    }
+    // 包邮
+    if (rule.freeDelivery) {
+      result.push(`${conditionTypeStr}包邮`);
+    }
+  });
+  return result;
 }

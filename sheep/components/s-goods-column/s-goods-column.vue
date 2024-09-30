@@ -11,11 +11,7 @@
       <view v-if="tagStyle.show" class="tag-icon-box">
         <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
       </view>
-      <image
-        class="xs-img-box"
-        :src="sheep.$url.cdn(data.image || data.picUrl)"
-        mode="aspectFit"
-      ></image>
+      <image class="xs-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="aspectFit" />
       <view
         v-if="goodsFields.title?.show || goodsFields.name?.show || goodsFields.price?.show"
         class="xs-goods-content ss-flex-col ss-row-around"
@@ -27,13 +23,34 @@
         >
           {{ data.title || data.name }}
         </view>
+        <!-- 活动信息 -->
+        <view class="iconBox" v-if="data.promotionType > 0 || data.rewardActivity">
+          <view class="card" v-if="discountText">{{ discountText }}</view>
+          <view
+            class="card2"
+            v-for="item in getRewardActivityRuleItemDescriptions(data.rewardActivity).slice(0, 1)"
+            :key="item"
+          >
+            {{ item }}
+          </view>
+        </view>
         <view
           v-if="goodsFields.price?.show"
           class="xs-goods-price font-OPPOSANS"
           :style="[{ color: goodsFields.price.color }]"
         >
-          <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-          {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+          <!-- 活动价格 -->
+          <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+            {{ data.point }}积分
+            {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
+          </text>
+          <template v-else>
+            <text class="price-unit ss-font-24">{{ priceUnit }}</text>
+            <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+            <text v-else>
+              {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+            </text>
+          </template>
         </view>
       </view>
     </view>
@@ -60,13 +77,34 @@
         >
           {{ data.title || data.name }}
         </view>
+        <!-- 活动信息 -->
+        <view class="iconBox" v-if="data.promotionType > 0 || data.rewardActivity">
+          <view class="card" v-if="discountText">{{ discountText }}</view>
+          <view
+            class="card2"
+            v-for="item in getRewardActivityRuleItemDescriptions(data.rewardActivity).slice(0, 1)"
+            :key="item"
+          >
+            {{ item }}
+          </view>
+        </view>
         <view
           v-if="goodsFields.price?.show"
           class="sm-goods-price font-OPPOSANS"
           :style="[{ color: goodsFields.price.color }]"
         >
-          <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-          {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+          <!-- 活动价格 -->
+          <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+            {{ data.point }}积分
+            {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
+          </text>
+          <template v-else>
+            <text class="price-unit ss-font-24">{{ priceUnit }}</text>
+            <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+            <text v-else>
+              {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+            </text>
+          </template>
         </view>
       </view>
     </view>
@@ -74,13 +112,9 @@
     <!-- md卡片：竖向，一行放两个，图上内容下 -->
     <view v-if="size === 'md'" class="md-goods-card ss-flex-col" :style="[elStyles]" @tap="onClick">
       <view v-if="tagStyle.show" class="tag-icon-box">
-        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
+        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)" />
       </view>
-      <image
-        class="md-img-box"
-        :src="sheep.$url.cdn(data.image || data.picUrl)"
-        mode="widthFix"
-      ></image>
+      <image class="md-img-box" :src="sheep.$url.cdn(data.image || data.picUrl)" mode="widthFix" />
       <view
         class="md-goods-content ss-flex-col ss-row-around ss-p-b-20 ss-p-t-20 ss-p-x-16"
         :id="elId"
@@ -110,16 +144,36 @@
             </view>
           </view>
         </slot>
+        <!-- 活动信息 -->
+        <view class="iconBox" v-if="data.promotionType > 0 || data.rewardActivity">
+          <view class="card" v-if="discountText">{{ discountText }}</view>
+          <view
+            class="card2"
+            v-for="item in getRewardActivityRuleItemDescriptions(data.rewardActivity).slice(0, 1)"
+            :key="item"
+          >
+            {{ item }}
+          </view>
+        </view>
         <view class="ss-flex ss-col-bottom">
           <view
             v-if="goodsFields.price?.show"
             class="md-goods-price ss-m-t-16 font-OPPOSANS ss-m-r-10"
             :style="[{ color: goodsFields.price.color }]"
           >
-            <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-            {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+            <!-- 活动价格 -->
+            <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+              {{ data.point }}积分
+              {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
+            </text>
+            <template v-else>
+              <text class="price-unit ss-font-24">{{ priceUnit }}</text>
+              <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+              <text v-else>
+                {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+              </text>
+            </template>
           </view>
-
           <view
             v-if="
               (goodsFields.original_price?.show || goodsFields.marketPrice?.show) &&
@@ -163,7 +217,7 @@
         class="lg-img-box"
         :src="sheep.$url.cdn(data.image || data.picUrl)"
         mode="aspectFill"
-      ></image>
+      />
       <view class="lg-goods-content ss-flex-1 ss-flex-col ss-row-between ss-p-b-10 ss-p-t-20">
         <view>
           <view
@@ -189,21 +243,38 @@
               </view>
             </view>
           </slot>
-          <view class="ss-flex ss-col-bottom ss-m-t-10">
+          <!-- 活动信息 -->
+          <view class="iconBox" v-if="data.promotionType > 0 || data.rewardActivity">
+            <view class="card" v-if="discountText">{{ discountText }}</view>
             <view
-              v-if="goodsFields.price?.show"
-              class="lg-goods-price ss-m-r-12 ss-flex ss-col-bottom font-OPPOSANS"
-              :style="[{ color: goodsFields.price.color }]"
+              class="card2"
+              v-for="item in getRewardActivityRuleItemDescriptions(data.rewardActivity).slice(0, 1)"
+              :key="item"
             >
-              <text class="ss-font-24">{{ priceUnit }}</text>
-              {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+              {{ item }}
+            </view>
+          </view>
+          <view v-if="goodsFields.price?.show" class="ss-flex ss-col-bottom font-OPPOSANS">
+            <view class="sl-goods-price ss-m-r-12" :style="[{ color: goodsFields.price.color }]">
+              <!-- 活动价格 -->
+              <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+                {{ data.point }}积分
+                {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
+              </text>
+              <template v-else>
+                <text class="price-unit ss-font-24">{{ priceUnit }}</text>
+                <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+                <text v-else>
+                  {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+                </text>
+              </template>
             </view>
             <view
               v-if="
                 (goodsFields.original_price?.show || goodsFields.marketPrice?.show) &&
                 (data.original_price > 0 || data.marketPrice > 0)
               "
-              class="goods-origin-price ss-flex ss-col-bottom font-OPPOSANS"
+              class="goods-origin-price ss-m-t-16 font-OPPOSANS ss-flex"
               :style="[{ color: originPriceColor }]"
             >
               <text class="price-unit ss-font-20">{{ priceUnit }}</text>
@@ -217,22 +288,20 @@
       </view>
 
       <slot name="cart">
-        <view class="buy-box ss-flex ss-col-center ss-row-center" v-if="buttonShow"> 去购买 </view>
+        <view class="buy-box ss-flex ss-col-center ss-row-center" v-if="buttonShow"> 去购买</view>
       </slot>
     </view>
 
     <!-- sl卡片：竖向型，一行放一个，图片上内容下边 -->
     <view v-if="size === 'sl'" class="sl-goods-card ss-flex-col" :style="[elStyles]" @tap="onClick">
       <view v-if="tagStyle.show" class="tag-icon-box">
-        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)"></image>
+        <image class="tag-icon" :src="sheep.$url.cdn(tagStyle.src || tagStyle.imgUrl)" />
       </view>
-
       <image
         class="sl-img-box"
         :src="sheep.$url.cdn(data.image || data.picUrl)"
         mode="aspectFill"
-      ></image>
-
+      />
       <view class="sl-goods-content">
         <view>
           <view
@@ -262,10 +331,31 @@
               </view>
             </view>
           </slot>
+          <!-- 活动信息 -->
+          <view class="iconBox" v-if="data.promotionType > 0 || data.rewardActivity">
+            <view class="card" v-if="discountText">{{ discountText }}</view>
+            <view
+              class="card2"
+              v-for="item in getRewardActivityRuleItemDescriptions(data.rewardActivity).slice(0, 1)"
+              :key="item"
+            >
+              {{ item }}
+            </view>
+          </view>
           <view v-if="goodsFields.price?.show" class="ss-flex ss-col-bottom font-OPPOSANS">
             <view class="sl-goods-price ss-m-r-12" :style="[{ color: goodsFields.price.color }]">
-              <text class="price-unit ss-font-24">{{ priceUnit }}</text>
-              {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+              <!-- 活动价格 -->
+              <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+                {{ data.point }}积分
+                {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
+              </text>
+              <template v-else>
+                <text class="price-unit ss-font-24">{{ priceUnit }}</text>
+                <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
+                <text v-else>
+                  {{ isArray(data.price) ? fen2yuan(data.price[0]) : fen2yuan(data.price) }}
+                </text>
+              </template>
             </view>
             <view
               v-if="
@@ -321,14 +411,17 @@
    * @event {Function()} click                    - 点击卡片
    *
    */
-  import { computed, reactive, getCurrentInstance, onMounted, nextTick } from 'vue';
+  import { computed, getCurrentInstance, nextTick, onMounted } from 'vue';
   import sheep from '@/sheep';
-  import { fen2yuan, formatSales } from '@/sheep/hooks/useGoods';
-  import { formatStock } from '@/sheep/hooks/useGoods';
+  import {
+    fen2yuan,
+    formatExchange,
+    formatSales,
+    formatStock,
+    getRewardActivityRuleItemDescriptions,
+  } from '@/sheep/hooks/useGoods';
   import { isArray } from 'lodash-es';
-
-  // 数据
-  const state = reactive({});
+  import { PromotionActivityTypeEnum } from '@/sheep/util/const';
 
   // 接收参数
   const props = defineProps({
@@ -337,17 +430,29 @@
       default() {
         return {
           // 商品价格
-          price: { show: true },
+          price: {
+            show: true,
+          },
           // 库存
-          stock: { show: true },
+          stock: {
+            show: true,
+          },
           // 商品名称
-          name: { show: true },
+          name: {
+            show: true,
+          },
           // 商品介绍
-          introduction: { show: true },
+          introduction: {
+            show: true,
+          },
           // 市场价
-          marketPrice: { show: true },
+          marketPrice: {
+            show: true,
+          },
           // 销量
-          salesCount: { show: true },
+          salesCount: {
+            show: true,
+          },
         };
       },
     },
@@ -417,6 +522,17 @@
     },
   });
 
+  // 优惠文案
+  const discountText = computed(() => {
+    const promotionType = props.data.promotionType;
+    if (promotionType === 4) {
+      return '限时优惠';
+    } else if (promotionType === 6) {
+      return '会员价';
+    }
+    return undefined;
+  });
+
   // 组件样式
   const elStyles = computed(() => {
     return {
@@ -432,10 +548,18 @@
   const salesAndStock = computed(() => {
     let text = [];
     if (props.goodsFields.salesCount?.show) {
-      text.push(formatSales(props.data.sales_show_type, props.data.salesCount));
+      if (props.data.activityType && props.data.activityType === PromotionActivityTypeEnum.POINT.type) {
+        text.push(formatExchange(props.data.sales_show_type, (props.data.pointTotalStock || 0) - (props.data.pointStock || 0)));
+      }else {
+        text.push(formatSales(props.data.sales_show_type, props.data.salesCount));
+      }
     }
     if (props.goodsFields.stock?.show) {
-      text.push(formatStock(props.data.stock_show_type, props.data.stock));
+      if (props.data.activityType && props.data.activityType === PromotionActivityTypeEnum.POINT.type) {
+        text.push(formatStock(props.data.stock_show_type, props.data.pointTotalStock));
+      }else {
+        text.push(formatStock(props.data.stock_show_type, props.data.stock));
+      }
     }
     return text.join(' | ');
   });
@@ -454,7 +578,10 @@
   function getGoodsPriceCardWH() {
     if (props.size === 'md') {
       const view = uni.createSelectorQuery().in(proxy);
-      view.select(`#${elId}`).fields({ size: true, scrollOffset: true });
+      view.select(`#${elId}`).fields({
+        size: true,
+        scrollOffset: true,
+      });
       view.exec((data) => {
         let totalHeight = 0;
         const goodsPriceCard = data[0];
@@ -762,5 +889,34 @@
       font-size: 24rpx;
       color: #ffffff;
     }
+  }
+
+  .card {
+    width: fit-content;
+    height: fit-content;
+    padding: 2rpx 10rpx;
+    background-color: red;
+    color: #ffffff;
+    font-size: 24rpx;
+    margin-top: 5rpx;
+  }
+
+  .card2 {
+    width: fit-content;
+    height: fit-content;
+    padding: 2rpx 10rpx;
+    background-color: rgb(255, 242, 241);
+    color: #ff2621;
+    font-size: 24rpx;
+    margin: 5rpx 0 5rpx 5rpx;
+  }
+
+  .iconBox {
+    width: 100%;
+    height: fit-content;
+    margin-top: 10rpx;
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 </style>
