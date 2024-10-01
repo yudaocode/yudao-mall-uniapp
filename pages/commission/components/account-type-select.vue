@@ -75,7 +75,12 @@
       icon: '/static/img/shop/pay/alipay.png',
       title: '支付宝账户',
       value: '4',
-    }
+    },
+	{
+	  icon: '/static/img/shop/pay/wechat.png',
+	  title: '微信零钱',
+	  value: '5',
+	}
   ];
 
   function onChange(e) {
