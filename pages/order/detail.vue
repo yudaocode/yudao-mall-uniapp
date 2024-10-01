@@ -260,7 +260,7 @@
 
 <script setup>
   import sheep from '@/sheep';
-  import { onLoad } from '@dcloudio/uni-app';
+  import { onLoad, onShow } from '@dcloudio/uni-app';
   import { reactive, ref } from 'vue';
   import { isEmpty } from 'lodash-es';
   import {
@@ -345,11 +345,20 @@
       return;
     }
 
-    // 正常的确认收货流程
-    const { code } = await OrderApi.receiveOrder(orderId);
-    if (code === 0) {
-      await getOrderDetail(orderId);
-    }
+    uni.showModal({
+      title: '提示',
+      content: '确认收货吗？',
+      success: async function (res) {
+        if (!res.confirm) {
+          return;
+        }
+        // 正常的确认收货流程
+        const { code } = await OrderApi.receiveOrder(orderId);
+        if (code === 0) {
+          await getOrderDetail(orderId);
+        }
+      },
+    });
   }
 
   // #ifdef MP-WEIXIN
@@ -420,6 +429,11 @@
     }
   }
 
+  onShow(async () => {
+    //onShow中获取订单列表,保证跳转后页面为最新状态
+    await getOrderDetail(state.orderInfo.id);
+  })
+
   onLoad(async (options) => {
     let id = 0;
     if (options.id) {
@@ -430,7 +444,7 @@
     if (state.comeinType === 'wechat') {
       state.merchantTradeNo = options.merchant_trade_no;
     }
-    await getOrderDetail(id);
+    state.orderInfo.id = id
   });
 </script>
 
