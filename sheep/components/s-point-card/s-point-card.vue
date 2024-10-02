@@ -1,458 +1,374 @@
+<!-- 装修商品组件：【积分商城】商品卡片 -->
 <template>
+  <!-- 商品卡片 -->
   <view>
-    <!-- md卡片：竖向，一行放两个，图上内容下 -->
-    <view v-if="size === 'md'" class="md-goods-card ss-flex-col" :style="[elStyles]" @tap="onClick">
-      <image
-        class="md-img-box"
-        :src="sheep.$url.cdn(data.image)"
-        mode="widthFix"
-        @load="calculatePanelHeight"
-      ></image>
-      <view
-        class="md-goods-content ss-flex-col ss-row-around ss-p-b-20 ss-p-t-20 ss-p-x-16"
-        :id="elId"
-      >
-        <view
-          v-if="goodsFields.title?.show"
-          class="md-goods-title ss-line-1"
-          :style="[{ color: titleColor, width: titleWidth ? titleWidth + 'rpx' : '' }]"
-        >
-          {{ data.title }}
-        </view>
-        <view
-          v-if="goodsFields.subtitle?.show"
-          class="md-goods-subtitle ss-m-t-16 ss-line-1"
-          :style="[{ color: subTitleColor }]"
-        >
-          {{ data.subtitle }}
-        </view>
-        <view class="ss-col-bottom">
-          <view
-            v-if="goodsFields.score_price?.show"
-            class="md-goods-price ss-m-t-16 font-OPPOSANS ss-m-r-10 ss-flex"
-            :style="[{ color: goodsFields.score_price.color }]"
-          >
-            <view>{{ Number(data.price[0]) > 0 ? '￥' + data.price[0] + '+' : '' }}</view>
-            <image
-              :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
-              class="score-img"
-            ></image>
-            {{ data.score }}
-          </view>
-
-          <view
-            v-if="goodsFields.price?.show && data.original_price > 0"
-            class="goods-origin-price ss-m-t-16 font-OPPOSANS ss-flex"
-            :style="[{ color: goodsFields.price.color }]"
-          >
-            <text class="price-unit ss-font-20">{{ priceUnit }}</text>
-            <view class="ss-m-l-8">{{ data.original_price }}</view>
-          </view>
-        </view>
-
-        <view class="ss-m-t-16 ss-flex ss-col-center ss-flex-wrap">
-          <view class="sales-text">{{ salesAndStock }}</view>
-        </view>
-      </view>
-
-      <slot name="cart">
-        <view class="cart-box ss-flex ss-col-center ss-row-center">
-          <image class="cart-icon" src="/static/img/shop/tabbar/category2.png" mode=""></image>
-        </view>
-      </slot>
-    </view>
-    <!-- lg卡片：横向型，一行放一个，图片左内容右边  -->
+    <!-- 布局1. 单列大图（上图，下内容）-->
     <view
-      v-if="size === 'lg'"
-      class="lg-goods-card ss-flex ss-col-stretch"
-      :style="[elStyles]"
-      @tap="onClick"
+      v-if="layoutType === LayoutTypeEnum.ONE_COL_BIG_IMG && state.spuList.length"
+      class="goods-sl-box"
     >
-      <image class="lg-img-box" :src="sheep.$url.cdn(data.image)" mode="aspectFill"></image>
-      <view class="lg-goods-content ss-flex-1 ss-flex-col ss-row-between ss-p-b-10 ss-p-t-20">
-        <view class="ss-m-r-20">
-          <view
-            v-if="goodsFields.title?.show"
-            class="lg-goods-title ss-line-2"
-            :style="[{ color: titleColor }]"
-          >
-            {{ data.title }}
-          </view>
-          <view
-            v-if="goodsFields.subtitle?.show"
-            class="lg-goods-subtitle ss-m-t-10 ss-line-1"
-            :style="[{ color: subTitleColor }]"
-          >
-            {{ data.subtitle }}
-          </view>
-        </view>
-        <view>
-          <view class="ss-m-t-10">
-            <view
-              v-if="goodsFields.score_price?.show"
-              class="lg-goods-price ss-m-r-12 ss-flex ss-col-bottom font-OPPOSANS"
-              :style="[{ color: goodsFields.score_price.color }]"
-            >
-              <view>{{ Number(data.price[0]) > 0 ? '￥' + data.price[0] + '+' : '' }}</view>
-              <image
-                :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
-                class="score-img"
-              ></image>
-              {{ data.score }}
-            </view>
-            <view
-              v-if="goodsFields.price?.show && data.original_price > 0"
-              class="goods-origin-price ss-flex ss-col-bottom font-OPPOSANS"
-              :style="[{ color: goodsFields.price.color }]"
-            >
-              <text class="price-unit ss-font-20">{{ priceUnit }}</text>
-              <view class="ss-m-l-8">{{ data.original_price }}</view>
-            </view>
-          </view>
-          <view class="ss-m-t-16 ss-flex ss-col-center ss-flex-wrap">
-            <view class="sales-text">{{ salesAndStock }}</view>
-          </view>
-        </view>
-      </view>
-
-      <slot name="cart"
-      ><view class="buy-box ss-flex ss-col-center ss-row-center">去兑换</view></slot
+      <view
+        class="goods-box"
+        v-for="item in state.spuList"
+        :key="item.id"
+        :style="[{ marginBottom: state.property.space * 2 + 'rpx' }]"
       >
+        <s-goods-column
+          class=""
+          size="sl"
+          :goodsFields="state.property.fields"
+          :tagStyle="state.property.badge"
+          :data="item"
+          :titleColor="state.property.fields.name?.color"
+          :subTitleColor="state.property.fields.introduction.color"
+          :topRadius="state.property.borderRadiusTop"
+          :bottomRadius="state.property.borderRadiusBottom"
+          @click="sheep.$router.go('/pages/goods/point', { id: item.activityId })"
+        >
+          <!-- 购买按钮 -->
+          <template v-slot:cart>
+            <button class="ss-reset-button cart-btn" :style="[buyStyle]">
+              {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
+            </button>
+          </template>
+        </s-goods-column>
+      </view>
     </view>
-    <!-- sl卡片：竖向型，一行放一个，图片上内容下边 -->
-    <view v-if="size === 'sl'" class="sl-goods-card ss-flex-col" @tap="onClick">
-      <image class="sl-img-box" :src="sheep.$url.cdn(data.image)" mode="aspectFill"></image>
 
-      <view class="sl-goods-content ss-flex-col ss-row-between ss-p-b-20 ss-p-t-20">
-        <view class="ss-m-b-20">
-          <view class="sl-goods-title ss-line-1 ss-p-l-16 ss-p-r-16">
-            {{ data.title }}
-          </view>
-          <view v-if="data.subtitle" class="sl-goods-subtitle ss-p-l-16 ss-p-r-16 ss-m-t-16">
-            {{ data.subtitle }}
-          </view>
-        </view>
-        <view>
-          <slot name="activity">
-            <view
-              v-if="data.promos?.length"
-              class="tag-box ss-flex ss-col-center ss-flex-wrap ss-p-l-16 ss-p-r-16"
-            >
-              <view
-                class="activity-tag ss-m-r-10 ss-m-t-16"
-                v-for="item in data.promos"
-                :key="item.id"
-              >
-                {{ item.title }}
-              </view>
-            </view>
-          </slot>
-          <view class="ss-flex ss-col-bottom ss-p-l-16 ss-p-r-16 font-OPPOSANS">
-            <view class="sl-goods-price ss-m-r-12 ss-flex">
-              <view>{{ Number(data.price[0]) > 0 ? '￥' + data.price[0] + '+' : '' }}</view>
-              <image
-                :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
-                class="score-img"
-              ></image>
-              <view>{{ data.score ? data.score : '' }}</view>
-            </view>
-            <view
-              v-if="data.original_price > 0"
-              class="goods-origin-price ss-m-t-16 font-OPPOSANS ss-flex"
-            >
-              <text class="price-unit ss-font-20">￥</text>
-              <view class="ss-m-l-8">{{ data.original_price }}</view>
-            </view>
-          </view>
-          <view class="ss-p-l-16 ss-p-r-16 ss-m-t-16 ss-flex ss-flex-wrap">
-            <view class="sales-text">{{ salesAndStock }}</view>
-          </view>
+    <!-- 布局2. 单列小图（左图，右内容） -->
+    <view
+      v-if="layoutType === LayoutTypeEnum.ONE_COL_SMALL_IMG && state.spuList.length"
+      class="goods-lg-box"
+    >
+      <view
+        class="goods-box"
+        :style="[{ marginBottom: state.property.space + 'px' }]"
+        v-for="item in state.spuList"
+        :key="item.id"
+      >
+        <s-goods-column
+          class="goods-card"
+          size="lg"
+          :goodsFields="state.property.fields"
+          :data="item"
+          :tagStyle="state.property.badge"
+          :titleColor="state.property.fields.name?.color"
+          :subTitleColor="state.property.fields.introduction.color"
+          :topRadius="state.property.borderRadiusTop"
+          :bottomRadius="state.property.borderRadiusBottom"
+          @tap="sheep.$router.go('/pages/goods/point', { id: item.activityId })"
+        >
+          <!-- 购买按钮 -->
+          <template v-slot:cart>
+            <button class="ss-reset-button cart-btn" :style="[buyStyle]">
+              {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
+            </button>
+          </template>
+        </s-goods-column>
+      </view>
+    </view>
+
+    <!-- 布局3. 双列（每一列：上图，下内容）-->
+    <view
+      v-if="layoutType === LayoutTypeEnum.TWO_COL && state.spuList.length"
+      class="goods-md-wrap ss-flex ss-flex-wrap ss-col-top"
+    >
+      <view class="goods-list-box">
+        <view
+          class="left-list"
+          :style="[{ paddingRight: state.property.space + 'rpx', marginBottom: state.property.space + 'px' }]"
+          v-for="item in state.leftSpuList"
+          :key="item.id"
+        >
+          <s-goods-column
+            class="goods-md-box"
+            size="md"
+            :goodsFields="state.property.fields"
+            :tagStyle="state.property.badge"
+            :data="item"
+            :titleColor="state.property.fields.name?.color"
+            :subTitleColor="state.property.fields.introduction.color"
+            :topRadius="state.property.borderRadiusTop"
+            :bottomRadius="state.property.borderRadiusBottom"
+            :titleWidth="330 - marginLeft - marginRight"
+            @click="sheep.$router.go('/pages/goods/point', { id: item.activityId })"
+            @getHeight="calculateGoodsColumn($event, 'left')"
+          >
+            <!-- 购买按钮 -->
+            <template v-slot:cart>
+              <button class="ss-reset-button cart-btn" :style="[buyStyle]">
+                {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
+              </button>
+            </template>
+          </s-goods-column>
         </view>
       </view>
-
-      <slot name="cart"
-      ><view class="buy-box ss-flex ss-col-center ss-row-center">去兑换</view></slot
-      >
+      <view class="goods-list-box">
+        <view
+          class="right-list"
+          :style="[{ paddingLeft: state.property.space + 'rpx', marginBottom: state.property.space + 'px' }]"
+          v-for="item in state.rightSpuList"
+          :key="item.id"
+        >
+          <s-goods-column
+            class="goods-md-box"
+            size="md"
+            :goodsFields="state.property.fields"
+            :tagStyle="state.property.badge"
+            :data="item"
+            :titleColor="state.property.fields.name?.color"
+            :subTitleColor="state.property.fields.introduction.color"
+            :topRadius="state.property.borderRadiusTop"
+            :bottomRadius="state.property.borderRadiusBottom"
+            :titleWidth="330 - marginLeft - marginRight"
+            @click="sheep.$router.go('/pages/goods/point', { id: item.activityId })"
+            @getHeight="calculateGoodsColumn($event, 'right')"
+          >
+            <!-- 购买按钮 -->
+            <template v-slot:cart>
+              <button class="ss-reset-button cart-btn" :style="[buyStyle]">
+                {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
+              </button>
+            </template>
+          </s-goods-column>
+        </view>
+      </view>
     </view>
   </view>
 </template>
+
 <script setup>
-  import { computed, getCurrentInstance } from 'vue';
-  import sheep from '@/sheep';
-  import { formatSales } from '@/sheep/hooks/useGoods';
-  import { formatStock } from '@/sheep/hooks/useGoods';
   /**
-   * 订单卡片
-   *
-   * @property {String} img 											- 图片
-   * @property {String} title 										- 标题
-   * @property {Number} titleWidth = 0								- 标题宽度，默认0，单位rpx
-   * @property {String} skuText 										- 规格
-   * @property {String | Number} score 								- 积分
-   * @property {String | Number} price 								- 价格
-   * @property {String | Number} originalPrice 						- 单购价
-   * @property {String} priceColor 									- 价格颜色
-   * @property {Number | String} num									- 数量
-   *
+   * 商品卡片
    */
-  const props = defineProps({
-    goodsFields: {
-      type: [Array, Object],
-      default() {
-        return {
-          title: { show: true },
-          subtitle: { show: true },
-          price: { show: true },
-          original_price: { show: true },
-          sales: { show: true },
-          stock: { show: true },
-        };
+  import { computed, onMounted, reactive, watch } from 'vue';
+  import sheep from '@/sheep';
+  import SpuApi from '@/sheep/api/product/spu';
+  import { PromotionActivityTypeEnum } from '@/sheep/util/const';
+  import { isEmpty } from '@/sheep/helper/utils';
+
+  // 布局类型
+  const LayoutTypeEnum = {
+    // 单列大图
+    ONE_COL_BIG_IMG: 'oneColBigImg',
+    // 双列
+    TWO_COL: 'twoCol',
+    // 单列小图
+    ONE_COL_SMALL_IMG: 'oneColSmallImg',
+  };
+
+  const state = reactive({
+    spuList: [],
+    leftSpuList: [],
+    rightSpuList: [],
+    property: {
+      'layoutType': 'oneColBigImg',
+      'fields': {
+        'name': {
+          'show': true,
+          'color': '#000',
+        },
+        'introduction': {
+          'show': true,
+          'color': '#999',
+        },
+        'price': {
+          'show': true,
+          'color': '#ff3000',
+        },
+        'marketPrice': {
+          'show': true,
+          'color': '#c4c4c4',
+        },
+        'salesCount': {
+          'show': true,
+          'color': '#c4c4c4',
+        },
+        'stock': {
+          'show': true,
+          'color': '#c4c4c4',
+        },
+      },
+      'badge': {
+        'show': false,
+        'imgUrl': '',
+      },
+      'btnBuy': {
+        'type': 'text',
+        'text': '立即兑换',
+        'bgBeginColor': '#FF6000',
+        'bgEndColor': '#FE832A',
+        'imgUrl': '',
+      },
+      'borderRadiusTop': 8,
+      'borderRadiusBottom': 8,
+      'space': 8,
+      'style': {
+        'bgType': 'color',
+        'bgColor': '',
+        'marginLeft': 8,
+        'marginRight': 8,
+        'marginBottom': 8,
       },
     },
-    tagStyle: {
+  });
+  const props = defineProps({
+    property: {
       type: Object,
-      default: {},
-    },
-    data: {
-      type: Object,
-      default: {},
-    },
-    size: {
-      type: String,
-      default: 'sl',
-    },
-    background: {
-      type: String,
-      default: '',
-    },
-    topRadius: {
-      type: Number,
-      default: 0,
-    },
-    bottomRadius: {
-      type: Number,
-      default: 0,
-    },
-    titleWidth: {
-      type: Number,
-      default: 0,
-    },
-    titleColor: {
-      type: String,
-      default: '#333',
-    },
-    priceUnit: {
-      type: String,
-      default: '￥',
-    },
-    subTitleColor: {
-      type: String,
-      default: '#999999',
+      default: () => ({}),
     },
   });
-  // 组件样式
-  const elStyles = computed(() => {
-    return {
-      background: props.background,
-      'border-top-left-radius': props.topRadius + 'px',
-      'border-top-right-radius': props.topRadius + 'px',
-      'border-bottom-left-radius': props.bottomRadius + 'px',
-      'border-bottom-right-radius': props.bottomRadius + 'px',
-    };
-  });
-  const emits = defineEmits(['click', 'getHeight']);
-  const onClick = () => {
-    emits('click');
-  };
-  // 格式化销量、库存信息
-  const salesAndStock = computed(() => {
-    let text = [];
-    text.push(formatSales(props.data.sales_show_type, props.data.sales));
-    text.push(formatStock(props.data.stock_show_type, props.data.stock));
-    return text.join(' | ');
-  });
-  // 获取实时卡片高度
-  const { proxy } = getCurrentInstance();
-  const elId = `sheep_${Math.ceil(Math.random() * 10e5).toString(36)}`;
-  function calculatePanelHeight(e) {
-    if (props.size === 'md') {
-      const view = uni.createSelectorQuery().in(proxy);
-      view.select(`#${elId}`).fields({ size: true, scrollOffset: true });
-      view.exec((data) => {
-        const goodsPriceCard = data[0];
-        const card = {
-          width: goodsPriceCard.width,
-          height: (goodsPriceCard.width / e.detail.width) * e.detail.height + goodsPriceCard.height,
-        };
-        emits('getHeight', card.height);
-      });
+  // 动态更新 property
+  watch(() => props.property, (newVal) => {
+    state.property = { ...state.property, ...newVal };
+  }, { immediate: true, deep: true });
+  const { layoutType, btnBuy } = state.property || {};
+  const { marginLeft, marginRight } = state.styles || {};
+
+  // 购买按钮样式
+  const buyStyle = computed(() => {
+    if (btnBuy.type === 'text') {
+      // 文字按钮：线性渐变背景颜色
+      return {
+        background: `linear-gradient(to right, ${btnBuy.bgBeginColor}, ${btnBuy.bgEndColor})`,
+      };
     }
+    if (btnBuy.type === 'img') {
+      // 图片按钮
+      return {
+        width: '54rpx',
+        height: '54rpx',
+        background: `url(${sheep.$url.cdn(btnBuy.imgUrl)}) no-repeat`,
+        backgroundSize: '100% 100%',
+      };
+    }
+  });
+
+  //region 商品瀑布流布局
+  // 下一个要处理的商品索引
+  let count = 0;
+  // 左列的高度
+  let leftHeight = 0;
+  // 右列的高度
+  let rightHeight = 0;
+
+  /**
+   * 计算商品在左列还是右列
+   * @param height 商品的高度
+   * @param where 添加到哪一列
+   */
+  function calculateGoodsColumn(height = 0, where = 'left') {
+    // 处理完
+    if (!state.spuList[count]) return;
+    // 增加列的高度
+    if (where === 'left') leftHeight += height;
+    if (where === 'right') rightHeight += height;
+    // 添加到矮的一列
+    if (leftHeight <= rightHeight) {
+      state.leftSpuList.push(state.spuList[count]);
+    } else {
+      state.rightSpuList.push(state.spuList[count]);
+    }
+    // 计数
+    count++;
   }
+
+  //endregion
+
+  /**
+   * 根据商品编号，获取商品详情
+   * @param ids 商品编号列表
+   * @return {Promise<undefined>} 商品列表
+   */
+  async function getSpuDetail(ids) {
+    const { data: spu } = await SpuApi.getSpuDetail(ids);
+    return spu;
+  }
+
+  async function concatActivity(list) {
+    if (isEmpty(list)) {
+      return;
+    }
+    // 循环获取活动商品SPU详情并添加到spuList
+    for (const activity of list) {
+      state.spuList.push(await getSpuDetail(activity.spuId));
+    }
+
+    // 循环活动列表
+    list.forEach((activity) => {
+      // 查找对应的 spu 并更新价格
+      const spu = state.spuList.find((spu) => activity.spuId === spu.id);
+      if (spu) {
+        spu.pointStock = activity.stock;
+        spu.pointTotalStock = activity.totalStock;
+        spu.point = activity.point;
+        spu.pointPrice = activity.price;
+        // 赋值活动ID，为了点击跳转详情页
+        spu.activityId = activity.id;
+        // 赋值活动类型
+        spu.activityType = PromotionActivityTypeEnum.POINT.type;
+      }
+    });
+  }
+  function getActivityCount() {
+    return state.spuList.length;
+  }
+  defineExpose({ concatActivity,getActivityCount });
+
+  // 初始化
+  onMounted(async () => {
+    // 只有双列布局时需要
+    if (layoutType === LayoutTypeEnum.TWO_COL) {
+      // 分列
+      calculateGoodsColumn();
+    }
+  });
 </script>
 
 <style lang="scss" scoped>
-  .price-unit {
-    margin-right: -4px;
-  }
-  .sales-text {
-    display: table;
-    font-size: 24rpx;
-    transform: scale(0.8);
-    margin-left: -16rpx;
-    color: #c4c4c4;
-  }
-
-  // md
-  .md-goods-card {
-    overflow: hidden;
+  .goods-md-wrap {
     width: 100%;
-    position: relative;
-    z-index: 1;
-    background-color: $white;
-    position: relative;
+  }
 
-    .md-img-box {
-      width: 100%;
+  .goods-list-box {
+    width: 50%;
+    box-sizing: border-box;
+
+    .left-list {
+      &:nth-last-child(1) {
+        margin-bottom: 0 !important;
+      }
     }
 
-    .md-goods-title {
-      font-size: 26rpx;
-      color: #333;
-      width: 100%;
-    }
-    .md-goods-subtitle {
-      font-size: 24rpx;
-      font-weight: 400;
-      color: #999999;
-    }
-
-    .md-goods-price {
-      font-size: 30rpx;
-      color: $red;
-      line-height: 36rpx;
-    }
-
-    .cart-box {
-      width: 54rpx;
-      height: 54rpx;
-      background: linear-gradient(90deg, #fe8900, #ff5e00);
-      border-radius: 50%;
-      position: absolute;
-      bottom: 50rpx;
-      right: 20rpx;
-      z-index: 2;
-
-      .cart-icon {
-        width: 30rpx;
-        height: 30rpx;
+    .right-list {
+      &:nth-last-child(1) {
+        margin-bottom: 0 !important;
       }
     }
   }
 
-  // lg
-  .lg-goods-card {
-    overflow: hidden;
+  .goods-box {
+    &:nth-last-of-type(1) {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  .goods-md-box,
+  .goods-sl-box,
+  .goods-lg-box {
     position: relative;
-    z-index: 1;
-    background-color: $white;
-    height: 280rpx;
 
-    .lg-img-box {
-      width: 280rpx;
-      height: 280rpx;
-      margin-right: 20rpx;
-    }
-
-    .lg-goods-title {
-      font-size: 28rpx;
-      font-weight: 500;
-      color: #333333;
-      // line-height: 36rpx;
-      // width: 410rpx;
-    }
-    .lg-goods-subtitle {
-      font-size: 24rpx;
-      font-weight: 400;
-      color: #999999;
-      line-height: 30rpx;
-      // width: 410rpx;
-    }
-
-    .lg-goods-price {
-      font-size: 30rpx;
-      color: $red;
-      line-height: 36rpx;
-    }
-
-    .buy-box {
+    .cart-btn {
       position: absolute;
-      bottom: 20rpx;
+      bottom: 18rpx;
       right: 20rpx;
-      z-index: 2;
-      width: 120rpx;
+      z-index: 11;
       height: 50rpx;
-      background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
+      line-height: 50rpx;
+      padding: 0 20rpx;
       border-radius: 25rpx;
       font-size: 24rpx;
-      color: #ffffff;
+      color: #fff;
     }
-    .tag-box {
-      width: 100%;
-    }
-  }
-  .sl-goods-card {
-    overflow: hidden;
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    background-color: $white;
-
-    .sl-img-box {
-      width: 100%;
-      height: 360rpx;
-    }
-
-    .sl-goods-title {
-      font-size: 26rpx;
-      color: #333;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .sl-goods-subtitle {
-      font-size: 24rpx;
-      font-weight: 400;
-      color: #999999;
-      line-height: 30rpx;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .sl-goods-price {
-      font-size: 30rpx;
-      color: $red;
-    }
-
-    .buy-box {
-      position: absolute;
-      bottom: 20rpx;
-      right: 20rpx;
-      z-index: 2;
-      width: 148rpx;
-      height: 50rpx;
-      background: linear-gradient(90deg, #fe8900, #ff5e00);
-      border-radius: 25rpx;
-      font-size: 24rpx;
-      color: #ffffff;
-    }
-  }
-  .goods-origin-price {
-    font-size: 20rpx;
-    color: #c4c4c4;
-    text-decoration: line-through;
-  }
-  .score-img {
-    width: 36rpx;
-    height: 36rpx;
-    margin: 0 4rpx;
   }
 </style>

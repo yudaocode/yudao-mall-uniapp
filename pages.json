@@ -652,7 +652,18 @@
 						"title": "秒杀活动",
 						"group": "营销活动"
 					}
-				}
+				},
+                {
+                  "path": "point/list",
+                  "style": {
+                    "navigationBarTitleText": "积分商城"
+                  },
+                  "meta": {
+                    "sync": true,
+                    "title": "积分商城",
+                    "group": "营销活动"
+                  }
+                }
 			]
 		}
 	],
