@@ -1,4 +1,4 @@
-<!-- 页面  -->
+<!-- 积分商城：商品列表  -->
 <template>
   <s-layout title="积分商城" navbar="normal" :leftWidth="0" :rightWidth="0">
     <!-- 筛选 -->
