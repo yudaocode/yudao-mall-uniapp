@@ -17,11 +17,7 @@ const PointApi = {
     });
   },
 
-  /**
-   * 获得积分商城活动明细
-   * @param {number} id 积分商城活动编号
-   * @return {*}
-   */
+  // 获得积分商城活动明细
   getPointActivity: (id) => {
     return request({
       url: 'promotion/point-activity/get-detail',
