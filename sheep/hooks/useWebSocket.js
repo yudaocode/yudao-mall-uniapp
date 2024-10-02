@@ -1,6 +1,7 @@
 import { onBeforeUnmount, reactive, ref } from 'vue';
 import { baseUrl, websocketPath } from '@/sheep/config';
 import { copyValueToTarget } from '@/sheep/util';
+import { getRefreshToken } from '@/sheep/request';
 
 /**
  * WebSocket 创建 hook
@@ -8,12 +9,8 @@ import { copyValueToTarget } from '@/sheep/util';
  * @return {{options: *}}
  */
 export function useWebSocket(opt) {
-  const getAccessToken = () => {
-    return uni.getStorageSync('token');
-  };
-
   const options = reactive({
-    url: (baseUrl + websocketPath).replace('http', 'ws') + '?token=' + getAccessToken(), // ws 地址
+    url: (baseUrl + websocketPath).replace('http', 'ws') + '?token=' + getRefreshToken(), // ws 地址
     isReconnecting: false, // 正在重新连接
     reconnectInterval: 3000, // 重连间隔，单位毫秒
     heartBeatInterval: 5000, // 心跳间隔，单位毫秒
@@ -22,12 +19,9 @@ export function useWebSocket(opt) {
     destroy: false, // 是否销毁
     pingTimeout: null, // 心跳检测定时器
     reconnectTimeout: null, // 重连定时器ID的属性
-    onConnected: () => {
-    }, // 连接成功时触发
-    onClosed: () => {
-    }, // 连接关闭时触发
-    onMessage: (data) => {
-    }, // 收到消息
+    onConnected: () => {}, // 连接成功时触发
+    onClosed: () => {}, // 连接关闭时触发
+    onMessage: (data) => {}, // 收到消息
   });
   const SocketTask = ref(null); // SocketTask 由 uni.connectSocket() 接口创建
 
@@ -58,7 +52,8 @@ export function useWebSocket(opt) {
       // 情况一：实例销毁
       if (options.destroy) {
         options.onClosed();
-      } else { // 情况二：连接失败重连
+      } else {
+        // 情况二：连接失败重连
         // 停止心跳检查
         stopHeartBeat();
         // 重连
@@ -140,10 +135,8 @@ export function useWebSocket(opt) {
     copyValueToTarget(options, opt);
     SocketTask.value = uni.connectSocket({
       url: options.url,
-      complete: () => {
-      },
-      success: () => {
-      },
+      complete: () => {},
+      success: () => {},
     });
     initEventListeners();
   };
