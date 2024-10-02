@@ -4,7 +4,7 @@
   <view>
     <!-- 布局1. 单列大图（上图，下内容）-->
     <view
-      v-if="layoutType === LayoutTypeEnum.ONE_COL_BIG_IMG && state.spuList.length"
+      v-if="state.property.layoutType === LayoutTypeEnum.ONE_COL_BIG_IMG && state.spuList.length"
       class="goods-sl-box"
     >
       <view
@@ -28,7 +28,7 @@
           <!-- 购买按钮 -->
           <template v-slot:cart>
             <button class="ss-reset-button cart-btn" :style="[buyStyle]">
-              {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
+              {{ state.property.btnBuy.type === 'text' ? state.property.btnBuy.text : '' }}
             </button>
           </template>
         </s-goods-column>
@@ -37,7 +37,7 @@
 
     <!-- 布局2. 单列小图（左图，右内容） -->
     <view
-      v-if="layoutType === LayoutTypeEnum.ONE_COL_SMALL_IMG && state.spuList.length"
+      v-if="state.property.layoutType === LayoutTypeEnum.ONE_COL_SMALL_IMG && state.spuList.length"
       class="goods-lg-box"
     >
       <view
@@ -61,7 +61,7 @@
           <!-- 购买按钮 -->
           <template v-slot:cart>
             <button class="ss-reset-button cart-btn" :style="[buyStyle]">
-              {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
+              {{ state.property.btnBuy.type === 'text' ? state.property.btnBuy.text : '' }}
             </button>
           </template>
         </s-goods-column>
@@ -70,7 +70,7 @@
 
     <!-- 布局3. 双列（每一列：上图，下内容）-->
     <view
-      v-if="layoutType === LayoutTypeEnum.TWO_COL && state.spuList.length"
+      v-if="state.property.layoutType === LayoutTypeEnum.TWO_COL && state.spuList.length"
       class="goods-md-wrap ss-flex ss-flex-wrap ss-col-top"
     >
       <view class="goods-list-box">
@@ -97,7 +97,7 @@
             <!-- 购买按钮 -->
             <template v-slot:cart>
               <button class="ss-reset-button cart-btn" :style="[buyStyle]">
-                {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
+                {{ state.property.btnBuy.type === 'text' ? state.property.btnBuy.text : '' }}
               </button>
             </template>
           </s-goods-column>
@@ -127,7 +127,7 @@
             <!-- 购买按钮 -->
             <template v-slot:cart>
               <button class="ss-reset-button cart-btn" :style="[buyStyle]">
-                {{ btnBuy.type === 'text' ? btnBuy.text : '' }}
+                {{ state.property.btnBuy.type === 'text' ? state.property.btnBuy.text : '' }}
               </button>
             </template>
           </s-goods-column>
@@ -141,7 +141,7 @@
   /**
    * 商品卡片
    */
-  import { computed, onMounted, reactive, watch } from 'vue';
+  import { computed, nextTick, onMounted, reactive, watch } from 'vue';
   import sheep from '@/sheep';
   import SpuApi from '@/sheep/api/product/spu';
   import { PromotionActivityTypeEnum } from '@/sheep/util/const';
@@ -222,23 +222,22 @@
   watch(() => props.property, (newVal) => {
     state.property = { ...state.property, ...newVal };
   }, { immediate: true, deep: true });
-  const { layoutType, btnBuy } = state.property || {};
-  const { marginLeft, marginRight } = state.styles || {};
+  const { marginLeft, marginRight } = state.property.styles || {};
 
   // 购买按钮样式
   const buyStyle = computed(() => {
-    if (btnBuy.type === 'text') {
+    if (state.property.btnBuy.type === 'text') {
       // 文字按钮：线性渐变背景颜色
       return {
-        background: `linear-gradient(to right, ${btnBuy.bgBeginColor}, ${btnBuy.bgEndColor})`,
+        background: `linear-gradient(to right, ${state.property.btnBuy.bgBeginColor}, ${state.property.btnBuy.bgEndColor})`,
       };
     }
-    if (btnBuy.type === 'img') {
+    if (state.property.btnBuy.type === 'img') {
       // 图片按钮
       return {
         width: '54rpx',
         height: '54rpx',
-        background: `url(${sheep.$url.cdn(btnBuy.imgUrl)}) no-repeat`,
+        background: `url(${sheep.$url.cdn(state.property.btnBuy.imgUrl)}) no-repeat`,
         backgroundSize: '100% 100%',
       };
     }
@@ -309,20 +308,16 @@
         spu.activityType = PromotionActivityTypeEnum.POINT.type;
       }
     });
+    // 只有双列布局时需要
+    if (state.property.layoutType === LayoutTypeEnum.TWO_COL) {
+      // 分列
+      calculateGoodsColumn();
+    }
   }
   function getActivityCount() {
     return state.spuList.length;
   }
-  defineExpose({ concatActivity,getActivityCount });
-
-  // 初始化
-  onMounted(async () => {
-    // 只有双列布局时需要
-    if (layoutType === LayoutTypeEnum.TWO_COL) {
-      // 分列
-      calculateGoodsColumn();
-    }
-  });
+  defineExpose({ concatActivity,getActivityCount,calculateGoodsColumn });
 </script>
 
 <style lang="scss" scoped>
