@@ -31,15 +31,14 @@
         <view class="title-card detail-card ss-p-y-40 ss-p-x-20">
           <view class="ss-flex ss-row-between ss-col-center ss-m-b-18">
             <view class="price-box ss-flex ss-col-bottom">
-              <view v-if="getShowPrice.price > 0" class="price-text"> ￥{{ getShowPrice.price }}</view>
-              <text v-if="getShowPrice.price > 0 && getShowPrice.point > 0">+</text>
               <image
                 :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
                 class="point-img"
               ></image>
-              <view class="point-text ss-m-r-16">
+              <text class="point-text ss-m-r-16">
                 {{ getShowPrice.point }}
-              </view>
+                {{ !getShowPrice.price || getShowPrice.price === 0 ? '' : `+￥${getShowPrice.price}` }}
+              </text>
             </view>
             <view class="sales-text">
               {{ formatExchange(state.goodsInfo.sales_show_type, state.goodsInfo.sales) }}
