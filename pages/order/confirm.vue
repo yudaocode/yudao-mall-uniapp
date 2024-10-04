@@ -40,7 +40,10 @@
             </text>
           </view>
         </view>
-        <view v-if="state.orderPayload.pointActivityId" class="order-item ss-flex ss-col-center ss-row-between">
+        <view
+          v-if="state.orderPayload.pointActivityId"
+          class="order-item ss-flex ss-col-center ss-row-between"
+        >
           <view class="item-title">兑换积分</view>
           <view class="ss-flex ss-col-center">
             <image
@@ -317,9 +320,15 @@
     }
 
     // 跳转到支付页面
-    sheep.$router.redirect('/pages/pay/index', {
-      id: data.payOrderId,
-    });
+    if (data.payOrderId && data.payOrderId > 0) {
+      sheep.$router.redirect('/pages/pay/index', {
+        id: data.payOrderId,
+      });
+    } else {
+      sheep.$router.redirect('/pages/order/detail', {
+        id: data.id,
+      });
+    }
   }
 
   // 检查库存 & 计算订单价格
