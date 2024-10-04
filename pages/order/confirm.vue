@@ -40,9 +40,21 @@
             </text>
           </view>
         </view>
+        <view v-if="state.orderPayload.pointActivityId" class="order-item ss-flex ss-col-center ss-row-between">
+          <view class="item-title">兑换积分</view>
+          <view class="ss-flex ss-col-center">
+            <image
+              :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
+              class="score-img"
+            />
+            <text class="item-value ss-m-r-24">
+              {{ state.orderInfo.usePoint }}
+            </text>
+          </view>
+        </view>
         <view
           class="order-item ss-flex ss-col-center ss-row-between"
-          v-if="state.orderInfo.type === 0"
+          v-if="state.orderInfo.type === 0 || state.orderPayload.pointActivityId"
         >
           <view class="item-title">积分抵扣</view>
           <view class="ss-flex ss-col-center">
@@ -51,14 +63,17 @@
               :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
               class="score-img"
             />
-            <text class="item-value ss-m-r-24">
+            <text class="item-value ss-m-r-24" v-if="state.orderPayload.pointActivityId">
+              {{ state.orderInfo.totalPoint || 0 }}
+            </text>
+            <text class="item-value ss-m-r-24" v-if="!state.orderPayload.pointActivityId">
               {{
                 state.pointStatus
                   ? state.orderInfo.totalPoint - state.orderInfo.usePoint
                   : state.orderInfo.totalPoint || 0
               }}
             </text>
-            <checkbox-group @change="changeIntegral">
+            <checkbox-group @change="changeIntegral" v-if="!state.orderPayload.pointActivityId">
               <checkbox
                 :checked="state.pointStatus"
                 :disabled="!state.orderInfo.totalPoint || state.orderInfo.totalPoint <= 0"
