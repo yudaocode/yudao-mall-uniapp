@@ -94,8 +94,15 @@
             "
             :disabled="state.goodsInfo.stock === 0"
           >
-            <view class="price-text">
-              {{ getShowPriceText }}
+            <view class="price-box ss-flex">
+              <image
+                :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
+                style="width: 36rpx;height: 36rpx;margin: 0 4rpx;"
+              ></image>
+              <text class="point-text ss-m-r-16">
+                {{ getShowPrice.point }}
+                {{ !getShowPrice.price || getShowPrice.price === 0 ? '' : `+￥${getShowPrice.price}` }}
+              </text>
             </view>
             <view v-if="state.goodsInfo.stock === 0">已售罄</view>
             <view v-else>立即兑换</view>
@@ -202,6 +209,15 @@
     };
   });
 
+  const getShowPriceText = computed(() => {
+    let priceText = `￥${fen2yuan(state.goodsInfo.price)}`;
+    if (!isEmpty(state.selectedSku)) {
+      const sku = state.selectedSku;
+      priceText = `${sku.point}${!sku.pointPrice ? '' : `+￥${fen2yuan(sku.pointPrice)}`}`;
+    }
+    return priceText;
+  });
+
   // 查询活动
   const getActivity = async (id) => {
     const { data } = await PointApi.getPointActivity(id);
@@ -276,6 +292,7 @@
         height: 36rpx;
         margin: 0 4rpx;
       }
+
       .point-text {
         font-size: 42rpx;
         font-weight: 500;
@@ -283,6 +300,7 @@
         line-height: 36rpx;
         font-family: OPPOSANS;
       }
+
       .price-text {
         font-size: 42rpx;
         font-weight: 500;
@@ -291,6 +309,7 @@
         font-family: OPPOSANS;
       }
     }
+
     .origin-price-text {
       font-size: 26rpx;
       font-weight: 400;
