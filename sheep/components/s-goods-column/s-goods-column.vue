@@ -47,7 +47,7 @@
             ></image>
             <text class="point-text ss-m-r-16">
               {{ data.point }}
-              {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
+              {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${priceUnit}${fen2yuan(data.pointPrice)}` }}
             </text>
           </view>
           <template v-else>
@@ -107,7 +107,7 @@
             ></image>
             <text class="point-text ss-m-r-16">
               {{ data.point }}
-              {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
+              {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${priceUnit}${fen2yuan(data.pointPrice)}` }}
             </text>
           </view>
           <template v-else>
@@ -181,7 +181,7 @@
               ></image>
               <text class="point-text ss-m-r-16">
                 {{ data.point }}
-                {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
+                {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${priceUnit}${fen2yuan(data.pointPrice)}` }}
               </text>
             </view>
             <template v-else>
@@ -282,7 +282,7 @@
                 ></image>
                 <text class="point-text ss-m-r-16">
                   {{ data.point }}
-                  {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
+                  {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${priceUnit}${fen2yuan(data.pointPrice)}` }}
                 </text>
               </view>
               <template v-else>
@@ -376,7 +376,7 @@
                 ></image>
                 <text class="ss-m-r-16">
                   {{ data.point }}
-                  {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
+                  {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${priceUnit}${fen2yuan(data.pointPrice)}` }}
                 </text>
               </view>
               <template v-else>
