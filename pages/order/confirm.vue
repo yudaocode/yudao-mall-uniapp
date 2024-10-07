@@ -41,24 +41,39 @@
           </view>
         </view>
         <view
+          v-if="state.orderPayload.pointActivityId"
           class="order-item ss-flex ss-col-center ss-row-between"
-          v-if="state.orderInfo.type === 0"
+        >
+          <view class="item-title">兑换积分</view>
+          <view class="ss-flex ss-col-center">
+            <image
+              :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
+              class="score-img"
+            />
+            <text class="item-value ss-m-r-24">
+              {{ state.orderInfo.usePoint }}
+            </text>
+          </view>
+        </view>
+        <view
+          class="order-item ss-flex ss-col-center ss-row-between"
+          v-if="state.orderInfo.type === 0 || state.orderPayload.pointActivityId"
         >
           <view class="item-title">积分抵扣</view>
           <view class="ss-flex ss-col-center">
-            {{ state.pointStatus ? '剩余积分' : '当前积分' }}
+            {{ state.pointStatus || state.orderPayload.pointActivityId ? '剩余积分' : '当前积分' }}
             <image
               :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
               class="score-img"
             />
             <text class="item-value ss-m-r-24">
               {{
-                state.pointStatus
+                state.pointStatus || state.orderPayload.pointActivityId
                   ? state.orderInfo.totalPoint - state.orderInfo.usePoint
                   : state.orderInfo.totalPoint || 0
               }}
             </text>
-            <checkbox-group @change="changeIntegral">
+            <checkbox-group @change="changeIntegral" v-if="!state.orderPayload.pointActivityId">
               <checkbox
                 :checked="state.pointStatus"
                 :disabled="!state.orderInfo.totalPoint || state.orderInfo.totalPoint <= 0"
@@ -305,9 +320,15 @@
     }
 
     // 跳转到支付页面
-    sheep.$router.redirect('/pages/pay/index', {
-      id: data.payOrderId,
-    });
+    if (data.payOrderId && data.payOrderId > 0) {
+      sheep.$router.redirect('/pages/pay/index', {
+        id: data.payOrderId,
+      });
+    } else {
+      sheep.$router.redirect('/pages/order/detail', {
+        id: data.id,
+      });
+    }
   }
 
   // 检查库存 & 计算订单价格
@@ -331,7 +352,7 @@
       return;
     }
     state.orderInfo = data;
-    state.couponInfo = data.coupons;
+    state.couponInfo = data.coupons || [];
     // 设置收货地址
     if (state.orderInfo.address) {
       addressState.value.addressInfo = state.orderInfo.address;

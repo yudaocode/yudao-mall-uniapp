@@ -40,10 +40,16 @@
           :style="[{ color: goodsFields.price.color }]"
         >
           <!-- 活动价格 -->
-          <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
-            {{ data.point }}积分
-            {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
-          </text>
+          <view class="ss-flex" v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+            <image
+              :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
+              class="point-img"
+            ></image>
+            <text class="point-text ss-m-r-16">
+              {{ data.point }}
+              {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${priceUnit}${fen2yuan(data.pointPrice)}` }}
+            </text>
+          </view>
           <template v-else>
             <text class="price-unit ss-font-24">{{ priceUnit }}</text>
             <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
@@ -94,10 +100,16 @@
           :style="[{ color: goodsFields.price.color }]"
         >
           <!-- 活动价格 -->
-          <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
-            {{ data.point }}积分
-            {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
-          </text>
+          <view class="ss-flex" v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+            <image
+              :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
+              class="point-img"
+            ></image>
+            <text class="point-text ss-m-r-16">
+              {{ data.point }}
+              {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${priceUnit}${fen2yuan(data.pointPrice)}` }}
+            </text>
+          </view>
           <template v-else>
             <text class="price-unit ss-font-24">{{ priceUnit }}</text>
             <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
@@ -162,10 +174,16 @@
             :style="[{ color: goodsFields.price.color }]"
           >
             <!-- 活动价格 -->
-            <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
-              {{ data.point }}积分
-              {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
-            </text>
+            <view class="ss-flex" v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+              <image
+                :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
+                class="point-img"
+              ></image>
+              <text class="point-text ss-m-r-16">
+                {{ data.point }}
+                {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${priceUnit}${fen2yuan(data.pointPrice)}` }}
+              </text>
+            </view>
             <template v-else>
               <text class="price-unit ss-font-24">{{ priceUnit }}</text>
               <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
@@ -257,10 +275,16 @@
           <view v-if="goodsFields.price?.show" class="ss-flex ss-col-bottom font-OPPOSANS">
             <view class="sl-goods-price ss-m-r-12" :style="[{ color: goodsFields.price.color }]">
               <!-- 活动价格 -->
-              <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
-                {{ data.point }}积分
-                {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
-              </text>
+              <view class="ss-flex" v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+                <image
+                  :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
+                  class="point-img"
+                ></image>
+                <text class="point-text ss-m-r-16">
+                  {{ data.point }}
+                  {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${priceUnit}${fen2yuan(data.pointPrice)}` }}
+                </text>
+              </view>
               <template v-else>
                 <text class="price-unit ss-font-24">{{ priceUnit }}</text>
                 <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
@@ -345,10 +369,16 @@
           <view v-if="goodsFields.price?.show" class="ss-flex ss-col-bottom font-OPPOSANS">
             <view class="sl-goods-price ss-m-r-12" :style="[{ color: goodsFields.price.color }]">
               <!-- 活动价格 -->
-              <text v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
-                {{ data.point }}积分
-                {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${fen2yuan(data.pointPrice)}元` }}
-              </text>
+              <view class="ss-flex" v-if="data.activityType && data.activityType === PromotionActivityTypeEnum.POINT.type">
+                <image
+                  :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
+                  class="point-img"
+                ></image>
+                <text class="ss-m-r-16">
+                  {{ data.point }}
+                  {{ !data.pointPrice || data.pointPrice === 0 ? '' : `+${priceUnit}${fen2yuan(data.pointPrice)}` }}
+                </text>
+              </view>
               <template v-else>
                 <text class="price-unit ss-font-24">{{ priceUnit }}</text>
                 <text v-if="data.promotionPrice > 0">{{ fen2yuan(data.promotionPrice) }}</text>
@@ -550,14 +580,14 @@
     if (props.goodsFields.salesCount?.show) {
       if (props.data.activityType && props.data.activityType === PromotionActivityTypeEnum.POINT.type) {
         text.push(formatExchange(props.data.sales_show_type, (props.data.pointTotalStock || 0) - (props.data.pointStock || 0)));
-      }else {
+      } else {
         text.push(formatSales(props.data.sales_show_type, props.data.salesCount));
       }
     }
     if (props.goodsFields.stock?.show) {
       if (props.data.activityType && props.data.activityType === PromotionActivityTypeEnum.POINT.type) {
         text.push(formatStock(props.data.stock_show_type, props.data.pointTotalStock));
-      }else {
+      } else {
         text.push(formatStock(props.data.stock_show_type, props.data.stock));
       }
     }
@@ -630,6 +660,12 @@
     font-weight: 500;
     color: #ffffff;
     line-height: 32rpx;
+  }
+
+  .point-img {
+    width: 30rpx;
+    height: 30rpx;
+    margin: 0 4rpx;
   }
 
   .groupon-tag {

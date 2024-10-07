@@ -32,6 +32,9 @@ const OrderApi = {
     if (!(data.seckillActivityId > 0)) {
       delete data2.seckillActivityId;
     }
+    if (!(data.pointActivityId > 0)) {
+      delete data2.pointActivityId;
+    }
     // 解决 SpringMVC 接受 List<Item> 参数的问题
     delete data2.items;
     for (let i = 0; i < data.items.length; i++) {

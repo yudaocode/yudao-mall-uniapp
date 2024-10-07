@@ -91,7 +91,7 @@
             :topRadius="data.borderRadiusTop"
             :bottomRadius="data.borderRadiusBottom"
             :titleWidth="330 - marginLeft - marginRight"
-            @click="sheep.$router.go('/pages/goods/seckill', { id: item.activityId })"
+            @click="sheep.$router.go('/pages/goods/point', { id: item.activityId })"
             @getHeight="calculateGoodsColumn($event, 'left')"
           >
             <!-- 购买按钮 -->
@@ -121,7 +121,7 @@
             :topRadius="data.borderRadiusTop"
             :bottomRadius="data.borderRadiusBottom"
             :titleWidth="330 - marginLeft - marginRight"
-            @click="sheep.$router.go('/pages/goods/seckill', { id: item.activityId })"
+            @click="sheep.$router.go('/pages/goods/point', { id: item.activityId })"
             @getHeight="calculateGoodsColumn($event, 'right')"
           >
             <!-- 购买按钮 -->

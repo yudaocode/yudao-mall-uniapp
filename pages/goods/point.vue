@@ -28,29 +28,25 @@
         />
 
         <!-- 价格+标题 -->
-        <view class="title-card ss-m-y-14 ss-m-x-20 ss-p-x-20 ss-p-y-34">
-          <view class="price-box ss-flex ss-row-between ss-m-b-18">
-            <view class="ss-flex">
-              <view class="price-text ss-m-r-16">
-                {{ getShowPriceText }}
-              </view>
-              <view class="tig ss-flex ss-col-center">
-                <view class="tig-icon ss-flex ss-col-center ss-row-center">
-                  <text class="cicon-alarm"></text>
-                </view>
-                <view class="tig-title">积分价</view>
-              </view>
+        <view class="title-card detail-card ss-p-y-40 ss-p-x-20">
+          <view class="ss-flex ss-row-between ss-col-center ss-m-b-18">
+            <view class="price-box ss-flex ss-col-bottom">
+              <image
+                :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
+                class="point-img"
+              ></image>
+              <text class="point-text ss-m-r-16">
+                {{ getShowPrice.point }}
+                {{ !getShowPrice.price || getShowPrice.price === 0 ? '' : `+￥${getShowPrice.price}` }}
+              </text>
+            </view>
+            <view class="sales-text">
+              {{ formatExchange(state.goodsInfo.sales_show_type, state.goodsInfo.sales) }}
             </view>
           </view>
-          <view class="ss-flex ss-row-between ss-m-b-60">
-            <view class="origin-price ss-flex ss-col-center" v-if="state.goodsInfo.marketPrice">
-              原价
-              <view class="origin-price-text">
-                {{ fen2yuan(state.selectedSku.marketPrice || state.goodsInfo.marketPrice) }}
-              </view>
-            </view>
+          <view class="origin-price-text ss-m-b-60" v-if="state.goodsInfo.marketPrice">
+            原价：￥{{ fen2yuan(state.selectedSku.marketPrice || state.goodsInfo.marketPrice) }}
           </view>
-
           <view class="title-text ss-line-2 ss-m-b-6">{{ state.goodsInfo.name || '' }}</view>
           <view class="subtitle-text ss-line-1">{{ state.goodsInfo.introduction }}</view>
         </view>
@@ -98,8 +94,15 @@
             "
             :disabled="state.goodsInfo.stock === 0"
           >
-            <view class="price-text">
-              {{getShowPriceText}}
+            <view class="price-box ss-flex">
+              <image
+                :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
+                style="width: 36rpx;height: 36rpx;margin: 0 4rpx;"
+              ></image>
+              <text class="point-text ss-m-r-16">
+                {{ getShowPrice.point }}
+                {{ !getShowPrice.price || getShowPrice.price === 0 ? '' : `+￥${getShowPrice.price}` }}
+              </text>
             </view>
             <view v-if="state.goodsInfo.stock === 0">已售罄</view>
             <view v-else>立即兑换</view>
@@ -115,7 +118,7 @@
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import { isEmpty } from 'lodash-es';
-  import { fen2yuan, formatGoodsSwiper } from '@/sheep/hooks/useGoods';
+  import { fen2yuan, formatExchange, formatGoodsSwiper } from '@/sheep/hooks/useGoods';
   import detailNavbar from './components/detail/detail-navbar.vue';
   import detailCellSku from './components/detail/detail-cell-sku.vue';
   import detailTabbar from './components/detail/detail-tabbar.vue';
@@ -126,7 +129,7 @@
   import { PromotionActivityTypeEnum } from '@/sheep/util/const';
   import PointApi from '@/sheep/api/promotion/point';
 
-  const headerBg = sheep.$url.css('/static/img/shop/goods/seckill-bg.png');
+  const headerBg = sheep.$url.css('/static/img/shop/goods/score-bg.png');
   const btnBg = sheep.$url.css('/static/img/shop/goods/seckill-btn.png');
   const disabledBtnBg = sheep.$url.css('/static/img/shop/goods/activity-btn-disabled.png');
   const seckillBg = sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png');
@@ -192,11 +195,25 @@
 
   const activity = ref();
 
-  const getShowPriceText = computed(() => {
-    let priceText = `${activity.value.point}积分${!activity.value.price ? '' : `+￥${fen2yuan(activity.value.price)}`}`;
+  const getShowPrice = computed(() => {
     if (!isEmpty(state.selectedSku)) {
       const sku = state.selectedSku;
-      priceText = `${sku.point}积分${!sku.pointPrice ? '' : `+￥${fen2yuan(sku.pointPrice)}`}`;
+      return {
+        point: sku.point,
+        price: !sku.pointPrice ? '' : fen2yuan(sku.pointPrice),
+      };
+    }
+    return {
+      point: activity.value.point,
+      price: !activity.value.price ? '' : fen2yuan(activity.value.price),
+    };
+  });
+
+  const getShowPriceText = computed(() => {
+    let priceText = `￥${fen2yuan(state.goodsInfo.price)}`;
+    if (!isEmpty(state.selectedSku)) {
+      const sku = state.selectedSku;
+      priceText = `${sku.point}${!sku.pointPrice ? '' : `+￥${fen2yuan(sku.pointPrice)}`}`;
     }
     return priceText;
   });
@@ -264,102 +281,47 @@
   .title-card {
     width: 710rpx;
     box-sizing: border-box;
-    // height: 320rpx;
     background-size: 100% 100%;
     border-radius: 10rpx;
     background-image: v-bind(headerBg);
     background-repeat: no-repeat;
 
     .price-box {
+      .point-img {
+        width: 36rpx;
+        height: 36rpx;
+        margin: 0 4rpx;
+      }
+
+      .point-text {
+        font-size: 42rpx;
+        font-weight: 500;
+        color: #ff3000;
+        line-height: 36rpx;
+        font-family: OPPOSANS;
+      }
+
       .price-text {
-        font-size: 30rpx;
+        font-size: 42rpx;
         font-weight: 500;
-        color: #fff;
-        line-height: normal;
+        color: #ff3000;
+        line-height: 36rpx;
         font-family: OPPOSANS;
       }
     }
 
-    .origin-price {
-      font-size: 24rpx;
+    .origin-price-text {
+      font-size: 26rpx;
       font-weight: 400;
-      color: #fff;
-      opacity: 0.7;
-
-      .origin-price-text {
-        text-decoration: line-through;
-
-        font-family: OPPOSANS;
-
-        &::before {
-          content: '￥';
-        }
-      }
+      text-decoration: line-through;
+      color: $gray-c;
+      font-family: OPPOSANS;
     }
 
-    .tig {
-      border: 2rpx solid #ffffff;
-      border-radius: 4rpx;
-      width: 126rpx;
-      height: 38rpx;
-
-      .tig-icon {
-        width: 40rpx;
-        height: 40rpx;
-        margin-left: -2rpx;
-        background: #ffffff;
-        border-radius: 4rpx 0 0 4rpx;
-
-        .cicon-alarm {
-          font-size: 32rpx;
-          color: #fc6e6f;
-        }
-      }
-
-      .tig-title {
-        width: 86rpx;
-        font-size: 24rpx;
-        font-weight: 500;
-        line-height: normal;
-        color: #ffffff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-    }
-
-    .countdown-title {
+    .sales-text {
       font-size: 26rpx;
       font-weight: 500;
-      color: #ffffff;
-    }
-
-    .countdown-time {
-      font-size: 26rpx;
-      font-weight: 500;
-      color: #ffffff;
-
-      .countdown-h {
-        font-size: 24rpx;
-        font-family: OPPOSANS;
-        font-weight: 500;
-        color: #ffffff;
-        padding: 0 4rpx;
-        height: 40rpx;
-        background: rgba(#000000, 0.1);
-        border-radius: 6rpx;
-      }
-
-      .countdown-num {
-        font-size: 24rpx;
-        font-family: OPPOSANS;
-        font-weight: 500;
-        color: #ffffff;
-        width: 40rpx;
-        height: 40rpx;
-        background: rgba(#000000, 0.1);
-        border-radius: 6rpx;
-      }
+      color: $gray-c;
     }
 
     .discounts-box {
@@ -392,15 +354,13 @@
       font-size: 30rpx;
       font-weight: bold;
       line-height: 42rpx;
-      color: #fff;
     }
 
     .subtitle-text {
       font-size: 26rpx;
       font-weight: 400;
-      color: #ffffff;
+      color: $dark-9;
       line-height: 42rpx;
-      opacity: 0.9;
     }
   }
 
@@ -516,10 +476,5 @@
       font-weight: 500;
       color: #333333;
     }
-  }
-
-  image {
-    width: 100%;
-    height: 100%;
   }
 </style>

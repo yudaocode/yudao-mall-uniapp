@@ -19,8 +19,16 @@
           <view class="goods-title ss-line-2">{{ state.goodsInfo.name }}</view>
           <view class="header-right-bottom ss-flex ss-col-center ss-row-between">
             <!-- 价格 -->
-            <view v-if="state.goodsInfo.activity_type === PromotionActivityTypeEnum.POINT.type" class="price-text">
-              {{ getShowPriceText }}
+            <view v-if="state.goodsInfo.activity_type === PromotionActivityTypeEnum.POINT.type"
+                  class="price-text ss-flex">
+              <image
+                v-if="!isEmpty(state.selectedSku)"
+                :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
+                class="point-img"
+              ></image>
+              <text class="point-text ss-m-r-16">
+                {{ getShowPriceText }}
+              </text>
             </view>
             <view v-else class="price-text">
               ￥{{ fen2yuan(state.selectedSku.price || state.goodsInfo.price) }}
@@ -124,7 +132,7 @@
     let priceText = `￥${fen2yuan(state.goodsInfo.price)}`;
     if (!isEmpty(state.selectedSku)) {
       const sku = state.selectedSku;
-      priceText = `${sku.point}积分${!sku.pointPrice ? '' : `+￥${fen2yuan(sku.pointPrice)}`}`;
+      priceText = `${sku.point}${!sku.pointPrice ? '' : `+￥${fen2yuan(sku.pointPrice)}`}`;
     }
     return priceText;
   });
@@ -318,6 +326,12 @@
       background: linear-gradient(90deg, #ff5854, #ff2621);
       color: #fff;
     }
+  }
+
+  .point-img {
+    width: 36rpx;
+    height: 36rpx;
+    margin: 0 4rpx;
   }
 
   .ss-modal-box {
