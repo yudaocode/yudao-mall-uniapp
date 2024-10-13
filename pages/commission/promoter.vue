@@ -163,7 +163,7 @@
 	}
 
 	.PromoterRank .header .nav {
-		width: 450rpx;
+		width: 440rpx;
 		height: 66rpx;
 		border: 1px solid #fff;
 		border-radius: 33rpx;

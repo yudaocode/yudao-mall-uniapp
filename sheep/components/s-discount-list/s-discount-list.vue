@@ -17,7 +17,7 @@
       >
         <view v-for="(item, index) in state.orderInfo.promotions" :key="index">
           <!-- 不展示积分、优惠劵、会员折扣，因为它们已经单独展示了 -->
-          <view class="ss-flex ss-m-b-40 subtitle" v-if="[1, 2, 3, 4, 5, 6].includes(item.type)">
+          <view class="ss-flex ss-m-b-40 subtitle" v-if="[1, 2, 3, 4, 5].includes(item.type)">
             <view> {{ item.description }} </view>
           </view>
         </view>

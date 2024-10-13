@@ -164,7 +164,7 @@
       list: [],
       total: 0,
       pageNo: 1,
-      pageSize: 1,
+      pageSize: 8,
     },
     categoryId: 0, // 选中的商品分类编号
     tabMaps: [], // 指定分类时，每个分类构成一个 tab

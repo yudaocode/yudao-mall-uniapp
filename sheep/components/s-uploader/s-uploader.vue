@@ -369,7 +369,7 @@
             },
           })
           .then((result) => {
-            this.setSuccessAndError(result.tempFiles);
+            this.setSuccessAndError(result);
           })
           .catch((err) => {
             console.log('选择失败', err);
@@ -453,7 +453,7 @@
 
           if (index === -1 || !this.files) break;
           if (item.errMsg === 'request:fail') {
-            this.files[index].url = item.path;
+            this.files[index].url = item.url;
             this.files[index].status = 'error';
             this.files[index].errMsg = item.errMsg;
             // this.files[index].progress = -1
@@ -587,7 +587,7 @@
             path: v.path,
             size: v.size,
             fileID: v.fileID,
-            url: v.url,
+            url: v.path,
           });
         });
         return newFilesData;

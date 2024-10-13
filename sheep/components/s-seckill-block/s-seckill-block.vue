@@ -261,6 +261,9 @@
       // 查找对应的 spu 并更新价格
       const spu = state.spuList.find((spu) => activity.spuId === spu.id);
       if (spu) {
+        // 赋值活动名称
+        // TODO 芋艿：暂定活动名。会在调研一些类似有赞、淘宝、京东的选择
+        spu.name = activity.name;
         // 赋值最低价格
         spu.price = Math.min(seckillPrice, spu.price);
         // 赋值活动ID，为了点击跳转详情页

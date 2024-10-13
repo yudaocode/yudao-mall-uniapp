@@ -116,6 +116,28 @@ function normalizeChooseAndUploadFileRes(res, fileType) {
   return res;
 }
 
+function convertToArrayBuffer(uniFile) {
+  return new Promise((resolve, reject) => {
+    const fs = uni.getFileSystemManager();
+
+    fs.readFile({
+      filePath: uniFile.path, // 确保路径正确
+      success: (fileRes) => {
+        try {
+          // 将读取的内容转换为 ArrayBuffer
+          const arrayBuffer = new Uint8Array(fileRes.data).buffer;
+          resolve(arrayBuffer);
+        } catch (error) {
+          reject(new Error(`转换为 ArrayBuffer 失败: ${error.message}`));
+        }
+      },
+      fail: (error) => {
+        reject(new Error(`读取文件失败: ${error.errMsg}`));
+      },
+    });
+  });
+}
+
 function uploadCloudFiles(files, max = 5, onUploadProgress) {
   files = JSON.parse(JSON.stringify(files));
   const len = files.length;
@@ -165,36 +187,58 @@ function uploadCloudFiles(files, max = 5, onUploadProgress) {
   });
 }
 
-function uploadFiles(choosePromise, { onChooseFile, onUploadProgress }) {
-  return choosePromise
-    .then((res) => {
-      if (onChooseFile) {
-        const customChooseRes = onChooseFile(res);
-        if (typeof customChooseRes !== 'undefined') {
-          return Promise.resolve(customChooseRes).then((chooseRes) =>
-            typeof chooseRes === 'undefined' ? res : chooseRes,
-          );
-        }
+async function uploadFiles(choosePromise, { onChooseFile, onUploadProgress }) {
+  // 获取选择的文件
+  const res = await choosePromise;
+  // 处理文件选择回调
+  let files = res.tempFiles || [];
+  if (onChooseFile) {
+    const customChooseRes = onChooseFile(res);
+    if (typeof customChooseRes !== 'undefined') {
+      files = await Promise.resolve(customChooseRes);
+      if (typeof files === 'undefined') {
+        files = res.tempFiles || []; // Fallback
       }
-      return res;
-    })
-    .then((res) => {
-      if (res === false) {
-        return {
-          errMsg: ERR_MSG_OK,
-          tempFilePaths: [],
-          tempFiles: [],
-        };
-      }
-      return res;
-    })
-    .then(async (files) => {
-      for (let file of files.tempFiles) {
-        const { data } = await FileApi.uploadFile(file.path);
-        file.url = data;
-      }
-      return files;
-    });
+    }
+  }
+
+  // 如果是前端直连上传
+  if (UPLOAD_TYPE.CLIENT === import.meta.env.SHOPRO_UPLOAD_TYPE) {
+    for (const file of files) {
+      // 1.1 获取文件预签名地址
+      const { data: presignedInfo } = await FileApi.getFilePresignedUrl(file.name);
+      // 1.2 获取二进制文件对象
+      const fileBuffer = await convertToArrayBuffer(file);
+      // 1.3 上传文件
+      await uni.request({
+        url: presignedInfo.uploadUrl, // 预签名的上传 URL
+        method: 'PUT', // 使用 PUT 方法
+        header: {
+          'Content-Type': file.fileType + '/' + file.name.substring(file.name.lastIndexOf('.') + 1), // 设置内容类型
+        },
+        data: fileBuffer, // 文件的路径，适用于小程序
+        success: (res) => {
+          // 1.4. 记录文件信息到后端（异步）
+          createFile(presignedInfo, file);
+          // 1.5. 重新赋值
+          file.url = presignedInfo.url;
+          console.log('上传成功:', res);
+        },
+        fail: (err) => {
+          console.error('上传失败:', err);
+        },
+      });
+    }
+    return files;
+  } else {
+    // 后端上传
+    for (let file of files) {
+      const { data } = await FileApi.uploadFile(file.path);
+      file.url = data;
+    }
+
+    return files;
+  }
 }
 
 function chooseAndUploadFile(
@@ -209,5 +253,33 @@ function chooseAndUploadFile(
   }
   return uploadFiles(chooseAll(opts), opts);
 }
+
+/**
+ * 创建文件信息
+ * @param vo 文件预签名信息
+ * @param file 文件
+ */
+function createFile(vo, file) {
+  const fileVo = {
+    configId: vo.configId,
+    url: vo.url,
+    path: file.name,
+    name: file.name,
+    type: file.fileType,
+    size: file.size,
+  };
+  FileApi.createFile(fileVo);
+  return fileVo;
+}
+
+/**
+ * 上传类型
+ */
+const UPLOAD_TYPE = {
+  // 客户端直接上传（只支持S3服务）
+  CLIENT: 'client',
+  // 客户端发送到后端上传
+  SERVER: 'server',
+};
 
 export { chooseAndUploadFile, uploadCloudFiles };
