@@ -45,7 +45,8 @@
       type: Boolean,
       default: false,
     },
-    methods: { // 开启的提现方式
+    methods: {
+      // 开启的提现方式
       type: Array,
       default: [],
     },
@@ -57,7 +58,7 @@
 
   const typeList = [
     {
-      // icon: '/static/img/shop/pay/wechat.png', // TODO 芋艿：后续给个 icon
+      icon: '/static/img/shop/pay/wechat.png',
       title: '钱包余额',
       value: '1',
     },
@@ -68,7 +69,7 @@
     },
     {
       icon: '/static/img/shop/pay/wechat.png',
-      title: '微信零钱',
+      title: '微信账户', // 微信手动转账
       value: '3',
     },
     {
@@ -76,11 +77,11 @@
       title: '支付宝账户',
       value: '4',
     },
-	{
-	  icon: '/static/img/shop/pay/wechat.png',
-	  title: '微信零钱',
-	  value: '5',
-	}
+    {
+      icon: '/static/img/shop/pay/wechat.png',
+      title: '微信零钱', // 微信 API 转账
+      value: '5',
+    },
   ];
 
   function onChange(e) {
@@ -94,7 +95,7 @@
     }
     // 赋值
     emits('update:modelValue', {
-      type: state.currentValue
+      type: state.currentValue,
     });
     // 关闭弹窗
     emits('close');
