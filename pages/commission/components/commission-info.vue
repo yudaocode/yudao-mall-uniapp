@@ -31,9 +31,10 @@
 <style lang="scss" scoped>
 	// 用户资料卡片
 	.user-card {
-		width: 690rpx;
+		width: 700rpx;
 		height: 192rpx;
-		margin: -88rpx 20rpx 0 20rpx;
+		margin: 0 auto;
+		margin-top: -88rpx;
 		padding-top: 88rpx;
 		background: v-bind(headerBg) no-repeat;
 		background-size: 100% 100%;
