@@ -361,7 +361,7 @@
     // 选择有 promotionPrice 且最小的
     state.settlementSku = state.goodsInfo.skus
       .filter((sku) => sku.stock > 0 && sku.promotionPrice > 0)
-      .reduce((prev, curr) => (prev.promotionPrice < curr.promotionPrice ? prev : curr));
+      .reduce((prev, curr) => (prev.promotionPrice < curr.promotionPrice ? prev : curr), []);
 
     // 设置满减送活动
     if (data.rewardActivity) {
