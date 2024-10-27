@@ -85,7 +85,7 @@
                 <view class="price-text ss-m-r-16">
                   {{ fen2yuan(state.selectedSku.price || state.goodsInfo.price) }}
                 </view>
-                <view class="origin-price-text" v-if="state.goodsInfo.marketPrice > 0">
+                <view class="origin-price-text" v-if="state.goodsInfo.marketPrice > state.goodsInfo.price">
                   {{ fen2yuan(state.selectedSku.marketPrice || state.goodsInfo.marketPrice) }}
                 </view>
               </view>
