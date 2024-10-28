@@ -204,32 +204,46 @@ async function uploadFiles(choosePromise, { onChooseFile, onUploadProgress }) {
 
   // 如果是前端直连上传
   if (UPLOAD_TYPE.CLIENT === import.meta.env.SHOPRO_UPLOAD_TYPE) {
-    for (const file of files) {
-      // 1.1 获取文件预签名地址
-      const { data: presignedInfo } = await FileApi.getFilePresignedUrl(file.name);
-      // 1.2 获取二进制文件对象
-      const fileBuffer = await convertToArrayBuffer(file);
-      // 1.3 上传文件
-      await uni.request({
-        url: presignedInfo.uploadUrl, // 预签名的上传 URL
-        method: 'PUT', // 使用 PUT 方法
-        header: {
-          'Content-Type': file.fileType + '/' + file.name.substring(file.name.lastIndexOf('.') + 1), // 设置内容类型
-        },
-        data: fileBuffer, // 文件的路径，适用于小程序
-        success: (res) => {
-          // 1.4. 记录文件信息到后端（异步）
-          createFile(presignedInfo, file);
-          // 1.5. 重新赋值
-          file.url = presignedInfo.url;
-          console.log('上传成功:', res);
-        },
-        fail: (err) => {
-          console.error('上传失败:', err);
-        },
-      });
-    }
-    return files;
+    // 为上传创建一组 Promise
+    const uploadPromises = files.map(async (file) => {
+      try {
+        // 1.1 获取文件预签名地址
+        const { data: presignedInfo } = await FileApi.getFilePresignedUrl(file.name);
+        // 1.2 获取二进制文件对象
+        const fileBuffer = await convertToArrayBuffer(file);
+
+        // 返回上传的 Promise
+        return new Promise((resolve, reject) => {
+          uni.request({
+            url: presignedInfo.uploadUrl, // 预签名的上传 URL
+            method: 'PUT', // 使用 PUT 方法
+            header: {
+              'Content-Type':
+                file.fileType + '/' + file.name.substring(file.name.lastIndexOf('.') + 1), // 设置内容类型
+            },
+            data: fileBuffer, // 文件的路径，适用于小程序
+            success: (res) => {
+              // 1.4. 记录文件信息到后端（异步）
+              createFile(presignedInfo, file);
+              // 1.5. 重新赋值
+              file.url = presignedInfo.url;
+              console.log('上传成功:', res);
+              resolve(file);
+            },
+            fail: (err) => {
+              console.error('上传失败:', err);
+              reject(err);
+            },
+          });
+        });
+      } catch (error) {
+        console.error('上传失败：', error);
+        throw error;
+      }
+    });
+
+    // 等待所有上传完成
+    return await Promise.all(uploadPromises); // 返回已上传的文件列表
   } else {
     // 后端上传
     for (let file of files) {
