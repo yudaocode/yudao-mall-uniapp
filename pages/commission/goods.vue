@@ -63,7 +63,7 @@
   import { showShareModal } from '@/sheep/hooks/useModal';
   import SpuApi from '@/sheep/api/product/spu';
   import BrokerageApi from '@/sheep/api/trade/brokerage';
-  import { fen2yuan } from '../../sheep/hooks/useGoods';
+  import { fen2yuan } from '@/sheep/hooks/useGoods';
 
   const state = reactive({
     pagination: {
@@ -105,19 +105,29 @@
       pageSize: state.pagination.pageSize,
       pageNo: state.pagination.pageNo,
     });
+
     if (code !== 0) {
+      state.loadStatus = 'error'; // 处理错误状态
       return;
     }
+
+    // 使用 Promise.all 来等待所有佣金请求完成
+    await Promise.all(
+      data.list.map(async (item) => {
+        try {
+          const res = await BrokerageApi.getProductBrokeragePrice(item.id);
+          item.brokerageMinPrice = res.data.brokerageMinPrice;
+          item.brokerageMaxPrice = res.data.brokerageMaxPrice;
+        } catch (error) {
+          console.error(`获取商品【${item.name}】的佣金时出错：`, error);
+        }
+      }),
+    );
+
+    // 在所有请求完成后合并列表和更新状态
     state.pagination.list = _.concat(state.pagination.list, data.list);
     state.pagination.total = data.total;
     state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
-    // 补充分佣金额
-    data.list.forEach((item) => {
-      BrokerageApi.getProductBrokeragePrice(item.id).then((res) => {
-        item.brokerageMinPrice = res.data.brokerageMinPrice;
-        item.brokerageMaxPrice = res.data.brokerageMaxPrice;
-      });
-    });
   }
 
   onLoad(() => {
