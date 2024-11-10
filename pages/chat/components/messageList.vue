@@ -34,10 +34,12 @@
   import KeFuApi from '@/sheep/api/promotion/kefu';
   import { isEmpty } from '@/sheep/helper/utils';
   import sheep from '@/sheep';
-  
+  import { formatDate } from '@/sheep/util';
+
   const sys_navBar = sheep.$platform.navbar;
   const messageList = ref([]); // 消息列表
   const showNewMessageTip = ref(false); // 显示有新消息提示
+  const refreshMessage = ref(false); // 更新消息列表
   const backToTopStyle = reactive({
     'width': '100px',
     'background-color': '#fff',
@@ -48,8 +50,9 @@
     'alignItems': 'center',
   }); // 返回顶部样式
   const queryParams = reactive({
-    pageNo: 1,
-    pageSize: 10,
+    pageNo: 1, // 只用于触底计算
+    pageSize: 20,
+    createTime: undefined,
   });
   const pagingRef = ref(null); // 虚拟列表
   const queryList = async (pageNo, pageSize) => {
@@ -61,21 +64,47 @@
   };
   // 获得消息分页列表
   const getMessageList = async () => {
-    const { data } = await KeFuApi.getKefuMessagePage(queryParams);
-    if (isEmpty(data.list)) {
+    const { data } = await KeFuApi.getKefuMessageList(queryParams);
+    if (isEmpty(data)) {
+      pagingRef.value.completeByNoMore([], true);
       return;
     }
-    pagingRef.value.completeByTotal(data.list, data.total);
+    if (queryParams.pageNo > 1 && refreshMessage.value) {
+      const newMessageList = [];
+      for (const message of data) {
+        if (messageList.value.some((val) => val.id === message.id)) {
+          continue;
+        }
+        newMessageList.push(message);
+      }
+      // 新消息追加到开头
+      messageList.value = [...newMessageList, ...messageList.value];
+      pagingRef.value.updateCache(); // 更新缓存
+      refreshMessage.value = false; // 更新好后重置状态
+      return;
+    }
+
+    // 设置最后一次历史查询的最后一条消息的 createTime
+    queryParams.createTime = formatDate(data.at(-1).createTime);
+    pagingRef.value.completeByNoMore(data, false);
   };
   /** 刷新消息列表 */
-  const refreshMessageList = (message = undefined) => {
-    if (message !== undefined) {
-      showNewMessageTip.value = true;
+  const refreshMessageList = async (message = undefined) => {
+    if (typeof message !== 'undefined') {
       // 追加数据
       pagingRef.value.addChatRecordData([message], false);
-      return;
+    } else {
+      queryParams.createTime = undefined;
+      refreshMessage.value = true;
+      await getMessageList();
     }
-    pagingRef.value.reload();
+
+    // 若已是第一页则不做处理
+    if (queryParams.pageNo > 1) {
+      showNewMessageTip.value = true;
+    } else {
+      onScrollToUpper();
+    }
   };
   /** 滚动到最新消息 */
   const onBackToTopClick = (event) => {
