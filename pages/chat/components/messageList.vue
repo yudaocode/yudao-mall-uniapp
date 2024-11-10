@@ -1,20 +1,35 @@
 <template>
   <!--  聊天虚拟列表  -->
-  <z-paging ref="pagingRef" v-model="messageList" use-chat-record-mode use-virtual-list
-            cell-height-mode="dynamic" default-page-size="20" :auto-clean-list-when-reload="false"
-            safe-area-inset-bottom bottom-bg-color="#f8f8f8" :back-to-top-style="backToTopStyle"
-            :auto-show-back-to-top="showNewMessageTip" @backToTopClick="onBackToTopClick"
-            @scrolltoupper="onScrollToUpper" @query="queryList">
+  <z-paging
+    ref="pagingRef"
+    v-model="messageList"
+    use-chat-record-mode
+    use-virtual-list
+    cell-height-mode="dynamic"
+    default-page-size="20"
+    :auto-clean-list-when-reload="false"
+    safe-area-inset-bottom
+    bottom-bg-color="#f8f8f8"
+    :back-to-top-style="backToTopStyle"
+    :auto-show-back-to-top="showNewMessageTip"
+    @backToTopClick="onBackToTopClick"
+    @scrolltoupper="onScrollToUpper"
+    @query="queryList"
+  >
     <template #top>
       <!-- 撑一下顶部导航 -->
       <view :style="{ height: sys_navBar + 'px' }"></view>
     </template>
     <!-- style="transform: scaleY(-1)"必须写，否则会导致列表倒置！！！ -->
     <!-- 注意不要直接在chat-item组件标签上设置style，因为在微信小程序中是无效的，请包一层view -->
-    <template #cell="{item,index}">
+    <template #cell="{ item, index }">
       <view style="transform: scaleY(-1)">
         <!--  消息渲染  -->
-        <MessageListItem :message="item" :message-index="index" :message-list="messageList"></MessageListItem>
+        <MessageListItem
+          :message="item"
+          :message-index="index"
+          :message-list="messageList"
+        ></MessageListItem>
       </view>
     </template>
     <!-- 底部聊天输入框 -->
@@ -41,13 +56,13 @@
   const showNewMessageTip = ref(false); // 显示有新消息提示
   const refreshMessage = ref(false); // 更新消息列表
   const backToTopStyle = reactive({
-    'width': '100px',
+    width: '100px',
     'background-color': '#fff',
     'border-radius': '30px',
     'box-shadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
-    'display': 'flex',
-    'justifyContent': 'center',
-    'alignItems': 'center',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   }); // 返回顶部样式
   const queryParams = reactive({
     pageNo: 1, // 只用于触底计算
@@ -106,6 +121,7 @@
       onScrollToUpper();
     }
   };
+
   /** 滚动到最新消息 */
   const onBackToTopClick = (event) => {
     event(false); // 禁用默认操作

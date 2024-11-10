@@ -1,17 +1,35 @@
 <template>
-  <s-layout class="chat-wrap" :title="!isReconnecting ? '连接客服成功' : '会话重连中'" navbar="inner">
+  <s-layout
+    class="chat-wrap"
+    :title="!isReconnecting ? '连接客服成功' : '会话重连中'"
+    navbar="inner"
+  >
     <!--  覆盖头部导航栏背景颜色  -->
     <div class="page-bg" :style="{ height: sys_navBar + 'px' }"></div>
     <!--  聊天区域  -->
     <MessageList ref="messageListRef">
       <template #bottom>
-        <message-input v-model="chat.msg" @on-tools="onTools" @send-message="onSendMessage"></message-input>
+        <message-input
+          v-model="chat.msg"
+          @on-tools="onTools"
+          @send-message="onSendMessage"
+        ></message-input>
       </template>
     </MessageList>
     <!--  聊天工具  -->
-    <tools-popup :show-tools="chat.showTools" :tools-mode="chat.toolsMode" @close="handleToolsClose"
-                 @on-emoji="onEmoji" @image-select="onSelect" @on-show-select="onShowSelect">
-      <message-input v-model="chat.msg" @on-tools="onTools" @send-message="onSendMessage"></message-input>
+    <tools-popup
+      :show-tools="chat.showTools"
+      :tools-mode="chat.toolsMode"
+      @close="handleToolsClose"
+      @on-emoji="onEmoji"
+      @image-select="onSelect"
+      @on-show-select="onShowSelect"
+    >
+      <message-input
+        v-model="chat.msg"
+        @on-tools="onTools"
+        @send-message="onSendMessage"
+      ></message-input>
     </tools-popup>
     <!--  商品订单选择  -->
     <SelectPopup
@@ -30,7 +48,10 @@
   import ToolsPopup from '@/pages/chat/components/toolsPopup.vue';
   import MessageInput from '@/pages/chat/components/messageInput.vue';
   import SelectPopup from '@/pages/chat/components/select-popup.vue';
-  import { KeFuMessageContentTypeEnum, WebSocketMessageTypeConstants } from '@/pages/chat/util/constants';
+  import {
+    KeFuMessageContentTypeEnum,
+    WebSocketMessageTypeConstants,
+  } from '@/pages/chat/util/constants';
   import FileApi from '@/sheep/api/infra/file';
   import KeFuApi from '@/sheep/api/promotion/kefu';
   import { useWebSocket } from '@/sheep/hooks/useWebSocket';
@@ -105,7 +126,7 @@
         const res = await FileApi.uploadFile(data.tempFiles[0].path);
         msg = {
           contentType: KeFuMessageContentTypeEnum.IMAGE,
-          content: JSON.stringify({picUrl: res.data}),
+          content: JSON.stringify({ picUrl: res.data }),
         };
         break;
       case 'goods':
@@ -135,8 +156,7 @@
   //======================= 聊天工具相关 end =======================
   const { options } = useWebSocket({
     // 连接成功
-    onConnected: async () => {
-    },
+    onConnected: async () => {},
     // 收到消息
     onMessage: async (data) => {
       const type = data.type;
@@ -161,7 +181,6 @@
 
 <style scoped lang="scss">
   .chat-wrap {
-
     .page-bg {
       width: 100%;
       position: absolute;
