@@ -15,9 +15,9 @@ const KeFuApi = {
       },
     });
   },
-  getKefuMessagePage: (params) => {
+  getKefuMessageList: (params) => {
     return request({
-      url: '/promotion/kefu-message/page',
+      url: '/promotion/kefu-message/list',
       method: 'GET',
       params,
       custom: {

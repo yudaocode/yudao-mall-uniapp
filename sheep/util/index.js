@@ -131,3 +131,16 @@ export const copyValueToTarget = (target, source) => {
   // 更新目标对象值
   Object.assign(target, newObj)
 }
+/**
+ * 解析 JSON 字符串
+ *
+ * @param str
+ */
+export function jsonParse(str) {
+  try {
+    return JSON.parse(str)
+  } catch (e) {
+    console.error(`str[${str}] 不是一个 JSON 字符串`)
+    return ''
+  }
+}
