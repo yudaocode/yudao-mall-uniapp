@@ -46,7 +46,7 @@
         <!-- 内容 -->
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.TEXT">
           <view class="message-box" :class="{ admin: message.senderType === UserTypeEnum.ADMIN }">
-            <mp-html :content="replaceEmoji(message.content)" />
+            <mp-html :content="replaceEmoji(getMessageContent(message).text || message.content)" />
           </view>
         </template>
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.IMAGE">
@@ -58,9 +58,9 @@
             <su-image
               class="message-img"
               isPreview
-              :previewList="[sheep.$url.cdn(message.content)]"
+              :previewList="[sheep.$url.cdn(getMessageContent(message).picUrl || message.content)]"
               :current="0"
-              :src="sheep.$url.cdn(message.content)"
+              :src="sheep.$url.cdn(getMessageContent(message).picUrl || message.content)"
               :height="200"
               :width="200"
               mode="aspectFill"
@@ -101,7 +101,7 @@
   import { KeFuMessageContentTypeEnum, UserTypeEnum } from '@/pages/chat/util/constants';
   import { emojiList } from '@/pages/chat/util/emoji';
   import sheep from '@/sheep';
-  import { formatDate } from '@/sheep/util';
+  import { formatDate, jsonParse } from '@/sheep/util';
   import GoodsItem from '@/pages/chat/components/goods.vue';
   import OrderItem from '@/pages/chat/components/order.vue';
 
@@ -122,7 +122,7 @@
       default: () => [],
     },
   });
-  const getMessageContent = computed(() => (item) => JSON.parse(item.content)); // 解析消息内容
+  const getMessageContent = computed(() => (item) => jsonParse(item.content)); // 解析消息内容
 
   //======================= 工具 =======================
 

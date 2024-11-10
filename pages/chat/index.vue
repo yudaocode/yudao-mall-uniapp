@@ -34,6 +34,7 @@
   import FileApi from '@/sheep/api/infra/file';
   import KeFuApi from '@/sheep/api/promotion/kefu';
   import { useWebSocket } from '@/sheep/hooks/useWebSocket';
+  import { jsonParse } from '@/sheep/util';
 
   const sys_navBar = sheep.$platform.navbar;
 
@@ -52,7 +53,7 @@
     try {
       const data = {
         contentType: KeFuMessageContentTypeEnum.TEXT,
-        content: chat.msg,
+        content: JSON.stringify({ text: chat.msg }),
       };
       await KeFuApi.sendKefuMessage(data);
       await messageListRef.value.refreshMessageList();
@@ -104,7 +105,7 @@
         const res = await FileApi.uploadFile(data.tempFiles[0].path);
         msg = {
           contentType: KeFuMessageContentTypeEnum.IMAGE,
-          content: res.data,
+          content: JSON.stringify({picUrl: res.data}),
         };
         break;
       case 'goods':
@@ -140,13 +141,13 @@
     onMessage: async (data) => {
       const type = data.type;
       if (!type) {
-        console.error('未知的消息类型：' + data.value);
+        console.error('未知的消息类型：' + data);
         return;
       }
       // 2.2 消息类型：KEFU_MESSAGE_TYPE
       if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_TYPE) {
         // 刷新消息列表
-        await messageListRef.value.refreshMessageList(JSON.parse(data.content));
+        await messageListRef.value.refreshMessageList(jsonParse(data.content));
         return;
       }
       // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ
