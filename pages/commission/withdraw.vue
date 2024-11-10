@@ -30,8 +30,9 @@
           <view v-if="!state.accountInfo.type" class="empty-text">请选择提现方式</view>
           <view v-if="state.accountInfo.type === '1'" class="empty-text">钱包余额</view>
           <view v-if="state.accountInfo.type === '2'" class="empty-text">银行卡转账</view>
-          <view v-if="state.accountInfo.type === '3'" class="empty-text">微信零钱</view>
+          <view v-if="state.accountInfo.type === '3'" class="empty-text">微信账户</view>
           <view v-if="state.accountInfo.type === '4'" class="empty-text">支付宝账户</view>
+          <view v-if="state.accountInfo.type === '5'" class="empty-text">微信零钱</view>
           <text class="cicon-forward" />
         </view>
       </view>
@@ -48,7 +49,7 @@
         />
       </view>
       <!-- 提现账号 -->
-      <view class="card-title" v-show="['2', '3', '4'].includes(state.accountInfo.type)">
+      <view class="card-title" v-show="['2', '3', '4', '5'].includes(state.accountInfo.type)">
         提现账号
       </view>
       <view

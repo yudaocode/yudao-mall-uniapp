@@ -43,7 +43,7 @@ const app = defineStore({
       },
     },
     shareInfo: {}, // 全局分享信息
-    has_wechat_trade_managed: 0 // 小程序发货信息管理  0 没有 || 1 有
+    has_wechat_trade_managed: 0, // 小程序发货信息管理  0 没有 || 1 有
   }),
   actions: {
     // 获取Shopro应用配置和模板
@@ -55,14 +55,14 @@ const app = defineStore({
       }
 
       // 加载装修配置
-      await adaptTemplate(this.template, templateId)
+      await adaptTemplate(this.template, templateId);
 
       // TODO 芋艿：未来支持管理后台可配；对应 https://api.shopro.sheepjs.com/shop/api/init
       if (true) {
         this.info = {
           name: '芋道商城',
           logo: 'https://static.iocoder.cn/ruoyi-vue-pro-logo.png',
-          version: '2.2.0',
+          version: '2.3.0',
           copyright: '全部开源，个人与企业可 100% 免费使用',
           copytime: 'Copyright© 2018-2024',
 
@@ -71,15 +71,15 @@ const app = defineStore({
         };
         this.platform = {
           share: {
-            methods: ["poster", "link"],
-            linkAddress: "http://127.0.0.1:3000", // TODO 芋艿：可以考虑改到 .env 那
+            methods: ['poster', 'link'],
+            linkAddress: 'http://127.0.0.1:3000', // TODO 芋艿：可以考虑改到 .env 那
             posterInfo: {
-              "user_bg": "/static/img/shop/config/user-poster-bg.png",
-              "goods_bg": "/static/img/shop/config/goods-poster-bg.png",
-              "groupon_bg": "/static/img/shop/config/groupon-poster-bg.png"
-            }
+              user_bg: '/static/img/shop/config/user-poster-bg.png',
+              goods_bg: '/static/img/shop/config/goods-poster-bg.png',
+              groupon_bg: '/static/img/shop/config/groupon-poster-bg.png',
+            },
           },
-          bind_mobile: 0
+          bind_mobile: 0,
         };
         this.has_wechat_trade_managed = 0;
 
@@ -111,24 +111,24 @@ const app = defineStore({
 // todo: @owen 先做数据适配，后期重构
 const adaptTemplate = async (appTemplate, templateId) => {
   const { data: diyTemplate } = templateId
-      // 查询指定模板，一般是预览时使用
-      ? await DiyApi.getDiyTemplate(templateId)
-      : await DiyApi.getUsedDiyTemplate();
+    ? // 查询指定模板，一般是预览时使用
+      await DiyApi.getDiyTemplate(templateId)
+    : await DiyApi.getUsedDiyTemplate();
   // 模板不存在
   if (!diyTemplate) {
     $router.error('TemplateError');
-    return
+    return;
   }
 
   const tabBar = diyTemplate?.property?.tabBar;
   if (tabBar) {
-    appTemplate.basic.tabbar = tabBar
+    appTemplate.basic.tabbar = tabBar;
     if (tabBar?.theme) {
       appTemplate.basic.theme = tabBar?.theme;
     }
   }
   appTemplate.home = diyTemplate?.home;
   appTemplate.user = diyTemplate?.user;
-}
+};
 
 export default app;

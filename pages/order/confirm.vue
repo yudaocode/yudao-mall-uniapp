@@ -40,7 +40,10 @@
             </text>
           </view>
         </view>
-        <view v-if="state.orderPayload.pointActivityId" class="order-item ss-flex ss-col-center ss-row-between">
+        <view
+          v-if="state.orderPayload.pointActivityId"
+          class="order-item ss-flex ss-col-center ss-row-between"
+        >
           <view class="item-title">兑换积分</view>
           <view class="ss-flex ss-col-center">
             <image
@@ -241,7 +244,7 @@
 
   const addressState = ref({
     addressInfo: {}, // 选择的收货地址
-    deliveryType: 1, // 收货方式：1-快递配送，2-门店自提
+    deliveryType: undefined, // 收货方式：1-快递配送，2-门店自提
     isPickUp: true, // 门店自提是否开启
     pickUpInfo: {}, // 选择的自提门店信息
     receiverName: '', // 收件人名称
@@ -317,9 +320,15 @@
     }
 
     // 跳转到支付页面
-    sheep.$router.redirect('/pages/pay/index', {
-      id: data.payOrderId,
-    });
+    if (data.payOrderId && data.payOrderId > 0) {
+      sheep.$router.redirect('/pages/pay/index', {
+        id: data.payOrderId,
+      });
+    } else {
+      sheep.$router.redirect('/pages/order/detail', {
+        id: data.id,
+      });
+    }
   }
 
   // 检查库存 & 计算订单价格
@@ -340,7 +349,7 @@
       pointActivityId: state.orderPayload.pointActivityId,
     });
     if (code !== 0) {
-      return;
+      return code;
     }
     state.orderInfo = data;
     state.couponInfo = data.coupons || [];
@@ -348,20 +357,41 @@
     if (state.orderInfo.address) {
       addressState.value.addressInfo = state.orderInfo.address;
     }
+    return code;
   }
 
   onLoad(async (options) => {
+    // 解析参数
     if (!options.data) {
       sheep.$helper.toast('参数不正确，请检查！');
       return;
     }
     state.orderPayload = JSON.parse(options.data);
-    await getOrderInfo();
+
     // 获取交易配置
     const { data, code } = await TradeConfigApi.getTradeConfig();
     if (code === 0) {
       addressState.value.isPickUp = data.deliveryPickUpEnabled;
     }
+
+    // 价格计算
+    // 情况一：先自动选择“快递物流”
+    addressState.value.deliveryType = 1;
+    let orderCode = await getOrderInfo();
+    if (orderCode === 0) {
+      return;
+    }
+    // 情况二：失败，再自动选择“门店自提”
+    if (addressState.value.isPickUp) {
+      addressState.value.deliveryType = 2;
+      let orderCode = await getOrderInfo();
+      if (orderCode === 0) {
+        return;
+      }
+    }
+    // 情况三：都失败，则不选择
+    addressState.value.deliveryType = undefined;
+    await getOrderInfo();
   });
 
   // 使用 watch 监听地址和配送方式的变化

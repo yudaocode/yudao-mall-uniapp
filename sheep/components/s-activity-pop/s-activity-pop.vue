@@ -57,8 +57,9 @@
               <view class="ss-m-b-24 cotBu-txt">
                 {{
                   item.validityType == 1
-                    ? sheep.$helper.timeFormat(item.validStartTime, 'yyyy.mm.dd') -
-                      sheep.$helper.timeFormat(item.validEndTime, 'yyyy.mm.dd')
+                    ? sheep.$helper.timeFormat(item.validStartTime, 'yyyy-mm-dd') +
+                      '-' +
+                      sheep.$helper.timeFormat(item.validEndTime, 'yyyy-mm-dd')
                     : '领取后' + item.fixedStartTerm + '-' + item.fixedEndTerm + '天可用'
                 }}
               </view>

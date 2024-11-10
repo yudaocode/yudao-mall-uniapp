@@ -223,12 +223,21 @@
       return;
     }
 
-    // 正常的确认收货流程
-    const { code } = await OrderApi.receiveOrder(order.id);
-    if (code === 0) {
-      resetPagination(state.pagination);
-      await getOrderList();
-    }
+    uni.showModal({
+      title: '提示',
+      content: '确认收货吗？',
+      success: async function (res) {
+        if (!res.confirm) {
+          return;
+        }
+        // 正常的确认收货流程
+        const { code } = await OrderApi.receiveOrder(order.id);
+        if (code === 0) {
+          resetPagination(state.pagination);
+          await getOrderList();
+        }
+      },
+    });
   }
 
   // #ifdef MP-WEIXIN
