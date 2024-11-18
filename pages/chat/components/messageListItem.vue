@@ -68,10 +68,12 @@
           </view>
         </template>
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.PRODUCT">
+          <div class="ss-m-b-10">
           <GoodsItem
             :goodsData="getMessageContent(message)"
             @tap="sheep.$router.go('/pages/goods/index', { id: getMessageContent(message).spuId })"
           />
+          </div>
         </template>
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.ORDER">
           <OrderItem
@@ -84,7 +86,7 @@
           v-if="message.senderType === UserTypeEnum.MEMBER"
           class="chat-avatar ss-m-l-24"
           :src="
-            sheep.$url.cdn(message.senderAvatar) ||
+            sheep.$url.cdn(userInfo.avatar) ||
             sheep.$url.static('/static/img/shop/chat/default.png')
           "
           mode="aspectFill"
@@ -122,7 +124,9 @@
       default: () => [],
     },
   });
+
   const getMessageContent = computed(() => (item) => jsonParse(item.content)); // 解析消息内容
+  const userInfo = computed(() => sheep.$store('user').userInfo);
 
   //======================= 工具 =======================
 
@@ -145,7 +149,7 @@
           let emojiFile = selEmojiFile(item);
           newData = newData.replace(
             item,
-            `<img class="chat-img" style="width: 24px;height: 24px;margin: 0 3px;" src="${sheep.$url.cdn(
+            `<img class="chat-img" style="width: 24px;height: 24px;margin: 0 3px;vertical-align: middle;" src="${sheep.$url.cdn(
               '/static/img/chat/emoji/' + emojiFile,
             )}"/>`,
           );
@@ -167,7 +171,7 @@
 
 <style scoped lang="scss">
   .message-item {
-    margin-bottom: 33rpx;
+    margin-bottom: 10rpx;
   }
 
   .date-message,
@@ -231,18 +235,23 @@
   .message-box {
     max-width: 50%;
     font-size: 16px;
-    line-height: 20px;
     white-space: normal;
     word-break: break-all;
     word-wrap: break-word;
     padding: 20rpx;
-    border-radius: 10rpx;
     color: #fff;
     background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
-
+    margin-top: 18px;
+    margin-bottom: 9px;
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
     &.admin {
       background: #fff;
       color: #333;
+      margin-top: 18px;
+      margin-bottom: 9px;
+      border-radius: 0 10px 10px 10px;
     }
 
     :deep() {
@@ -268,30 +277,6 @@
     width: 100px;
     height: 100px;
     border-radius: 6rpx;
-  }
-
-  .template-wrap {
-    // width: 100%;
-    padding: 20rpx 24rpx;
-    background: #fff;
-    border-radius: 10rpx;
-
-    .title {
-      font-size: 26rpx;
-      font-weight: 500;
-      color: #333;
-      margin-bottom: 29rpx;
-    }
-
-    .item {
-      font-size: 24rpx;
-      color: var(--ui-BG-Main);
-      margin-bottom: 16rpx;
-
-      &:last-of-type {
-        margin-bottom: 0;
-      }
-    }
   }
 
   .error-img {

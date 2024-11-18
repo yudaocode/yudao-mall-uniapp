@@ -83,9 +83,10 @@
       refreshMessage.value = false; // 更新好后重置状态
       return;
     }
-
-    // 设置最后一次历史查询的最后一条消息的 createTime
-    queryParams.createTime = formatDate(data.at(-1).createTime);
+    if (data.slice(-1).length > 0) {
+      // 设置最后一次历史查询的最后一条消息的 createTime
+      queryParams.createTime = formatDate(data.slice(-1)[0].createTime);
+    }
     pagingRef.value.completeByNoMore(data, false);
   };
   /** 刷新消息列表 */
