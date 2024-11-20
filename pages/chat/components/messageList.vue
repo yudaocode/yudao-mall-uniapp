@@ -65,16 +65,15 @@
     alignItems: 'center',
   }); // 返回顶部样式
   const queryParams = reactive({
-    pageNo: 1, // 只用于触底计算
-    pageSize: 20,
+    no: 1, // 查询次数，只用于触底计算
+    limit: 20,
     createTime: undefined,
   });
   const pagingRef = ref(null); // 虚拟列表
-  const queryList = async (pageNo, pageSize) => {
+  const queryList = async (no, limit) => {
     // 组件加载时会自动触发此方法，因此默认页面加载时会自动触发，无需手动调用
-    // 这里的pageNo和pageSize会自动计算好，直接传给服务器即可
-    queryParams.pageNo = pageNo;
-    queryParams.pageSize = pageSize;
+    queryParams.no = no;
+    queryParams.limit = limit;
     await getMessageList();
   };
   // 获得消息分页列表
@@ -84,7 +83,7 @@
       pagingRef.value.completeByNoMore([], true);
       return;
     }
-    if (queryParams.pageNo > 1 && refreshMessage.value) {
+    if (queryParams.no > 1 && refreshMessage.value) {
       const newMessageList = [];
       for (const message of data) {
         if (messageList.value.some((val) => val.id === message.id)) {
@@ -98,9 +97,10 @@
       refreshMessage.value = false; // 更新好后重置状态
       return;
     }
-
-    // 设置最后一次历史查询的最后一条消息的 createTime
-    queryParams.createTime = formatDate(data.at(-1).createTime);
+    if (data.slice(-1).length > 0) {
+      // 设置最后一次历史查询的最后一条消息的 createTime
+      queryParams.createTime = formatDate(data.slice(-1)[0].createTime);
+    }
     pagingRef.value.completeByNoMore(data, false);
   };
   /** 刷新消息列表 */
@@ -115,7 +115,7 @@
     }
 
     // 若已是第一页则不做处理
-    if (queryParams.pageNo > 1) {
+    if (queryParams.no > 1) {
       showNewMessageTip.value = true;
     } else {
       onScrollToUpper();
@@ -130,7 +130,7 @@
   /** 监听滚动到底部事件（因为 scroll 翻转了顶就是底） */
   const onScrollToUpper = () => {
     // 若已是第一页则不做处理
-    if (queryParams.pageNo === 1) {
+    if (queryParams.no === 1) {
       return;
     }
     showNewMessageTip.value = false;
