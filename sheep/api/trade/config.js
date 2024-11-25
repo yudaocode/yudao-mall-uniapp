@@ -6,6 +6,9 @@ const TradeConfigApi = {
     return request({
       url: `/trade/config/get`,
       method: 'GET',
+      custom: {
+        showLoading: false,
+      },
     });
   },
 };

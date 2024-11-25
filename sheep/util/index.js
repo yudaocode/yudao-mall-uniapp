@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from 'dayjs';
 
 /**
  * 将一个整数转换为分数保留两位小数
@@ -6,10 +6,10 @@ import dayjs from "dayjs";
  * @return {number} 分数
  */
 export const formatToFraction = (num) => {
-  if (typeof num === 'undefined') return 0
-  const parsedNumber = typeof num === 'string' ? parseFloat(num) : num
-  return parseFloat((parsedNumber / 100).toFixed(2))
-}
+  if (typeof num === 'undefined') return 0;
+  const parsedNumber = typeof num === 'string' ? parseFloat(num) : num;
+  return parseFloat((parsedNumber / 100).toFixed(2));
+};
 
 /**
  * 将一个数转换为 1.00 这样
@@ -19,26 +19,26 @@ export const formatToFraction = (num) => {
  * @return {string} 分数
  */
 export const floatToFixed2 = (num) => {
-  let str = '0.00'
+  let str = '0.00';
   if (typeof num === 'undefined') {
-    return str
+    return str;
   }
-  const f = formatToFraction(num)
-  const decimalPart = f.toString().split('.')[1]
-  const len = decimalPart ? decimalPart.length : 0
+  const f = formatToFraction(num);
+  const decimalPart = f.toString().split('.')[1];
+  const len = decimalPart ? decimalPart.length : 0;
   switch (len) {
     case 0:
-      str = f.toString() + '.00'
-      break
+      str = f.toString() + '.00';
+      break;
     case 1:
-      str = f.toString() + '.0'
-      break
+      str = f.toString() + '.0';
+      break;
     case 2:
-      str = f.toString()
-      break
+      str = f.toString();
+      break;
   }
-  return str
-}
+  return str;
+};
 
 /**
  * 将一个分数转换为整数
@@ -47,11 +47,11 @@ export const floatToFixed2 = (num) => {
  * @return {number} 整数
  */
 export const convertToInteger = (num) => {
-  if (typeof num === 'undefined') return 0
-  const parsedNumber = typeof num === 'string' ? parseFloat(num) : num
+  if (typeof num === 'undefined') return 0;
+  const parsedNumber = typeof num === 'string' ? parseFloat(num) : num;
   // TODO 分转元后还有小数则四舍五入
-  return Math.round(parsedNumber * 100)
-}
+  return Math.round(parsedNumber * 100);
+};
 
 /**
  * 时间日期转换
@@ -64,16 +64,16 @@ export const convertToInteger = (num) => {
  * @description format 季度 + 星期 + 几周："YYYY-mm-dd HH:MM:SS WWW QQQQ ZZZ"
  * @returns {string} 返回拼接后的时间字符串
  */
-export function formatDate(date, format= 'YYYY-MM-DD HH:mm:ss') {
+export function formatDate(date, format = 'YYYY-MM-DD HH:mm:ss') {
   // 日期不存在，则返回空
   if (!date) {
-    return ''
+    return '';
   }
   // 日期存在，则进行格式化
   if (format === undefined) {
-    format = 'YYYY-MM-DD HH:mm:ss'
+    format = 'YYYY-MM-DD HH:mm:ss';
   }
-  return dayjs(date).format(format)
+  return dayjs(date).format(format);
 }
 
 /**
@@ -85,16 +85,22 @@ export function formatDate(date, format= 'YYYY-MM-DD HH:mm:ss') {
  * @param {*} children 孩子节点字段 默认 'children'
  * @param {*} rootId 根Id 默认 0
  */
-export function handleTree(data, id = 'id', parentId = 'parentId', children = 'children', rootId = 0) {
+export function handleTree(
+  data,
+  id = 'id',
+  parentId = 'parentId',
+  children = 'children',
+  rootId = 0,
+) {
   // 对源数据深度克隆
-  const cloneData = JSON.parse(JSON.stringify(data))
+  const cloneData = JSON.parse(JSON.stringify(data));
   // 循环所有项
-  const treeData = cloneData.filter(father => {
-    let branchArr = cloneData.filter(child => {
+  const treeData = cloneData.filter((father) => {
+    let branchArr = cloneData.filter((child) => {
       //返回每一项的子级数组
-      return father[id] === child[parentId]
+      return father[id] === child[parentId];
     });
-    branchArr.length > 0 ? father.children = branchArr : '';
+    branchArr.length > 0 ? (father.children = branchArr) : '';
     //返回第一层
     return father[parentId] === rootId;
   });
@@ -120,14 +126,28 @@ export function resetPagination(pagination) {
  * @param source 源对象
  */
 export const copyValueToTarget = (target, source) => {
-  const newObj = Object.assign({}, target, source)
+  const newObj = Object.assign({}, target, source);
   // 删除多余属性
   Object.keys(newObj).forEach((key) => {
     // 如果不是target中的属性则删除
     if (Object.keys(target).indexOf(key) === -1) {
-      delete newObj[key]
+      delete newObj[key];
     }
-  })
+  });
   // 更新目标对象值
-  Object.assign(target, newObj)
+  Object.assign(target, newObj);
+};
+
+/**
+ * 解析 JSON 字符串
+ *
+ * @param str
+ */
+export function jsonParse(str) {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    console.error(`str[${str}] 不是一个 JSON 字符串`);
+    return '';
+  }
 }

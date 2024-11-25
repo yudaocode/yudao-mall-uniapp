@@ -37,14 +37,14 @@
           <text class="_icon-forward"></text>
         </view>
         <view class="tool-btn-box ss-flex ss-col-center ss-row-right ss-p-r-20">
-          <!-- TODO 功能缺失：填写退货信息 -->
           <view>
             <button
               class="ss-reset-button tool-btn"
               @tap.stop="onApply(order.id)"
               v-if="order?.buttons.includes('cancel')"
-              >取消申请</button
             >
+              取消申请
+            </button>
           </view>
         </view>
       </view>

@@ -8,7 +8,7 @@
       :scroll-with-animation="false"
       :enable-back-to-top="true"
     >
-      <s-point-card ref="sPointCardRef" class="ss-p-x-20 ss-m-t-20"/>
+      <s-point-card ref="sPointCardRef" class="ss-p-x-20 ss-m-t-20" />
       <s-empty
         v-if="activityTotal === 0"
         icon="/static/goods-empty.png"
@@ -18,8 +18,8 @@
         v-if="activityTotal > 0"
         :status="loadStatus"
         :content-text="{
-            contentdown: '上拉加载更多',
-          }"
+          contentdown: '上拉加载更多',
+        }"
         @tap="loadMore"
       />
     </scroll-view>
