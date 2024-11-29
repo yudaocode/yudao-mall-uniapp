@@ -158,6 +158,13 @@ const decryptSpm = (spm) => {
         id: shareParamsArray[2],
       };
       break;
+    case '6':
+      // 积分商品
+      shareParams.page = '/pages/goods/point';
+      shareParams.query = {
+        id: shareParamsArray[2],
+      };
+      break;
   }
   shareParams.platform = platformMap[shareParamsArray[3] - 1];
   shareParams.from = fromMap[shareParamsArray[4] - 1];

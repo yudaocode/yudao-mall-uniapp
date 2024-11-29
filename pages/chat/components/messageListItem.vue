@@ -241,7 +241,7 @@
     padding: 20rpx;
     color: #fff;
     background: linear-gradient(90deg, var(--ui-BG-Main), var(--ui-BG-Main-gradient));
-    margin-top: 18px;
+    margin-top: 3px;
     margin-bottom: 9px;
     border-top-left-radius: 10px;
     border-bottom-right-radius: 10px;
@@ -249,7 +249,7 @@
     &.admin {
       background: #fff;
       color: #333;
-      margin-top: 18px;
+      margin-top: 3px;
       margin-bottom: 9px;
       border-radius: 0 10px 10px 10px;
     }
