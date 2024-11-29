@@ -47,19 +47,18 @@ const getShareInfo = (
   // 配置分享链接地址
   shareInfo.link = buildSpmLink(query, shareConfig.linkAddress);
   // 配置页面地址带参数
-  shareInfo.path = buildSpmPath(query);
+  shareInfo.path = buildSpmPath();
 
   // 配置转发参数
   if (shareConfig.methods.includes('forward')) {
-    // TODO puhui999: forward 这块有点问题
     if (shareConfig.forwardInfo.title === '' || shareConfig.forwardInfo.image === '') {
-      console.log('请在平台设置中配置转发信息');
+      console.log('请在平台设置中配置默认转发信息');
     }
     // 设置自定义分享信息
     shareInfo.title = scene.title || shareConfig.forwardInfo.title;
     shareInfo.image = $url.cdn(scene.image || shareConfig.forwardInfo.image);
     shareInfo.desc = scene.desc || shareConfig.forwardInfo.subtitle;
-    shareInfo.path = buildSpmPath(scene.path, query);
+    shareInfo.path = buildSpmPath(query);
   }
 
   return shareInfo;
@@ -100,7 +99,7 @@ const buildSpmQuery = (params) => {
 const buildSpmPath = (query) => {
   // 默认是主页，页面 page，例如 pages/index/index，根路径前不要填加 /，
   // 不能携带参数（参数请放在scene字段里），如果不填写这个字段，默认跳主页面。scancode_time为系统保留参数，不允许配置
-  return `pages/index/index`;
+  return typeof query === 'undefined' ? `pages/index/index` : `pages/index/index?${query}`;
 };
 
 // 构造分享链接
