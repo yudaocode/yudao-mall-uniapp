@@ -71,7 +71,7 @@
 <script setup>
   import sheep from '@/sheep';
   import { onLoad } from '@dcloudio/uni-app';
-  import { reactive, ref } from 'vue';
+  import { reactive } from 'vue';
   import OrderApi from '@/sheep/api/trade/order';
 
   const state = reactive({
@@ -111,7 +111,7 @@
    * @param commentIndex  当前评论的下标
    */
   function uploadSuccess(payload, commentIndex) {
-    state.commentList[commentIndex].picUrls = state.commentList[commentIndex].images;
+    state.commentList[commentIndex].picUrls = payload.tempFilePaths;
   }
 
   onLoad(async (options) => {
