@@ -148,7 +148,7 @@ const decryptSpm = (spm) => {
       shareParams.page = '/pages/goods/seckill';
       query = shareParamsArray[2].split(',');
       shareParams.query = {
-        id: query[1],
+        id: query[0],
       };
       break;
     case '5':
