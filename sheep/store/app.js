@@ -71,12 +71,17 @@ const app = defineStore({
         };
         this.platform = {
           share: {
-            methods: ['poster', 'link'],
+            methods: ['forward', 'poster', 'link'],
             linkAddress: 'http://127.0.0.1:3000', // TODO 芋艿：可以考虑改到 .env 那
             posterInfo: {
               user_bg: '/static/img/shop/config/user-poster-bg.png',
               goods_bg: '/static/img/shop/config/goods-poster-bg.png',
               groupon_bg: '/static/img/shop/config/groupon-poster-bg.png',
+            },
+            forwardInfo: {
+              title: '',
+              image: '',
+              desc: '',
             },
           },
           bind_mobile: 0,

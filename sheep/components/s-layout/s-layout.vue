@@ -60,12 +60,11 @@
   /**
    * 模板组件 - 提供页面公共组件，属性，方法
    */
-  import { computed, reactive, ref } from 'vue';
+  import { computed } from 'vue';
   import sheep from '@/sheep';
   import { isEmpty } from 'lodash-es';
-  import { onShow } from '@dcloudio/uni-app';
   // #ifdef MP-WEIXIN
-  import { onShareAppMessage } from '@dcloudio/uni-app';
+  import { onShareAppMessage, onShareTimeline, onShow } from '@dcloudio/uni-app';
   // #endif
 
   const props = defineProps({
@@ -191,11 +190,23 @@
   });
 
   // #ifdef MP-WEIXIN
-  // 微信小程序分享
+  uni.showShareMenu({
+    withShareTicket: true,
+    menus: ['shareAppMessage', 'shareTimeline'],
+  });
+  // 微信小程序分享好友
   onShareAppMessage(() => {
     return {
       title: shareInfo.value.title,
       path: shareInfo.value.path,
+      imageUrl: shareInfo.value.image,
+    };
+  });
+  // 微信小程序分享朋友圈
+  onShareTimeline(() => {
+    return {
+      title: shareInfo.value.title,
+      query: shareInfo.value.path,
       imageUrl: shareInfo.value.image,
     };
   });

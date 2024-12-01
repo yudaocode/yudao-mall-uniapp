@@ -78,6 +78,7 @@
             limit="1"
             mode="grid"
             :imageStyles="{ width: '168rpx', height: '168rpx' }"
+            @success="(payload) => state.accountInfo.accountQrCodeUrl = payload.tempFilePaths[0]"
           />
         </view>
       </view>
@@ -161,13 +162,14 @@
 </template>
 
 <script setup>
-  import { computed, reactive, onBeforeMount } from 'vue';
+  import { computed, onBeforeMount, reactive } from 'vue';
   import sheep from '@/sheep';
   import accountTypeSelect from './components/account-type-select.vue';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import TradeConfigApi from '@/sheep/api/trade/config';
   import BrokerageApi from '@/sheep/api/trade/brokerage';
   import DictApi from '@/sheep/api/system/dict';
+  import SLayout from '@/sheep/components/s-layout/s-layout.vue';
 
   const headerBg = sheep.$url.css('/static/img/shop/user/withdraw_bg.png');
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;

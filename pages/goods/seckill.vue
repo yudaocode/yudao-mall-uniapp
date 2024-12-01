@@ -137,11 +137,11 @@
 </template>
 
 <script setup>
-  import { reactive, computed, ref, unref } from 'vue';
+  import { computed, reactive, ref, unref } from 'vue';
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import { isEmpty, min } from 'lodash-es';
-  import { useDurationTime, formatGoodsSwiper, fen2yuan } from '@/sheep/hooks/useGoods';
+  import { fen2yuan, formatGoodsSwiper, useDurationTime } from '@/sheep/hooks/useGoods';
   import detailNavbar from './components/detail/detail-navbar.vue';
   import detailCellSku from './components/detail/detail-cell-sku.vue';
   import detailTabbar from './components/detail/detail-tabbar.vue';
@@ -214,8 +214,8 @@
         type: 'goods', // 商品海报
         title: activity.value.name, // 商品标题
         image: sheep.$url.cdn(state.goodsInfo.picUrl), // 商品主图
-        price: state.goodsInfo.price, // 商品价格
-        marketPrice: state.goodsInfo.marketPrice, // 商品原价
+        price: fen2yuan(state.goodsInfo.price), // 商品价格
+        marketPrice: fen2yuan(state.goodsInfo.marketPrice), // 商品原价
       },
     );
   });

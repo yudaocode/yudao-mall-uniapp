@@ -76,13 +76,12 @@
     shareInfo: {},
   });
 
-  // TODO @puhui999：【分享】接入
   function onShareGoods(goodsInfo) {
     state.shareInfo = $share.getShareInfo(
       {
-        title: goodsInfo.title,
-        image: sheep.$url.cdn(goodsInfo.image),
-        desc: goodsInfo.subtitle,
+        title: goodsInfo.name,
+        image: sheep.$url.cdn(goodsInfo.picUrl),
+        desc: goodsInfo.introduction,
         params: {
           page: '2',
           query: goodsInfo.id,
@@ -90,10 +89,10 @@
       },
       {
         type: 'goods', // 商品海报
-        title: goodsInfo.title, // 商品标题
-        image: sheep.$url.cdn(goodsInfo.image), // 商品主图
-        price: goodsInfo.price[0], // 商品价格
-        original_price: goodsInfo.original_price, // 商品原价
+        title: goodsInfo.name, // 商品名称
+        image: sheep.$url.cdn(goodsInfo.picUrl), // 商品主图
+        price: fen2yuan(goodsInfo.price), // 商品价格
+        original_price: fen2yuan(goodsInfo.marketPrice), // 商品原价
       },
     );
     showShareModal();

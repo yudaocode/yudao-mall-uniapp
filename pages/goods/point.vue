@@ -171,7 +171,6 @@
   }
 
   // 分享信息
-  // TODO puhui999: 下次 fix
   const shareInfo = computed(() => {
     if (isEmpty(unref(activity))) return {};
     return sheep.$platform.share.getShareInfo(
@@ -179,7 +178,7 @@
         title: activity.value.name,
         image: sheep.$url.cdn(state.goodsInfo.picUrl),
         params: {
-          page: '4',
+          page: '6',
           query: activity.value.id,
         },
       },
@@ -187,8 +186,8 @@
         type: 'goods', // 商品海报
         title: activity.value.name, // 商品标题
         image: sheep.$url.cdn(state.goodsInfo.picUrl), // 商品主图
-        price: state.goodsInfo.price, // 商品价格
-        marketPrice: state.goodsInfo.marketPrice, // 商品原价
+        price: (getShowPrice.value.price || 0) + ` + ${getShowPrice.value.point} 积分`, // 积分价格
+        marketPrice: fen2yuan(state.goodsInfo.marketPrice), // 商品原价
       },
     );
   });
