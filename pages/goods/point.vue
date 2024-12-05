@@ -7,7 +7,10 @@
     <detailSkeleton v-if="state.skeletonLoading" />
     <!-- 下架/售罄提醒 -->
     <s-empty
-      v-else-if="state.goodsInfo === null || state.goodsInfo.activity_type !== PromotionActivityTypeEnum.POINT.type"
+      v-else-if="
+        state.goodsInfo === null ||
+        state.goodsInfo.activity_type !== PromotionActivityTypeEnum.POINT.type
+      "
       text="活动不存在或已结束"
       icon="/static/soldout-empty.png"
       showAction
@@ -37,7 +40,9 @@
               ></image>
               <text class="point-text ss-m-r-16">
                 {{ getShowPrice.point }}
-                {{ !getShowPrice.price || getShowPrice.price === 0 ? '' : `+￥${getShowPrice.price}` }}
+                {{
+                  !getShowPrice.price || getShowPrice.price === 0 ? '' : `+￥${getShowPrice.price}`
+                }}
               </text>
             </view>
             <view class="sales-text">
@@ -87,21 +92,19 @@
           <button
             class="ss-reset-button btn-box ss-flex-col"
             @tap="state.showSelectSku = true"
-            :class="
-             state.goodsInfo.stock != 0
-                ? 'check-btn-box'
-                : 'disabled-btn-box'
-            "
+            :class="state.goodsInfo.stock != 0 ? 'check-btn-box' : 'disabled-btn-box'"
             :disabled="state.goodsInfo.stock === 0"
           >
             <view class="price-box ss-flex">
               <image
                 :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
-                style="width: 36rpx;height: 36rpx;margin: 0 4rpx;"
+                style="width: 36rpx; height: 36rpx; margin: 0 4rpx"
               ></image>
               <text class="point-text ss-m-r-16">
                 {{ getShowPrice.point }}
-                {{ !getShowPrice.price || getShowPrice.price === 0 ? '' : `+￥${getShowPrice.price}` }}
+                {{
+                  !getShowPrice.price || getShowPrice.price === 0 ? '' : `+￥${getShowPrice.price}`
+                }}
               </text>
             </view>
             <view v-if="state.goodsInfo.stock === 0">已售罄</view>
@@ -135,8 +138,7 @@
   const seckillBg = sheep.$url.css('/static/img/shop/goods/seckill-tip-bg.png');
   const grouponBg = sheep.$url.css('/static/img/shop/goods/groupon-tip-bg.png');
 
-  onPageScroll(() => {
-  });
+  onPageScroll(() => {});
   const state = reactive({
     skeletonLoading: true,
     goodsInfo: {},
@@ -178,6 +180,7 @@
         title: activity.value.name,
         image: sheep.$url.cdn(state.goodsInfo.picUrl),
         params: {
+          // TODO @puhui：page 相关，要不搞个枚举，然后都弄过去；
           page: '6',
           query: activity.value.id,
         },

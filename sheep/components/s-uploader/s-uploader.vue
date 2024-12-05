@@ -44,13 +44,7 @@
 
 <script>
   import { chooseAndUploadFile, uploadCloudFiles } from './choose-and-upload-file.js';
-  import {
-    get_file_ext,
-    get_extname,
-    get_files_and_is_max,
-    get_file_info,
-    get_file_data,
-  } from './utils.js';
+  import { get_extname, get_files_and_is_max, get_file_data } from './utils.js';
   import uploadImage from './upload-image.vue';
   import uploadFile from './upload-file.vue';
   import sheep from '@/sheep';
@@ -352,22 +346,21 @@
       /**
        * 选择文件并上传
        */
-      chooseFiles() {
+      async chooseFiles() {
         const _extname = get_extname(this.fileExtname);
         // 获取后缀
-        uniCloud
-          .chooseAndUploadFile({
-            type: this.fileMediatype,
-            compressed: false,
-            sizeType: this.sizeType,
-            // TODO 如果为空，video 有问题
-            extension: _extname.length > 0 ? _extname : undefined,
-            count: this.limitLength - this.files.length, //默认9
-            onChooseFile: this.chooseFileCallback,
-            onUploadProgress: (progressEvent) => {
-              this.setProgress(progressEvent, progressEvent.index);
-            },
-          })
+        await chooseAndUploadFile({
+          type: this.fileMediatype,
+          compressed: false,
+          sizeType: this.sizeType,
+          // TODO 如果为空，video 有问题
+          extension: _extname.length > 0 ? _extname : undefined,
+          count: this.limitLength - this.files.length, //默认9
+          onChooseFile: this.chooseFileCallback,
+          onUploadProgress: (progressEvent) => {
+            this.setProgress(progressEvent, progressEvent.index);
+          },
+        })
           .then((result) => {
             this.setSuccessAndError(result);
           })
@@ -587,7 +580,7 @@
             path: v.path,
             size: v.size,
             fileID: v.fileID,
-            url: v.path,
+            url: v.url,
           });
         });
         return newFilesData;

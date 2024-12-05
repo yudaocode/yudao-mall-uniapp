@@ -85,7 +85,7 @@
                 <view class="price-text ss-m-r-16">
                   {{ fen2yuan(state.selectedSku.price || state.goodsInfo.price) }}
                 </view>
-                <view class="origin-price-text" v-if="state.goodsInfo.marketPrice > 0">
+                <view class="origin-price-text" v-if="state.goodsInfo.marketPrice > state.goodsInfo.price">
                   {{ fen2yuan(state.selectedSku.marketPrice || state.goodsInfo.marketPrice) }}
                 </view>
               </view>
@@ -361,7 +361,7 @@
     // 选择有 promotionPrice 且最小的
     state.settlementSku = state.goodsInfo.skus
       .filter((sku) => sku.stock > 0 && sku.promotionPrice > 0)
-      .reduce((prev, curr) => (prev.promotionPrice < curr.promotionPrice ? prev : curr));
+      .reduce((prev, curr) => (prev.promotionPrice < curr.promotionPrice ? prev : curr), []);
 
     // 设置满减送活动
     if (data.rewardActivity) {

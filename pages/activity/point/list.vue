@@ -60,7 +60,7 @@
 
   // 加载更多
   function loadMore() {
-    if (loadStatus !== 'noMore') {
+    if (loadStatus.value !== 'noMore') {
       activityPageParams.pageNo += 1;
       getActivityList();
     }

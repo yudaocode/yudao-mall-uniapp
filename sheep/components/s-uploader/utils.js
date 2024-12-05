@@ -17,12 +17,11 @@ export const get_file_ext = (name) => {
  */
 export const get_extname = (fileExtname) => {
   if (!Array.isArray(fileExtname)) {
-    let extname = fileExtname.replace(/(\[|\])/g, '');
+    let extname = fileExtname.replace(/([\[\]])/g, '');
     return extname.split(',');
   } else {
     return fileExtname;
   }
-  return [];
 };
 
 /**
@@ -91,7 +90,7 @@ export const get_file_data = async (files, type = 'image') => {
     extname: extname || '',
     cloudPath: files.cloudPath,
     fileType: files.fileType,
-    url: files.path || files.path,
+    url: files.url || files.path,
     size: files.size, //单位是字节
     image: {},
     path: files.path,
