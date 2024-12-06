@@ -189,12 +189,12 @@ const bindBrokerageUser = async (val = undefined) => {
     if (!shareId) {
       return;
     }
-    const { data } = await BrokerageApi.bindBrokerageUser({ bindUserId: shareId });
-    if (!data) {
-      return;
-    }
+    const { data, msg } = await BrokerageApi.bindBrokerageUser({ bindUserId: shareId });
     // 绑定成功后清除缓存
-    uni.removeStorageSync('shareId');
+    if (!!data || msg.includes('不能绑定自己')) {
+      uni.removeStorageSync('shareId');
+    }
+
   } catch (e) {
     console.error(e);
   }
