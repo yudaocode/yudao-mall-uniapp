@@ -168,12 +168,11 @@ const decryptSpm = (spm) => {
   shareParams.platform = platformMap[shareParamsArray[3] - 1];
   shareParams.from = fromMap[shareParamsArray[4] - 1];
   if (shareParams.shareId !== 0) {
+    // 记录分享者编号
+    uni.setStorageSync('shareId', shareParams.shareId);
     // 已登录 绑定推广员
-    if (user.isLogin) {
+    if (!!user.isLogin) {
       bindBrokerageUser(shareParams.shareId);
-    } else {
-      // 记录分享者编号
-      uni.setStorageSync('shareId', shareParams.shareId);
     }
   }
 
@@ -190,7 +189,11 @@ const bindBrokerageUser = async (val = undefined) => {
     if (!shareId) {
       return;
     }
-    await BrokerageApi.bindBrokerageUser({ bindUserId: shareId });
+    const { data } = await BrokerageApi.bindBrokerageUser({ bindUserId: shareId });
+    if (!data) {
+      return;
+    }
+    // 绑定成功后清除缓存
     uni.removeStorageSync('shareId');
   } catch (e) {
     console.error(e);
