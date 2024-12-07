@@ -6,6 +6,7 @@
       v-if="data.type === 'text'"
       class="nav-title inline"
       :style="[{ color: data.textColor, width: width }]"
+      @tap="sheep.$router.go(data.url)"
     >
       {{ data.text }}
     </view>
