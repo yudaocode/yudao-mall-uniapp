@@ -1,6 +1,6 @@
 <!-- 收件地址列表 -->
 <template>
-  <s-layout title="收货地址" :bgStyle="{ color: '#FFF' }">
+  <s-layout :bgStyle="{ backgroundColor: '#FFF' }" title="收货地址">
     <view v-if="state.list.length">
       <s-address-item
         hasBorderBottom
@@ -40,7 +40,7 @@
 
 <script setup>
   import { onBeforeMount, reactive } from 'vue';
-  import { onShow, onLoad } from '@dcloudio/uni-app';
+  import { onLoad, onShow } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import { isEmpty } from 'lodash-es';
   import AreaApi from '@/sheep/api/system/area';

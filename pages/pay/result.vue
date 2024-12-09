@@ -1,6 +1,6 @@
 <!-- 支付结果页面 -->
 <template>
-  <s-layout title="支付结果" :bgStyle="{ color: '#FFF' }">
+  <s-layout :bgStyle="{ backgroundColor: '#FFF' }" title="支付结果">
     <view class="pay-result-box ss-flex-col ss-row-center ss-col-center">
       <!-- 信息展示 -->
       <view class="pay-waiting ss-m-b-30" v-if="payResult === 'waiting'" />
@@ -63,8 +63,8 @@
 </template>
 
 <script setup>
-  import { onLoad, onHide, onShow } from '@dcloudio/uni-app';
-  import { reactive, computed, ref } from 'vue';
+  import { onHide, onLoad, onShow } from '@dcloudio/uni-app';
+  import { computed, reactive, ref } from 'vue';
   import { isEmpty } from 'lodash-es';
   import sheep from '@/sheep';
   import PayOrderApi from '@/sheep/api/pay/order';

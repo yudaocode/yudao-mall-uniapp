@@ -1,5 +1,5 @@
 <template>
-  <s-layout :bgStyle="{ color: '#fff' }" tabbar="/pages/index/cart" title="购物车">
+  <s-layout :bgStyle="{ backgroundColor: '#fff' }" tabbar="/pages/index/cart" title="购物车">
     <s-empty v-if="state.list.length === 0" icon="/static/cart-empty.png" text="购物车空空如也,快去逛逛吧~" />
 
     <!-- 头部 -->

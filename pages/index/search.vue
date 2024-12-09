@@ -1,6 +1,6 @@
 <!-- 搜索界面 -->
 <template>
-  <s-layout class="set-wrap" title="搜索" :bgStyle="{ color: '#FFF' }">
+  <s-layout :bgStyle="{ backgroundColor: '#FFF' }" class="set-wrap" title="搜索">
     <view class="ss-p-x-24">
       <view class="ss-flex ss-col-center">
         <uni-search-bar

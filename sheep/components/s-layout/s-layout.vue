@@ -107,7 +107,7 @@
       type: Object,
       default: () => ({
         src: '',
-        color: 'var(--ui-BG-1)',
+        backgroundColor: 'var(--ui-BG-1)',
       }),
     },
     tabbar: {
