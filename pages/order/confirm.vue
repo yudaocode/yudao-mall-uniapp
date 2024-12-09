@@ -228,6 +228,7 @@
   import OrderApi from '@/sheep/api/trade/order';
   import TradeConfigApi from '@/sheep/api/trade/config';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
+  import { DeliveryTypeEnum } from '@/sheep/util/const';
 
   const state = reactive({
     orderPayload: {},
@@ -376,14 +377,14 @@
 
     // 价格计算
     // 情况一：先自动选择“快递物流”
-    addressState.value.deliveryType = 1;
+    addressState.value.deliveryType = DeliveryTypeEnum.EXPRESS.type;
     let orderCode = await getOrderInfo();
     if (orderCode === 0) {
       return;
     }
     // 情况二：失败，再自动选择“门店自提”
     if (addressState.value.isPickUp) {
-      addressState.value.deliveryType = 2;
+      addressState.value.deliveryType = DeliveryTypeEnum.PICK_UP.type;
       let orderCode = await getOrderInfo();
       if (orderCode === 0) {
         return;

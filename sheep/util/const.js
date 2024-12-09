@@ -119,7 +119,11 @@ export const PromotionActivityTypeEnum = {
     name: '积分商城',
   },
 };
-
+/** 配送方式枚举 */
+export const DeliveryTypeEnum = {
+  EXPRESS: { type: 1, name: '快递发货' },
+  PICK_UP: { type: 2, name: '用户自提' },
+};
 export const getTimeStatusEnum = (startTime, endTime) => {
   const now = dayjs();
   if (now.isBefore(startTime)) {
