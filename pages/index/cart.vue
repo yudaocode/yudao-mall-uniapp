@@ -1,6 +1,10 @@
 <template>
   <s-layout :bgStyle="{ backgroundColor: '#fff' }" tabbar="/pages/index/cart" title="购物车">
-    <s-empty v-if="state.list.length === 0" icon="/static/cart-empty.png" text="购物车空空如也,快去逛逛吧~" />
+    <s-empty
+      v-if="state.list.length === 0"
+      icon="/static/cart-empty.png"
+      text="购物车空空如也,快去逛逛吧~"
+    />
 
     <!-- 头部 -->
     <view v-if="state.list.length" class="cart-box ss-flex ss-flex-col ss-row-between">
@@ -24,16 +28,35 @@
         <view v-for="item in state.list" :key="item.id" class="goods-box ss-r-10 ss-m-b-14">
           <view class="ss-flex ss-col-center">
             <label class="check-box ss-flex ss-col-center ss-p-l-10" @tap="onSelectSingle(item.id)">
-              <radio :checked="state.selectedIds.includes(item.id)" color="var(--ui-BG-Main)"
-                     style="transform: scale(0.8)" @tap.stop="onSelectSingle(item.id)" />
+              <radio
+                :checked="state.selectedIds.includes(item.id)"
+                color="var(--ui-BG-Main)"
+                style="transform: scale(0.8)"
+                @tap.stop="onSelectSingle(item.id)"
+              />
             </label>
-            <s-goods-item :img="item.spu.picUrl || item.goods.image" :price="item.sku.price"
-                          :skuText="item.sku.properties.length>1? item.sku.properties.reduce((items2,items)=>items2.valueName+' '+items.valueName):item.sku.properties[0].valueName"
-                          :title="item.spu.name"
-                          :titleWidth="400" priceColor="#FF3000">
+            <s-goods-item
+              :img="item.spu.picUrl || item.goods.image"
+              :price="item.sku.price"
+              :skuText="
+                item.sku.properties.length > 1
+                  ? item.sku.properties.reduce(
+                      (items2, items) => items2.valueName + ' ' + items.valueName,
+                    )
+                  : item.sku.properties[0].valueName
+              "
+              :title="item.spu.name"
+              :titleWidth="400"
+              priceColor="#FF3000"
+            >
               <template v-if="!state.editMode" v-slot:tool>
-                <su-number-box v-model="item.count" :max="item.sku.stock" :min="0" :step="1"
-                               @change="onNumberChange($event, item)" />
+                <su-number-box
+                  v-model="item.count"
+                  :max="item.sku.stock"
+                  :min="0"
+                  :step="1"
+                  @change="onNumberChange($event, item)"
+                />
               </template>
             </s-goods-item>
           </view>
@@ -44,8 +67,12 @@
         <view class="cart-footer ss-flex ss-col-center ss-row-between ss-p-x-30 border-bottom">
           <view class="footer-left ss-flex ss-col-center">
             <label class="check-box ss-flex ss-col-center ss-p-r-30" @tap="onSelectAll">
-              <radio :checked="state.isAllSelected" color="var(--ui-BG-Main)"
-                     style="transform: scale(0.8)" @tap.stop="onSelectAll" />
+              <radio
+                :checked="state.isAllSelected"
+                color="var(--ui-BG-Main)"
+                style="transform: scale(0.8)"
+                @tap.stop="onSelectAll"
+              />
               <view class="ss-m-l-8"> 全选</view>
             </label>
             <text>合计：</text>
@@ -54,12 +81,18 @@
             </view>
           </view>
           <view class="footer-right">
-            <button v-if="state.editMode" class="ss-reset-button ui-BG-Main-Gradient pay-btn ui-Shadow-Main"
-                    @tap="onDelete">
+            <button
+              v-if="state.editMode"
+              class="ss-reset-button ui-BG-Main-Gradient pay-btn ui-Shadow-Main"
+              @tap="onDelete"
+            >
               删除
             </button>
-            <button v-else class="ss-reset-button ui-BG-Main-Gradient pay-btn ui-Shadow-Main"
-                    @tap="onConfirm">
+            <button
+              v-else
+              class="ss-reset-button ui-BG-Main-Gradient pay-btn ui-Shadow-Main"
+              @tap="onConfirm"
+            >
               去结算
               {{ state.selectedIds?.length ? `(${state.selectedIds.length})` : '' }}
             </button>
@@ -133,8 +166,9 @@
         reject('获取商品信息失败！！！');
         return;
       }
-      let onlyExpress = false;  // 只快递
-      let onlyPickup = false;   // 只自提
+      let onlyExpress = false; // 只快递
+      let onlyPickup = false; // 只自提
+      // TODO @puhui999：这里需要比对，A 商品支持自提、B 商品支持快递，这样导致 A 和 B 无法一起下单。
       const deliveryTypes = data.map((item) => item.deliveryTypes);
       for (const deliveryType of deliveryTypes) {
         // 情况一：两种配送方式都支持

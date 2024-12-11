@@ -153,6 +153,7 @@
   });
 
   // 背景1
+  // TODO puhui999：是不是应该还是用 color。然后后端装修那，做下调整~
   const bgMain = computed(() => {
     if (navbarMode.value === 'inner') {
       return {

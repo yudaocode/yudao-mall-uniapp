@@ -194,7 +194,6 @@ const bindBrokerageUser = async (val = undefined) => {
     if (!!data || msg.includes('不能绑定自己')) {
       uni.removeStorageSync('shareId');
     }
-
   } catch (e) {
     console.error(e);
   }
