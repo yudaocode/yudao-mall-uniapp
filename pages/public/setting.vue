@@ -1,5 +1,5 @@
 <template>
-  <s-layout class="set-wrap" title="系统设置" :bgStyle="{ color: '#fff' }">
+  <s-layout :bgStyle="{ backgroundColor: '#fff' }" class="set-wrap" title="系统设置">
     <view class="header-box ss-flex-col ss-row-center ss-col-center">
       <image
         class="logo-img ss-m-b-46"

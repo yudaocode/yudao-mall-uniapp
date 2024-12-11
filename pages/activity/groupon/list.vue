@@ -1,6 +1,6 @@
 <!-- 拼团活动列表 -->
 <template>
-  <s-layout navbar="inner" :bgStyle="{ color: '#FE832A' }">
+  <s-layout :bgStyle="{ backgroundColor: '#FE832A' }" navbar="inner">
     <view class="page-bg" :style="[{ marginTop: '-' + Number(statusBarHeight + 88) + 'rpx' }]" />
     <view class="list-content">
       <!-- 参团会员统计 -->

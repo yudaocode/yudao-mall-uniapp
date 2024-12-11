@@ -1,6 +1,6 @@
 <!-- 秒杀活动列表 -->
 <template>
-  <s-layout navbar="inner" :bgStyle="{ color: 'rgb(245,28,19)' }">
+  <s-layout :bgStyle="{ backgroundColor: 'rgb(245,28,19)' }" navbar="inner">
     <!--顶部背景图-->
     <view
       class="page-bg"
@@ -146,7 +146,7 @@
   </s-layout>
 </template>
 <script setup>
-  import { reactive, computed, ref, nextTick } from 'vue';
+  import { computed, nextTick, reactive, ref } from 'vue';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import { useDurationTime } from '@/sheep/hooks/useGoods';

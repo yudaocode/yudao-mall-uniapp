@@ -1,6 +1,6 @@
 <!-- 优惠券中心  -->
 <template>
-  <s-layout title="优惠券" :bgStyle="{ color: '#f2f2f2' }">
+  <s-layout :bgStyle="{ backgroundColor: '#f2f2f2' }" title="优惠券">
     <su-sticky bgColor="#fff">
       <su-tabs
         :list="tabMaps"
