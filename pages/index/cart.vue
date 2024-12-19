@@ -109,7 +109,6 @@
   import { computed, reactive } from 'vue';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import { isEmpty } from '@/sheep/helper/utils';
-  import { DeliveryTypeEnum } from '@/sheep/util/const';
 
   const sys_navBar = sheep.$platform.navbar;
   const cart = sheep.$store('cart');
@@ -158,37 +157,60 @@
     });
   }
 
-  /** 校验配送方式 */
-  function validateDeliveryType(spuIds) {
-    return new Promise(async (resolve, reject) => {
-      const { data } = await SpuApi.getSpuListByIds(spuIds.join(','));
-      if (isEmpty(data)) {
-        reject('获取商品信息失败！！！');
-        return;
-      }
-      let onlyExpress = false; // 只快递
-      let onlyPickup = false; // 只自提
-      // TODO @puhui999：这里需要比对，A 商品支持自提、B 商品支持快递，这样导致 A 和 B 无法一起下单。
-      const deliveryTypes = data.map((item) => item.deliveryTypes);
-      for (const deliveryType of deliveryTypes) {
-        // 情况一：两种配送方式都支持
-        if (deliveryType.length > 1) {
-          continue;
+  /**
+   * 校验配送方式冲突
+   *
+   * @param {string[]} spuIds - 商品ID数组
+   * @returns {Promise<void>}
+   * @throws {Error} 当配送方式冲突或获取商品信息失败时抛出错误
+   */
+  async function validateDeliveryType(spuIds) {
+    // 获取商品信息
+    const { data: spuList } = await SpuApi.getSpuListByIds(spuIds.join(','));
+    if (isEmpty(spuList)) {
+      sheep.$helper.toast('未找到商品信息');
+      throw new Error('未找到商品信息');
+    }
+    // 获取所有商品的配送方式列表
+    const deliveryTypesList = spuList.map(item => item.deliveryTypes);
+    // 检查配送方式冲突
+    const hasConflict = checkDeliveryConflicts(deliveryTypesList);
+    if (hasConflict) {
+      sheep.$helper.toast('选中商品支持的配送方式冲突，不允许提交');
+      throw new Error('选中商品支持的配送方式冲突，不允许提交');
+    }
+  }
+
+  /**
+   * 检查配送方式列表中是否存在冲突
+   * @description
+   * 示例场景:
+   * A 商品支持：[快递, 自提]
+   * B 商品支持：[快递]
+   * C 商品支持：[自提]
+   *
+   * 对比结果:
+   * A 和 B：不冲突 (有交集：快递)
+   * A 和 C：不冲突 (有交集：自提)
+   * B 和 C：冲突 (无交集)
+   * @param {Array<Array<number>>} deliveryTypesList - 配送方式列表的数组
+   * @returns {boolean} 是否存在冲突
+   */
+  function checkDeliveryConflicts(deliveryTypesList) {
+    for (let i = 0; i < deliveryTypesList.length - 1; i++) {
+      const currentTypes = deliveryTypesList[i];
+      for (let j = i + 1; j < deliveryTypesList.length; j++) {
+        const nextTypes = deliveryTypesList[j];
+        // 检查是否没有交集（即冲突）
+        const hasNoIntersection = !currentTypes.some(type =>
+          nextTypes.includes(type),
+        );
+        if (hasNoIntersection) {
+          return true;
         }
-        // 情况二：只支持一种
-        if (deliveryType[0] === DeliveryTypeEnum.EXPRESS.type) {
-          onlyExpress = true;
-        } else if (deliveryType[0] === DeliveryTypeEnum.PICK_UP.type) {
-          onlyPickup = true;
-        }
       }
-      if (onlyExpress || onlyPickup) {
-        reject('选中商品存在只支持特定配送方式的情况不允许提交！！！');
-        sheep.$helper.toast('选中商品存在只支持特定配送方式的情况不允许提交！！！');
-        return;
-      }
-      resolve();
-    });
+    }
+    return false;
   }
 
   function onNumberChange(e, cartItem) {
