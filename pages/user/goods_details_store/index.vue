@@ -1,5 +1,5 @@
 <template>
-  <s-layout :bgStyle="{ backgroundColor: '#FFF' }" title="选择自提门店">
+  <s-layout :bgStyle="{ color: '#FFF' }" title="选择自提门店">
     <view class="storeBox" ref="container">
       <view
         class="storeBox-box"

@@ -1,6 +1,6 @@
 <!-- 商品分类列表 -->
 <template>
-  <s-layout :bgStyle="{ backgroundColor: '#fff' }" tabbar="/pages/index/category" title="分类">
+  <s-layout :bgStyle="{ color: '#fff' }" tabbar="/pages/index/category" title="分类">
     <view class="s-category">
       <view class="three-level-wrap ss-flex ss-col-top" :style="[{ height: pageHeight + 'px' }]">
         <!-- 商品分类（左） -->

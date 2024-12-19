@@ -1,6 +1,6 @@
 <!-- 支付结果页面 -->
 <template>
-  <s-layout :bgStyle="{ backgroundColor: '#FFF' }" title="支付结果">
+  <s-layout :bgStyle="{ color: '#FFF' }" title="支付结果">
     <view class="pay-result-box ss-flex-col ss-row-center ss-col-center">
       <!-- 信息展示 -->
       <view class="pay-waiting ss-m-b-30" v-if="payResult === 'waiting'" />
