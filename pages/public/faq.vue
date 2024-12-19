@@ -1,6 +1,6 @@
 <!-- FAQ 常见问题 -->
 <template>
-  <s-layout :bgStyle="{ backgroundColor: '#FFF' }" class="set-wrap" title="常见问题">
+  <s-layout :bgStyle="{ color: '#FFF' }" class="set-wrap" title="常见问题">
     <uni-collapse>
       <uni-collapse-item v-for="(item, index) in state.list" :key="item">
         <template v-slot:title>

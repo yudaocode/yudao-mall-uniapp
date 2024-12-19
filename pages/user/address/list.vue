@@ -1,6 +1,6 @@
 <!-- 收件地址列表 -->
 <template>
-  <s-layout :bgStyle="{ backgroundColor: '#FFF' }" title="收货地址">
+  <s-layout :bgStyle="{ color: '#FFF' }" title="收货地址">
     <view v-if="state.list.length">
       <s-address-item
         hasBorderBottom

@@ -1,6 +1,6 @@
 <!-- 秒杀活动列表 -->
 <template>
-  <s-layout :bgStyle="{ backgroundColor: 'rgb(245,28,19)' }" navbar="inner">
+  <s-layout :bgStyle="{ color: 'rgb(245,28,19)' }" navbar="inner">
     <!--顶部背景图-->
     <view
       class="page-bg"

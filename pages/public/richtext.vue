@@ -1,6 +1,6 @@
 <!-- 文章展示 -->
 <template>
-  <s-layout :bgStyle="{ backgroundColor: '#FFF' }" :title="state.title" class="set-wrap">
+  <s-layout :bgStyle="{ color: '#FFF' }" :title="state.title" class="set-wrap">
     <view class="ss-p-30">
       <mp-html class="richtext" :content="state.content" />
     </view>

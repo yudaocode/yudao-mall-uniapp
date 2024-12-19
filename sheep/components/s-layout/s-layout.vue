@@ -107,7 +107,7 @@
       type: Object,
       default: () => ({
         src: '',
-        backgroundColor: 'var(--ui-BG-1)',
+        color: 'var(--ui-BG-1)',
       }),
     },
     tabbar: {
@@ -153,11 +153,10 @@
   });
 
   // 背景1
-  // TODO puhui999：是不是应该还是用 color。然后后端装修那，做下调整~
   const bgMain = computed(() => {
     if (navbarMode.value === 'inner') {
       return {
-        background: `${props.bgStyle.backgroundColor} url(${sheep.$url.cdn(
+        background: `${props.bgStyle.backgroundColor || props.bgStyle.color} url(${sheep.$url.cdn(
           props.bgStyle.backgroundImage,
         )}) no-repeat top center / 100% auto`,
       };
@@ -169,7 +168,7 @@
   const bgBody = computed(() => {
     if (navbarMode.value === 'normal') {
       return {
-        background: `${props.bgStyle.backgroundColor} url(${sheep.$url.cdn(
+        background: `${props.bgStyle.backgroundColor || props.bgStyle.color} url(${sheep.$url.cdn(
           props.bgStyle.backgroundImage,
         )}) no-repeat top center / 100% auto`,
       };

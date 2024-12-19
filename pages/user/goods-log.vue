@@ -1,6 +1,6 @@
 <!-- 商品浏览记录  -->
 <template>
-  <s-layout :bgStyle="{ backgroundColor: '#f2f2f2' }" title="我的足迹">
+  <s-layout :bgStyle="{ color: '#f2f2f2' }" title="我的足迹">
     <view class="cart-box ss-flex ss-flex-col ss-row-between">
       <!-- 头部 -->
       <view class="cart-header ss-flex ss-col-center ss-row-between ss-p-x-30">
