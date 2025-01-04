@@ -67,7 +67,7 @@
           <!-- TODO 芋艿：上传的测试 -->
           <view class="upload-img">
             <s-uploader
-              v-model:url="formData.images"
+              v-model:url="formData.applyPicUrls"
               fileMediatype="image"
               limit="9"
               mode="grid"
@@ -155,7 +155,7 @@
     way: '',
     applyReason: '',
     applyDescription: '',
-    images: [],
+    applyPicUrls: [],
   });
   const rules = reactive({});
 
