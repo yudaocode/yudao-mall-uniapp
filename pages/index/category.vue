@@ -23,6 +23,7 @@
           scroll-y
           :style="[{ height: pageHeight + 'px' }]"
           v-if="state.categoryList?.length"
+		  @scrolltolower="handleScrollToLower"
         >
           <image
             v-if="state.categoryList[state.activeMenu].picUrl"
@@ -61,7 +62,7 @@
   import sheep from '@/sheep';
   import CategoryApi from '@/sheep/api/product/category';
   import SpuApi from '@/sheep/api/product/spu';
-  import { onLoad, onReachBottom } from '@dcloudio/uni-app';
+  import { onLoad } from '@dcloudio/uni-app';
   import { computed, reactive } from 'vue';
   import _ from 'lodash-es';
   import { handleTree } from '@/sheep/util';
@@ -140,9 +141,9 @@
     onMenu(foundCategory ? state.categoryList.indexOf(foundCategory) : 0);
   });
 
-  onReachBottom(() => {
+  function handleScrollToLower() {
     loadMore();
-  });
+  };
 </script>
 
 <style lang="scss" scoped>
