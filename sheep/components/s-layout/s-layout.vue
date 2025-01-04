@@ -1,7 +1,7 @@
 <template>
   <view
     class="page-app"
-    :class="['theme-' + sys.mode, 'main-' + sys.theme, 'font-' + sys.fontSize]"
+    :class="['theme-' + sys?.mode, 'main-' + sys?.theme, 'font-' + sys?.fontSize]"
   >
     <view class="page-main" :style="[bgMain]">
       <!-- 顶部导航栏-情况1：默认通用顶部导航栏 -->
@@ -27,7 +27,7 @@
         <su-inner-navbar v-if="navbar === 'inner'" :title="title" />
         <view
           v-if="navbar === 'inner'"
-          :style="[{ paddingTop: sheep.$platform.navbar + 'px' }]"
+          :style="[{ paddingTop: sheep?.$platform?.navbar + 'px' }]"
         ></view>
 
         <!-- 顶部导航栏-情况4：装修组件导航栏-沉浸式 -->
