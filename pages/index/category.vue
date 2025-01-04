@@ -23,7 +23,7 @@
           scroll-y
           :style="[{ height: pageHeight + 'px' }]"
           v-if="state.categoryList?.length"
-		  @scrolltolower="handleScrollToLower"
+          @scrolltolower="handleScrollToLower"
         >
           <image
             v-if="state.categoryList[state.activeMenu].picUrl"
@@ -136,14 +136,14 @@
     await getList();
 
     // 首页点击分类的处理：查找满足条件的分类
-    const foundCategory = state.categoryList.find(category => category.id === params.id);
+    const foundCategory = state.categoryList.find((category) => category.id === Number(params.id));
     // 如果找到则调用 onMenu 自动勾选相应分类，否则调用 onMenu(0) 勾选第一个分类
     onMenu(foundCategory ? state.categoryList.indexOf(foundCategory) : 0);
   });
 
   function handleScrollToLower() {
     loadMore();
-  };
+  }
 </script>
 
 <style lang="scss" scoped>
