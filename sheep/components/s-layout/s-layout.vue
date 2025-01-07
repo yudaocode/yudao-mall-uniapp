@@ -197,17 +197,17 @@
   // 微信小程序分享好友
   onShareAppMessage(() => {
     return {
-      title: shareInfo.value.title,
-      path: shareInfo.value.path,
-      imageUrl: shareInfo.value.image,
+      title: shareInfo.value.forward.title,
+      path: shareInfo.value.forward.path,
+      imageUrl: shareInfo.value.forward.image,
     };
   });
   // 微信小程序分享朋友圈
   onShareTimeline(() => {
     return {
-      title: shareInfo.value.title,
-      query: shareInfo.value.path,
-      imageUrl: shareInfo.value.image,
+      title: shareInfo.value.forward.title,
+      query: shareInfo.value.forward.path,
+      imageUrl: shareInfo.value.forward.image,
     };
   });
   // #endif

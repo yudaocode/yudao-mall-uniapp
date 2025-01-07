@@ -35,6 +35,7 @@ const getShareInfo = (
     link: '', // 分享Url+参数
     query: '', // 分享参数
     poster, // 海报所需数据
+    forward: {} // 转发所需参数
   };
 
   const app = $store('app');
@@ -55,10 +56,10 @@ const getShareInfo = (
       console.log('请在平台设置中配置默认转发信息');
     }
     // 设置自定义分享信息
-    shareInfo.title = scene.title || shareConfig.forwardInfo.title;
-    shareInfo.image = $url.cdn(scene.image || shareConfig.forwardInfo.image);
-    shareInfo.desc = scene.desc || shareConfig.forwardInfo.subtitle;
-    shareInfo.path = buildSpmPath(query);
+    shareInfo.forward.title = scene.title || shareConfig.forwardInfo.title;
+    shareInfo.forward.image = $url.cdn(scene.image || shareConfig.forwardInfo.image);
+    shareInfo.forward.desc = scene.desc || shareConfig.forwardInfo.subtitle;
+    shareInfo.forward.path = buildSpmPath(query);
   }
 
   return shareInfo;
