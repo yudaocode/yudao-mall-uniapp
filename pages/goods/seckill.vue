@@ -151,7 +151,7 @@
   import detailProgress from './components/detail/detail-progress.vue';
   import SeckillApi from '@/sheep/api/promotion/seckill';
   import SpuApi from '@/sheep/api/product/spu';
-  import { getTimeStatusEnum, TimeStatusEnum } from '@/sheep/util/const';
+  import { getTimeStatusEnum, SharePageEnum, TimeStatusEnum } from '@/sheep/util/const';
 
   const headerBg = sheep.$url.css('/static/img/shop/goods/seckill-bg.png');
   const btnBg = sheep.$url.css('/static/img/shop/goods/seckill-btn.png');
@@ -206,7 +206,7 @@
         title: activity.value.name,
         image: sheep.$url.cdn(state.goodsInfo.picUrl),
         params: {
-          page: '4',
+          page: SharePageEnum.SECKILL.value,
           query: activity.value.id,
         },
       },

@@ -64,7 +64,7 @@
   import sheep from '@/sheep';
   import { isEmpty } from 'lodash-es';
   // #ifdef MP-WEIXIN
-  import { onShareAppMessage, onShareTimeline, onShow } from '@dcloudio/uni-app';
+  import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
   // #endif
 
   const props = defineProps({
@@ -197,17 +197,17 @@
   // 微信小程序分享好友
   onShareAppMessage(() => {
     return {
-      title: shareInfo.value.forward.title,
+      title: shareInfo.value.title,
       path: shareInfo.value.forward.path,
-      imageUrl: shareInfo.value.forward.image,
+      imageUrl: shareInfo.value.image,
     };
   });
   // 微信小程序分享朋友圈
   onShareTimeline(() => {
     return {
-      title: shareInfo.value.forward.title,
+      title: shareInfo.value.title,
       query: shareInfo.value.forward.path,
-      imageUrl: shareInfo.value.forward.image,
+      imageUrl: shareInfo.value.image,
     };
   });
   // #endif

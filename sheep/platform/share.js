@@ -3,6 +3,8 @@ import $platform from '@/sheep/platform';
 import $router from '@/sheep/router';
 import $url from '@/sheep/url';
 import BrokerageApi from '@/sheep/api/trade/brokerage';
+import { SharePageEnum } from '@/sheep/util/const';
+
 // #ifdef H5
 import $wxsdk from '@/sheep/libs/sdk-h5-weixin';
 // #endif
@@ -37,6 +39,9 @@ const getShareInfo = (
     poster, // 海报所需数据
     forward: {} // 转发所需参数
   };
+  shareInfo.title = scene.title;
+  shareInfo.image = $url.cdn(scene.image);
+  shareInfo.desc = scene.desc;
 
   const app = $store('app');
   const shareConfig = app.platform.share;
@@ -50,15 +55,8 @@ const getShareInfo = (
   // 配置页面地址带参数
   shareInfo.path = buildSpmPath();
 
-  // 配置转发参数
+  // 配置页面转发参数
   if (shareConfig.methods.includes('forward')) {
-    if (shareConfig.forwardInfo.title === '' || shareConfig.forwardInfo.image === '') {
-      console.log('请在平台设置中配置默认转发信息');
-    }
-    // 设置自定义分享信息
-    shareInfo.forward.title = scene.title || shareConfig.forwardInfo.title;
-    shareInfo.forward.image = $url.cdn(scene.image || shareConfig.forwardInfo.image);
-    shareInfo.forward.desc = scene.desc || shareConfig.forwardInfo.subtitle;
     shareInfo.forward.path = buildSpmPath(query);
   }
 
@@ -79,7 +77,7 @@ const buildSpmQuery = (params) => {
       shareId = user.userInfo.id;
     }
   }
-  let page = '1'; // 页面类型: 1=首页(默认),2=商品,3=拼团商品,4=秒杀商品,5=邀请参团,6=分销邀请...按需扩展
+  let page = SharePageEnum.HOME.value; // 页面类型，默认首页
   if (typeof params.page !== 'undefined') {
     page = params.page;
   }
@@ -100,6 +98,7 @@ const buildSpmQuery = (params) => {
 const buildSpmPath = (query) => {
   // 默认是主页，页面 page，例如 pages/index/index，根路径前不要填加 /，
   // 不能携带参数（参数请放在scene字段里），如果不填写这个字段，默认跳主页面。scancode_time为系统保留参数，不允许配置
+  // 页面分享时参数使用 ? 拼接
   return typeof query === 'undefined' ? `pages/index/index` : `pages/index/index?${query}`;
 };
 
@@ -123,44 +122,44 @@ const decryptSpm = (spm) => {
   let query;
   shareParams.shareId = shareParamsArray[0];
   switch (shareParamsArray[1]) {
-    case '1':
+    case SharePageEnum.HOME.value:
       // 默认首页不跳转
-      shareParams.page = '/pages/index/index';
+      shareParams.page = SharePageEnum.HOME.page;
       break;
-    case '2':
+    case SharePageEnum.GOODS.value:
       // 普通商品
-      shareParams.page = '/pages/goods/index';
+      shareParams.page = SharePageEnum.GOODS.page;
       shareParams.query = {
         id: shareParamsArray[2],
       };
       break;
-    case '3':
+    case SharePageEnum.GROUPON.value:
       // 拼团商品
-      shareParams.page = '/pages/goods/groupon';
+      shareParams.page = SharePageEnum.GROUPON.page;
       query = shareParamsArray[2].split(',');
       shareParams.query = {
         id: query[0],
         activity_id: query[1],
       };
       break;
-    case '4':
+    case SharePageEnum.SECKILL.value:
       // 秒杀商品
-      shareParams.page = '/pages/goods/seckill';
+      shareParams.page = SharePageEnum.SECKILL.page;
       query = shareParamsArray[2].split(',');
       shareParams.query = {
         id: query[0],
       };
       break;
-    case '5':
+    case SharePageEnum.GROUPON_DETAIL.value:
       // 参与拼团
-      shareParams.page = '/pages/activity/groupon/detail';
+      shareParams.page = SharePageEnum.GROUPON_DETAIL.page;
       shareParams.query = {
         id: shareParamsArray[2],
       };
       break;
-    case '6':
+    case SharePageEnum.POINT.value:
       // 积分商品
-      shareParams.page = '/pages/goods/point';
+      shareParams.page = SharePageEnum.POINT.page;
       shareParams.query = {
         id: shareParamsArray[2],
       };
@@ -177,7 +176,7 @@ const decryptSpm = (spm) => {
     }
   }
 
-  if (shareParams.page !== '/pages/index/index') {
+  if (shareParams.page !== SharePageEnum.HOME.page) {
     $router.go(shareParams.page, shareParams.query);
   }
   return shareParams;

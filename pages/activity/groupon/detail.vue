@@ -209,6 +209,7 @@
   import { isEmpty } from 'lodash-es';
   import CombinationApi from '@/sheep/api/promotion/combination';
   import SpuApi from '@/sheep/api/product/spu';
+  import { SharePageEnum } from '@/sheep/util/const';
 
   const headerBg = sheep.$url.css('/static/img/shop/user/withdraw_bg.png');
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
@@ -234,7 +235,7 @@
         image: sheep.$url.cdn(state.data.headRecord.picUrl),
         desc: state.data.goods?.subtitle,
         params: {
-          page: '5',
+          page: SharePageEnum.GROUPON_DETAIL.value,
           query: state.data.headRecord.id,
         },
       },

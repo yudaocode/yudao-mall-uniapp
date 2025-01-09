@@ -134,3 +134,39 @@ export const getTimeStatusEnum = (startTime, endTime) => {
     return TimeStatusEnum.STARTED;
   }
 };
+/**
+ * 分享页枚举
+ * 按需扩展
+ * */
+export const SharePageEnum = {
+  HOME: {
+    name: '首页',
+    page: '/pages/index/index',
+    value: '1'
+  },
+  GOODS: {
+    name: '普通商品页',
+    page: '/pages/goods/index',
+    value: '2'
+  },
+  GROUPON: {
+    name: '拼团商品页',
+    page: '/pages/goods/groupon',
+    value: '3'
+  },
+  SECKILL: {
+    name: '秒杀商品页',
+    page: '/pages/goods/seckill',
+    value: '4'
+  },
+  GROUPON_DETAIL: {
+    name: '参与拼团页',
+    page: '/pages/activity/groupon/detail',
+    value: '5'
+  },
+  POINT: {
+    name: '积分商品页',
+    page: '/pages/goods/point',
+    value: '6'
+  }
+}

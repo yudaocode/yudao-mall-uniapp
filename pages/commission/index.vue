@@ -23,11 +23,12 @@
 	import commissionMenu from './components/commission-menu.vue';
 	import commissionAuth from './components/commission-auth.vue';
   import sheep from '@/sheep';
+  import { SharePageEnum } from '@/sheep/util/const';
 
   const shareInfo = computed(() => {
     return sheep.$platform.share.getShareInfo({
       params: {
-        page: '6',
+        page: SharePageEnum.POINT.value,
       },
     }, {
       type: 'user',

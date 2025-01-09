@@ -129,7 +129,7 @@
   import detailCommentCard from './components/detail/detail-comment-card.vue';
   import detailContentCard from './components/detail/detail-content-card.vue';
   import SpuApi from '@/sheep/api/product/spu';
-  import { PromotionActivityTypeEnum } from '@/sheep/util/const';
+  import { PromotionActivityTypeEnum, SharePageEnum } from '@/sheep/util/const';
   import PointApi from '@/sheep/api/promotion/point';
 
   const headerBg = sheep.$url.css('/static/img/shop/goods/score-bg.png');
@@ -180,8 +180,7 @@
         title: activity.value.name,
         image: sheep.$url.cdn(state.goodsInfo.picUrl),
         params: {
-          // TODO @puhui：page 相关，要不搞个枚举，然后都弄过去；
-          page: '6',
+          page: SharePageEnum.POINT.value,
           query: activity.value.id,
         },
       },
