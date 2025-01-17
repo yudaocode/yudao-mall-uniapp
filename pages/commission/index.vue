@@ -23,11 +23,13 @@
 	import commissionMenu from './components/commission-menu.vue';
 	import commissionAuth from './components/commission-auth.vue';
   import sheep from '@/sheep';
+  import { SharePageEnum } from '@/sheep/util/const';
 
+  /** 分销邀请 */
   const shareInfo = computed(() => {
     return sheep.$platform.share.getShareInfo({
       params: {
-        page: '6',
+        page: SharePageEnum.HOME.value, // 用户通邀请进入到首页
       },
     }, {
       type: 'user',

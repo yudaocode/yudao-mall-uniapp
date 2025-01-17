@@ -92,7 +92,6 @@
       showAuthModal();
       return;
     }
-    console.log(props.shareInfo);
     unref(SharePosterRef).getPoster();
     state.showPosterModal = true;
   };

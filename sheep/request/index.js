@@ -80,13 +80,13 @@ http.interceptors.request.use(
     if (config.custom.showLoading) {
       LoadingInstance.count++;
       LoadingInstance.count === 1 &&
-        uni.showLoading({
-          title: config.custom.loadingMsg,
-          mask: true,
-          fail: () => {
-            uni.hideLoading();
-          },
-        });
+      uni.showLoading({
+        title: config.custom.loadingMsg,
+        mask: true,
+        fail: () => {
+          uni.hideLoading();
+        },
+      });
     }
 
     // 增加 token 令牌、terminal 终端、tenant 租户的请求头
@@ -124,9 +124,10 @@ http.interceptors.response.use(
       if (response.data.code === 401) {
         return refreshToken(response.config);
       }
-
-      // 错误提示
-      if (response.config.custom.showError) {
+      // 特殊：处理分销用户绑定失败的提示
+      if ((response.data.code + '').includes('1011007')) {
+        console.error(`分销用户绑定失败，原因：${response.data.msg}`);
+      } else if (response.config.custom.showError) { // 错误提示
         uni.showToast({
           title: response.data.msg || '服务器开小差啦,请稍后再试~',
           icon: 'none',

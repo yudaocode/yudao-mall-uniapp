@@ -234,6 +234,7 @@
   import countDown from '@/sheep/components/countDown/index.vue';
   import OrderApi from '@/sheep/api/trade/order';
   import activity from '@/sheep/api/promotion/activity';
+  import { SharePageEnum } from '@/sheep/util/const';
 
   const bgColor = {
     bgColor: '#E93323',
@@ -318,7 +319,7 @@
         image: sheep.$url.cdn(state.goodsInfo.picUrl),
         desc: state.goodsInfo.introduction,
         params: {
-          page: '2',
+          page: SharePageEnum.GOODS.value,
           query: state.goodsInfo.id,
         },
       },

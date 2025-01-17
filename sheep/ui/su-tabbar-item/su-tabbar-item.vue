@@ -9,7 +9,7 @@
         <image
           v-if="icon"
           :name="icon"
-          :color="isActive ? parentData.activeColor : parentData.color"
+          :color="isActive ? parentData.activeColor : parentData.inactiveColor"
           :size="20"
         ></image>
         <block v-else>
@@ -30,7 +30,7 @@
         <text
           class="u-tabbar-item__text"
           :style="{
-            color: isActive ? parentData.activeColor : parentData.color,
+            color: isActive ? parentData.activeColor : parentData.inactiveColor,
           }"
         >
           {{ text }}
@@ -120,8 +120,8 @@
         addStyle,
         parentData: {
           value: null,
-          activeColor: '',
-          color: '',
+          activeColor: '', // 选中标签的颜色
+          inactiveColor: '', // 未选中标签的颜色
         },
         parent: {},
       };
