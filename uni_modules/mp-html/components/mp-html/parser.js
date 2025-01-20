@@ -71,7 +71,8 @@ const config = {
     viewbox: 'viewBox',
     attributename: 'attributeName',
     repeatcount: 'repeatCount',
-    repeatdur: 'repeatDur'
+    repeatdur: 'repeatDur',
+    foreignobject: 'foreignObject'
   }
 }
 const tagSelector={}
@@ -321,6 +322,7 @@ Parser.prototype.onTagName = function (name) {
   this.tagName = this.xml ? name : name.toLowerCase()
   if (this.tagName === 'svg') {
     this.xml = (this.xml || 0) + 1 // svg 标签内大小写敏感
+    config.ignoreTags.style = undefined // svg 标签内 style 可用
   }
 }
 
@@ -331,6 +333,12 @@ Parser.prototype.onTagName = function (name) {
  */
 Parser.prototype.onAttrName = function (name) {
   name = this.xml ? name : name.toLowerCase()
+  // #ifdef (VUE3 && (H5 || APP-PLUS)) || APP-PLUS-NVUE
+  if (name.includes('?') || name.includes(';')) {
+    this.attrName = undefined
+    return
+  }
+  // #endif
   if (name.substr(0, 5) === 'data-') {
     if (name === 'data-src' && !this.attrs.src) {
       // data-src 自动转为 src
@@ -457,7 +465,7 @@ Parser.prototype.onOpenTag = function (selfClose) {
           node.webp = 'T'
         }
         // data url 图片如果没有设置 original-src 默认为不可预览的小图片
-        if (attrs.src.includes('data:') && !attrs['original-src']) {
+        if (attrs.src.includes('data:') && this.options.previewImg !== 'all' && !attrs['original-src']) {
           attrs.ignore = 'T'
         }
         if (!attrs.ignore || node.webp || attrs.src.includes('cloud://')) {
@@ -550,6 +558,13 @@ Parser.prototype.onOpenTag = function (selfClose) {
       }
       if (!isNaN(parseInt(styleObj.height)) && (!styleObj.height.includes('%') || (parent && (parent.attrs.style || '').includes('height')))) {
         node.h = 'T'
+      }
+      if (node.w && node.h && styleObj['object-fit']) {
+        if (styleObj['object-fit'] === 'contain') {
+          node.m = 'aspectFit'
+        } else if (styleObj['object-fit'] === 'cover') {
+          node.m = 'aspectFill'
+        }
       }
     } else if (node.name === 'svg') {
       siblings.push(node)
@@ -677,11 +692,19 @@ Parser.prototype.popNode = function () {
         return
       }
       const name = config.svgDict[node.name] || node.name
+      if (name === 'foreignObject') {
+        for (const child of (node.children || [])) {
+          if (child.attrs && !child.attrs.xmlns) {
+            child.attrs.xmlns = 'http://www.w3.org/1999/xhtml'
+            break
+          }
+        }
+      }
       src += '<' + name
       for (const item in node.attrs) {
         const val = node.attrs[item]
         if (val) {
-          src += ` ${config.svgDict[item] || item}="${val}"`
+          src += ` ${config.svgDict[item] || item}="${val.replace(/"/g, '')}"`
         }
       }
       if (!node.children) {
@@ -703,6 +726,7 @@ Parser.prototype.popNode = function () {
     node.children = undefined
     // #endif
     this.xml = false
+    config.ignoreTags.style = true
     return
   }
 
@@ -839,6 +863,10 @@ Parser.prototype.popNode = function () {
     if (node.flag && node.c) {
       // 有 colspan 或 rowspan 且含有链接的表格通过 grid 布局实现
       styleObj.display = 'grid'
+      if (styleObj['border-collapse'] === 'collapse') {
+        styleObj['border-collapse'] = undefined
+        spacing = 0
+      }
       if (spacing) {
         styleObj['grid-gap'] = spacing + 'px'
         styleObj.padding = spacing + 'px'
@@ -856,6 +884,23 @@ Parser.prototype.popNode = function () {
         for (let i = 0; i < nodes.length; i++) {
           if (nodes[i].name === 'tr') {
             trList.push(nodes[i])
+          } else if (nodes[i].name === 'colgroup') {
+            let colI = 1
+            for (const col of (nodes[i].children || [])) {
+              if (col.name === 'col') {
+                const style = col.attrs.style || ''
+                const start = style.indexOf('width') ? style.indexOf(';width') : 0
+                // 提取出宽度
+                if (start !== -1) {
+                  let end = style.indexOf(';', start + 6)
+                  if (end === -1) {
+                    end = style.length
+                  }
+                  width[colI] = style.substring(start ? start + 7 : 6, end)
+                }
+                colI += 1
+              }
+            }
           } else {
             traversal(nodes[i].children || [])
           }
@@ -982,11 +1027,26 @@ Parser.prototype.popNode = function () {
       node.children = [table]
       attrs = table.attrs
     }
+  } else if ((node.name === 'tbody' || node.name === 'tr') && node.flag && node.c) {
+    node.flag = undefined;
+    (function traversal (nodes) {
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].name === 'td') {
+          // 颜色样式设置给单元格避免丢失
+          for (const style of ['color', 'background', 'background-color']) {
+            if (styleObj[style]) {
+              nodes[i].attrs.style = style + ':' + styleObj[style] + ';' + (nodes[i].attrs.style || '')
+            }
+          }
+        } else {
+          traversal(nodes[i].children || [])
+        }
+      }
+    })(children)
   } else if ((node.name === 'td' || node.name === 'th') && (attrs.colspan || attrs.rowspan)) {
     for (let i = this.stack.length; i--;) {
-      if (this.stack[i].name === 'table') {
+      if (this.stack[i].name === 'table' || this.stack[i].name === 'tbody' || this.stack[i].name === 'tr') {
         this.stack[i].flag = 1 // 指示含有合并单元格
-        break
       }
     }
   } else if (node.name === 'ruby') {

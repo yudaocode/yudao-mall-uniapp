@@ -5,7 +5,7 @@
     navbar="inner"
   >
     <!--  覆盖头部导航栏背景颜色  -->
-    <div class="page-bg" :style="{ height: sys_navBar + 'px' }"></div>
+    <view class="page-bg" :style="{ height: sys_navBar + 'px' }"></view>
     <!--  聊天区域  -->
     <MessageList ref="messageListRef">
       <template #bottom>
