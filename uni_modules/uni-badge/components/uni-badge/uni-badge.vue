@@ -1,7 +1,7 @@
 <template>
 	<view class="uni-badge--x">
 		<slot />
-		<text v-if="text" :class="classNames" :style="[badgeWidth, positionStyle, customStyle, dotStyle]"
+		<text v-if="text" :class="classNames" :style="[positionStyle, customStyle, dotStyle]"
 			class="uni-badge" @click="onClick()">{{displayValue}}</text>
 	</view>
 </template>
@@ -21,7 +21,7 @@
 	 * 	@value error 红色
 	 * @property {String} inverted = [true|false] 是否无需背景颜色
 	 * @property {Number} maxNum 展示封顶的数字值，超过 99 显示 99+
-	 * @property {String} absolute = [rightTop|rightBottom|leftBottom|leftTop] 开启绝对定位, 角标将定位到其包裹的标签的四角上		
+	 * @property {String} absolute = [rightTop|rightBottom|leftBottom|leftTop] 开启绝对定位, 角标将定位到其包裹的标签的四角上
 	 * 	@value rightTop 右上
 	 * 	@value rightBottom 右下
 	 * 	@value leftTop 左上
@@ -130,16 +130,13 @@
 				const match = whiteList[this.absolute]
 				return match ? match : whiteList['rightTop']
 			},
-			badgeWidth() {
-				return {
-					width: `${this.width}px`
-				}
-			},
 			dotStyle() {
 				if (!this.isDot) return {}
 				return {
 					width: '10px',
+					minWidth: '0',
 					height: '10px',
+					padding: '0',
 					borderRadius: '10px'
 				}
 			},
@@ -160,7 +157,7 @@
 	};
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" >
 	$uni-primary: #2979ff !default;
 	$uni-success: #4cd964 !default;
 	$uni-warning: #f0ad4e !default;
@@ -195,10 +192,13 @@
 		display: flex;
 		overflow: hidden;
 		box-sizing: border-box;
+		font-feature-settings: "tnum";
+		min-width: 20px;
 		/* #endif */
 		justify-content: center;
 		flex-direction: row;
 		height: 20px;
+		padding: 0 4px;
 		line-height: 18px;
 		color: #fff;
 		border-radius: 100px;

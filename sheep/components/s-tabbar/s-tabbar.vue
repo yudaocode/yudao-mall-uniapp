@@ -15,6 +15,9 @@
         :key="item.text"
         :text="item.text"
         :name="item.url"
+        :badge="item.badge"
+        :dot="item.dot"
+        :badgeStyle="tabbar.badgeStyle"
         :isCenter="getTabbarCenter(index)"
         :centerImage="sheep.$url.cdn(item.iconUrl)"
         @tap="sheep.$router.go(item.url)"
@@ -33,6 +36,7 @@
 <script setup>
   import { computed, unref } from 'vue';
   import sheep from '@/sheep';
+  import SuTabbar from '@/sheep/ui/su-tabbar/su-tabbar.vue';
 
   const tabbar = computed(() => {
     return sheep.$store('app').template.basic?.tabbar;
