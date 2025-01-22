@@ -166,7 +166,7 @@
                   >单</view
                 >
                 <view>
-                  <text class="num">{{ item.brokeragePrice || 0 }}</text
+                  <text class="num">{{ fen2yuan(item.brokeragePrice) || 0 }}</text
                   >元
                 </view>
               </view>
@@ -259,6 +259,7 @@
   import _ from 'lodash-es';
   import { onPageScroll } from '@dcloudio/uni-app';
   import BrokerageApi from '@/sheep/api/trade/brokerage';
+  import { fen2yuan } from '../../sheep/hooks/useGoods';
 
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   // const agentInfo = computed(() => sheep.$store('user').agentInfo);
