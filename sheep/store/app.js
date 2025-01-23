@@ -128,6 +128,14 @@ const adaptTemplate = async (appTemplate, templateId) => {
   const tabBar = diyTemplate?.property?.tabBar;
   if (tabBar) {
     appTemplate.basic.tabbar = tabBar;
+    // TODO 商城装修没有对 tabBar 进行角标配置，测试角标需打开以下注释
+    // appTemplate.basic.tabbar.items.forEach((tabBar) => {
+    //   tabBar.dot = false
+    //   tabBar.badge = 100
+    // })
+    // appTemplate.basic.tabbar.badgeStyle = {
+    //   backgroundColor: '#882222',
+    // }
     if (tabBar?.theme) {
       appTemplate.basic.theme = tabBar?.theme;
     }
