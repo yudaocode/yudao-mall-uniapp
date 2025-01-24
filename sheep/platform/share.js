@@ -130,38 +130,35 @@ const decryptSpm = (spm) => {
       // 普通商品
       shareParams.page = SharePageEnum.GOODS.page;
       shareParams.query = {
-        id: shareParamsArray[2],
+        id: shareParamsArray[2], // 设置活动编号
       };
       break;
     case SharePageEnum.GROUPON.value:
       // 拼团商品
       shareParams.page = SharePageEnum.GROUPON.page;
-      query = shareParamsArray[2].split(',');
       shareParams.query = {
-        id: query[0],
-        activity_id: query[1],
+        id: shareParamsArray[2], // 设置活动编号
       };
       break;
     case SharePageEnum.SECKILL.value:
       // 秒杀商品
       shareParams.page = SharePageEnum.SECKILL.page;
-      query = shareParamsArray[2].split(',');
       shareParams.query = {
-        id: query[0],
+        id: shareParamsArray[2], // 设置活动编号
       };
       break;
     case SharePageEnum.GROUPON_DETAIL.value:
       // 参与拼团
       shareParams.page = SharePageEnum.GROUPON_DETAIL.page;
       shareParams.query = {
-        id: shareParamsArray[2],
+        id: shareParamsArray[2], // 设置活动编号
       };
       break;
     case SharePageEnum.POINT.value:
       // 积分商品
       shareParams.page = SharePageEnum.POINT.page;
       shareParams.query = {
-        id: shareParamsArray[2],
+        id: shareParamsArray[2], // 设置活动编号
       };
       break;
   }

@@ -6,24 +6,24 @@
     </view>
     <template v-else>
       <view class="u-tabbar-item__icon">
-        <image
-          v-if="icon"
-          :name="icon"
-          :color="isActive ? parentData.activeColor : parentData.inactiveColor"
-          :size="20"
-        ></image>
-        <block v-else>
-          <slot v-if="isActive" name="active-icon" />
-          <slot v-else name="inactive-icon" />
-        </block>
-        <!-- <u-badge
-					absolute
-					:offset="[0, dot ? '34rpx' : badge > 9 ? '14rpx' : '20rpx']"
-					:customStyle="badgeStyle"
-					:isDot="dot"
-					:value="badge || (dot ? 1 : null)"
-					:show="dot || badge > 0"
-				></u-badge> -->
+        <uni-badge
+          absolute="rightTop"
+          size="small"
+          :text="badge || (dot ? 1 : null)"
+          :customStyle="badgeStyle"
+          :isDot="dot"
+        >
+          <image
+            v-if="icon"
+            :name="icon"
+            :color="isActive ? parentData.activeColor : parentData.inactiveColor"
+            :size="20"
+          ></image>
+          <block v-else>
+            <slot v-if="isActive" name="active-icon" />
+            <slot v-else name="inactive-icon" />
+          </block>
+        </uni-badge>
       </view>
 
       <slot name="text">
@@ -44,16 +44,17 @@
   /**
    * TabbarItem 底部导航栏子组件
    * @description 此组件提供了自定义tabbar的能力。
-   * @property {String | Number}	name		item标签的名称，作为与u-tabbar的value参数匹配的标识符
-   * @property {String}			icon		uView内置图标或者绝对路径的图片
-   * @property {String | Number}	badge		右上角的角标提示信息
-   * @property {Boolean}			dot			是否显示圆点，将会覆盖badge参数（默认 false ）
-   * @property {String}			text		描述文本
-   * @property {Object | String}	badgeStyle	控制徽标的位置，对象或者字符串形式，可以设置top和right属性（默认 'top: 6px;right:2px;' ）
-   * @property {Object}			customStyle	定义需要用到的外部样式
+   * @property {String | Number}  name    item标签的名称，作为与u-tabbar的value参数匹配的标识符
+   * @property {String}      icon    uView内置图标或者绝对路径的图片
+   * @property {String | Number}  badge    右上角的角标提示信息
+   * @property {Boolean}      dot      是否显示圆点，将会覆盖badge参数（默认 false ）
+   * @property {String}      text    描述文本
+   * @property {Object | String}  badgeStyle  控制徽标的位置，对象或者字符串形式，可以设置top和right属性（默认 'top: 6px;right:2px;' ）
+   * @property {Object}      customStyle  定义需要用到的外部样式
    *
    */
-  import { deepMerge, addStyle, sleep, $parent } from '@/sheep/helper';
+  import { $parent, addStyle } from '@/sheep/helper';
+
   export default {
     name: 'su-tabbar-item',
     props: {
@@ -102,8 +103,8 @@
       },
       // 控制徽标的位置，对象或者字符串形式，可以设置top和right属性
       badgeStyle: {
-        type: [Object, String],
-        default: '',
+        type: Object,
+        default: ()=>{},
       },
       isCenter: {
         type: Boolean,
@@ -202,6 +203,7 @@
       height: 25px;
     }
   }
+
   .u-tabbar-item {
     display: flex;
     flex-direction: column;
@@ -230,5 +232,6 @@
   :host {
     flex: 1;
   }
+
   /* #endif */
 </style>
