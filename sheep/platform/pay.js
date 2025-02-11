@@ -228,26 +228,28 @@ export default class SheepPay {
     });
   }
 
-  // 支付宝支付（App） TODO 芋艿：待接入【暂时没打包 app，所以没接入，一般人用不到】
+  // 支付宝支付（App）
   async alipay() {
     let that = this;
-    const { error, data } = await this.prepay();
-    if (error === 0) {
-      uni.requestPayment({
-        provider: 'alipay',
-        orderInfo: data.pay_data, //支付宝订单数据
-        success: (res) => {
-          that.payResult('success');
-        },
-        fail: (err) => {
-          if (err.errMsg === 'requestPayment:fail [paymentAlipay:62001]user cancel') {
-            sheep.$helper.toast('支付已手动取消');
-          } else {
-            that.payResult('fail');
-          }
-        },
-      });
+    const { code, data } = await this.prepay('alipay_app');
+    if (code !== 0) {
+      return;
     }
+    
+    uni.requestPayment({
+      provider: 'alipay',
+      orderInfo: data.displayContent, // 直接使用返回的支付参数
+      success: (res) => {
+        that.payResult('success');
+      },
+      fail: (err) => {
+        if (err.errMsg === 'requestPayment:fail [paymentAlipay:62001]user cancel') {
+          sheep.$helper.toast('支付已手动取消');
+        } else {
+          that.payResult('fail');
+        }
+      },
+    });
   }
 
   // 微信支付（App）  TODO 芋艿：待接入：待接入【暂时没打包 app，所以没接入，一般人用不到】
