@@ -228,44 +228,63 @@ export default class SheepPay {
     });
   }
 
-  // 支付宝支付（App） TODO 芋艿：待接入【暂时没打包 app，所以没接入，一般人用不到】
+  // 支付宝支付（App）
   async alipay() {
     let that = this;
-    const { error, data } = await this.prepay();
-    if (error === 0) {
-      uni.requestPayment({
-        provider: 'alipay',
-        orderInfo: data.pay_data, //支付宝订单数据
-        success: (res) => {
-          that.payResult('success');
-        },
-        fail: (err) => {
-          if (err.errMsg === 'requestPayment:fail [paymentAlipay:62001]user cancel') {
-            sheep.$helper.toast('支付已手动取消');
-          } else {
-            that.payResult('fail');
-          }
-        },
-      });
+    const { code, data } = await this.prepay('alipay_app');
+    if (code !== 0) {
+      return;
     }
+    
+    uni.requestPayment({
+      provider: 'alipay',
+      orderInfo: data.displayContent, // 直接使用返回的支付参数
+      success: (res) => {
+        that.payResult('success');
+      },
+      fail: (err) => {
+        if (err.errMsg === 'requestPayment:fail [paymentAlipay:62001]user cancel') {
+          sheep.$helper.toast('支付已手动取消');
+        } else {
+          that.payResult('fail');
+        }
+      },
+    });
   }
 
-  // 微信支付（App）  TODO 芋艿：待接入：待接入【暂时没打包 app，所以没接入，一般人用不到】
+  // 微信支付（App）
   async wechatAppPay() {
     let that = this;
-    let { error, data } = await this.prepay();
-    if (error === 0) {
-      uni.requestPayment({
-        provider: 'wxpay',
-        orderInfo: data.pay_data, //微信订单数据(官方说是string。实测为object)
-        success: (res) => {
-          that.payResult('success');
-        },
-        fail: (err) => {
-          err.errMsg !== 'requestPayment:fail cancel' && that.payResult('fail');
-        },
-      });
+    // 获取预支付信息
+    let { code, data } = await this.prepay('wx_app');
+    if (code !== 0) {
+      sheep.$helper.toast('获取支付信息失败');
+      return;
     }
+
+    // 解析支付参数
+    const payConfig = JSON.parse(data.displayContent);
+    
+    // 调用微信支付
+    uni.requestPayment({
+      provider: 'wxpay',
+      timeStamp: payConfig.timeStamp,
+      nonceStr: payConfig.nonceStr,
+      package: payConfig.packageValue,
+      signType: payConfig.signType,
+      paySign: payConfig.paySign,
+      success: (res) => {
+        that.payResult('success');
+      },
+      fail: (err) => {
+        if (err.errMsg === 'requestPayment:fail cancel') {
+          sheep.$helper.toast('支付已手动取消');
+        } else {
+          sheep.$helper.toast('支付失败：' + err.errMsg);
+          that.payResult('fail');
+        }
+      }
+    });
   }
 
   // 支付结果跳转,success:成功，fail:失败
