@@ -60,8 +60,8 @@
 
   const props = defineProps({
     agreeStatus: {
-      type: Boolean,
-      default: false,
+      type: [Boolean, null],
+      default: null,
     },
   });
 
@@ -87,10 +87,14 @@
       });
     if (!validate) return;
 
-    // 同意协议
-    if (!props.agreeStatus) {
-      emits('onConfirm', true)
-      sheep.$helper.toast('请勾选同意');
+    // 检查协议状态
+    if (props.agreeStatus !== true) {
+      emits('onConfirm', true);
+      if (props.agreeStatus === false) {
+        sheep.$helper.toast('您已拒绝协议，无法继续登录');
+      } else {
+        sheep.$helper.toast('请选择是否同意协议');
+      }
       return;
     }
 

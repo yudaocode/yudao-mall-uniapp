@@ -31,9 +31,9 @@
           <template v-slot:right>
             <button
               class="ss-reset-button code-btn code-btn-start"
-              :disabled="state.isMobileEnd"
-              :class="{ 'code-btn-end': state.isMobileEnd }"
-              @tap="getSmsCode('smsLogin', state.model.mobile)"
+              :disabled="state.isMobileEnd || props.agreeStatus === false"
+              :class="{ 'code-btn-end': state.isMobileEnd || props.agreeStatus === false }"
+              @tap="checkAgreementAndGetSmsCode"
             >
               {{ getSmsTimer('smsLogin') }}
             </button>
@@ -71,8 +71,8 @@
 
   const props = defineProps({
     agreeStatus: {
-      type: Boolean,
-      default: false,
+      type: [Boolean, null],
+      default: null,
     },
   });
 
@@ -90,6 +90,20 @@
     },
   });
 
+  // 检查协议并获取验证码
+  function checkAgreementAndGetSmsCode() {
+    if (props.agreeStatus !== true) {
+      emits('onConfirm', true);
+      if (props.agreeStatus === false) {
+        sheep.$helper.toast('您已拒绝协议，无法发送验证码');
+      } else {
+        sheep.$helper.toast('请选择是否同意协议');
+      }
+      return;
+    }
+    getSmsCode('smsLogin', state.model.mobile);
+  }
+
   // 短信登录
   async function smsLoginSubmit() {
     // 参数校验
@@ -101,9 +115,14 @@
     if (!validate) {
       return;
     }
-    if (!props.agreeStatus) {
-      emits('onConfirm', true)
-      sheep.$helper.toast('请勾选同意');
+    // 检查协议状态
+    if (props.agreeStatus !== true) {
+      emits('onConfirm', true);
+      if (props.agreeStatus === false) {
+        sheep.$helper.toast('您已拒绝协议，无法继续登录');
+      } else {
+        sheep.$helper.toast('请选择是否同意协议');
+      }
       return;
     }
     // 提交数据
