@@ -7,37 +7,42 @@
     <!--  覆盖头部导航栏背景颜色  -->
     <view class="page-bg" :style="{ height: sys_navBar + 'px' }"></view>
     <!--  聊天区域  -->
-    <MessageList ref="messageListRef">
-      <template #bottom>
+    <view @click.stop="toolsPopupRef.handleClose">
+      <MessageList ref="messageListRef">
+        <template #bottom>
+          <message-input
+            v-model="chat.msg"
+            @on-tools="onTools"
+            @send-message="onSendMessage"
+            :adjustPosition="false"
+          ></message-input>
+        </template>
+      </MessageList>
+      <!--  聊天工具  -->
+      <tools-popup
+        ref="toolsPopupRef"
+        :show-tools="chat.showTools"
+        :tools-mode="chat.toolsMode"
+        @close="handleToolsClose"
+        @on-emoji="onEmoji"
+        @image-select="onSelect"
+        @on-show-select="onShowSelect"
+      >
         <message-input
           v-model="chat.msg"
           @on-tools="onTools"
           @send-message="onSendMessage"
+          :adjustPosition="false"
         ></message-input>
-      </template>
-    </MessageList>
-    <!--  聊天工具  -->
-    <tools-popup
-      :show-tools="chat.showTools"
-      :tools-mode="chat.toolsMode"
-      @close="handleToolsClose"
-      @on-emoji="onEmoji"
-      @image-select="onSelect"
-      @on-show-select="onShowSelect"
-    >
-      <message-input
-        v-model="chat.msg"
-        @on-tools="onTools"
-        @send-message="onSendMessage"
-      ></message-input>
-    </tools-popup>
-    <!--  商品订单选择  -->
-    <SelectPopup
-      :mode="chat.selectMode"
-      :show="chat.showSelect"
-      @select="onSelect"
-      @close="chat.showSelect = false"
-    />
+      </tools-popup>
+      <!--  商品订单选择  -->
+      <SelectPopup
+        :mode="chat.selectMode"
+        :show="chat.showSelect"
+        @select="onSelect"
+        @close="chat.showSelect = false"
+      />
+    </view>
   </s-layout>
 </template>
 
@@ -67,6 +72,8 @@
     showSelect: false,
     selectMode: '',
   });
+
+  const toolsPopupRef = ref();
 
   // 发送消息
   async function onSendMessage() {
