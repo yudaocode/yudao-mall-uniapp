@@ -1,8 +1,5 @@
 <template>
-  <su-popup
-    :show="showTools"
-    @close="handleClose"
-  >
+  <su-popup :show="showTools" @close="handleClose" :overlay="false">
     <view class="ss-modal-box ss-flex-col">
       <slot></slot>
       <view class="content ss-flex ss-flex-1">
@@ -20,7 +17,8 @@
             <swiper-item v-for="emoji in emojiPage" :key="emoji">
               <view class="ss-flex ss-flex-wrap">
                 <image
-                  v-for="item in emoji" :key="item"
+                  v-for="item in emoji"
+                  :key="item"
                   class="emoji-img"
                   :src="sheep.$url.cdn(`/static/img/chat/emoji/${item.file}`)"
                   @tap="onEmoji(item)"
@@ -107,58 +105,65 @@
   function onShowSelect(mode) {
     emits('onShowSelect', mode);
   }
+
+  defineExpose({
+    handleClose,
+  });
 </script>
 
 <style scoped lang="scss">
-  .content {
-    width: 100%;
-    align-content: space-around;
-    border-top: 1px solid #dfdfdf;
-    padding: 20rpx 0 0;
-
-    .emoji-swiper {
+  .ss-modal-box {
+    height: 400rpx;
+    .content {
       width: 100%;
-      height: 280rpx;
-      padding: 0 20rpx;
+      align-content: space-around;
+      border-top: 1px solid #dfdfdf;
+      padding: 20rpx 0 0;
 
-      .emoji-img {
-        width: 50rpx;
-        height: 50rpx;
-        display: inline-block;
-        margin: 10rpx;
+      .emoji-swiper {
+        width: 100%;
+        height: 280rpx;
+        padding: 0 20rpx;
+
+        .emoji-img {
+          width: 50rpx;
+          height: 50rpx;
+          display: inline-block;
+          margin: 10rpx;
+        }
       }
-    }
 
-    .image,
-    .goods,
-    .order {
-      width: 33.3%;
-      height: 280rpx;
-      text-align: center;
-      font-size: 24rpx;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-
-      .icon {
-        width: 50rpx;
-        height: 50rpx;
-        margin-bottom: 21rpx;
-      }
-    }
-
-    :deep() {
-      .uni-file-picker__container {
+      .image,
+      .goods,
+      .order {
+        width: 33.3%;
+        height: 280rpx;
+        text-align: center;
+        font-size: 24rpx;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         justify-content: center;
+
+        .icon {
+          width: 50rpx;
+          height: 50rpx;
+          margin-bottom: 21rpx;
+        }
       }
 
-      .file-picker__box {
-        display: none;
+      :deep() {
+        .uni-file-picker__container {
+          justify-content: center;
+        }
 
-        &:last-of-type {
-          display: flex;
+        .file-picker__box {
+          display: none;
+
+          &:last-of-type {
+            display: flex;
+          }
         }
       }
     }
