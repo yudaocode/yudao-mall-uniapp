@@ -2,7 +2,7 @@
   "id": "shopro",
   "name": "shopro",
   "displayName": "芋道商城",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "芋道商城，一套代码，同时发行到iOS、Android、H5、微信小程序多个平台，请使用手机扫码快速体验强大功能",
   "scripts": {
     "prettier": "prettier --write  \"{pages,sheep}/**/*.{js,json,tsx,css,less,scss,vue,html,md}\""

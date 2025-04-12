@@ -62,7 +62,7 @@ const app = defineStore({
         this.info = {
           name: '芋道商城',
           logo: 'https://static.iocoder.cn/ruoyi-vue-pro-logo.png',
-          version: '2.4.0',
+          version: '2.4.2',
           copyright: '全部开源，个人与企业可 100% 免费使用',
           copytime: 'Copyright© 2018-2024',
 
