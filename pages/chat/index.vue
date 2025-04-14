@@ -7,7 +7,7 @@
     <!--  覆盖头部导航栏背景颜色  -->
     <view class="page-bg" :style="{ height: sys_navBar + 'px' }"></view>
     <!--  聊天区域  -->
-    <view @click.stop="toolsPopupRef.handleClose">
+    <view @click.stop="handleClose">
       <MessageList ref="messageListRef">
         <template #bottom>
           <message-input
@@ -74,6 +74,10 @@
   });
 
   const toolsPopupRef = ref();
+
+  const handleClose = () => {
+    toolsPopupRef.value.toolsPopupRef();
+  };
 
   // 发送消息
   async function onSendMessage() {
