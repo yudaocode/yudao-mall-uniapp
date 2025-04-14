@@ -7,6 +7,7 @@
         :clearable="false"
         v-model="message"
         placeholder="请输入你要咨询的问题"
+        :adjust-position="adjustPosition"
       ></uni-easyinput>
     </view>
     <text class="sicon-basic bq" @tap.stop="onTools('emoji')"></text>
@@ -16,9 +17,7 @@
       :class="{ 'is-active': toolsMode === 'tools' }"
       @tap.stop="onTools('tools')"
     ></text>
-    <button v-if="message" class="ss-reset-button send-btn" @tap="sendMessage">
-      发送
-    </button>
+    <button v-if="message" class="ss-reset-button send-btn" @tap="sendMessage"> 发送 </button>
   </view>
 </template>
 
@@ -38,17 +37,20 @@
       type: String,
       default: '',
     },
+    adjustPosition: {
+      type: Boolean,
+      default: true,
+    },
   });
-  const emits = defineEmits(['update:modelValue', 'onTools', 'sendMessage']);
+  const emits = defineEmits(['update:modelValue', 'onTools', 'sendMessage', 'closeTools']);
   const message = computed({
     get() {
       return props.modelValue;
     },
     set(newValue) {
       emits(`update:modelValue`, newValue);
-    }
+    },
   });
-
 
   // 打开工具菜单
   function onTools(mode) {
@@ -63,8 +65,10 @@
 
 <style scoped lang="scss">
   .send-wrap {
-    padding: 18rpx 20rpx;
+    height: 100rpx;
+    padding: 0 20rpx;
     background: #fff;
+    width: 100%;
 
     .left {
       height: 64rpx;
