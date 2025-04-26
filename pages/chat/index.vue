@@ -104,13 +104,21 @@
       return;
     }
 
-    if (!chat.toolsMode || chat.toolsMode === mode) {
-      chat.showTools = !chat.showTools;
+    // 第二次点击关闭
+    if (chat.showTools && chat.toolsMode === mode){
+      handleToolsClose();
+      return;
     }
-    chat.toolsMode = mode;
-    if (!chat.showTools) {
+    // 切换工具栏
+    if (chat.showTools && chat.toolsMode !== mode) {
+      chat.showTools = false;
       chat.toolsMode = '';
     }
+    // 延迟打开等一下过度效果
+    setTimeout(()=>{
+      chat.toolsMode = mode;
+      chat.showTools = true;
+    }, 200)
   }
 
   function onShowSelect(mode) {

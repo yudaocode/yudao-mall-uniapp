@@ -96,8 +96,8 @@ const groupon = async (poster) => {
       text: poster.shareInfo.link,
       css: {
         position: 'fixed',
-        left: width * 0.5,
-        top: width * 1.3,
+        left: width * 0.75,
+        top: width * 1.4,
         width: width * 0.2,
         height: width * 0.2,
       },
@@ -110,7 +110,7 @@ const groupon = async (poster) => {
       css: {
         position: 'fixed',
         left: width * 0.75,
-        top: width * 1.3,
+        top: width * 1.4,
         width: width * 0.2,
         height: width * 0.2,
       },
