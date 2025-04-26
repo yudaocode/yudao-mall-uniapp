@@ -193,7 +193,6 @@
           @close="state.showSelectSku = false"
         />
       </view>
-
     </view>
 
     <s-empty v-if="!state.data && !state.loading" icon="/static/goods-empty.png" />
@@ -244,6 +243,7 @@
         title: state.data.headRecord.spuName, // 商品标题
         image: sheep.$url.cdn(state.data.headRecord.picUrl), // 商品主图
         price: fen2yuan(state.data.headRecord.combinationPrice), // 商品价格
+        grouponNum: state.data.headRecord.userSize, // 拼团人数
       },
     );
   });

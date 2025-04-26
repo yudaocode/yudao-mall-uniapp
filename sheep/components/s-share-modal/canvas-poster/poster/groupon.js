@@ -2,13 +2,16 @@ import sheep from '@/sheep';
 import { formatImageUrlProtocol, getWxaQrcode } from './index';
 
 const groupon = async (poster) => {
+  debugger;
   const width = poster.width;
   const userInfo = sheep.$store('user').userInfo;
   const wxa_qrcode = await getWxaQrcode(poster.shareInfo.path, poster.shareInfo.query);
   return [
     {
       type: 'image',
-      src: formatImageUrlProtocol(sheep.$url.cdn(sheep.$store('app').platform.share.posterInfo.groupon_bg)),
+      src: formatImageUrlProtocol(
+        sheep.$url.cdn(sheep.$store('app').platform.share.posterInfo.groupon_bg),
+      ),
       css: {
         width,
         position: 'fixed',
@@ -80,7 +83,7 @@ const groupon = async (poster) => {
     },
     {
       type: 'text',
-      text: '2人团',
+      text: poster.shareInfo.poster.grouponNum + '人团',
       css: {
         color: '#fff',
         fontSize: 12,
