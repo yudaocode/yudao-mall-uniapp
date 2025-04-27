@@ -15,10 +15,10 @@
           件商品
         </view>
         <view class="header-right">
-          <button v-if="state.editMode" class="ss-reset-button" @tap="state.editMode = false">
+          <button v-if="state.editMode" class="ss-reset-button" @tap="onChangeEditMode(false)">
             取消
           </button>
-          <button v-else class="ss-reset-button ui-TC-Main" @tap="state.editMode = true">
+          <button v-else class="ss-reset-button ui-TC-Main" @tap="onChangeEditMode(true)">
             编辑
           </button>
         </view>
@@ -35,6 +35,12 @@
                 @tap.stop="onSelectSingle(item.id)"
               />
             </label>
+            <view v-if="item.spu?.status !== 1 && !state.editMode" class="down-box">
+              该商品已下架
+            </view>
+            <view v-else-if="item.spu?.stock <= 0 && !state.editMode" class="down-box">
+              该商品无库存
+            </view>
             <s-goods-item
               :img="item.spu.picUrl || item.goods.image"
               :price="item.sku.price"
@@ -114,7 +120,7 @@
   const cart = sheep.$store('cart');
 
   const state = reactive({
-    editMode: false,
+    editMode: computed(() => cart.editMode),
     list: computed(() => cart.list),
     selectedList: [],
     selectedIds: computed(() => cart.selectedIds),
@@ -125,6 +131,11 @@
   // 单选选中
   function onSelectSingle(id) {
     cart.selectSingle(id);
+  }
+
+  // 编辑、取消
+  function onChangeEditMode(flag) {
+    cart.onChangeEditMode(flag);
   }
 
   // 全选
@@ -172,7 +183,7 @@
       throw new Error('未找到商品信息');
     }
     // 获取所有商品的配送方式列表
-    const deliveryTypesList = spuList.map(item => item.deliveryTypes);
+    const deliveryTypesList = spuList.map((item) => item.deliveryTypes);
     // 检查配送方式冲突
     const hasConflict = checkDeliveryConflicts(deliveryTypesList);
     if (hasConflict) {
@@ -202,9 +213,7 @@
       for (let j = i + 1; j < deliveryTypesList.length; j++) {
         const nextTypes = deliveryTypesList[j];
         // 检查是否没有交集（即冲突）
-        const hasNoIntersection = !currentTypes.some(type =>
-          nextTypes.includes(type),
-        );
+        const hasNoIntersection = !currentTypes.some((type) => nextTypes.includes(type));
         if (hasNoIntersection) {
           return true;
         }
@@ -270,6 +279,22 @@
 
       .goods-box {
         background-color: #fff;
+        position: relative;
+      }
+      // 下架商品
+      .down-box {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(#fff, 0.8);
+        z-index: 2;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #999;
+        font-size: 32rpx;
       }
     }
   }
