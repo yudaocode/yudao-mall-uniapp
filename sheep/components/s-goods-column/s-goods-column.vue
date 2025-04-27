@@ -505,7 +505,6 @@
   import { PromotionActivityTypeEnum } from '@/sheep/util/const';
 
   // 数据
-  const state = reactive({});
   let defaultImgWidth = ref(0);
 
   // 接收参数
@@ -605,10 +604,6 @@
       type: Boolean,
       default: false,
     },
-    imgHeight: {
-      type: String,
-      default: '',
-    },
   });
 
   // 优惠文案
@@ -692,10 +687,8 @@
           totalHeight =
             (goodsPriceCard.width / props.data.image_wh.w) * props.data.image_wh.h +
             goodsPriceCard.height;
-          console.log(totalHeight, 'totalHeight');
         } else {
           totalHeight = goodsPriceCard.width + goodsPriceCard.height;
-          console.log(totalHeight, 'totalHeight2');
         }
         emits('getHeight', totalHeight);
       });
