@@ -4,7 +4,7 @@
     <view class="s-category">
       <view class="three-level-wrap ss-flex ss-col-top">
         <!-- 商品分类（左） -->
-        <view class="side-menu-wrap">
+        <view class="side-menu-wrap" :style="[{ top: Number(statusBarHeight + 88) + 'rpx' }]">
           <scroll-view scroll-y :style="[{ height: pageHeight + 'px' }]">
             <view
               class="menu-item ss-flex"
@@ -82,6 +82,7 @@
 
   const { safeArea } = sheep.$platform.device;
   const pageHeight = computed(() => safeArea.height - 44 - 50);
+  const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
 
   // 加载商品分类
   async function getList() {
@@ -154,7 +155,6 @@
         background-color: #f6f6f6;
         position: fixed;
         left: 0;
-        top: 128rpx;
 
         .menu-item {
           width: 100%;
