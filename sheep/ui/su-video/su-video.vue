@@ -1,5 +1,6 @@
 <template>
   <view class="ui-video-wrap">
+    <!-- #ifndef APP-PLUS -->
     <video
       :id="`sVideo${uid}`"
       class="radius"
@@ -18,12 +19,38 @@
       @pause="pause"
       @ended="end"
       :poster="poster"
-      :autoplay="autoplay"
     >
-      <!-- #ifdef APP-PLUS -->
-      <cover-view :style="{ transform: 'translateX(' + moveX + 'px)' }" />
-      <!-- #endif -->
     </video>
+    <!-- #endif -->
+    <!-- #ifdef APP-PLUS -->
+    <dom-video
+      ref="domVideo"
+      class="radius"
+      :style="[{ height: height + 'rpx' }]"
+      object-fit="contain"
+      :controls="true"
+      :show-progress="false"
+      :show-fullscreen-btn="false"
+      :show-play-btn="false"
+      :show-bottom-progress="false"
+      :autoplay="false"
+      :src="src"
+      @play="play"
+      @pause="pause"
+      @ended="end"
+    />
+    <!-- #endif -->
+    <!-- <view
+      v-show="!state.isplay"
+      class="poster-wrap radius"
+      :style="{ height: height + 'px' }"
+      @click="beforePlay"
+    >
+      <image class="poster-image" mode="aspectFill" :src="poster" v-if="poster" />
+      <view class="play-icon ss-flex ss-row-center ss-col-center">
+        <text class="cicon-play-arrow ss-font-40"></text>
+      </view>
+    </view> -->
   </view>
 </template>
 <script setup>
@@ -43,6 +70,7 @@
    */
 
   import { reactive, nextTick, getCurrentInstance } from 'vue';
+  import DomVideo from './components/dom-video.vue';
   import sheep from '@/sheep';
   const vm = getCurrentInstance();
 
@@ -81,7 +109,7 @@
     // 指定视频初始播放位置，单位为秒（s）
     initialTime: {
       type: Number,
-      default: 1,
+      default: 0,
     },
     src: {
       type: String,
@@ -91,10 +119,6 @@
       type: String,
       default: 'https://img1.baidu.com/it/u=1601695551,235775011&fm=26&fmt=auto',
     },
-    autoplay: {
-      type: Boolean,
-      default: false,
-    }
   });
 
   // 事件
@@ -137,6 +161,7 @@
   const beforePlay = () => {
     uni.getNetworkType({
       success: (res) => {
+        console.log(res.networkType, 'res.networkType');
         const networkType = res.networkType;
         // if (networkType === 'wifi' || networkType === 'ethernet') {
         //   startPlay();
@@ -169,6 +194,7 @@
   .radius {
     width: 100%;
   }
+
   .ui-video-wrap {
     display: flex;
     align-items: center;
