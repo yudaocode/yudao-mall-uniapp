@@ -1,6 +1,7 @@
 <!-- 装修营销组件：营销文章 -->
 <template>
   <view
+    class="richtext"
     :style="[
       {
         marginLeft: styles.marginLeft + 'px',
@@ -11,7 +12,7 @@
       },
     ]"
   >
-    <mp-html class="richtext" :content="state.content"></mp-html>
+    <mp-html :content="state.content"></mp-html>
   </view>
 </template>
 <script setup>
@@ -38,3 +39,8 @@
     state.content = data.content;
   });
 </script>
+<style lang="scss" scoped>
+  .richtext {
+    line-height: 0;
+  }
+</style>

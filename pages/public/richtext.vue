@@ -1,9 +1,7 @@
 <!-- 文章展示 -->
 <template>
   <s-layout :bgStyle="{ color: '#FFF' }" :title="state.title" class="set-wrap">
-    <view class="ss-p-30">
-      <mp-html class="richtext" :content="state.content" />
-    </view>
+    <view class="ss-p-30 richtext"><mp-html :content="state.content"></mp-html></view>
   </s-layout>
 </template>
 
@@ -41,7 +39,6 @@
     }
     getRichTextContent(options.id, options.title);
   });
-
 </script>
 
 <style lang="scss" scoped>
@@ -49,6 +46,9 @@
     margin: 0 30rpx;
   }
 
-  .richtext {
+  :deep() {
+    image {
+      display: block;
+    }
   }
 </style>

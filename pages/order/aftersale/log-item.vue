@@ -74,4 +74,10 @@
     color: #999999;
     margin-bottom: 40rpx;
   }
+
+  :deep() {
+    image {
+      display: block;
+    }
+  }
 </style>
