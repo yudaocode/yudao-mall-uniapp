@@ -5,14 +5,18 @@
   onLaunch(() => {
     // 延时隐藏原生导航栏
     setTimeout(() => {
-      uni.hideTabBar();
+      try {
+        uni.hideNavigationBar();
+      } catch (error) {
+        // 忽略该 error，不一定存在
+      }
     }, 200);
 
     // 加载Shopro底层依赖
     ShoproInit();
   });
 
-  onShow((options) => {
+  onShow(() => {
     // #ifdef APP-PLUS
     // 获取urlSchemes参数
     const args = plus.runtime.arguments;
@@ -23,11 +27,6 @@
     uni.getClipboardData({
       success: (res) => {},
     });
-    // #endif
-
-    // #ifdef MP-WEIXIN
-    // 确认收货回调结果
-    console.log(options, 'options');
     // #endif
   });
 </script>

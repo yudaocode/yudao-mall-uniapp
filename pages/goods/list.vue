@@ -187,15 +187,15 @@
 
   // 处理双列布局 leftGoodsList + rightGoodsList
   function mountMasonry(height = 0, where = 'left') {
-    if (!state.pagination.list[count]) {
-      return;
-    }
-
     if (where === 'left') {
       leftHeight += height;
     } else {
       rightHeight += height;
     }
+    if (!state.pagination.list[count]) {
+      return;
+    }
+
     if (leftHeight <= rightHeight) {
       state.leftGoodsList.push(state.pagination.list[count]);
     } else {
