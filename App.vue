@@ -3,14 +3,10 @@
   import { ShoproInit } from './sheep';
 
   onLaunch(() => {
-    // 延时隐藏原生导航栏
-    setTimeout(() => {
-      try {
-        uni.hideNavigationBar();
-      } catch (error) {
-        // 忽略该 error，不一定存在
-      }
-    }, 200);
+    // 隐藏原生导航栏 使用自定义底部导航
+    uni.hideTabBar({
+      fail: () => {},
+    });
 
     // 加载Shopro底层依赖
     ShoproInit();

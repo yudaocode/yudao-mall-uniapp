@@ -25,6 +25,7 @@
     <!-- #ifdef APP-PLUS -->
     <dom-video
       ref="domVideo"
+      :id="`sVideo${uid}`"
       class="radius"
       :style="[{ height: height + 'rpx' }]"
       object-fit="contain"
@@ -38,6 +39,7 @@
       @play="play"
       @pause="pause"
       @ended="end"
+      :poster="poster"
     />
     <!-- #endif -->
     <!-- <view

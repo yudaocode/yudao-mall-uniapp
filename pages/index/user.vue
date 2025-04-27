@@ -8,7 +8,11 @@
     :navbarStyle="template.navigationBar"
     onShareAppMessage
   >
-    <s-block v-for="(item, index) in template.components" :key="index" :styles="item.property.style">
+    <s-block
+      v-for="(item, index) in template.components"
+      :key="index"
+      :styles="item.property.style"
+    >
       <s-block-item :type="item.id" :data="item.property" :styles="item.property.style" />
     </s-block>
   </s-layout>
@@ -20,10 +24,11 @@
   import sheep from '@/sheep';
 
   // 隐藏原生tabBar
-  uni.hideTabBar();
+  uni.hideTabBar({
+    fail: () => {},
+  });
 
   const template = computed(() => sheep.$store('app').template.user);
-  const isLogin = computed(() => sheep.$store('user').isLogin);
 
   onShow(() => {
     sheep.$store('user').updateUserData();

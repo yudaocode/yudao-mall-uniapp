@@ -97,6 +97,24 @@
     }
   });
 
+  function showRepayModal() {
+    if (state.result !== 'failed') return;
+    uni.showModal({
+      title: '确认支付',
+      content: '未检测到您的支付结果,请确认您是否已经支付完成？',
+      cancelText: '取消',
+      confirmText: '我已支付',
+      success: function (res) {
+        if (res.confirm) {
+          state.counter = 0;
+          setTimeout(() => {
+            getOrderInfo(state.orderId);
+          }, 100);
+        }
+      },
+    });
+  }
+
   // 获得订单信息
   async function getOrderInfo(id) {
     state.counter++;
@@ -137,15 +155,16 @@
         return;
       }
     }
-    // 2.1 情况三一：未支付，且轮询次数小于三次，则继续轮询
-    if (state.counter < 3 && state.result === 'unpaid') {
+    // 2.1 情况三一：未支付，且轮询次数小于五次，则继续轮询
+    if (state.counter < 5 && state.result === 'unpaid') {
       setTimeout(() => {
         getOrderInfo(id);
-      }, 1500);
+      }, 2000);
     }
-    // 2.2 情况二：超过三次检测才判断为支付失败
-    if (state.counter >= 3) {
+    // 2.2 情况二：超过五次检测才判断为支付失败
+    if (state.counter >= 5) {
       state.result = 'failed';
+      showRepayModal();
     }
   }
 
@@ -203,7 +222,7 @@
     if (options.payState === 'fail') {
       state.result = 'failed';
     } else {
-      // 轮询三次检测订单支付结果
+      // 轮询五次检测订单支付结果
       await getOrderInfo(state.id);
     }
   });
