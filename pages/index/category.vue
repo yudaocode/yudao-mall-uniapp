@@ -2,54 +2,52 @@
 <template>
   <s-layout :bgStyle="{ color: '#fff' }" tabbar="/pages/index/category" title="分类">
     <view class="s-category">
-      <view class="three-level-wrap ss-flex ss-col-top" :style="[{ height: pageHeight + 'px' }]">
+      <view class="three-level-wrap ss-flex ss-col-top">
         <!-- 商品分类（左） -->
-        <scroll-view class="side-menu-wrap" scroll-y :style="[{ height: pageHeight + 'px' }]">
-          <view
-            class="menu-item ss-flex"
-            v-for="(item, index) in state.categoryList"
-            :key="item.id"
-            :class="[{ 'menu-item-active': index === state.activeMenu }]"
-            @tap="onMenu(index)"
-          >
-            <view class="menu-title ss-line-1">
-              {{ item.name }}
+        <view class="side-menu-wrap">
+          <scroll-view scroll-y :style="[{ height: pageHeight + 'px' }]">
+            <view
+              class="menu-item ss-flex"
+              v-for="(item, index) in state.categoryList"
+              :key="item.id"
+              :class="[{ 'menu-item-active': index === state.activeMenu }]"
+              @tap="onMenu(index)"
+            >
+              <view class="menu-title ss-line-1">
+                {{ item.name }}
+              </view>
             </view>
-          </view>
-        </scroll-view>
+          </scroll-view>
+        </view>
         <!-- 商品分类（右） -->
-        <scroll-view
-          class="goods-list-box"
-          scroll-y
-          :style="[{ height: pageHeight + 'px' }]"
-          v-if="state.categoryList?.length"
-          @scrolltolower="handleScrollToLower"
-        >
-          <image
-            v-if="state.categoryList[state.activeMenu].picUrl"
-            class="banner-img"
-            :src="sheep.$url.cdn(state.categoryList[state.activeMenu].picUrl)"
-            mode="widthFix"
-          />
-          <first-one v-if="state.style === 'first_one'" :pagination="state.pagination" />
-          <first-two v-if="state.style === 'first_two'" :pagination="state.pagination" />
-          <second-one
-            v-if="state.style === 'second_one'"
-            :data="state.categoryList"
-            :activeMenu="state.activeMenu"
-          />
-          <uni-load-more
-            v-if="
-              (state.style === 'first_one' || state.style === 'first_two') &&
-              state.pagination.total > 0
-            "
-            :status="state.loadStatus"
-            :content-text="{
-              contentdown: '点击查看更多',
-            }"
-            @tap="loadMore"
-          />
-        </scroll-view>
+        <view class="goods-list-box" v-if="state.categoryList?.length">
+          <scroll-view scroll-y :style="[{ height: pageHeight + 'px' }]">
+            <image
+              v-if="state.categoryList[state.activeMenu].picUrl"
+              class="banner-img"
+              :src="sheep.$url.cdn(state.categoryList[state.activeMenu].picUrl)"
+              mode="widthFix"
+            />
+            <first-one v-if="state.style === 'first_one'" :pagination="state.pagination" />
+            <first-two v-if="state.style === 'first_two'" :pagination="state.pagination" />
+            <second-one
+              v-if="state.style === 'second_one'"
+              :data="state.categoryList"
+              :activeMenu="state.activeMenu"
+            />
+            <uni-load-more
+              v-if="
+                (state.style === 'first_one' || state.style === 'first_two') &&
+                state.pagination.total > 0
+              "
+              :status="state.loadStatus"
+              :content-text="{
+                contentdown: '点击查看更多',
+              }"
+              @tap="loadMore"
+            />
+          </scroll-view>
+        </view>
       </view>
     </view>
   </s-layout>
@@ -154,6 +152,9 @@
         height: 100%;
         padding-left: 12rpx;
         background-color: #f6f6f6;
+        position: fixed;
+        left: 0;
+        top: 128rpx;
 
         .menu-item {
           width: 100%;
@@ -224,8 +225,9 @@
 
       .goods-list-box {
         background-color: #fff;
-        width: calc(100vw - 100px);
+        width: calc(100vw - 200rpx);
         padding: 10px;
+        margin-left: 200rpx;
       }
 
       .banner-img {
