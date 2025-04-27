@@ -48,6 +48,8 @@
   import uploadImage from './upload-image.vue';
   import uploadFile from './upload-file.vue';
   import sheep from '@/sheep';
+  import { isEmpty } from 'lodash-es';
+
   let fileInput = null;
   /**
    * FilePicker 文件选择上传
@@ -516,11 +518,18 @@
        * @param {Object} index
        */
       delFile(index) {
-        this.$emit('delete', {
-          tempFile: this.files[index],
-          tempFilePath: this.files[index].url,
-        });
-        this.files.splice(index, 1);
+        if (!isEmpty(this.files)) {
+          this.$emit('delete', {
+            tempFile: this.files[index],
+            tempFilePath: this.files[index].url,
+          });
+          this.files.splice(index, 1);
+        } else {
+          this.$emit('delete', {
+            tempFilePath: this.url,
+          });
+        }
+
         this.$nextTick(() => {
           this.setEmit();
         });
