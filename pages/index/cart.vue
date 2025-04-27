@@ -111,6 +111,7 @@
 
 <script setup>
   import sheep from '@/sheep';
+  import { onShow } from '@dcloudio/uni-app';
   import SpuApi from '@/sheep/api/product/spu';
   import { computed, reactive } from 'vue';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
@@ -239,6 +240,14 @@
   async function onDelete() {
     cart.delete(state.selectedIds);
   }
+
+  function getCartList() {
+    cart.getList();
+  }
+
+  onShow(() => {
+    getCartList();
+  });
 </script>
 
 <style lang="scss" scoped>
