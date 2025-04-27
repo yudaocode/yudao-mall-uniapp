@@ -4,6 +4,7 @@ import $platform from '@/sheep/platform';
 import $router from '@/sheep/router';
 import user from './user';
 import sys from './sys';
+import { baseUrl } from '@/sheep/config';
 
 const app = defineStore({
   id: 'app',
@@ -52,6 +53,11 @@ const app = defineStore({
       const networkStatus = await $platform.checkNetwork();
       if (!networkStatus) {
         $router.error('NetworkError');
+      }
+
+      // 检查配置
+      if (typeof baseUrl === 'undefined') {
+        $router.error('EnvError');
       }
 
       // 加载装修配置

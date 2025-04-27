@@ -13,7 +13,7 @@
     <s-empty
       v-else-if="errCode === 'TemplateError'"
       icon="/static/internet-empty.png"
-      text="未找到模板"
+      text="未找到模板,请前往后台启用对应模板"
       showAction
       actionText="重新加载"
       @clickAction="onReconnect"
