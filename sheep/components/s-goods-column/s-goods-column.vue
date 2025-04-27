@@ -683,7 +683,7 @@
         const goodsPriceCard = data[0];
         defaultImgWidth.value = data[0].width;
 
-        if (props.data.image_wh) {
+        if (props.data.image_wh && Number(props.data.image_wh.w)) {
           totalHeight =
             (goodsPriceCard.width / props.data.image_wh.w) * props.data.image_wh.h +
             goodsPriceCard.height;
