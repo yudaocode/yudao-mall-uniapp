@@ -39,14 +39,16 @@
       type: Array,
       default() {
         return [];
-      }
-    }
+      },
+    },
   });
 
   function onActivity(activity) {
     const type = activity.type;
-    const typePath = type === 1 ? 'seckill' :
-      type === 2 ? 'TODO 拼团' : 'groupon';
+    const typePath = type === 1 ? 'seckill' : type === 3 ? 'groupon' : undefined;
+    if (!typePath) {
+      return;
+    }
     sheep.$router.go(`/pages/goods/${typePath}`, {
       id: activity.id,
     });
