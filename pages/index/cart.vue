@@ -116,10 +116,12 @@
   import { computed, reactive } from 'vue';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import { isEmpty } from '@/sheep/helper/utils';
-  
+
   // 隐藏原生tabBar
-  uni.hideTabBar();
-  
+  uni.hideTabBar({
+    fail: () => {},
+  });
+
   const sys_navBar = sheep.$platform.navbar;
   const cart = sheep.$store('cart');
 
