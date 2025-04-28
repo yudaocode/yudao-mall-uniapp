@@ -194,7 +194,7 @@
       @close="state.showCoupon = false"
     />
 
-    <!-- 满额折扣弹框 TODO @puhui999：【折扣】后续要把优惠信息打进去 -->
+    <!-- 满额折扣弹框 -->
     <s-discount-list
       v-model="state.orderInfo"
       :show="state.showDiscount"

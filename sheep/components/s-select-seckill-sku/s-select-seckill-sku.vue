@@ -19,8 +19,10 @@
           <view class="goods-title ss-line-2">{{ state.goodsInfo.name }}</view>
           <view class="header-right-bottom ss-flex ss-col-center ss-row-between">
             <!-- 价格 -->
-            <view v-if="state.goodsInfo.activity_type === PromotionActivityTypeEnum.POINT.type"
-                  class="price-text ss-flex">
+            <view
+              v-if="state.goodsInfo.activity_type === PromotionActivityTypeEnum.POINT.type"
+              class="price-text ss-flex"
+            >
               <image
                 v-if="!isEmpty(state.selectedSku)"
                 :src="sheep.$url.static('/static/img/shop/goods/score1.svg')"
@@ -97,7 +99,6 @@
   /**
    * 秒杀活动SKU选择，
    * 与s-select-sku的区别：多一个秒杀价的标签、没有加入购物车按钮、立即购买按钮叫确认、秒杀有最大购买数量限制
-   * 差别不大，可以考虑合并 todo @芋艿
    */
   // 按钮状态： active,nostock
   import { computed, reactive, watch } from 'vue';
@@ -110,8 +111,7 @@
   const props = defineProps({
     modelValue: {
       type: Object,
-      default() {
-      },
+      default() {},
     },
     show: {
       type: Boolean,

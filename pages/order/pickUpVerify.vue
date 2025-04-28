@@ -1,5 +1,5 @@
 <template>
-  <view class='order-details'>
+  <view class="order-details">
     <!--  自提商品核销  -->
     <view v-if="orderInfo.deliveryType === 2 && orderInfo.payStatus" class="writeOff borRadius14">
       <view class="title">核销信息</view>
@@ -8,21 +8,19 @@
           <image
             v-if="!!painterImageUrl"
             :src="painterImageUrl"
-            :style="{width: `${state.qrcodeSize}px`, height: `${state.qrcodeSize}px`}"
+            :style="{ width: `${state.qrcodeSize}px`, height: `${state.qrcodeSize}px` }"
             :show-menu-by-longpress="true"
           />
         </view>
       </view>
       <view class="gear">
-        <image :src="sheep.$url.static('/static/images/writeOff.png', 'local')"></image>
+        <image :src="sheep.$url.static('/static/img/shop/writeOff.png')"></image>
       </view>
       <view class="num">{{ orderInfo.pickUpVerifyCode }}</view>
       <view class="rules">
         <!-- TODO puhui999: 需要后端放回：使用 receiveTime 即可 -->
         <view class="item">
-          <view class="rulesTitle flex flex-wrap align-center">
-            核销时间
-          </view>
+          <view class="rulesTitle flex flex-wrap align-center"> 核销时间 </view>
           <view class="info">
             每日：
             <text class="time">2020-2-+52</text>
@@ -37,7 +35,10 @@
         </view>
       </view>
     </view>
-    <view v-if="orderInfo.deliveryType === 2" class="map flex flex-wrap align-center ss-row-between borRadius14">
+    <view
+      v-if="orderInfo.deliveryType === 2"
+      class="map flex flex-wrap align-center ss-row-between borRadius14"
+    >
       <view>自提地址信息</view>
       <view class="place cart-color flex flex-wrap flex-center" @tap="showMaoLocation">
         查看位置
@@ -64,14 +65,14 @@
       type: Object,
       default() {},
     },
-    systemStore:{
+    systemStore: {
       type: Object,
       default() {},
-    }
+    },
   });
   const state = reactive({
-    qrcodeSize: 145
-  })
+    qrcodeSize: 145,
+  });
 
   /**
    * 打开地图
@@ -80,7 +81,7 @@
     console.log(props.systemStore);
     if (!props.systemStore.latitude || !props.systemStore.longitude) {
       sheep.$helper.toast('缺少经纬度信息无法查看地图!');
-      return
+      return;
     }
     uni.openLocation({
       latitude: props.systemStore.latitude,
@@ -89,19 +90,19 @@
       name: props.systemStore.name,
       address: props.systemStore.areaName + props.systemStore.detailAddress,
     });
-  }
+  };
   /**
    * 拨打电话
    */
   const makePhone = () => {
     uni.makePhoneCall({
-      phoneNumber: props.systemStore.phone
-    })
-  }
+      phoneNumber: props.systemStore.phone,
+    });
+  };
 
   const painterRef = ref(); // 海报画板
   const painterImageUrl = ref(); // 海报 url
-  const showPainter = ref(true)
+  const showPainter = ref(true);
   // 渲染海报
   const renderPoster = async (poster) => {
     await painterRef.value.render(poster);
@@ -109,7 +110,7 @@
   // 获得生成的图片
   const setPainterImageUrl = (path) => {
     painterImageUrl.value = path;
-    showPainter.value = false
+    showPainter.value = false;
   };
   /**
    * 生成核销二维码
@@ -118,23 +119,23 @@
     renderPoster({
       css: {
         width: `${state.qrcodeSize}px`,
-        height: `${state.qrcodeSize}px`
+        height: `${state.qrcodeSize}px`,
       },
-      views:[
+      views: [
         {
           type: 'qrcode',
           text: text,
           css: {
             width: `${state.qrcodeSize}px`,
-            height: `${state.qrcodeSize}px`
-          }
-        }
-      ]
-    })
-  }
+            height: `${state.qrcodeSize}px`,
+          },
+        },
+      ],
+    });
+  };
   defineExpose({
-    markCode
-  })
+    markCode,
+  });
 </script>
 
 <style scoped lang="scss">
@@ -142,10 +143,10 @@
     border-radius: 14rpx !important;
   }
   .cart-color {
-    color: #E93323 !important;
-    border: 1px solid #E93323 !important
+    color: #e93323 !important;
+    border: 1px solid #e93323 !important;
   }
-  .order-details{
+  .order-details {
     border-radius: 10rpx;
     margin: 0 20rpx 20rpx 20rpx;
   }

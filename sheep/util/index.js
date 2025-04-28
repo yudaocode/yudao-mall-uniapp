@@ -41,19 +41,6 @@ export const floatToFixed2 = (num) => {
 };
 
 /**
- * 将一个分数转换为整数
- *
- * @param {number | string | undefined} num 分数
- * @return {number} 整数
- */
-export const convertToInteger = (num) => {
-  if (typeof num === 'undefined') return 0;
-  const parsedNumber = typeof num === 'string' ? parseFloat(num) : num;
-  // TODO 分转元后还有小数则四舍五入
-  return Math.round(parsedNumber * 100);
-};
-
-/**
  * 时间日期转换
  * @param {dayjs.ConfigType} date 当前时间，new Date() 格式
  * @param {string} format 需要转换的时间格式字符串
@@ -109,8 +96,6 @@ export function handleTree(
 
 /**
  * 重置分页对象
- *
- * TODO 芋艿：需要处理其它页面
  *
  * @param pagination 分页对象
  */

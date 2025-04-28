@@ -68,7 +68,7 @@
       </view>
     </view>
     <view class="line">
-      <image :src="sheep.$url.static('/static/images/line.png', 'local')" />
+      <image :src="sheep.$url.static('/static/img/shop/line.png')" />
     </view>
   </view>
 </template>

@@ -43,8 +43,6 @@ function ShoproDebug() {
   // 	new vconsole.default();
   // });
   // #endif
-
-  // TODO 芋艿：可以打印路由
   // 同步前端页面到后端
   // console.log(ROUTES)
 }

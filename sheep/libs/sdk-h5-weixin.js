@@ -39,8 +39,14 @@ export default {
         timestamp: data.timestamp,
         nonceStr: data.nonceStr,
         signature: data.signature,
-        jsApiList: ['chooseWXPay', 'openLocation', 'getLocation','updateTimelineShareData','scanQRCode'], // TODO 芋艿：后续可以设置更多权限；
-        openTagList: data.openTagList
+        jsApiList: [
+          'chooseWXPay',
+          'openLocation',
+          'getLocation',
+          'updateTimelineShareData',
+          'scanQRCode',
+        ], // TODO 芋艿：后续可以设置更多权限；
+        openTagList: data.openTagList,
       });
     }
 
@@ -55,7 +61,7 @@ export default {
       if (configSuccess) {
         console.log('微信 JSSDK 初始化成功');
       }
-    })
+    });
 
     // 回调
     if (callback) {
@@ -110,7 +116,7 @@ export default {
     });
   },
 
-  // 更新微信分享信息 TODO 芋艿：未测试
+  // 更新微信分享信息
   updateShareInfo(data, callback = null) {
     this.isReady(() => {
       const shareData = {
@@ -141,7 +147,7 @@ export default {
         ...data,
         success: function (res) {
           console.log(res);
-        }
+        },
       });
     });
   },

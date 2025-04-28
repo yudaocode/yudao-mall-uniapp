@@ -15,7 +15,6 @@ const platformMap = ['H5', 'WechatOfficialAccount', 'WechatMiniProgram', 'App'];
 // 设置分享方式: 1=直接转发,2=海报,3=复制链接,...按需扩展
 const fromMap = ['forward', 'poster', 'link'];
 
-// TODO 芋艿：分享的接入
 // 设置分享信息参数
 const getShareInfo = (
   scene = {
@@ -37,7 +36,7 @@ const getShareInfo = (
     link: '', // 分享Url+参数
     query: '', // 分享参数
     poster, // 海报所需数据
-    forward: {} // 转发所需参数
+    forward: {}, // 转发所需参数
   };
   shareInfo.title = scene.title;
   shareInfo.image = $url.cdn(scene.image);

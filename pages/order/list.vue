@@ -209,7 +209,7 @@
   // 确认收货 TODO 芋艿：待测试
   async function onConfirm(order, ignore = false) {
     // 需开启确认收货组件
-    // todo: 芋艿：需要后续接入微信收货组件
+    // todo: 芋艿：需要后续接入微信收货组件 https://gitee.com/sheepjs/shopro-uniapp/commit/a6bbba49b84dd418b84c5fefc8b7463df8f4901f
     // 1.怎么检测是否开启了发货组件功能？如果没有开启的话就不能在这里return出去
     // 2.如果开启了走mpConfirm方法,需要在App.vue的show方法中拿到确认收货结果
     let isOpenBusinessView = true;

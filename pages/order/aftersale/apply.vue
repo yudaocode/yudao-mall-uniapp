@@ -64,7 +64,6 @@
             v-model="formData.applyDescription"
             placeholder="客官~请描述您遇到的问题，建议上传照片"
           />
-          <!-- TODO 芋艿：上传的测试 -->
           <view class="upload-img">
             <s-uploader
               v-model:url="formData.applyPicUrls"

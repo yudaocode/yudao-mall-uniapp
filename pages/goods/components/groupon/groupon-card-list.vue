@@ -2,7 +2,6 @@
 <template>
   <view v-if="state.list.length > 0" class="groupon-list detail-card ss-p-x-20">
     <view class="join-activity ss-flex ss-row-between ss-m-t-30">
-      <!-- todo: 接口缺少总数 -->
       <view class="">已有{{ state.list.length }}人参与活动</view>
       <text class="cicon-forward"></text>
     </view>
@@ -37,7 +36,7 @@
   import { onMounted, reactive } from 'vue';
   import sheep from '@/sheep';
   import { useDurationTime } from '@/sheep/hooks/useGoods';
-  import CombinationApi from "@/sheep/api/promotion/combination";
+  import CombinationApi from '@/sheep/api/promotion/combination';
 
   const props = defineProps({
     modelValue: {
@@ -74,7 +73,7 @@
   onMounted(async () => {
     // 查询参团记录
     // status = 0 表示未成团
-    const { data } = await CombinationApi.getHeadCombinationRecordList(props.modelValue.id, 0 , 10);
+    const { data } = await CombinationApi.getHeadCombinationRecordList(props.modelValue.id, 0, 10);
     state.list = data;
   });
 </script>

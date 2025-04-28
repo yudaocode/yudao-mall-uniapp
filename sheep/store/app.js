@@ -119,7 +119,6 @@ const app = defineStore({
   },
 });
 
-// todo: @owen 先做数据适配，后期重构
 const adaptTemplate = async (appTemplate, templateId) => {
   const { data: diyTemplate } = templateId
     ? // 查询指定模板，一般是预览时使用

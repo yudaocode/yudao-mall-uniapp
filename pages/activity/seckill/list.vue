@@ -28,10 +28,9 @@
     <view class="flex align-center justify-between ss-p-25">
       <!-- 左侧图标 -->
       <view class="time-icon">
-        <!-- TODO 芋艿：图片统一维护 -->
         <image
           class="ss-w-100 ss-h-100"
-          src="http://mall.yudao.iocoder.cn/static/images/priceTag.png"
+          :src="sheep.$url.static('/static/img/shop/priceTag.png')"
         />
       </view>
       <scroll-view

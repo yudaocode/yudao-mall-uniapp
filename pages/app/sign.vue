@@ -62,7 +62,7 @@
         </view>
       </view>
 
-      <!-- 签到说明 TODO @科举：这里改成【已累计签到】 -->
+      <!-- 签到说明 -->
       <view class="bg-white ss-m-t-16 ss-p-t-30 ss-p-b-60 ss-p-x-40">
         <view class="activity-title ss-m-b-30">签到说明</view>
         <view class="activity-des">1.已累计签到{{ state.signInfo.totalDay }}天</view>
@@ -160,7 +160,6 @@
     getSignInfo();
     getSignConfigList();
   });
-  // TODO 芋艿：1）css 需要优化，例如说引入的图片；2）删除多余的样式
 </script>
 
 <style lang="scss" scoped>
