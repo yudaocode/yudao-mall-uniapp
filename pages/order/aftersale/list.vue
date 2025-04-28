@@ -85,28 +85,27 @@
     loadStatus: '',
   });
 
-  // TODO 芋艿：【需要】优化点，增加筛选
   const tabMaps = [
     {
       name: '全部',
-      value: 'all',
+      value: [],
     },
-    // {
-    //   name: '申请中',
-    //   value: 'nooper',
-    // },
-    // {
-    //   name: '处理中',
-    //   value: 'ing',
-    // },
-    // {
-    //   name: '已完成',
-    //   value: 'completed',
-    // },
-    // {
-    //   name: '已拒绝',
-    //   value: 'refuse',
-    // },
+    {
+      name: '申请中',
+      value: [10],
+    },
+    {
+      name: '处理中',
+      value: [20, 30, 40],
+    },
+    {
+      name: '已完成',
+      value: [50],
+    },
+    {
+      name: '已拒绝',
+      value: [61, 62, 63],
+    },
   ];
 
   // 切换选项卡
@@ -120,9 +119,9 @@
   async function getOrderList() {
     state.loadStatus = 'loading';
     let { data, code } = await AfterSaleApi.getAfterSalePage({
-      // type: tabMaps[state.currentTab].value,
       pageNo: state.pagination.pageNo,
       pageSize: state.pagination.pageSize,
+      statuses: tabMaps[state.currentTab].value.join(','),
     });
     if (code !== 0) {
       return;
