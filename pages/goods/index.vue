@@ -60,7 +60,7 @@
                 </view>
                 <view class="disContB2" v-if="state.settlementSku.promotionEndTime > 0">
                   距结束仅剩
-                  <countDown
+                  <s-count-down
                     :tipText="' '"
                     :bgColor="bgColor"
                     :dayText="':'"
@@ -234,7 +234,6 @@
   import SpuApi from '@/sheep/api/product/spu';
 
   onPageScroll(() => {});
-  import countDown from '@/sheep/components/countDown/index.vue';
   import OrderApi from '@/sheep/api/trade/order';
   import { SharePageEnum } from '@/sheep/helper/const';
 
