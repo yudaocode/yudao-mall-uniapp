@@ -77,23 +77,48 @@
       <!-- 用户协议的勾选 -->
       <view
         v-if="['accountLogin', 'smsLogin'].includes(authType)"
-        class="agreement-box ss-flex ss-row-center"
+        class="agreement-box ss-flex ss-flex-col ss-col-center"
         :class="{ shake: currentProtocol }"
       >
-        <label class="radio ss-flex ss-col-center" @tap="onChange">
-          <radio
-            :checked="state.protocol"
-            color="var(--ui-BG-Main)"
-            style="transform: scale(0.8)"
-            @tap.stop="onChange"
-          />
-          <view class="agreement-text ss-flex ss-col-center ss-m-l-8">
-            我已阅读并遵守
-            <view class="tcp-text" @tap.stop="onProtocol('用户协议')"> 《用户协议》 </view>
-            <view class="agreement-text">与</view>
-            <view class="tcp-text" @tap.stop="onProtocol('隐私协议')"> 《隐私协议》 </view>
+        <view class="agreement-title ss-m-b-20">请选择是否同意以下协议(请联网查看)：</view>
+        
+        <view class="agreement-options-container">
+          <!-- 同意选项 -->
+          <view class="agreement-option ss-m-b-20">
+            <label class="radio ss-flex ss-col-center" @tap="onAgree">
+              <radio
+                :checked="state.protocol === true"
+                color="var(--ui-BG-Main)"
+                style="transform: scale(0.8)"
+                @tap.stop="onAgree"
+              />
+              <view class="agreement-text ss-flex ss-col-center ss-m-l-8">
+                我已阅读并同意遵守
+                <view class="tcp-text" @tap.stop="onProtocol('用户协议')"> 《用户协议》 </view>
+                <view class="agreement-text">与</view>
+                <view class="tcp-text" @tap.stop="onProtocol('隐私协议')"> 《隐私协议》 </view>
+              </view>
+            </label>
           </view>
-        </label>
+          
+          <!-- 拒绝选项 -->
+          <view class="agreement-option">
+            <label class="radio ss-flex ss-col-center" @tap="onRefuse">
+              <radio
+                :checked="state.protocol === false"
+                color="#ff4d4f"
+                style="transform: scale(0.8)"
+                @tap.stop="onRefuse"
+              />
+              <view class="agreement-text ss-flex ss-col-center ss-m-l-8">
+                我拒绝遵守
+                <view class="tcp-text" @tap.stop="onProtocol('用户协议')"> 《用户协议》 </view>
+                <view class="agreement-text">与</view>
+                <view class="tcp-text" @tap.stop="onProtocol('隐私协议')"> 《隐私协议》 </view>
+              </view>
+            </label>
+          </view>
+        </view>
       </view>
       <view class="safe-box" />
     </view>
@@ -116,14 +141,19 @@
   const authType = computed(() => modalStore.auth);
 
   const state = reactive({
-    protocol: false,
+    protocol: null, // null表示未选择，true表示同意，false表示拒绝
   });
 
   const currentProtocol = ref(false);
 
-  // 勾选协议
-  function onChange() {
-    state.protocol = !state.protocol;
+  // 同意协议
+  function onAgree() {
+    state.protocol = true;
+  }
+  
+  // 拒绝协议
+  function onRefuse() {
+    state.protocol = false;
   }
 
   // 查看协议
@@ -144,12 +174,17 @@
 
   // 第三方授权登陆（微信小程序、Apple）
   const thirdLogin = async (provider) => {
-    if (!state.protocol) {
+    if (state.protocol !== true) {
       currentProtocol.value = true;
       setTimeout(() => {
         currentProtocol.value = false;
       }, 1000);
-      sheep.$helper.toast('请勾选同意');
+      
+      if (state.protocol === false) {
+        sheep.$helper.toast('您已拒绝协议，无法继续登录');
+      } else {
+        sheep.$helper.toast('请选择是否同意协议');
+      }
       return;
     }
     const loginRes = await sheep.$platform.useProvider(provider).login();
@@ -243,5 +278,24 @@
 
   .agreement-text {
     color: $dark-9;
+  }
+  
+  .agreement-title {
+    font-size: 28rpx;
+    color: $dark-9;
+    text-align: left;
+    width: 100%;
+    padding-left: 60rpx;
+  }
+  
+  .agreement-options-container {
+    width: 100%;
+    padding-left: 100rpx;
+  }
+  
+  .agreement-option {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
   }
 </style>
