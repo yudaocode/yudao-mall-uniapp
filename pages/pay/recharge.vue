@@ -1,12 +1,15 @@
 <!-- 充值界面 -->
 <template>
   <s-layout title="充值" class="withdraw-wrap" navbar="inner">
-    <view class="wallet-num-box ss-flex ss-col-center ss-row-between" :style="[
-      {
-        marginTop: '-' + Number(statusBarHeight + 88) + 'rpx',
-        paddingTop: Number(statusBarHeight + 108) + 'rpx',
-      },
-    ]">
+    <view
+      class="wallet-num-box ss-flex ss-col-center ss-row-between"
+      :style="[
+        {
+          marginTop: '-' + Number(statusBarHeight + 88) + 'rpx',
+          paddingTop: Number(statusBarHeight + 108) + 'rpx',
+        },
+      ]"
+    >
       <view class="">
         <view class="num-title">当前余额（元）</view>
         <view class="wallet-num">{{ fen2yuan(userWallet.balance) }}</view>
@@ -20,20 +23,31 @@
         <view class="input-label ss-m-b-50">充值金额</view>
         <view class="input-box ss-flex border-bottom ss-p-b-20">
           <view class="unit">￥</view>
-          <uni-easyinput v-model="state.recharge_money" type="digit" placeholder="请输入充值金额"
-                         :inputBorder="false" />
+          <uni-easyinput
+            v-model="state.recharge_money"
+            type="digit"
+            placeholder="请输入充值金额"
+            :inputBorder="false"
+          />
         </view>
         <view class="face-value-box ss-flex ss-flex-wrap ss-m-y-40">
-          <button class="ss-reset-button face-value-btn" v-for="item in state.packageList" :key="item.money"
-                  :class="[{ 'btn-active': state.recharge_money === fen2yuan(item.payPrice) }]"
-                  @tap="onCard(item.payPrice)">
+          <button
+            class="ss-reset-button face-value-btn"
+            v-for="item in state.packageList"
+            :key="item.money"
+            :class="[{ 'btn-active': state.recharge_money === fen2yuan(item.payPrice) }]"
+            @tap="onCard(item.payPrice)"
+          >
             <text class="face-value-title">{{ fen2yuan(item.payPrice) }}</text>
             <view v-if="item.bonusPrice" class="face-value-tag">
               送 {{ fen2yuan(item.bonusPrice) }} 元
             </view>
           </button>
         </view>
-        <button class="ss-reset-button save-btn ui-BG-Main-Gradient ss-m-t-60 ui-Shadow-Main" @tap="onConfirm">
+        <button
+          class="ss-reset-button save-btn ui-BG-Main-Gradient ss-m-t-60 ui-Shadow-Main"
+          @tap="onConfirm"
+        >
           确认充值
         </button>
       </view>
@@ -47,7 +61,7 @@
   import { onLoad } from '@dcloudio/uni-app';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import PayWalletApi from '@/sheep/api/pay/wallet';
-  import { WxaSubscribeTemplate } from '@/sheep/util/const';
+  import { WxaSubscribeTemplate } from '@/sheep/helper/const';
 
   const userWallet = computed(() => sheep.$store('user').userWallet);
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
@@ -75,14 +89,17 @@
   // 发起支付
   async function onConfirm() {
     const { code, data } = await PayWalletApi.createWalletRecharge({
-      packageId: state.packageList.find((item) => fen2yuan(item.payPrice) === state.recharge_money)?.id,
+      packageId: state.packageList.find((item) => fen2yuan(item.payPrice) === state.recharge_money)
+        ?.id,
       payPrice: state.recharge_money * 100,
     });
     if (code !== 0) {
       return;
     }
     // #ifdef MP
-    sheep.$platform.useProvider('wechat').subscribeMessage(WxaSubscribeTemplate.PAY_WALLET_RECHARGER_SUCCESS);
+    sheep.$platform
+      .useProvider('wechat')
+      .subscribeMessage(WxaSubscribeTemplate.PAY_WALLET_RECHARGER_SUCCESS);
     // #endif
     sheep.$router.go('/pages/pay/index', {
       id: data.payOrderId,

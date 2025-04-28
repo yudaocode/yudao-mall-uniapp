@@ -70,7 +70,7 @@
   import PayOrderApi from '@/sheep/api/pay/order';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import OrderApi from '@/sheep/api/trade/order';
-  import { WxaSubscribeTemplate } from '@/sheep/util/const';
+  import { WxaSubscribeTemplate } from '@/sheep/helper/const';
 
   const state = reactive({
     id: 0, // 支付单号

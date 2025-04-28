@@ -502,7 +502,7 @@
     getRewardActivityRuleItemDescriptions,
   } from '@/sheep/hooks/useGoods';
   import { isArray } from 'lodash-es';
-  import { PromotionActivityTypeEnum } from '@/sheep/util/const';
+  import { PromotionActivityTypeEnum } from '@/sheep/helper/const';
 
   // 数据
   let defaultImgWidth = ref(0);

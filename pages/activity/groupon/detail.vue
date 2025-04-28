@@ -208,7 +208,7 @@
   import { isEmpty } from 'lodash-es';
   import CombinationApi from '@/sheep/api/promotion/combination';
   import SpuApi from '@/sheep/api/product/spu';
-  import { SharePageEnum } from '@/sheep/util/const';
+  import { SharePageEnum } from '@/sheep/helper/const';
 
   const headerBg = sheep.$url.css('/static/img/shop/user/withdraw_bg.png');
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;

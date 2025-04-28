@@ -228,7 +228,7 @@
   import OrderApi from '@/sheep/api/trade/order';
   import TradeConfigApi from '@/sheep/api/trade/config';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
-  import { DeliveryTypeEnum } from '@/sheep/util/const';
+  import { DeliveryTypeEnum } from '@/sheep/helper/const';
 
   const state = reactive({
     orderPayload: {},

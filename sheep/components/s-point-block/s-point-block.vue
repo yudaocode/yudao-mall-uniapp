@@ -141,11 +141,11 @@
   /**
    * 商品卡片
    */
-  import { computed, onMounted, reactive, ref } from 'vue';
+  import { computed, onMounted, reactive } from 'vue';
   import sheep from '@/sheep';
   import SpuApi from '@/sheep/api/product/spu';
   import PointApi from '@/sheep/api/promotion/point';
-  import { PromotionActivityTypeEnum } from '@/sheep/util/const';
+  import { PromotionActivityTypeEnum } from '@/sheep/helper/const';
 
   // 布局类型
   const LayoutTypeEnum = {
@@ -260,10 +260,10 @@
       // 查找对应的 spu 并更新价格
       const spu = state.spuList.find((spu) => activity.spuId === spu.id);
       if (spu) {
-        spu.pointStock = activity.stock
-        spu.pointTotalStock = activity.totalStock
-        spu.point = activity.point
-        spu.pointPrice = activity.price
+        spu.pointStock = activity.stock;
+        spu.pointTotalStock = activity.totalStock;
+        spu.point = activity.point;
+        spu.pointPrice = activity.price;
         // 赋值活动ID，为了点击跳转详情页
         spu.activityId = activity.id;
         // 赋值活动类型

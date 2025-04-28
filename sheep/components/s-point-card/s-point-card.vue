@@ -76,7 +76,12 @@
       <view class="goods-list-box">
         <view
           class="left-list"
-          :style="[{ paddingRight: state.property.space + 'rpx', marginBottom: state.property.space + 'px' }]"
+          :style="[
+            {
+              paddingRight: state.property.space + 'rpx',
+              marginBottom: state.property.space + 'px',
+            },
+          ]"
           v-for="item in state.leftSpuList"
           :key="item.id"
         >
@@ -106,7 +111,12 @@
       <view class="goods-list-box">
         <view
           class="right-list"
-          :style="[{ paddingLeft: state.property.space + 'rpx', marginBottom: state.property.space + 'px' }]"
+          :style="[
+            {
+              paddingLeft: state.property.space + 'rpx',
+              marginBottom: state.property.space + 'px',
+            },
+          ]"
           v-for="item in state.rightSpuList"
           :key="item.id"
         >
@@ -141,10 +151,10 @@
   /**
    * 商品卡片
    */
-  import { computed, nextTick, onMounted, reactive, watch } from 'vue';
+  import { computed, reactive, watch } from 'vue';
   import sheep from '@/sheep';
   import SpuApi from '@/sheep/api/product/spu';
-  import { PromotionActivityTypeEnum } from '@/sheep/util/const';
+  import { PromotionActivityTypeEnum } from '@/sheep/helper/const';
   import { isEmpty } from '@/sheep/helper/utils';
 
   // 布局类型
@@ -162,53 +172,53 @@
     leftSpuList: [],
     rightSpuList: [],
     property: {
-      'layoutType': 'oneColBigImg',
-      'fields': {
-        'name': {
-          'show': true,
-          'color': '#000',
+      layoutType: 'oneColBigImg',
+      fields: {
+        name: {
+          show: true,
+          color: '#000',
         },
-        'introduction': {
-          'show': true,
-          'color': '#999',
+        introduction: {
+          show: true,
+          color: '#999',
         },
-        'price': {
-          'show': true,
-          'color': '#ff3000',
+        price: {
+          show: true,
+          color: '#ff3000',
         },
-        'marketPrice': {
-          'show': true,
-          'color': '#c4c4c4',
+        marketPrice: {
+          show: true,
+          color: '#c4c4c4',
         },
-        'salesCount': {
-          'show': true,
-          'color': '#c4c4c4',
+        salesCount: {
+          show: true,
+          color: '#c4c4c4',
         },
-        'stock': {
-          'show': true,
-          'color': '#c4c4c4',
+        stock: {
+          show: true,
+          color: '#c4c4c4',
         },
       },
-      'badge': {
-        'show': false,
-        'imgUrl': '',
+      badge: {
+        show: false,
+        imgUrl: '',
       },
-      'btnBuy': {
-        'type': 'text',
-        'text': '立即兑换',
-        'bgBeginColor': '#FF6000',
-        'bgEndColor': '#FE832A',
-        'imgUrl': '',
+      btnBuy: {
+        type: 'text',
+        text: '立即兑换',
+        bgBeginColor: '#FF6000',
+        bgEndColor: '#FE832A',
+        imgUrl: '',
       },
-      'borderRadiusTop': 8,
-      'borderRadiusBottom': 8,
-      'space': 8,
-      'style': {
-        'bgType': 'color',
-        'bgColor': '',
-        'marginLeft': 8,
-        'marginRight': 8,
-        'marginBottom': 8,
+      borderRadiusTop: 8,
+      borderRadiusBottom: 8,
+      space: 8,
+      style: {
+        bgType: 'color',
+        bgColor: '',
+        marginLeft: 8,
+        marginRight: 8,
+        marginBottom: 8,
       },
     },
   });
@@ -219,9 +229,13 @@
     },
   });
   // 动态更新 property
-  watch(() => props.property, (newVal) => {
-    state.property = { ...state.property, ...newVal };
-  }, { immediate: true, deep: true });
+  watch(
+    () => props.property,
+    (newVal) => {
+      state.property = { ...state.property, ...newVal };
+    },
+    { immediate: true, deep: true },
+  );
   const { marginLeft, marginRight } = state.property.styles || {};
 
   // 购买按钮样式
@@ -317,7 +331,7 @@
   function getActivityCount() {
     return state.spuList.length;
   }
-  defineExpose({ concatActivity,getActivityCount,calculateGoodsColumn });
+  defineExpose({ concatActivity, getActivityCount, calculateGoodsColumn });
 </script>
 
 <style lang="scss" scoped>

@@ -105,7 +105,7 @@
   import sheep from '@/sheep';
   import { convertProductPropertyList, fen2yuan } from '@/sheep/hooks/useGoods';
   import { isEmpty, min } from 'lodash-es';
-  import { PromotionActivityTypeEnum } from '@/sheep/util/const';
+  import { PromotionActivityTypeEnum } from '@/sheep/helper/const';
 
   const emits = defineEmits(['change', 'addCart', 'buy', 'close']);
   const props = defineProps({

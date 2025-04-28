@@ -3,7 +3,7 @@ import $platform from '@/sheep/platform';
 import $router from '@/sheep/router';
 import $url from '@/sheep/url';
 import BrokerageApi from '@/sheep/api/trade/brokerage';
-import { SharePageEnum } from '@/sheep/util/const';
+import { SharePageEnum } from '@/sheep/helper/const';
 
 // #ifdef H5
 import $wxsdk from '@/sheep/libs/sdk-h5-weixin';

@@ -85,7 +85,10 @@
                 <view class="price-text ss-m-r-16">
                   {{ fen2yuan(state.selectedSku.price || state.goodsInfo.price) }}
                 </view>
-                <view class="origin-price-text" v-if="state.goodsInfo.marketPrice > state.goodsInfo.price">
+                <view
+                  class="origin-price-text"
+                  v-if="state.goodsInfo.marketPrice > state.goodsInfo.price"
+                >
                   {{ fen2yuan(state.selectedSku.marketPrice || state.goodsInfo.marketPrice) }}
                 </view>
               </view>
@@ -205,7 +208,7 @@
 </template>
 
 <script setup>
-  import { reactive, computed, ref, toRaw } from 'vue';
+  import { reactive, computed } from 'vue';
   import { onLoad, onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import CouponApi from '@/sheep/api/promotion/coupon';
@@ -233,8 +236,7 @@
   onPageScroll(() => {});
   import countDown from '@/sheep/components/countDown/index.vue';
   import OrderApi from '@/sheep/api/trade/order';
-  import activity from '@/sheep/api/promotion/activity';
-  import { SharePageEnum } from '@/sheep/util/const';
+  import { SharePageEnum } from '@/sheep/helper/const';
 
   const bgColor = {
     bgColor: '#E93323',

@@ -9,7 +9,7 @@ import $store from '@/sheep/store';
 import $platform from '@/sheep/platform';
 import { showAuthModal } from '@/sheep/hooks/useModal';
 import AuthUtil from '@/sheep/api/member/auth';
-import { getTerminal } from '@/sheep/util/const';
+import { getTerminal } from '@/sheep/helper/const';
 
 const options = {
   // 显示操作成功消息 默认不显示
@@ -80,13 +80,13 @@ http.interceptors.request.use(
     if (config.custom.showLoading) {
       LoadingInstance.count++;
       LoadingInstance.count === 1 &&
-      uni.showLoading({
-        title: config.custom.loadingMsg,
-        mask: true,
-        fail: () => {
-          uni.hideLoading();
-        },
-      });
+        uni.showLoading({
+          title: config.custom.loadingMsg,
+          mask: true,
+          fail: () => {
+            uni.hideLoading();
+          },
+        });
     }
 
     // 增加 token 令牌、terminal 终端、tenant 租户的请求头
@@ -127,7 +127,8 @@ http.interceptors.response.use(
       // 特殊：处理分销用户绑定失败的提示
       if ((response.data.code + '').includes('1011007')) {
         console.error(`分销用户绑定失败，原因：${response.data.msg}`);
-      } else if (response.config.custom.showError) { // 错误提示
+      } else if (response.config.custom.showError) {
+        // 错误提示
         uni.showToast({
           title: response.data.msg || '服务器开小差啦,请稍后再试~',
           icon: 'none',

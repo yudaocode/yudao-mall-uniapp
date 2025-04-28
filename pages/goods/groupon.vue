@@ -159,7 +159,7 @@
   import { useDurationTime, formatGoodsSwiper, fen2yuan } from '@/sheep/hooks/useGoods';
   import CombinationApi from '@/sheep/api/promotion/combination';
   import SpuApi from '@/sheep/api/product/spu';
-  import { SharePageEnum } from '@/sheep/util/const';
+  import { SharePageEnum } from '@/sheep/helper/const';
 
   const headerBg = sheep.$url.css('/static/img/shop/goods/groupon-bg.png');
   const btnBg = sheep.$url.css('/static/img/shop/goods/groupon-btn.png');

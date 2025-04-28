@@ -129,7 +129,7 @@
   import detailCommentCard from './components/detail/detail-comment-card.vue';
   import detailContentCard from './components/detail/detail-content-card.vue';
   import SpuApi from '@/sheep/api/product/spu';
-  import { PromotionActivityTypeEnum, SharePageEnum } from '@/sheep/util/const';
+  import { PromotionActivityTypeEnum, SharePageEnum } from '@/sheep/helper/const';
   import PointApi from '@/sheep/api/promotion/point';
 
   const headerBg = sheep.$url.css('/static/img/shop/goods/score-bg.png');

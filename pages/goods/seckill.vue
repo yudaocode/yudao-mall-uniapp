@@ -151,7 +151,7 @@
   import detailProgress from './components/detail/detail-progress.vue';
   import SeckillApi from '@/sheep/api/promotion/seckill';
   import SpuApi from '@/sheep/api/product/spu';
-  import { getTimeStatusEnum, SharePageEnum, TimeStatusEnum } from '@/sheep/util/const';
+  import { getTimeStatusEnum, SharePageEnum, TimeStatusEnum } from '@/sheep/helper/const';
 
   const headerBg = sheep.$url.css('/static/img/shop/goods/seckill-bg.png');
   const btnBg = sheep.$url.css('/static/img/shop/goods/seckill-btn.png');
