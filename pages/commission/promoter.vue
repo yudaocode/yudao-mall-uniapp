@@ -55,8 +55,8 @@
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import { reactive } from 'vue';
   import _ from 'lodash-es';
-  import { resetPagination } from '@/sheep/helper/utils';
   import BrokerageApi from '@/sheep/api/trade/brokerage';
+  import { resetPagination, getWeekTimes, getMonthTimes } from '@/sheep/helper/utils';
 
   const tabMaps = ['周排行', '月排行'];
 
@@ -128,40 +128,6 @@
 
   function formatDate(date) {
     return sheep.$helper.timeFormat(date, 'yyyy-mm-dd hh:MM:ss');
-  }
-
-  // TODO 芋艿：此处可考虑抽离
-  // 此处可考虑抽离
-  /**
-   * 获得当前周的开始和结束时间
-   */
-  function getWeekTimes() {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    return [
-      new Date(today.getFullYear(), today.getMonth(), today.getDate() - dayOfWeek, 0, 0, 0),
-      new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate() + (6 - dayOfWeek),
-        23,
-        59,
-        59,
-      ),
-    ];
-  }
-
-  /**
-   * 获得当前月的开始和结束时间
-   */
-  function getMonthTimes() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
-    const startDate = new Date(year, month, 1, 0, 0, 0);
-    const nextMonth = new Date(year, month + 1, 1);
-    const endDate = new Date(nextMonth.getTime() - 1);
-    return [startDate, endDate];
   }
 </script>
 
