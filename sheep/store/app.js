@@ -63,7 +63,7 @@ const app = defineStore({
       // 加载装修配置
       await adaptTemplate(this.template, templateId);
 
-      // TODO 芋艿：未来支持管理后台可配；对应 https://api.shopro.sheepjs.com/shop/api/init
+      // TODO 芋艿：【初始化优化】未来支持管理后台可配；对应 https://api.shopro.sheepjs.com/shop/api/init
       if (true) {
         this.info = {
           name: '芋道商城',

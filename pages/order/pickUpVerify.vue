@@ -18,12 +18,11 @@
       </view>
       <view class="num">{{ orderInfo.pickUpVerifyCode }}</view>
       <view class="rules">
-        <!-- TODO puhui999: 需要后端放回：使用 receiveTime 即可 -->
         <view class="item">
           <view class="rulesTitle flex flex-wrap align-center"> 核销时间 </view>
           <view class="info">
             每日：
-            <text class="time">2020-2-+52</text>
+            <text class="time">{{ systemStore.openingTime }} - {{ systemStore.closingTime }}</text>
           </view>
         </view>
         <view class="item">
@@ -78,7 +77,6 @@
    * 打开地图
    */
   const showMaoLocation = () => {
-    console.log(props.systemStore);
     if (!props.systemStore.latitude || !props.systemStore.longitude) {
       sheep.$helper.toast('缺少经纬度信息无法查看地图!');
       return;
@@ -91,6 +89,7 @@
       address: props.systemStore.areaName + props.systemStore.detailAddress,
     });
   };
+
   /**
    * 拨打电话
    */

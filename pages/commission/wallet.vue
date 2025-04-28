@@ -64,7 +64,7 @@
         </uni-datetime-picker>
 
         <view class="total-box">
-          <!-- TODO 芋艿：这里暂时不考虑做 -->
+          <!-- TODO 芋艿：【钱包-可优化】这里暂时不考虑做 -->
           <!-- <view class="ss-m-b-10">总收入￥{{ state.pagination.income.toFixed(2) }}</view> -->
           <!-- <view>总支出￥{{ (-state.pagination.expense).toFixed(2) }}</view> -->
         </view>

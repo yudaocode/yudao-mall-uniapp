@@ -1,7 +1,6 @@
 <!-- 订单详情 -->
 <template>
   <s-layout title="订单详情" class="index-wrap" navbar="inner">
-    <!-- 订单状态 TODO -->
     <view
       class="state-box ss-flex-col ss-col-center ss-row-right"
       :style="[
@@ -12,37 +11,36 @@
       ]"
     >
       <view class="ss-flex ss-m-t-32 ss-m-b-20">
+        <!-- 待支付 -->
         <image
-          v-if="
-            state.orderInfo.status_code == 'unpaid' ||
-            state.orderInfo.status === 10 || // 待发货
-            state.orderInfo.status_code == 'nocomment'
-          "
+          v-if="state.orderInfo.status === 0"
+          class="state-img"
+          :src="sheep.$url.static('/static/img/shop/order/no_pay.png')"
+        />
+        <!-- 待发货 -->
+        <image
+          v-if="state.orderInfo.status === 10"
           class="state-img"
           :src="sheep.$url.static('/static/img/shop/order/order_loading.png')"
-        >
-        </image>
+        />
+        <!-- 已完成 -->
         <image
-          v-if="
-            state.orderInfo.status_code == 'completed' ||
-            state.orderInfo.status_code == 'refund_agree'
-          "
+          v-else-if="state.orderInfo.status === 30"
           class="state-img"
           :src="sheep.$url.static('/static/img/shop/order/order_success.png')"
-        >
-        </image>
+        />
+        <!-- 已关闭 -->
         <image
-          v-if="state.orderInfo.status_code == 'cancel' || state.orderInfo.status_code == 'closed'"
+          v-else-if="state.orderInfo.status === 40"
           class="state-img"
           :src="sheep.$url.static('/static/img/shop/order/order_close.png')"
-        >
-        </image>
+        />
+        <!-- 已发货 -->
         <image
-          v-if="state.orderInfo.status_code == 'noget'"
+          v-else-if="state.orderInfo.status === 20"
           class="state-img"
           :src="sheep.$url.static('/static/img/shop/order/order_express.png')"
-        >
-        </image>
+        />
         <view class="ss-font-30">{{ formatOrderStatus(state.orderInfo) }}</view>
       </view>
       <view class="ss-font-26 ss-m-x-20 ss-m-b-70">
@@ -331,7 +329,7 @@
   // 确认收货
   async function onConfirm(orderId, ignore = false) {
     // 需开启确认收货组件
-    // todo: 芋艿：待接入微信 https://gitee.com/sheepjs/shopro-uniapp/commit/a6bbba49b84dd418b84c5fefc8b7463df8f4901f
+    // todo: 芋艿：【微信物流】待接入微信 https://gitee.com/sheepjs/shopro-uniapp/commit/a6bbba49b84dd418b84c5fefc8b7463df8f4901f
     // 1.怎么检测是否开启了发货组件功能？如果没有开启的话就不能在这里return出去
     // 2.如果开启了走mpConfirm方法,需要在App.vue的show方法中拿到确认收货结果
     let isOpenBusinessView = true;
@@ -406,7 +404,7 @@
     // 对详情数据进行适配
     let res;
     if (state.comeinType === 'wechat') {
-      // TODO 芋艿：微信场景下
+      // TODO 芋艿：【微信物流】微信场景下
       res = await OrderApi.getOrderDetail(id, {
         merchant_trade_no: state.merchantTradeNo,
       });
@@ -439,7 +437,7 @@
     if (options.id) {
       id = options.id;
     }
-    // TODO 芋艿：下面两个变量，后续接入
+    // TODO 芋艿：【微信物流】下面两个变量，后续接入
     state.comeinType = options.comein_type;
     if (state.comeinType === 'wechat') {
       state.merchantTradeNo = options.merchant_trade_no;

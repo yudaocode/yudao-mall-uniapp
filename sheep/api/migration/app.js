@@ -1,6 +1,6 @@
 import request from '@/sheep/request';
 
-// TODO 芋艿：小程序直播还不支持
+// TODO 芋艿：【直播】小程序直播还不支持
 export default {
   //小程序直播
   mplive: {
@@ -10,12 +10,12 @@ export default {
         method: 'GET',
         params: {
           ids: ids.join(','),
-        }
+        },
       }),
     getMpLink: () =>
       request({
         url: 'app/mplive/getMpLink',
-        method: 'GET'
+        method: 'GET',
       }),
   },
 };

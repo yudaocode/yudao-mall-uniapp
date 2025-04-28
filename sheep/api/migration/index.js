@@ -6,5 +6,5 @@ Object.keys(files).forEach((key) => {
     [key.replace(/(.*\/)*([^.]+).*/gi, '$2')]: files[key].default,
   };
 });
-
+// TODO @芋艿：要不要删除
 export default api;

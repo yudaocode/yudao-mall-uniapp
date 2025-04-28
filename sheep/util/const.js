@@ -63,25 +63,6 @@ export const CouponTemplateValidityTypeEnum = {
   },
 };
 
-/**
- * 营销的商品范围枚举
- */
-export const PromotionProductScopeEnum = {
-  ALL: {
-    scope: 1,
-    name: '通用劵',
-  },
-  SPU: {
-    scope: 2,
-    name: '商品劵',
-  },
-  CATEGORY: {
-    scope: 3,
-    name: '品类劵',
-  },
-};
-
-
 // 时间段的状态枚举
 export const TimeStatusEnum = {
   WAIT_START: '即将开始',
@@ -142,31 +123,33 @@ export const SharePageEnum = {
   HOME: {
     name: '首页',
     page: '/pages/index/index',
-    value: '1'
+    value: '1',
   },
   GOODS: {
     name: '普通商品页',
     page: '/pages/goods/index',
-    value: '2'
+    value: '2',
   },
   GROUPON: {
     name: '拼团商品页',
     page: '/pages/goods/groupon',
-    value: '3'
+    value: '3',
   },
   SECKILL: {
     name: '秒杀商品页',
     page: '/pages/goods/seckill',
-    value: '4'
+    value: '4',
   },
   GROUPON_DETAIL: {
     name: '参与拼团页',
     page: '/pages/activity/groupon/detail',
-    value: '5'
+    value: '5',
   },
   POINT: {
     name: '积分商品页',
     page: '/pages/goods/point',
-    value: '6'
-  }
-}
+    value: '6',
+  },
+};
+
+// TODO @芋艿：融合下；

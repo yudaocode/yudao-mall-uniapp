@@ -78,7 +78,7 @@
             limit="1"
             mode="grid"
             :imageStyles="{ width: '168rpx', height: '168rpx' }"
-            @success="(payload) => state.accountInfo.accountQrCodeUrl = payload.tempFilePaths[0]"
+            @success="(payload) => (state.accountInfo.accountQrCodeUrl = payload.tempFilePaths[0])"
           />
         </view>
       </view>
@@ -206,7 +206,6 @@
   // 提交提现
   const onConfirm = async () => {
     // 参数校验
-    //debugger;
     if (
       !state.accountInfo.price ||
       state.accountInfo.price > state.brokerageInfo.price ||
