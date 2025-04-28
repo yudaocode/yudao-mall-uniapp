@@ -4,7 +4,7 @@ import $platform from '@/sheep/platform';
 import $router from '@/sheep/router';
 import user from './user';
 import sys from './sys';
-import { baseUrl } from '@/sheep/config';
+import { baseUrl, h5Url } from '@/sheep/config';
 
 const app = defineStore({
   id: 'app',
@@ -78,7 +78,7 @@ const app = defineStore({
         this.platform = {
           share: {
             methods: ['forward', 'poster', 'link'],
-            linkAddress: 'http://127.0.0.1:3000', // TODO 芋艿：可以考虑改到 .env 那
+            linkAddress: h5Url,
             posterInfo: {
               user_bg: '/static/img/shop/config/user-poster-bg.png',
               goods_bg: '/static/img/shop/config/goods-poster-bg.png',
