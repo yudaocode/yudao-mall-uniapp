@@ -153,7 +153,7 @@
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import SpuApi from '@/sheep/api/product/spu';
   import CategoryApi from '@/sheep/api/product/category';
-  import { resetPagination } from '@/sheep/util';
+  import { resetPagination } from '@/sheep/helper/utils';
 
   const state = reactive({
     id: 0, // 优惠劵模版编号 templateId

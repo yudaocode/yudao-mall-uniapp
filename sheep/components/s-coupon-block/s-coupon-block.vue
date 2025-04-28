@@ -56,7 +56,7 @@
   import CouponApi from '@/sheep/api/promotion/coupon';
   import { ref, onMounted, computed } from 'vue';
   import { CouponTemplateValidityTypeEnum, PromotionDiscountTypeEnum } from '@/sheep/helper/const';
-  import { floatToFixed2, formatDate } from '@/sheep/util';
+  import { floatToFixed2, formatDate } from '@/sheep/helper/utils';
 
   const props = defineProps({
     data: {

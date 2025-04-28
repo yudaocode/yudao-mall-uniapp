@@ -75,7 +75,7 @@
   import { onLoad, onPageScroll, onReachBottom } from '@dcloudio/uni-app';
   import { reactive } from 'vue';
   import _ from 'lodash-es';
-  import { resetPagination } from '@/sheep/util';
+  import { resetPagination } from '@/sheep/helper/utils';
   import BrokerageApi from '@/sheep/api/trade/brokerage';
   import { fen2yuan } from '../../sheep/hooks/useGoods';
 
@@ -131,7 +131,7 @@
       pageNo: state.pagination.pageNo,
       bizType: 1, // 获得推广佣金
       status: tab.value,
-    }
+    };
     if (tab.value < 0) {
       delete queryParams.status;
     }

@@ -47,9 +47,8 @@
   import MessageListItem from '@/pages/chat/components/messageListItem.vue';
   import { reactive, ref } from 'vue';
   import KeFuApi from '@/sheep/api/promotion/kefu';
-  import { isEmpty } from '@/sheep/helper/utils';
+  import { isEmpty, formatDate } from '@/sheep/helper/utils';
   import sheep from '@/sheep';
-  import { formatDate } from '@/sheep/util';
 
   const sys_navBar = sheep.$platform.navbar;
   const messageList = ref([]); // 消息列表

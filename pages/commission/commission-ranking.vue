@@ -60,7 +60,7 @@
   import BrokerageApi from '@/sheep/api/trade/brokerage';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import _ from 'lodash-es';
-  import { resetPagination } from '@/sheep/util';
+  import { resetPagination } from '@/sheep/helper/utils';
 
   const tabMaps = ['周排行', '月排行'];
 

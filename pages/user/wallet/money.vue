@@ -92,7 +92,7 @@
   import _ from 'lodash-es';
   import PayWalletApi from '@/sheep/api/pay/wallet';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
-  import { resetPagination } from '@/sheep/util';
+  import { resetPagination } from '@/sheep/helper/utils';
 
   const headerBg = sheep.$url.css('/static/img/shop/user/wallet_card_bg.png');
 

@@ -55,7 +55,7 @@
   import FileApi from '@/sheep/api/infra/file';
   import KeFuApi from '@/sheep/api/promotion/kefu';
   import { useWebSocket } from '@/sheep/hooks/useWebSocket';
-  import { jsonParse } from '@/sheep/util';
+  import { jsonParse } from '@/sheep/helper/utils';
 
   const sys_navBar = sheep.$platform.navbar;
 
@@ -105,7 +105,7 @@
     }
 
     // 第二次点击关闭
-    if (chat.showTools && chat.toolsMode === mode){
+    if (chat.showTools && chat.toolsMode === mode) {
       handleToolsClose();
       return;
     }
@@ -115,10 +115,10 @@
       chat.toolsMode = '';
     }
     // 延迟打开等一下过度效果
-    setTimeout(()=>{
+    setTimeout(() => {
       chat.toolsMode = mode;
       chat.showTools = true;
-    }, 200)
+    }, 200);
   }
 
   function onShowSelect(mode) {

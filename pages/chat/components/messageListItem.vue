@@ -69,10 +69,12 @@
         </template>
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.PRODUCT">
           <div class="ss-m-b-10">
-          <GoodsItem
-            :goodsData="getMessageContent(message)"
-            @tap="sheep.$router.go('/pages/goods/index', { id: getMessageContent(message).spuId })"
-          />
+            <GoodsItem
+              :goodsData="getMessageContent(message)"
+              @tap="
+                sheep.$router.go('/pages/goods/index', { id: getMessageContent(message).spuId })
+              "
+            />
           </div>
         </template>
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.ORDER">
@@ -103,7 +105,7 @@
   import { KeFuMessageContentTypeEnum, UserTypeEnum } from '@/pages/chat/util/constants';
   import { emojiList } from '@/pages/chat/util/emoji';
   import sheep from '@/sheep';
-  import { formatDate, jsonParse } from '@/sheep/util';
+  import { formatDate, jsonParse } from '@/sheep/helper/utils';
   import GoodsItem from '@/pages/chat/components/goods.vue';
   import OrderItem from '@/pages/chat/components/order.vue';
 

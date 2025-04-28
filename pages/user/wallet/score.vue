@@ -91,7 +91,7 @@
   import _ from 'lodash-es';
   import dayjs from 'dayjs';
   import PointApi from '@/sheep/api/member/point';
-  import { resetPagination } from '@/sheep/util';
+  import { resetPagination } from '@/sheep/helper/utils';
 
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
   const userInfo = computed(() => sheep.$store('user').userInfo);

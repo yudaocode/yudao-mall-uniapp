@@ -131,7 +131,7 @@
   import _ from 'lodash-es';
   import { isEmpty } from 'lodash-es';
   import OrderApi from '@/sheep/api/trade/order';
-  import { resetPagination } from '@/sheep/util';
+  import { resetPagination } from '@/sheep/helper/utils';
 
   // 数据
   const state = reactive({
