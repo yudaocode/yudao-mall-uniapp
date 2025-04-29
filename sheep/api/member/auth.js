@@ -56,10 +56,10 @@ const AuthUtil = {
       url: '/member/auth/refresh-token',
       method: 'POST',
       params: {
-        refreshToken
+        refreshToken,
       },
       custom: {
-        loading: false, // 不用加载中
+        showLoading: false, // 不用加载中
         showError: false, // 不展示错误提示
       },
     });
@@ -103,7 +103,7 @@ const AuthUtil = {
       data: {
         phoneCode,
         loginCode,
-        state
+        state,
       },
       custom: {
         showSuccess: true,
@@ -118,13 +118,13 @@ const AuthUtil = {
       url: '/member/auth/create-weixin-jsapi-signature',
       method: 'POST',
       params: {
-        url
+        url,
       },
       custom: {
         showError: false,
         showLoading: false,
       },
-    })
+    });
   },
   //
 };
