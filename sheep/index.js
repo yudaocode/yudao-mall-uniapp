@@ -1,3 +1,4 @@
+import $api from '@/sheep/api';
 import $url from '@/sheep/url';
 import $router from '@/sheep/router';
 import $platform from '@/sheep/platform';
@@ -14,6 +15,7 @@ dayjs.extend(relativeTime);
 dayjs.extend(duration);
 
 const sheep = {
+  $api,
   $store,
   $url,
   $router,
