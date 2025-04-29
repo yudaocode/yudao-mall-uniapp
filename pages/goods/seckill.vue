@@ -226,6 +226,11 @@
   // 查询活动
   const getActivity = async (id) => {
     const { data } = await SeckillApi.getSeckillActivity(id);
+    if (!data) {
+      state.goodsInfo = null;
+      state.skeletonLoading = false;
+      return;
+    }
     activity.value = data;
     timeStatusEnum.value = getTimeStatusEnum(activity.value.startTime, activity.value.endTime);
     state.percent = 100 - (data.stock / data.totalStock) * 100;
@@ -236,6 +241,11 @@
   // 查询商品
   const getSpu = async (id) => {
     const { data } = await SpuApi.getSpuDetail(id);
+    if (!data) {
+      state.goodsInfo = null;
+      state.skeletonLoading = false;
+      return;
+    }
     data.activity_type = 'seckill';
     state.goodsInfo = data;
     // 处理轮播图
@@ -274,6 +284,7 @@
     // 非法参数
     if (!options.id) {
       state.goodsInfo = null;
+      state.skeletonLoading = false;
       return;
     }
 

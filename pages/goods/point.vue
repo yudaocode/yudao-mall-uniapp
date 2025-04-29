@@ -210,18 +210,14 @@
     };
   });
 
-  const getShowPriceText = computed(() => {
-    let priceText = `￥${fen2yuan(state.goodsInfo.price)}`;
-    if (!isEmpty(state.selectedSku)) {
-      const sku = state.selectedSku;
-      priceText = `${sku.point}${!sku.pointPrice ? '' : `+￥${fen2yuan(sku.pointPrice)}`}`;
-    }
-    return priceText;
-  });
-
   // 查询活动
   const getActivity = async (id) => {
     const { data } = await PointApi.getPointActivity(id);
+    if (!data) {
+      state.goodsInfo = null;
+      state.skeletonLoading = false;
+      return;
+    }
     activity.value = data;
     // 查询商品
     await getSpu(data.spuId);
@@ -230,6 +226,11 @@
   // 查询商品
   const getSpu = async (id) => {
     const { data } = await SpuApi.getSpuDetail(id);
+    if (!data) {
+      state.goodsInfo = null;
+      state.skeletonLoading = false;
+      return;
+    }
     data.activity_type = PromotionActivityTypeEnum.POINT.type;
     state.goodsInfo = data;
     state.goodsInfo.stock = Math.min(data.stock, activity.value.stock);
@@ -258,6 +259,7 @@
     // 非法参数
     if (!options.id) {
       state.goodsInfo = null;
+      state.skeletonLoading = false;
       return;
     }
 

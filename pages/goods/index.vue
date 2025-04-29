@@ -387,19 +387,22 @@
     // 非法参数
     if (!options.id) {
       state.goodsInfo = null;
+      state.skeletonLoading = false;
       return;
     }
     state.goodsId = options.id;
     // 1. 加载商品信息
     SpuApi.getSpuDetail(state.goodsId).then((res) => {
-      // 未找到商品
       if (res.code !== 0 || !res.data) {
         state.goodsInfo = null;
+        state.skeletonLoading = false;
         return;
       }
       // 加载到商品
       state.skeletonLoading = false;
       state.goodsInfo = res.data;
+      // 获取结算信息
+      getSettlementByIds(state.goodsId);
       // 加载是否收藏
       if (isLogin.value) {
         FavoriteApi.isFavoriteExists(state.goodsId, 'goods').then((res) => {
@@ -421,8 +424,6 @@
       }
       state.activityList = res.data;
     });
-    //获取结算信息
-    getSettlementByIds(state.goodsId);
   });
 </script>
 

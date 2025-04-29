@@ -258,14 +258,25 @@
     // 非法参数
     if (!options.id) {
       state.goodsInfo = null;
+      state.skeletonLoading = false;
       return;
     }
     state.grouponId = options.id;
     // 加载活动信息
     const { code, data: activity } = await CombinationApi.getCombinationActivity(state.grouponId);
+    if (code !== 0) {
+      state.goodsInfo = null;
+      state.skeletonLoading = false;
+      return;
+    }
     state.activity = activity;
     // 加载商品信息
     const { data: spu } = await SpuApi.getSpuDetail(activity.spuId);
+    if (code !== 0) {
+      state.goodsInfo = null;
+      state.skeletonLoading = false;
+      return;
+    }
     state.goodsId = spu.id;
 
     // 默认显示最低价
