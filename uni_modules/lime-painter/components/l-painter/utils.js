@@ -3,8 +3,7 @@ export const isBase64 = (path) => /^data:image\/(\w+);base64/.test(path);
 export function sleep(delay) {
 	return new Promise(resolve => setTimeout(resolve, delay))
 }
-let platform = uni.getDeviceInfo().platform
-let SDKVersion = uni.getSystemInfoSync().SDKVersion
+let {platform, SDKVersion} = uni.getSystemInfoSync() 
 export const isPC = /windows|mac/.test(platform)
 // 缓存图片
 let cache = {}
@@ -317,7 +316,7 @@ export function getImageInfo(path, useCORS) {
 					// #ifdef APP-PLUS
 					// console.log('getImageInfo', +new Date() - time)
 					// ios 比较严格 可能需要设置跨域
-					if(uni.getDeviceInfo().osName === 'ios' && useCORS) {
+					if(uni.getSystemInfoSync().osName == 'ios' && useCORS) {
 						pathToBase64(image.path).then(base64 => {
 							image.path = base64
 							cache[path] = image

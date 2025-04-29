@@ -1,9 +1,7 @@
 # Painter 画板 测试版
 
 > uniapp 海报画板，更优雅的海报生成方案  
-> [查看更多 站点 1](https://limeui.qcoon.cn/#/painter)  
-> [查看更多 站点 2](http://liangei.gitee.io/limeui/#/painter)  
-> Q 群：1169785031
+> [查看更多](https://limeui.qcoon.cn/#/painter)  
 
 ## 平台兼容
 

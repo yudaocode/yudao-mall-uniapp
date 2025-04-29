@@ -1,7 +1,7 @@
 {
   "id": "lime-painter",
   "displayName": "海报画板",
-  "version": "1.9.6.5",
+  "version": "1.9.6.6",
   "description": "一款canvas海报组件，更优雅的海报生成方案，有限的支持富文本",
   "keywords": [
     "海报",
