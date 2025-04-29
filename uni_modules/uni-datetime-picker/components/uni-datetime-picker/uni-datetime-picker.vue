@@ -473,7 +473,7 @@
 				right.setDate(this.$refs.right.nowDate.fullDate)
 			},
 			platform() {
-				const systemInfo = uni.getSystemInfoSync()
+				const systemInfo = uni.getWindowInfo()
 				this.isPhone = systemInfo.windowWidth <= 500
 				this.windowWidth = systemInfo.windowWidth
 			},

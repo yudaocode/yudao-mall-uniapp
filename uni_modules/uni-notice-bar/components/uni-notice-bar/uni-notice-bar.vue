@@ -187,7 +187,7 @@
 					// #endif
 					// #ifdef APP-NVUE
 					dom.getComponentRect(this.$refs['animationEle'], (res) => {
-						let winWidth = uni.getSystemInfoSync().windowWidth
+						let winWidth = uni.getWindowInfo().windowWidth
 						this.textWidth = res.size.width
 						animation.transition(this.$refs['animationEle'], {
 							styles: {

@@ -60,7 +60,7 @@
 				}
 			},
 			dpr() {
-				return this.pixelRatio || uni.getSystemInfoSync().pixelRatio;
+				return this.pixelRatio || uni.getWindowInfo().pixelRatio;
 			},
 			boardWidth() {
 				const {width = 0} = (this.elements && this.elements.css) || this.elements || this
@@ -168,7 +168,7 @@
 			},
 			runTask(){
 				while(this.tasks.length){
-					const task = this.tasks.shift()	
+					const task = this.tasks.shift()
 					 this.canvasToTempFilePath(task)
 				}
 			},
@@ -199,7 +199,7 @@
 				// #endif
 				await this.getSize(args)
 				const ctx = await this.getContext();
-				
+
 				let {
 					use2dCanvas,
 					boardWidth,
@@ -243,7 +243,7 @@
 						}
 					}
 					this.painter = new Painter(param)
-				} 
+				}
 				try{
 					// vue3 赋值给data会引起图片无法绘制
 					const { width, height } = await this.painter.source(JSON.parse(JSON.stringify(args)))
@@ -278,7 +278,7 @@
 				}catch(e){
 					//TODO handle the exception
 				}
-				
+
 			},
 			canvasDraw(flag = false) {
 				return new Promise((resolve, reject) => this.ctx.draw(flag, () => setTimeout(() => resolve(), this
@@ -308,7 +308,7 @@
 										this.use2dCanvas = false;
 										this.canvas = res;
 									}
-									
+
 									// 钉钉小程序框架不支持 measureText 方法，用此方法 mock
 									if (!ctx.measureText) {
 										function strLen(str) {
@@ -334,7 +334,7 @@
 											};
 										}
 									}
-									
+
 									// #ifdef MP-ALIPAY
 									ctx.scale(dpr, dpr);
 									// #endif
@@ -384,7 +384,7 @@
 							this.$emit('fail', e)
 						}
 					}
-					
+
 					let { top: y = 0, left: x = 0, width, height } = this.boundary || this;
 					// let destWidth = width * dpr;
 					// let destHeight = height * dpr;
@@ -392,7 +392,7 @@
 					// width = destWidth;
 					// height = destHeight;
 					// #endif
-					
+
 					const copyArgs = Object.assign({
 						// x,
 						// y,

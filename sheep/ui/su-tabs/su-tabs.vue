@@ -72,7 +72,7 @@
 </template>
 
 <script>
-  import { deepMerge, addStyle, addUnit, sleep, getPx, sys } from '@/sheep/helper';
+  import { deepMerge, addStyle, addUnit, sleep, getPx } from '@/sheep/helper';
   // #ifdef APP-NVUE
   const animation = uni.requireNativePlugin('animation');
   const dom = uni.requireNativePlugin('dom');
@@ -221,7 +221,8 @@
     methods: {
       $uGetRect(selector, all) {
         return new Promise((resolve) => {
-          uni.createSelectorQuery()
+          uni
+            .createSelectorQuery()
             .in(this)
             [all ? 'selectAll' : 'select'](selector)
             .boundingClientRect((rect) => {
@@ -301,7 +302,7 @@
           return total + curr.rect.width;
         }, 0);
         // 此处为屏幕宽度
-        const windowWidth = sys().windowWidth;
+        const windowWidth = uni.getWindowInfo().windowWidth;
         // 将活动的tabs-item移动到屏幕正中间，实际上是对scroll-view的移动
         let scrollLeft =
           offsetLeft -

@@ -6,16 +6,13 @@ import {
 	networkReg
 } from './utils';
 const dom = weex.requireModule('dom')
-import {
-	version
-} from '../../package.json'
 
 export default {
 	data() {
 		return {
 			tempFilePath: [],
 			isInitFile: false,
-			osName: uni.getSystemInfoSync().osName
+			osName: uni.getDeviceInfo().osName
 		}
 	},
 	methods: {

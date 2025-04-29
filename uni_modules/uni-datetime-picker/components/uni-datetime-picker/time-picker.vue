@@ -432,7 +432,7 @@
 
 		mounted() {
 			// #ifdef APP-NVUE
-			const res = uni.getSystemInfoSync();
+			const res = uni.getWindowInfo();
 			this.fixNvueBug = {
 				top: res.windowHeight / 2,
 				left: res.windowWidth / 2

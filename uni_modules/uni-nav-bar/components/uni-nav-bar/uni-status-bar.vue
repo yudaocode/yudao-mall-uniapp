@@ -13,7 +13,7 @@
 			}
 		},
 		mounted() {
-			this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px'
+			this.statusBarHeight = uni.getWindowInfo().statusBarHeight + 'px'
 		}
 	}
 </script>
