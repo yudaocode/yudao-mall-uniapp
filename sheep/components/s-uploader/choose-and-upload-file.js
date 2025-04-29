@@ -116,26 +116,14 @@ function normalizeChooseAndUploadFileRes(res, fileType) {
   return res;
 }
 
-function convertToArrayBuffer(uniFile) {
-  return new Promise((resolve, reject) => {
+async function readFile(uniFile) {
+  // 微信小程序
+  if (uni.getFileSystemManager) {
     const fs = uni.getFileSystemManager();
-
-    fs.readFile({
-      filePath: uniFile.path, // 确保路径正确
-      success: (fileRes) => {
-        try {
-          // 将读取的内容转换为 ArrayBuffer
-          const arrayBuffer = new Uint8Array(fileRes.data).buffer;
-          resolve(arrayBuffer);
-        } catch (error) {
-          reject(new Error(`转换为 ArrayBuffer 失败: ${error.message}`));
-        }
-      },
-      fail: (error) => {
-        reject(new Error(`读取文件失败: ${error.errMsg}`));
-      },
-    });
-  });
+    return fs.readFileSync(uniFile.path);
+  }
+  // H5 等
+  return uniFile.arrayBuffer();
 }
 
 function uploadCloudFiles(files, max = 5, onUploadProgress) {
@@ -187,6 +175,22 @@ function uploadCloudFiles(files, max = 5, onUploadProgress) {
   });
 }
 
+function uploadFilesFromPath(path) {
+  // 目的：用于微信小程序，选择图片时，只有 path
+  return uploadFiles(
+    Promise.resolve({
+      tempFiles: [
+        {
+          path,
+          type: 'image/jpeg',
+          name: path.includes('/') ? path.substring(path.lastIndexOf('/') + 1) : path,
+        },
+      ],
+    }),
+    {},
+  );
+}
+
 async function uploadFiles(choosePromise, { onChooseFile, onUploadProgress }) {
   // 获取选择的文件
   const res = await choosePromise;
@@ -210,28 +214,26 @@ async function uploadFiles(choosePromise, { onChooseFile, onUploadProgress }) {
         // 1.1 获取文件预签名地址
         const { data: presignedInfo } = await FileApi.getFilePresignedUrl(file.name);
         // 1.2 获取二进制文件对象
-        const fileBuffer = await convertToArrayBuffer(file);
+        const fileBuffer = await readFile(file);
 
         // 返回上传的 Promise
         return new Promise((resolve, reject) => {
+          // 1.3. 上传文件到 S3
           uni.request({
-            url: presignedInfo.uploadUrl, // 预签名的上传 URL
-            method: 'PUT', // 使用 PUT 方法
+            url: presignedInfo.uploadUrl,
+            method: 'PUT',
             header: {
-              'Content-Type':
-                file.fileType + '/' + file.name.substring(file.name.lastIndexOf('.') + 1), // 设置内容类型
+              'Content-Type': file.type,
             },
-            data: fileBuffer, // 文件的路径，适用于小程序
+            data: fileBuffer,
             success: (res) => {
               // 1.4. 记录文件信息到后端（异步）
               createFile(presignedInfo, file);
               // 1.5. 重新赋值
               file.url = presignedInfo.url;
-              console.log('上传成功:', res);
               resolve(file);
             },
             fail: (err) => {
-              console.error('上传失败:', err);
               reject(err);
             },
           });
@@ -296,4 +298,4 @@ const UPLOAD_TYPE = {
   SERVER: 'server',
 };
 
-export { chooseAndUploadFile, uploadCloudFiles };
+export { chooseAndUploadFile, uploadCloudFiles, uploadFilesFromPath };

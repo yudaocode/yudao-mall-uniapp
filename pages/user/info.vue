@@ -185,8 +185,11 @@
   import sheep from '@/sheep';
   import { clone } from 'lodash-es';
   import { showAuthModal } from '@/sheep/hooks/useModal';
-  import FileApi from '@/sheep/api/infra/file';
   import UserApi from '@/sheep/api/member/user';
+  import {
+    chooseAndUploadFile,
+    uploadFilesFromPath,
+  } from '@/sheep/components/s-uploader/choose-and-upload-file';
 
   const state = reactive({
     model: {}, // 个人信息
@@ -220,28 +223,22 @@
   };
 
   // 选择微信的头像，进行上传
-  function onChooseAvatar(e) {
+  async function onChooseAvatar(e) {
+    debugger;
     const tempUrl = e.detail.avatarUrl || '';
-    uploadAvatar(tempUrl);
+    if (!tempUrl) return;
+    const files = await uploadFilesFromPath(tempUrl);
+    if (files.length > 0) {
+      state.model.avatar = files[0].url;
+    }
   }
 
   // 手动选择头像，进行上传
-  function onChangeAvatar() {
-    uni.chooseImage({
-      success: async (chooseImageRes) => {
-        const tempUrl = chooseImageRes.tempFilePaths[0];
-        await uploadAvatar(tempUrl);
-      },
-    });
-  }
-
-  // 上传头像文件
-  async function uploadAvatar(tempUrl) {
-    if (!tempUrl) {
-      return;
+  async function onChangeAvatar() {
+    const files = await chooseAndUploadFile({ type: 'image' });
+    if (files.length > 0) {
+      state.model.avatar = files[0].url;
     }
-    let { data } = await FileApi.uploadFile(tempUrl);
-    state.model.avatar = data;
   }
 
   // 修改密码

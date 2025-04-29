@@ -15,7 +15,6 @@ const FileApi = {
         filePath: file,
         name: 'file',
         header: {
-          // Accept: 'text/json',
           Accept: '*/*',
           'tenant-id': tenantId,
           // Authorization:  'Bearer test247',
