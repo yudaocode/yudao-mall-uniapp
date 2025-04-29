@@ -8,7 +8,7 @@ export default {
 	props: {
 		// 自定义初始的pageNo，默认为1
 		defaultPageNo: {
-			type: [Number, String],
+			type: Number,
 			default: u.gc('defaultPageNo', 1),
 			observer: function(newVal) {
 				this.pageNo = newVal;
@@ -16,7 +16,7 @@ export default {
 		},
 		// 自定义pageSize，默认为10
 		defaultPageSize: {
-			type: [Number, String],
+			type: Number,
 			default: u.gc('defaultPageSize', 10),
 			validator: (value) => {
 				if (value <= 0) u.consoleErr('default-page-size必须大于0！');
@@ -473,14 +473,10 @@ export default {
 			if (!isLocal && tempIsUserPullDown && this.isFirstPage) {
 				this.isUserPullDown = false;
 			}
-			if (!this.isFirstPage) {
-				this.listRendering = true;
-				this.$nextTick(() => {
-					u.delay(() => this.listRendering = false);
-				})
-			} else {
-				this.listRendering = false;
-			}
+			this.listRendering = true;
+			this.$nextTick(() => {
+				u.delay(() => this.listRendering = false);
+			})
 			let dataTypeRes = this._checkDataType(data, success, isLocal);
 			data = dataTypeRes.data;
 			success = dataTypeRes.success;
@@ -511,7 +507,9 @@ export default {
 					const localPageNo = this.defaultPageNo;
 					const localPageSize = this.queryFrom !== Enum.QueryFrom.Refresh ? this.defaultPageSize : this.currentRefreshPageSize;
 					this._localPagingQueryList(localPageNo, localPageSize, 0, res => {
-						this.completeByTotal(res, this.totalLocalPagingList.length);
+						u.delay(() => {
+							this.completeByTotal(res, this.totalLocalPagingList.length);;
+						}, 0)
 					})
 				} else {
 					// 如果当前不是本地分页，则按照正常分页逻辑进行数据处理&emit数据
@@ -538,7 +536,7 @@ export default {
 				this._callDataPromise(false);
 				this.loadingStatus = Enum.More.Fail;
 				this.isHandlingRefreshToPage = false;
-				if (this.loadingType === Enum.LoadingType.LoadingMore) {
+				if (this.loadingType === Enum.LoadingType.LoadMore) {
 					this.pageNo --;
 				}
 			}

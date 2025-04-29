@@ -1,4 +1,5 @@
 // [z-paging]通用布局相关模块
+import u from '.././z-paging-utils'
 
 // #ifdef APP-NVUE
 const weexDom = weex.requireModule('dom');
@@ -40,7 +41,7 @@ export default {
 		isOldWebView() {
 			// #ifndef APP-NVUE || MP-KUAISHOU
 			try {
-				const systemInfos = uni.getSystemInfoSync().system.split(' ');
+				const systemInfos = u.getSystemInfoSync(true).system.split(' ');
 				const deviceType = systemInfos[0];
 				const version = parseInt(systemInfos[1]);
 				if ((deviceType === 'iOS' && version <= 10) || (deviceType === 'Android' && version <= 6)) {
@@ -78,7 +79,7 @@ export default {
 		// 更新fixed模式下z-paging的布局
 		updateFixedLayout() {
 			this.fixed && this.$nextTick(() => {
-				this.systemInfo = uni.getSystemInfoSync();
+				this.systemInfo = u.getSystemInfoSync();
 			})
 		},
 		// 获取节点尺寸
@@ -106,6 +107,12 @@ export default {
 			//#ifdef MP-ALIPAY
 			inDom = false;
 			//#endif
+			
+			/*
+			inDom可能是true、false，也可能是具体的dom节点
+			如果inDom不为false，则使用uni.createSelectorQuery().in()进行查询，如果inDom为true，则in中的是this，否则in中的为具体的dom
+			如果inDom为false，则使用uni.createSelectorQuery()进行查询
+			*/
 			let res = !!inDom ? uni.createSelectorQuery().in(inDom === true ? this : inDom) : uni.createSelectorQuery();
 			scrollOffset ? res.select(select).scrollOffset() : res.select(select).boundingClientRect();
 			return new Promise((resolve, reject) => {
@@ -136,6 +143,10 @@ export default {
 				this.cssSafeAreaInsetBottom = res ? res[0].height : -1;
 				res && success && success();
 			});
+		},
+		// 同步获取系统信息，兼容不同平台（供z-paging-swiper使用）
+		_getSystemInfoSync(useCache = false) {
+			return u.getSystemInfoSync(useCache);
 		}
 	}
 }

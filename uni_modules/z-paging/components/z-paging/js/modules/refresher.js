@@ -349,7 +349,7 @@ export default {
 			return this.refresherTriggered;
 		},
 		showRefresher() {
-			const showRefresher = this.finalRefresherEnabled && this.useCustomRefresher;
+			const showRefresher = this.finalRefresherEnabled || this.useCustomRefresher && !this.useChatRecordMode;
 			// #ifndef APP-NVUE
 			this.active && this.customRefresherHeight === -1 && showRefresher && this.updateCustomRefresherHeight();
 			// #endif
@@ -405,7 +405,7 @@ export default {
 			this.isUserReload = !isUserPullDown;
 			this._startLoading(true);
 			this.refresherTriggered = true;
-			if(this.reloadWhenRefresh && isUserPullDown){
+			if (this.reloadWhenRefresh && isUserPullDown) {
 				this.useChatRecordMode ? this._onLoadingMore('click') : this._reload(false, false, isUserPullDown);
 			}
 		},
@@ -439,7 +439,7 @@ export default {
 			this._cleanRefresherEndTimeout();
 		},
 		
-		// 非appvue或微信小程序或QQ小程序或h5平台，使用js控制下拉刷新
+		// 非app-vue或微信小程序或QQ小程序或h5平台，使用js控制下拉刷新
 		// #ifndef APP-VUE || MP-WEIXIN || MP-QQ || H5
 		// touch中
 		_refresherTouchmove(e) {
@@ -615,7 +615,9 @@ export default {
 		// 下拉刷新结束
 		_refresherEnd(shouldEndLoadingDelay = true, fromAddData = false, isUserPullDown = false, setLoading = true) {
 			if (this.loadingType === Enum.LoadingType.Refresher) {
+				// 计算当前下拉刷新结束需要延迟的时间
 				const refresherCompleteDelay = (fromAddData && (isUserPullDown || this.showRefresherWhenReload)) ? this.refresherCompleteDelay : 0;
+				// 如果延迟时间大于0，则展示刷新结束状态，否则直接展示默认状态
 				const refresherStatus = refresherCompleteDelay > 0 ? Enum.Refresher.Complete : Enum.Refresher.Default;
 				if (this.finalShowRefresherWhenReload) {
 					const stackCount = this.refresherRevealStackCount;
@@ -624,7 +626,12 @@ export default {
 				}
 				this._cleanRefresherEndTimeout();
 				this.refresherEndTimeout = u.delay(() => {
+					// 更新下拉刷新状态
 					this.refresherStatus = refresherStatus;
+					// 如果当前下拉刷新状态不是刷新结束，则认为其不在刷新结束状态
+					if (refresherStatus !== Enum.Refresher.Complete) {
+						this.isRefresherInComplete = false;
+					}
 				}, this.refresherStatus !== Enum.Refresher.Default && refresherStatus === Enum.Refresher.Default ? this.refresherCompleteDuration : 0);
 				
 				// #ifndef APP-NVUE
@@ -762,7 +769,7 @@ export default {
 		},
 		// 触发下拉刷新
 		_doRefresherLoad(isUserPullDown = true) {
-			this._onRefresh(false,isUserPullDown);
+			this._onRefresh(false, isUserPullDown);
 			this.loading = true;
 		},
 		// #ifndef APP-VUE || MP-WEIXIN || MP-QQ || H5

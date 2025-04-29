@@ -39,7 +39,6 @@
 		data() {
 			return {
 				R: Enum.Refresher,
-				isIos: uni.getSystemInfoSync().platform === 'ios',
 				refresherTimeText: '',
 				zTheme: {
 					title: { white: '#efefef', black: '#555555' },
@@ -51,20 +50,27 @@
 			};
 		},
 		props: ['status', 'defaultThemeStyle', 'defaultText', 'pullingText', 'refreshingText', 'completeText', 'goF2Text', 'defaultImg', 'pullingImg', 
-			'refreshingImg', 'completeImg', 'refreshingAnimated', 'showUpdateTime', 'updateTimeKey', 'imgStyle', 'titleStyle', 'updateTimeStyle', 'updateTimeTextMap', 'unit'
+			'refreshingImg', 'completeImg', 'refreshingAnimated', 'showUpdateTime', 'updateTimeKey', 'imgStyle', 'titleStyle', 'updateTimeStyle', 'updateTimeTextMap', 'unit', 'isIos'
 		],
 		computed: {
 			ts() {
 				return this.defaultThemeStyle;
 			},
-			// 当前状态数组
-			statusTextArr() {
+			// 当前状态Map
+			statusTextMap() {
 				this.updateTime();
-				return [this.defaultText, this.pullingText, this.refreshingText, this.completeText, this.goF2Text];
+				const { R, defaultText, pullingText, refreshingText, completeText, goF2Text } = this;
+				return {
+					[R.Default]: defaultText,
+					[R.ReleaseToRefresh]: pullingText,
+					[R.Loading]: refreshingText,
+					[R.Complete]: completeText,
+					[R.GoF2]: goF2Text,
+				};
 			},
 			// 当前状态文字
 			currentTitle() {
-				return this.statusTextArr[this.status] || this.defaultText;
+				return this.statusTextMap[this.status] || this.defaultText;
 			},
 			// 左侧图片class
 			leftImageClass() {

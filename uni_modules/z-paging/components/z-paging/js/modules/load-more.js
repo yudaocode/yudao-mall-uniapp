@@ -179,12 +179,16 @@ export default {
 		// 是否显示自定义状态下的底部加载更多
 		showLoadingMoreCustom() {
 			return this._showLoadingMore('Custom');
-		}
+		},
+		// 底部加载更多固定高度
+		loadingMoreFixedHeight() {
+			return u.addUnit('80rpx', this.unit);
+		},
 	},
 	methods: {
 		// 页面滚动到底部时通知z-paging进行进一步处理
 		pageReachBottom() {
-			!this.useChatRecordMode && this._onLoadingMore('toBottom');
+			!this.useChatRecordMode && this.toBottomLoadingMoreEnabled && this._onLoadingMore('toBottom');
 		},
 		// 手动触发上拉加载更多(非必须，可依据具体需求使用)
 		doLoadMore(type) {
@@ -240,7 +244,7 @@ export default {
 				}
 			}
 		},
-		// 触发加载更多时调用,from:toBottom-滑动到底部触发；1、click-点击加载更多触发
+		// 触发加载更多时调用,from:toBottom-滑动到底部触发；click-点击加载更多触发
 		_onLoadingMore(from = 'click') {
 			// 如果是ios并且是滚动到底部的，则在滚动到底部时候尝试将列表设置为禁止滚动然后设置为允许滚动，以禁止底部bounce的效果
 			if (this.isIos && from === 'toBottom' && !this.scrollToBottomBounceEnabled && this.scrollEnable) {
@@ -250,7 +254,7 @@ export default {
 				})
 			}
 			// emit scrolltolower
-			this.$emit('scrolltolower', from);
+			this._emitScrollEvent('scrolltolower');
 			// 如果是只使用下拉刷新 或者 禁用底部加载更多 或者 底部加载更多不是默认状态或加载失败状态 或者 是加载中状态 或者 空数据图已经展示了，则return，不触发内部加载更多逻辑
 			if (this.refresherOnly || !this.loadingMoreEnabled || !(this.loadingStatus === Enum.More.Default || this.loadingStatus === Enum.More.Fail) || this.loading || this.showEmpty) return;
 			// #ifdef MP-WEIXIN
@@ -275,15 +279,15 @@ export default {
 					// 如果是本地分页，则在组件内部对数据进行分页处理，不触发@query事件
 					this._localPagingQueryList(this.pageNo, this.defaultPageSize, this.localPagingLoadingTime, res => {
 						this.completeByTotal(res, this.totalLocalPagingList.length);
-						this.queryFrom = Enum.QueryFrom.LoadingMore;
+						this.queryFrom = Enum.QueryFrom.LoadMore;
 					})
 				} else {
 					// emit @query相关加载更多事件
-					this._emitQuery(this.pageNo, this.defaultPageSize, Enum.QueryFrom.LoadingMore);
+					this._emitQuery(this.pageNo, this.defaultPageSize, Enum.QueryFrom.LoadMore);
 					this._callMyParentQuery();
 				}
 				// 设置当前加载状态为底部加载更多状态
-				this.loadingType = Enum.LoadingType.LoadingMore;
+				this.loadingType = Enum.LoadingType.LoadMore;
 			}
 		},
 		// (预处理)判断当没有更多数据且分页内容未超出z-paging时是否显示没有更多数据的view

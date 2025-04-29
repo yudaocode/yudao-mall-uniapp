@@ -24,8 +24,7 @@ import virtualListModule from './modules/virtual-list'
 
 import Enum from './z-paging-enum'
 
-const systemInfo = uni.getSystemInfoSync();
-
+const systemInfo = u.getSystemInfoSync();
 export default {
 	name: "z-paging",
 	components: {
@@ -50,8 +49,6 @@ export default {
 	data() {
 		return {
 			// --------------静态资源---------------
-			base64Arrow: zStatic.base64Arrow,
-			base64Flower: zStatic.base64Flower,
 			base64BackToTop: zStatic.base64BackToTop,
 
 			// -------------全局数据相关--------------
@@ -216,9 +213,12 @@ export default {
 		// #endif
 		this.$nextTick(() => {
 			// 初始化systemInfo
-			this.systemInfo = uni.getSystemInfoSync();
+			this.systemInfo = u.getSystemInfoSync();
 			// 初始化z-paging高度
-			!this.usePageScroll && this.autoHeight && this._setAutoHeight();
+			!this.usePageScroll && this.autoHeight  && this._setAutoHeight();
+			// #ifdef MP-KUAISHOU
+			this._setFullScrollViewInHeight();
+			// #endif
 			this.loaded = true;
 			u.delay(() => {
 				// 更新fixed模式下z-paging的布局，主要是更新windowTop、windowBottom
@@ -408,10 +408,7 @@ export default {
 		},
 		// 设置z-paging高度
 		async _setAutoHeight(shouldFullHeight = true, scrollViewNode = null) {
-			let heightKey = 'min-height';
-			// #ifndef APP-NVUE
-			heightKey = 'min-height';
-			// #endif
+			const heightKey = 'min-height';
 			try {
 				if (shouldFullHeight) {
 					// 如果需要铺满全屏，则计算当前全屏可是区域的高度
@@ -422,7 +419,12 @@ export default {
 						let scrollViewHeight = this.windowHeight - scrollViewTop;
 						scrollViewHeight -= finalScrollBottomNode ? finalScrollBottomNode[0].height : 0;
 						const additionHeight = u.convertToPx(this.autoHeightAddition);
-						const finalHeight = scrollViewHeight + additionHeight - (this.insideMore ? 1 : 0) + 'px !important';
+						// 在支付宝小程序中，添加!important会导致min-height失效，因此在支付宝小程序中需要去掉
+						let importantSuffix =  ' !important';
+						// #ifdef MP-ALIPAY
+						importantSuffix = '';
+						// #endif
+						const finalHeight = scrollViewHeight + additionHeight - (this.insideMore ? 1 : 0) + 'px' + importantSuffix;
 						this.$set(this.scrollViewStyle, heightKey, finalHeight);
 						this.$set(this.scrollViewInStyle, heightKey, finalHeight);
 					}
@@ -432,6 +434,16 @@ export default {
 				}
 			} catch (e) {}
 		},
+		// #ifdef MP-KUAISHOU
+		// 设置scroll-view内容器的最小高度等于scroll-view的高度(为了解决在快手小程序中内容较少时scroll-view内容器高度无法铺满scroll-view的问题)
+		async _setFullScrollViewInHeight() {
+			try {
+				// 如果需要铺满全屏，则计算当前全屏可是区域的高度
+				const scrollViewNode = await this._getNodeClientRect('.zp-scroll-view');
+				scrollViewNode && this.$set(this.scrollViewInStyle, 'min-height', scrollViewNode[0].height + 'px');
+			} catch (e) {}
+		},
+		// #endif
 		// 组件销毁后续处理
 		_handleUnmounted() {
 			this.active = false;
