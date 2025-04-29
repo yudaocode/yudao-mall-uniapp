@@ -45,7 +45,7 @@
   import { onPageScroll } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import throttle from '@/sheep/helper/throttle.js';
-  import { showMenuTools, closeMenuTools } from '@/sheep/hooks/useModal';
+  import { showMenuTools } from '@/sheep/hooks/useModal';
 
   const sys_statusBar = sheep.$platform.device.statusBarHeight;
   const sys_navBar = sheep.$platform.navbar;
@@ -98,7 +98,8 @@
 
   function getCommentCardNode() {
     return new Promise((res, rej) => {
-      uni.createSelectorQuery()
+      uni
+        .createSelectorQuery()
         .select('.detail-comment-selector')
         .boundingClientRect((data) => {
           if (data) {

@@ -11,9 +11,6 @@
 </template>
 
 <script setup>
-  import sheep from '@/sheep';
-  const { safeAreaInsets } = sheep.$platform.device;
-
   const props = defineProps({
     content: {
       type: String,

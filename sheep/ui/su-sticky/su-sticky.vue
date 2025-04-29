@@ -5,7 +5,7 @@
 </template>
 
 <script>
-  import { deepMerge, addStyle, addUnit, sleep, guid, getPx, os, sys } from '@/sheep/helper';
+  import { deepMerge, addStyle, addUnit, guid, getPx, os } from '@/sheep/helper';
   import sheep from '@/sheep';
   /**
    * sticky 吸顶
@@ -130,7 +130,8 @@
       },
       $uGetRect(selector, all) {
         return new Promise((resolve) => {
-          uni.createSelectorQuery()
+          uni
+            .createSelectorQuery()
             .in(this)
             [all ? 'selectAll' : 'select'](selector)
             .boundingClientRect((rect) => {
@@ -194,7 +195,7 @@
         // #endif
 
         // 如果安卓版本高于8.0，依然认为是支持css sticky的(因为安卓7在某些机型，可能不支持sticky)
-        if (os() === 'android' && Number(sys().system) > 8) {
+        if (os() === 'android' && Number(uni.getDeviceInfo().system) > 8) {
           this.cssSticky = true;
         }
 
@@ -218,7 +219,8 @@
         // 方法内进行判断，避免在其他平台生成无用代码
         // #ifdef APP-VUE || MP-WEIXIN
         return new Promise((resolve) => {
-          uni.createSelectorQuery()
+          uni
+            .createSelectorQuery()
             .in(this)
             .select('.u-sticky')
             .fields({

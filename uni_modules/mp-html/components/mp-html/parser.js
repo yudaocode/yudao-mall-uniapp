@@ -77,11 +77,13 @@ const config = {
 }
 const tagSelector={}
 const {
-  windowWidth,
   // #ifdef MP-WEIXIN
   system
   // #endif
-} = uni.getSystemInfoSync()
+} = uni.getDeviceInfo()
+const {
+  windowWidth
+} = uni.getWindowInfo()
 const blankChar = makeMap(' ,\r,\n,\t,\f')
 let idIndex = 0
 

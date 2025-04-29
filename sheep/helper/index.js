@@ -47,13 +47,6 @@ export function sleep(value = 30) {
 export function os() {
   return uni.getDeviceInfo().platform.toLowerCase();
 }
-/**
- * @description 获取系统信息同步接口
- * @link 获取系统信息同步接口 https://uniapp.dcloud.io/api/system/info?id=getsysteminfosync
- */
-export function sys() {
-  return uni.getSystemInfoSync();
-}
 
 /**
  * @description 取一个区间数
@@ -679,7 +672,6 @@ export default {
   getPx,
   sleep,
   os,
-  sys,
   random,
   guid,
   $parent,

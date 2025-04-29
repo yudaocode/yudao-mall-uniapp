@@ -18,7 +18,7 @@ import apple from './provider/apple';
 import share from './share';
 import Pay from './pay';
 
-const device = uni.getSystemInfoSync();
+const device = uni.getWindowInfo();
 
 const os = uni.getDeviceInfo().platform;
 
