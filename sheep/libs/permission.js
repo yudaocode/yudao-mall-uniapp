@@ -234,9 +234,7 @@ function gotoAppPermissionSetting() {
 
 const permission = {
   get isIOS() {
-    return typeof isIOS === 'boolean'
-      ? isIOS
-      : (isIOS = uni.getSystemInfoSync().platform === 'ios');
+    return typeof isIOS === 'boolean' ? isIOS : (isIOS = uni.getDeviceInfo().platform === 'ios');
   },
   requestIOS: requestIOS,
   requestAndroid: requestAndroid,

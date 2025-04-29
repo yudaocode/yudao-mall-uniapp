@@ -82,10 +82,9 @@
 
 <script>
 import sheep from '@/sheep';
-const { safeAreaInsets } = sheep.$platform.device;
 let platform = 'other';
 // #ifdef APP-NVUE
-platform = uni.getSystemInfoSync().platform;
+platform = uni.getDeviceInfo().platform;
 // #endif
 
 /**

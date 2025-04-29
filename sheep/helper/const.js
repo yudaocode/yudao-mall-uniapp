@@ -17,7 +17,7 @@ export const TerminalEnum = {
  * @return 终端
  */
 export const getTerminal = () => {
-  const platformType = uni.getSystemInfoSync().uniPlatform;
+  const platformType = uni.getAppBaseInfo().uniPlatform;
   // 与后端terminal枚举一一对应
   switch (platformType) {
     case 'app':

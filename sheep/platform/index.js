@@ -20,7 +20,7 @@ import Pay from './pay';
 
 const device = uni.getSystemInfoSync();
 
-const os = device.platform;
+const os = uni.getDeviceInfo().platform;
 
 let name = '';
 let provider = '';
