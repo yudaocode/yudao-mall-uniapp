@@ -186,8 +186,7 @@
     "setting": {
       "urlCheck": false,
       "minified": true,
-      "postcss": false,
-      "es6": false
+      "postcss": true
     },
     "optimization": {
       "subPackages": true
