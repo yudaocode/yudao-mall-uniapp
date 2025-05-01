@@ -7,31 +7,11 @@
   >
     <view class="title-content">
       <!-- 主标题 -->
-      <view
-        v-if="data.title"
-        :style="{
-          fontSize: `${data.titleSize}px`,
-          fontWeight: data.titleWeight,
-          color: data.titleColor,
-          textAlign: data.textAlign
-      }"
-        class="title-text"
-      >
-        {{ data.title }}
-      </view>
+      <view v-if="data.title" class="title-text" :style="[titleStyles]">{{ data.title }}</view>
       <!-- 副标题 -->
-      <view
-        v-if="data.description"
-        :style="{
-          fontSize: `${data.descriptionSize}px`,
-          fontWeight: data.descriptionWeight,
-          color: data.descriptionColor,
-          textAlign: data.textAlign
-        }"
-        class="sub-title-text"
-      >
-        {{ data.description }}
-      </view>
+      <view v-if="data.description" :style="[descStyles]" class="sub-title-text">{{
+        data.description
+      }}</view>
     </view>
     <!-- 查看更多 -->
     <view
@@ -40,7 +20,7 @@
       @tap="sheep.$router.go(data.more.url)"
       :style="{ color: data.descriptionColor }"
     >
-      <view v-if="data.more.type !== 'icon'" class="more-text">{{ data.more.text }}</view>
+      <view class="more-text" v-if="data.more.type !== 'icon'">{{ data.more.text }} </view>
       <text class="_icon-forward" v-if="data.more.type !== 'text'"></text>
     </view>
   </view>
@@ -50,7 +30,7 @@
   /**
    * 标题栏
    */
-  import { computed, reactive } from 'vue';
+  import { reactive, computed } from 'vue';
   import sheep from '@/sheep';
 
   // 数据
@@ -84,12 +64,41 @@
       background: bgType === 'img' ? `url(${bgImg}) no-repeat top center / 100% 100%` : bgColor,
     };
   });
+
+  // 标题样式
+  const titleStyles = {
+    color: props.data.titleColor,
+    fontSize: `${props.data.titleSize}px`,
+    textAlign: props.data.textAlign,
+    marginLeft: `${props.data.skew || 0}px`,
+  };
+
+  // 副标题
+  const descStyles = {
+    color: props.data.descriptionColor,
+    textAlign: props.data.textAlign,
+    fontSize: `${props.data.descriptionSize}px`,
+    fontWeight: `${props.data.descriptionWeight}`,
+    marginLeft: `${props.data.skew || 0}px`,
+  };
 </script>
 
 <style lang="scss" scoped>
   .ss-title-wrap {
-    min-height: 80rpx;
+    height: 80rpx;
     position: relative;
+
+    .title-content {
+      .title-text {
+        font-size: 30rpx;
+        color: #333;
+      }
+
+      .sub-title-text {
+        font-size: 22rpx;
+        color: #999;
+      }
+    }
 
     .more-box {
       white-space: nowrap;
