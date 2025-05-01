@@ -3,15 +3,15 @@
   <view
     class="ss-title-wrap ss-flex ss-col-center"
     :class="[state.typeMap[data.textAlign]]"
-    :style="[bgStyle, { marginLeft: `${data.space}px` }]"
+    :style="[elStyles]"
   >
     <view class="title-content">
       <!-- 主标题 -->
       <view v-if="data.title" class="title-text" :style="[titleStyles]">{{ data.title }}</view>
       <!-- 副标题 -->
-      <view v-if="data.description" :style="[descStyles]" class="sub-title-text">{{
-        data.description
-      }}</view>
+      <view v-if="data.description" :style="[descStyles]" class="sub-title-text">
+        {{ data.description }}
+      </view>
     </view>
     <!-- 查看更多 -->
     <view
@@ -30,7 +30,7 @@
   /**
    * 标题栏
    */
-  import { reactive, computed } from 'vue';
+  import { reactive } from 'vue';
   import sheep from '@/sheep';
 
   // 数据
@@ -43,34 +43,32 @@
 
   // 接收参数
   const props = defineProps({
-    // 装修数据
     data: {
       type: Object,
-      default: () => ({}),
+      default() {},
     },
-    // 装修样式
     styles: {
       type: Object,
-      default: () => ({}),
+      default() {},
     },
   });
-  // 设置背景样式
-  const bgStyle = computed(() => {
-    // 直接从 props.styles 解构
-    const { bgType, bgImg, bgColor } = props.styles;
 
-    // 根据 bgType 返回相应的样式
-    return {
-      background: bgType === 'img' ? `url(${bgImg}) no-repeat top center / 100% 100%` : bgColor,
-    };
-  });
+  // 组件样式
+  const elStyles = {
+    background: `url(${sheep.$url.cdn(props.data.bgImgUrl)}) no-repeat top center / 100% auto`,
+    fontSize: `${props.data.titleSize}px`,
+    fontWeight: `${props.data.titleWeight}`,
+    // add by 芋艿：shopro 是在 props.styles.height，我们是在 props.data.height
+    height: `${props.data.height || 40}px`,
+  };
 
   // 标题样式
   const titleStyles = {
     color: props.data.titleColor,
     fontSize: `${props.data.titleSize}px`,
     textAlign: props.data.textAlign,
-    marginLeft: `${props.data.skew || 0}px`,
+    // add by 芋艿：shopro 是在 props.data.skew，我们是在 props.data.marginLeft
+    marginLeft: `${props.data.marginLeft || 0}px`,
   };
 
   // 副标题
@@ -78,8 +76,8 @@
     color: props.data.descriptionColor,
     textAlign: props.data.textAlign,
     fontSize: `${props.data.descriptionSize}px`,
-    fontWeight: `${props.data.descriptionWeight}`,
-    marginLeft: `${props.data.skew || 0}px`,
+    fontWeight: `${props.data.descriptionWeight}px`,
+    marginLeft: `${props.data.marginLeft || 0}px`,
   };
 </script>
 
