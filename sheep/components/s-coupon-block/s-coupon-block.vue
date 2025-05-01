@@ -58,7 +58,7 @@
   import { ref, onMounted, computed } from 'vue';
   import { CouponTemplateValidityTypeEnum, PromotionDiscountTypeEnum } from '@/sheep/helper/const';
   import { floatToFixed2, formatDate } from '@/sheep/helper/utils';
-  import { formatDiscountPercent, fen2yuanSimple } from '@/sheep/hooks/useGoods';
+  import { formatDiscountPercent } from '@/sheep/hooks/useGoods';
 
   const props = defineProps({
     data: {
