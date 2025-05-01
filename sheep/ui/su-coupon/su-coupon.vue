@@ -43,7 +43,8 @@
         </view>
         <view class="ss-m-b-28">
           <view class="title-text ss-m-b-10">{{ props.title }}</view>
-          <view class="surplus-text" v-if="props.surplus">仅剩：{{ props.surplus }}张</view>
+          <view class="surplus-text" v-if="props.surplus >= 0">仅剩：{{ props.surplus }}张</view>
+          <view class="surplus-text" v-else-if="props.surplus === -1">仅限：不限制</view>
         </view>
       </view>
       <view class="card-right ss-flex ss-row-center">

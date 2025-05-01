@@ -21,10 +21,11 @@
           :textColor="data.textColor"
           background=""
           :couponId="item.id"
-          :title="item.name"
+          :title="formatCouponTitle(item)"
           :type="formatCouponDiscountType(item)"
           :value="formatCouponDiscountValue(item)"
           :sellBy="formatValidityType(item)"
+          :surplus="item.totalCount === -1 ? -1 : item.totalCount - item.takeCount"
         >
           <template v-slot:btn>
             <!-- 两列时，领取按钮坚排 -->
@@ -57,6 +58,7 @@
   import { ref, onMounted, computed } from 'vue';
   import { CouponTemplateValidityTypeEnum, PromotionDiscountTypeEnum } from '@/sheep/helper/const';
   import { floatToFixed2, formatDate } from '@/sheep/helper/utils';
+  import { formatDiscountPercent, fen2yuanSimple } from '@/sheep/hooks/useGoods';
 
   const props = defineProps({
     data: {
@@ -114,7 +116,7 @@
       return floatToFixed2(coupon.discountPrice);
     }
     if (coupon.discountType === PromotionDiscountTypeEnum.PERCENT.type) {
-      return coupon.discountPercent;
+      return formatDiscountPercent(coupon.discountPercent);
     }
     return `未知【${coupon.discountType}】`;
   };
@@ -128,6 +130,15 @@
       return `领取后第 ${row.fixedStartTerm} - ${row.fixedEndTerm} 天内可用`;
     }
     return '未知【' + row.validityType + '】';
+  };
+
+  // 格式化【优惠券标题】
+  const formatCouponTitle = (coupon) => {
+    return `满${floatToFixed2(coupon.usePrice)}元${
+      coupon.discountType === PromotionDiscountTypeEnum.PRICE.type
+        ? ',减' + floatToFixed2(coupon.discountPrice) + '元'
+        : ',打' + formatDiscountPercent(coupon.discountPercent) + '折'
+    }`;
   };
 
   const couponList = ref([]);
