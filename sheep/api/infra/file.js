@@ -1,11 +1,9 @@
 import { baseUrl, apiPath, tenantId } from '@/sheep/config';
-import request from '@/sheep/request';
+import request, { getAccessToken } from '@/sheep/request';
 
 const FileApi = {
   // 上传文件
-  uploadFile: (file) => {
-    // TODO 芋艿：访问令牌的接入；
-    const token = uni.getStorageSync('token');
+  uploadFile: (file, directory) => {
     uni.showLoading({
       title: '上传中',
     });
@@ -17,7 +15,10 @@ const FileApi = {
         header: {
           Accept: '*/*',
           'tenant-id': tenantId,
-          // Authorization:  'Bearer test247',
+          Authorization: 'Bearer ' + getAccessToken(),
+        },
+        formData: {
+          directory,
         },
         success: (uploadFileRes) => {
           let result = JSON.parse(uploadFileRes.data);
@@ -42,12 +43,13 @@ const FileApi = {
   },
 
   // 获取文件预签名地址
-  getFilePresignedUrl: (path) => {
+  getFilePresignedUrl: (name, directory) => {
     return request({
       url: '/infra/file/presigned-url',
       method: 'GET',
       params: {
-        path,
+        name,
+        directory,
       },
     });
   },

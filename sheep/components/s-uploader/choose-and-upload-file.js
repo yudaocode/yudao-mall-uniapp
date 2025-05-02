@@ -175,7 +175,7 @@ function uploadCloudFiles(files, max = 5, onUploadProgress) {
   });
 }
 
-function uploadFilesFromPath(path) {
+function uploadFilesFromPath(path, directory) {
   // 目的：用于微信小程序，选择图片时，只有 path
   return uploadFiles(
     Promise.resolve({
@@ -187,11 +187,13 @@ function uploadFilesFromPath(path) {
         },
       ],
     }),
-    {},
+    {
+      directory,
+    },
   );
 }
 
-async function uploadFiles(choosePromise, { onChooseFile, onUploadProgress }) {
+async function uploadFiles(choosePromise, { onChooseFile, onUploadProgress, directory }) {
   // 获取选择的文件
   const res = await choosePromise;
   // 处理文件选择回调
@@ -212,7 +214,7 @@ async function uploadFiles(choosePromise, { onChooseFile, onUploadProgress }) {
     const uploadPromises = files.map(async (file) => {
       try {
         // 1.1 获取文件预签名地址
-        const { data: presignedInfo } = await FileApi.getFilePresignedUrl(file.name);
+        const { data: presignedInfo } = await FileApi.getFilePresignedUrl(file.name, directory);
         // 1.2 获取二进制文件对象
         const fileBuffer = await readFile(file);
 
@@ -260,6 +262,7 @@ async function uploadFiles(choosePromise, { onChooseFile, onUploadProgress }) {
 function chooseAndUploadFile(
   opts = {
     type: 'all',
+    directory: undefined,
   },
 ) {
   if (opts.type === 'image') {
@@ -279,7 +282,7 @@ function createFile(vo, file) {
   const fileVo = {
     configId: vo.configId,
     url: vo.url,
-    path: file.name,
+    path: vo.path,
     name: file.name,
     type: file.fileType,
     size: file.size,
