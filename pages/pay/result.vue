@@ -108,7 +108,7 @@
         if (res.confirm) {
           state.counter = 0;
           setTimeout(() => {
-            getOrderInfo(state.orderId);
+            getOrderInfo(state.id);
           }, 100);
         }
       },
