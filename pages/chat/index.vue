@@ -13,6 +13,9 @@
           v-model="chat.msg"
           @on-tools="onTools"
           @send-message="onSendMessage"
+          :auto-focus="false"
+          :show-char-count="true"
+          :max-length="500"
         ></message-input>
       </template>
     </MessageList>
@@ -29,6 +32,9 @@
         v-model="chat.msg"
         @on-tools="onTools"
         @send-message="onSendMessage"
+        :auto-focus="false"
+        :show-char-count="true"
+        :max-length="500"
       ></message-input>
     </tools-popup>
     <!--  商品订单选择  -->
@@ -181,6 +187,8 @@
       // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ
       if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_ADMIN_READ) {
         console.log('管理员已读消息');
+        // 更新消息已读状态
+        sheep.$helper.toast('客服已读您的消息');
       }
     },
   });
