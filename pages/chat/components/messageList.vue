@@ -1,6 +1,6 @@
 <template>
   <!--  聊天列表使用scroll-view原生组件，整体倒置  -->
-  <scroll-view ref="scrollRef" :scroll-top="scroll.top" class="chat-scroll-view" scroll-y :refresher-enabled="false"
+  <scroll-view :scroll-top="scroll.top" class="chat-scroll-view" scroll-y :refresher-enabled="false"
                @scroll="onScroll" @scrolltolower="loadMoreHistory" style="transform: scaleY(-1);">
     <!-- 消息列表容器 -->
     <view class="message-container">
@@ -13,8 +13,7 @@
         <view v-for="(item, index) in messageList" :key="item.id" class="message-item"
               style="transform: scaleY(-1);">
           <!--  消息渲染  -->
-          <MessageListItem :message="item" :message-index="index"
-                           :message-list="messageList"></MessageListItem>
+          <MessageListItem :message="item" :message-index="index" :message-list="messageList"></MessageListItem>
         </view>
       </view>
     </view>
@@ -22,8 +21,8 @@
 
   <!-- 底部聊天输入框 -->
   <su-fixed bottom>
-    <view v-if="showNewMessageTip" :style="backToTopStyle" @click="scrollToTop">
-      <text>有新消息</text>
+    <view v-if="showTip" class="back-top ss-flex ss-row-center ss-m-b-10" @click="scrollToTop">
+      <text class="back-top-item ss-flex ss-row-center">{{ showNewMessageTip ? '有新消息' : '回到底部' }}</text>
     </view>
     <slot name="bottom"></slot>
   </su-fixed>
@@ -37,30 +36,20 @@
   import { formatDate } from '@/sheep/util';
 
   const messageList = ref([]); // 消息列表
+  const showTip = ref(false); // 显示提示
   const showNewMessageTip = ref(false); // 显示有新消息提示
   const refreshMessage = ref(false); // 更新消息列表
   const isLoading = ref(false); // 是否正在加载更多
   const hasMore = ref(true); // 是否还有更多数据
-  const scrollRef = ref(null); // 滚动视图引用
   const scroll = ref({
     top: 0,
     oldTop: 0,
-  });
+  }); // 滚动位置记录
   const queryParams = reactive({
-    no: 1, // 查询次数，只用于触底计算
+    no: 1,
     limit: 20,
     createTime: undefined,
-  });
-  const backToTopStyle = reactive({
-    height: '30px',
-    width: '100px',
-    'background-color': '#fff',
-    'border-radius': '30px',
-    'box-shadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  }); // 返回顶部样式
+  }); // 查询参数
 
   // 获得消息分页列表
   const getMessageList = async () => {
@@ -131,6 +120,7 @@
     if (typeof message !== 'undefined') {
       // 追加数据到列表开头（因为是倒置的，所以新消息在顶部/列表开头）
       messageList.value.unshift(message);
+      showNewMessageTip.value = true;
     } else {
       queryParams.createTime = undefined;
       refreshMessage.value = true;
@@ -139,9 +129,9 @@
 
     // 若已是第一页则不做处理
     if (queryParams.no > 1) {
-      showNewMessageTip.value = true;
+      showTip.value = true;
     } else {
-      onScrollToUpper();
+      scrollToTop();
     }
   };
 
@@ -150,17 +140,8 @@
     scroll.value.top = scroll.value.oldTop;
     setTimeout(() => {
       scroll.value.top = 0;
-    }, 200) // 等待 view 层同步
-    showNewMessageTip.value = false;
-  };
-
-  /** 监听滚动到底部事件（因为 scroll 翻转了顶就是底） */
-  const onScrollToUpper = () => {
-    // 若已是第一页则不做处理
-    if (queryParams.no === 1) {
-      return;
-    }
-    showNewMessageTip.value = false;
+    }, 200); // 等待 view 层同步
+    showTip.value = false;
   };
 
   defineExpose({ getMessageList, refreshMessageList, scrollToTop });
@@ -171,9 +152,9 @@
     scroll.value.oldTop = scrollTop;
     // 当滚动位置超过一定值时，显示"新消息"提示
     if (scrollTop > 100) {
-      showNewMessageTip.value = true;
+      showTip.value = true;
     } else {
-      showNewMessageTip.value = false;
+      showTip.value = false;
     }
   };
 
@@ -185,23 +166,21 @@
 
 <style>
   .chat-scroll-view {
-    height: calc(100vh - 100px);
     /* 减去底部输入框的高度 */
+    height: calc(100vh - 100px);
     width: 100%;
     position: relative;
     background-color: #f8f8f8;
     z-index: 1;
-    /* 确保层级正确 */
   }
 
   .message-container {
     width: 100%;
-    min-height: 100vh;
     /* 确保容器至少有一屏高度 */
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    /* 默认内容放到底部 */
   }
 
   .message-list {
@@ -209,7 +188,6 @@
     display: flex;
     flex-direction: column;
     padding-bottom: 20px;
-    /* 底部留出一些空间 */
   }
 
   .message-item {
@@ -224,5 +202,15 @@
     align-items: center;
     color: #999;
     font-size: 14px;
+  }
+
+  .back-top {
+    .back-top-item{
+      height: 30px;
+      width: 100px;
+      background-color: #fff;
+      border-radius: 30px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
   }
 </style>

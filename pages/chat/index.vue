@@ -83,7 +83,6 @@
         content: JSON.stringify({ text: chat.msg }),
       };
       await KeFuApi.sendKefuMessage(data);
-      await messageListRef.value.refreshMessageList();
       chat.msg = '';
     } finally {
       chat.showTools = false;
