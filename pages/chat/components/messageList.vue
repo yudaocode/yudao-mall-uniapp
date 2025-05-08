@@ -57,7 +57,7 @@
 
   // 计算聊天窗口高度
   const chatScrollHeight = computed(() => {
-    const baseHeight = 'calc(100vh - 100px - ' + safeAreaInsetsBottom + ')';
+    const baseHeight = 'calc(100vh - 150px - ' + safeAreaInsetsBottom + ')';
     if (keyboardHeight.value > 0) {
       // 键盘弹起状态，减去键盘高度
       return `calc(${baseHeight} - ${keyboardHeight.value}px)`;
@@ -200,6 +200,7 @@
     // #endif
 
     // #ifdef MP-WEIXIN
+    // TODO puhui999: 小程序键盘弹起还有点问题，看看怎么适配
     // 微信小程序环境
     uni.onKeyboardHeightChange((res) => {
       setKeyboardHeight(res.height);
@@ -209,6 +210,10 @@
 
   onMounted(() => {
     queryParams.no = 1; // 确保首次加载是第一页
+    scroll.value = {
+      top: 0,
+      oldTop: 0,
+    }
     getMessageList();
     setupKeyboardListeners();
   });

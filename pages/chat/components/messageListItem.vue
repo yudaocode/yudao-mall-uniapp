@@ -2,6 +2,26 @@
   <view class="chat-box">
     <!--  消息渲染  -->
     <view class="message-item ss-flex-col scroll-item">
+      <view class="ss-flex ss-row-center ss-col-center">
+        <!-- 系统消息 -->
+        <view
+          v-if="message.contentType === KeFuMessageContentTypeEnum.SYSTEM"
+          class="system-message"
+        >
+          {{ message.content }}
+        </view>
+        <!-- 日期 - 移到消息内容上方显示 -->
+        <view
+          v-if="
+            message.contentType !== KeFuMessageContentTypeEnum.SYSTEM &&
+            showTime(message, messageIndex)
+          "
+          class="date-message"
+        >
+          {{ formatDate(message.createTime) }}
+        </view>
+      </view>
+      
       <!-- 消息体渲染管理员消息和用户消息并左右展示  -->
       <view
         v-if="message.contentType !== KeFuMessageContentTypeEnum.SYSTEM"
@@ -74,25 +94,6 @@
           mode="aspectFill"
         >
         </image>
-      </view>
-      <view class="ss-flex ss-row-center ss-col-center">
-        <!-- 日期 -->
-        <view
-          v-if="
-            message.contentType !== KeFuMessageContentTypeEnum.SYSTEM &&
-            showTime(message, messageIndex)
-          "
-          class="date-message"
-        >
-          {{ formatDate(message.createTime) }}
-        </view>
-        <!-- 系统消息 -->
-        <view
-          v-if="message.contentType === KeFuMessageContentTypeEnum.SYSTEM"
-          class="system-message"
-        >
-          {{ message.content }}
-        </view>
       </view>
     </view>
   </view>
