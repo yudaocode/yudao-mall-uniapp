@@ -21,7 +21,7 @@
 
   <!-- 底部聊天输入框 -->
   <su-fixed bottom>
-    <view v-if="showTip" class="back-top ss-flex ss-row-center ss-m-b-10" @click="scrollToTop">
+    <view v-if="showTip" class="back-top ss-flex ss-row-center ss-m-b-10" @tap="scrollToTop">
       <text class="back-top-item ss-flex ss-row-center">{{ showNewMessageTip ? '有新消息' : '回到底部' }}</text>
     </view>
     <slot name="bottom"></slot>
@@ -34,7 +34,10 @@
   import KeFuApi from '@/sheep/api/promotion/kefu';
   import { isEmpty } from '@/sheep/helper/utils';
   import { formatDate } from '@/sheep/util';
+  import sheep from '@/sheep';
 
+  const { safeAreaInsets } = sheep.$platform.device;
+  const safeAreaInsetsBottom = safeAreaInsets.bottom + 'px' // 底部安全区域
   const messageList = ref([]); // 消息列表
   const showTip = ref(false); // 显示提示
   const showNewMessageTip = ref(false); // 显示有新消息提示
@@ -164,10 +167,10 @@
   });
 </script>
 
-<style>
+<style lang="scss" scoped>
   .chat-scroll-view {
     /* 减去底部输入框的高度 */
-    height: calc(100vh - 100px);
+    height: calc(100vh - 100px - v-bind(safeAreaInsetsBottom));
     width: 100%;
     position: relative;
     background-color: #f8f8f8;
