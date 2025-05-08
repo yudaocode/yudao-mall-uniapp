@@ -30,20 +30,21 @@
 
 <script setup>
   import MessageListItem from '@/pages/chat/components/messageListItem.vue';
-  import { onMounted, reactive, ref } from 'vue';
+  import { onMounted, reactive, ref, computed } from 'vue';
   import KeFuApi from '@/sheep/api/promotion/kefu';
   import { isEmpty } from '@/sheep/helper/utils';
   import { formatDate } from '@/sheep/util';
   import sheep from '@/sheep';
 
   const { safeAreaInsets } = sheep.$platform.device;
-  const safeAreaInsetsBottom = safeAreaInsets.bottom + 'px' // 底部安全区域
+  const safeAreaInsetsBottom = safeAreaInsets.bottom + 'px'; // 底部安全区域
   const messageList = ref([]); // 消息列表
   const showTip = ref(false); // 显示提示
   const showNewMessageTip = ref(false); // 显示有新消息提示
   const refreshMessage = ref(false); // 更新消息列表
   const isLoading = ref(false); // 是否正在加载更多
   const hasMore = ref(true); // 是否还有更多数据
+  const keyboardHeight = ref(0); // 键盘高度
   const scroll = ref({
     top: 0,
     oldTop: 0,
@@ -53,6 +54,16 @@
     limit: 20,
     createTime: undefined,
   }); // 查询参数
+
+  // 计算聊天窗口高度
+  const chatScrollHeight = computed(() => {
+    const baseHeight = 'calc(100vh - 100px - ' + safeAreaInsetsBottom + ')';
+    if (keyboardHeight.value > 0) {
+      // 键盘弹起状态，减去键盘高度
+      return `calc(${baseHeight} - ${keyboardHeight.value}px)`;
+    }
+    return baseHeight;
+  });
 
   // 获得消息分页列表
   const getMessageList = async () => {
@@ -147,7 +158,16 @@
     showTip.value = false;
   };
 
-  defineExpose({ getMessageList, refreshMessageList, scrollToTop });
+  /** 设置键盘高度 */
+  const setKeyboardHeight = (height) => {
+    keyboardHeight.value = height;
+    // 键盘弹起时，滚动到最新消息
+    if (height > 0) {
+      scrollToTop();
+    }
+  };
+
+  defineExpose({ getMessageList, refreshMessageList });
 
   /** 监听消息列表滚动 */
   const onScroll = (e) => {
@@ -161,16 +181,42 @@
     }
   };
 
+  // 监听键盘弹起和收起事件
+  const setupKeyboardListeners = () => {
+    // #ifdef H5
+    // H5环境
+    window.addEventListener('resize', () => {
+      // 窗口大小变化可能是由键盘引起的
+      if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+        // 估算键盘高度，实际上是窗口高度变化
+        const currentHeight = window.innerHeight;
+        const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        const keyboardHeight = currentHeight - viewportHeight;
+        setKeyboardHeight(keyboardHeight > 0 ? keyboardHeight : 0);
+      } else {
+        setKeyboardHeight(0);
+      }
+    });
+    // #endif
+
+    // #ifdef MP-WEIXIN
+    // 微信小程序环境
+    uni.onKeyboardHeightChange((res) => {
+      setKeyboardHeight(res.height);
+    });
+    // #endif
+  };
+
   onMounted(() => {
     queryParams.no = 1; // 确保首次加载是第一页
     getMessageList();
+    setupKeyboardListeners();
   });
 </script>
 
 <style lang="scss" scoped>
   .chat-scroll-view {
-    /* 减去底部输入框的高度 */
-    height: calc(100vh - 100px - v-bind(safeAreaInsetsBottom));
+    height: v-bind(chatScrollHeight);
     width: 100%;
     position: relative;
     background-color: #f8f8f8;
