@@ -235,7 +235,7 @@ export default class SheepPay {
     if (code !== 0) {
       return;
     }
-    
+
     uni.requestPayment({
       provider: 'alipay',
       orderInfo: data.displayContent, // 直接使用返回的支付参数
@@ -264,7 +264,7 @@ export default class SheepPay {
 
     // 解析支付参数
     const payConfig = JSON.parse(data.displayContent);
-    
+
     // 调用微信支付
     uni.requestPayment({
       provider: 'wxpay',
@@ -283,7 +283,7 @@ export default class SheepPay {
           sheep.$helper.toast('支付失败：' + err.errMsg);
           that.payResult('fail');
         }
-      }
+      },
     });
   }
 
@@ -294,15 +294,7 @@ export default class SheepPay {
 
   // 引导绑定微信
   bindWeixin() {
-    uni.showModal({
-      title: '微信支付',
-      content: '请先绑定微信再使用微信支付',
-      success: function (res) {
-        if (res.confirm) {
-          sheep.$platform.useProvider('wechat').bind();
-        }
-      },
-    });
+    goBindWeixin();
   }
 }
 
@@ -381,5 +373,17 @@ export function goPayResult(id, orderType, resultType) {
     id,
     orderType,
     payState: resultType,
+  });
+}
+
+export function goBindWeixin() {
+  uni.showModal({
+    title: '微信支付',
+    content: '请先绑定微信再使用微信支付',
+    success: function (res) {
+      if (res.confirm) {
+        sheep.$platform.useProvider('wechat').bind();
+      }
+    },
   });
 }

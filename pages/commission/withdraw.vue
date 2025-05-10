@@ -49,18 +49,18 @@
         />
       </view>
       <!-- 提现账号 -->
-      <view class="card-title" v-show="['2', '3', '4', '5'].includes(state.accountInfo.type)">
+      <view class="card-title" v-show="['2', '6'].includes(state.accountInfo.type)">
         提现账号
       </view>
       <view
         class="input-box ss-flex ss-col-center border-bottom"
-        v-show="['2', '3', '4'].includes(state.accountInfo.type)"
+        v-show="['2', '6'].includes(state.accountInfo.type)"
       >
         <view class="unit" />
         <uni-easyinput
           :inputBorder="false"
           class="ss-flex-1 ss-p-l-10"
-          v-model="state.accountInfo.accountNo"
+          v-model="state.accountInfo.userAccount"
           placeholder="请输入提现账号"
         />
       </view>
@@ -73,27 +73,29 @@
         <view class="unit" />
         <view class="upload-img">
           <s-uploader
-            v-model:url="state.accountInfo.accountQrCodeUrl"
+            v-model:url="state.accountInfo.qrCodeUrl"
             fileMediatype="image"
             limit="1"
             mode="grid"
             :imageStyles="{ width: '168rpx', height: '168rpx' }"
-            @success="(payload) => (state.accountInfo.accountQrCodeUrl = payload.tempFilePaths[0])"
+            @success="(payload) => (state.accountInfo.qrCodeUrl = payload.tempFilePaths[0])"
           />
         </view>
       </view>
       <!-- 持卡人姓名 -->
-      <view class="card-title" v-show="state.accountInfo.type === '2'">持卡人</view>
+      <view class="card-title" v-show="['2', '5', '6'].includes(state.accountInfo.type)">
+        收款款真名
+      </view>
       <view
         class="input-box ss-flex ss-col-center border-bottom"
-        v-show="state.accountInfo.type === '2'"
+        v-show="['2', '5', '6'].includes(state.accountInfo.type)"
       >
         <view class="unit" />
         <uni-easyinput
           :inputBorder="false"
           class="ss-flex-1 ss-p-l-10"
-          v-model="state.accountInfo.name"
-          placeholder="请输入持卡人姓名"
+          v-model="state.accountInfo.userName"
+          placeholder="请输入收款款真名"
         />
       </view>
       <!-- 提现银行 -->
@@ -162,7 +164,7 @@
 </template>
 
 <script setup>
-  import { computed, onBeforeMount, reactive } from 'vue';
+  import { onBeforeMount, reactive } from 'vue';
   import sheep from '@/sheep';
   import accountTypeSelect from './components/account-type-select.vue';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
@@ -170,19 +172,18 @@
   import BrokerageApi from '@/sheep/api/trade/brokerage';
   import DictApi from '@/sheep/api/system/dict';
   import SLayout from '@/sheep/components/s-layout/s-layout.vue';
+  import { goBindWeixin } from '@/sheep/platform/pay';
 
   const headerBg = sheep.$url.css('/static/img/shop/user/withdraw_bg.png');
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
 
-  const userStore = sheep.$store('user');
-  const userInfo = computed(() => userStore.userInfo);
   const state = reactive({
     accountInfo: {
       // 提现表单
       type: undefined,
-      accountNo: undefined,
-      accountQrCodeUrl: undefined,
-      name: undefined,
+      userAccount: undefined,
+      userName: undefined,
+      qrCodeUrl: undefined,
       bankName: undefined,
       bankAddress: undefined,
     },
@@ -218,11 +219,25 @@
       sheep.$helper.toast('请选择提现方式');
       return;
     }
+    let openid;
+    if (state.accountInfo.type === '5') {
+      openid = await sheep.$platform.useProvider('wechat').getOpenid();
+      // 如果获取不到 openid，微信无法发起支付，此时需要引导
+      if (!openid) {
+        goBindWeixin();
+        return;
+      }
+    }
+
     // 提交请求
-    let { code } = await BrokerageApi.createBrokerageWithdraw({
+    const data = {
       ...state.accountInfo,
       price: state.accountInfo.price * 100,
-    });
+    };
+    if (state.accountInfo.type === '5') {
+      data.userAccount = openid;
+    }
+    let { code } = await BrokerageApi.createBrokerageWithdraw(data);
     if (code !== 0) {
       return;
     }
