@@ -114,22 +114,62 @@
 
     <!-- 钱包记录 -->
     <view v-if="state.pagination.total > 0">
-      <view
-        class="wallet-list ss-flex border-bottom"
-        v-for="item in state.pagination.list"
-        :key="item.id"
-      >
-        <view class="list-content">
-          <view class="title-box ss-flex ss-row-between ss-m-b-20">
-            <text class="title ss-line-1">{{ item.title }}</text>
-            <view class="money">
-              <text v-if="item.price >= 0" class="add">+{{ fen2yuan(item.price) }}</text>
-              <text v-else class="minus">{{ fen2yuan(item.price) }}</text>
+      <!-- 分佣列表 -->
+      <view v-if="state.currentTab === 0">
+        <view
+          class="wallet-list ss-flex border-bottom"
+          v-for="item in state.pagination.list"
+          :key="item.id"
+        >
+          <view class="list-content">
+            <view class="title-box ss-flex ss-row-between ss-m-b-20">
+              <text class="title ss-line-1">{{ item.title }}</text>
+              <view class="money">
+                <text v-if="item.price >= 0" class="add">+{{ fen2yuan(item.price) }}</text>
+                <text v-else class="minus">{{ fen2yuan(item.price) }}</text>
+              </view>
+            </view>
+            <view class="ss-flex ss-row-between ss-col-center">
+              <text class="time">
+                {{ sheep.$helper.timeFormat(item.createTime, 'yyyy-mm-dd hh:MM:ss') }}
+              </text>
+              <view class="ss-flex ss-col-center">
+                <text class="status" :class="'status-' + item.status">{{ item.statusName }}</text>
+              </view>
             </view>
           </view>
-          <text class="time">{{
-            sheep.$helper.timeFormat(item.createTime, 'yyyy-mm-dd hh:MM:ss')
-          }}</text>
+        </view>
+      </view>
+      <!-- 提现列表 -->
+      <view v-else>
+        <view
+          class="wallet-list ss-flex border-bottom"
+          v-for="item in state.pagination.list"
+          :key="item.id"
+        >
+          <view class="list-content">
+            <view class="title-box ss-flex ss-row-between ss-m-b-20">
+              <text class="title ss-line-1">{{ item.typeName }}</text>
+              <view class="money">
+                <text class="minus">{{ fen2yuan(item.price) }}</text>
+              </view>
+            </view>
+            <view class="ss-flex ss-row-between ss-col-center">
+              <text class="time">
+                {{ sheep.$helper.timeFormat(item.createTime, 'yyyy-mm-dd hh:MM:ss') }}
+              </text>
+              <button
+                v-if="item.status === 10 && item.type === 5 && item.payTransferId > 0"
+                class="ss-reset-button confirm-btn ss-m-l-20"
+                @tap="onRequestMerchantTransfer(item)"
+              >
+                确认收款
+              </button>
+              <text v-else class="status" :class="'status-' + item.status">{{
+                item.statusName
+              }}</text>
+            </view>
+          </view>
         </view>
       </view>
     </view>
@@ -179,11 +219,11 @@
   const tabMaps = [
     {
       name: '分佣',
-      value: '1', // BrokerageRecordBizTypeEnum.ORDER
+      value: '1',
     },
     {
       name: '提现',
-      value: '2', // BrokerageRecordBizTypeEnum.WITHDRAW
+      value: '2',
     },
   ];
 
@@ -197,13 +237,19 @@
 
   async function getLogList() {
     state.loadStatus = 'loading';
-    let { code, data } = await BrokerageApi.getBrokerageRecordPage({
-      pageSize: state.pagination.pageSize,
-      pageNo: state.pagination.pageNo,
-      bizType: tabMaps[state.currentTab].value,
-      'createTime[0]': state.date[0] + ' 00:00:00',
-      'createTime[1]': state.date[1] + ' 23:59:59',
-    });
+    let { code, data } = await (state.currentTab === 0
+      ? BrokerageApi.getBrokerageRecordPage({
+          pageSize: state.pagination.pageSize,
+          pageNo: state.pagination.pageNo,
+          'createTime[0]': state.date[0] + ' 00:00:00',
+          'createTime[1]': state.date[1] + ' 23:59:59',
+        })
+      : BrokerageApi.getBrokerageWithdrawPage({
+          pageSize: state.pagination.pageSize,
+          pageNo: state.pagination.pageNo,
+          'createTime[0]': state.date[0] + ' 00:00:00',
+          'createTime[1]': state.date[1] + ' 23:59:59',
+        }));
     if (code !== 0) {
       return;
     }
@@ -261,11 +307,36 @@
     state.summary = data;
   }
 
+  // 微信场景下：用户确认收款
+  // 可见 https://pay.weixin.qq.com/doc/v3/merchant/4012716430 文档
+  async function onRequestMerchantTransfer(item) {
+    const requestMerchantTransfer = sheep.$platform.useProvider()
+      ? sheep.$platform.useProvider().requestMerchantTransfer
+      : undefined;
+    if (!requestMerchantTransfer) {
+      sheep.$helper.toast('仅微信平台支持该功能');
+      return;
+    }
+    // 获取提现详情
+    const { code, data } = await BrokerageApi.getBrokerageWithdraw(item.id);
+    if (code !== 0) {
+      return;
+    }
+    // 调用微信确认收款
+    await requestMerchantTransfer(
+      data.transferChannelMchId,
+      data.transferChannelPackageInfo,
+      (res) => {
+        debugger;
+      },
+    );
+  }
+
   onLoad(async (options) => {
     state.today = dayjs().format('YYYY-MM-DD');
     state.date = [state.today, state.today];
-    if (options.type === 2) {
-      // 切换到“提现” tab 下
+    if (options.type === '2') {
+      // 切换到"提现" tab 下
       state.currentTab = 1;
     }
     getLogList();
@@ -476,6 +547,17 @@
         color: $dark-3;
       }
     }
+
+    .confirm-btn {
+      font-size: 22rpx;
+      color: var(--ui-BG-Main);
+      background: rgba(var(--ui-BG-Main-rgb), 0.1);
+      padding: 4rpx 16rpx;
+      margin: 0;
+      line-height: 1.4;
+      border-radius: 20rpx;
+      border: 1px solid var(--ui-BG-Main);
+    }
   }
 
   .model-title {
@@ -513,6 +595,19 @@
       font-size: 30rpx;
       height: 40rpx;
       line-height: normal;
+    }
+  }
+
+  .status {
+    font-size: 22rpx;
+    &.status-0 {
+      color: #ff9900;
+    }
+    &.status-1 {
+      color: #19be6b;
+    }
+    &.status-2 {
+      color: #fa3534;
     }
   }
 </style>

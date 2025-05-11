@@ -84,7 +84,7 @@
       </view>
       <!-- 持卡人姓名 -->
       <view class="card-title" v-show="['2', '5', '6'].includes(state.accountInfo.type)">
-        收款款真名
+        收款真名
       </view>
       <view
         class="input-box ss-flex ss-col-center border-bottom"
@@ -95,7 +95,7 @@
           :inputBorder="false"
           class="ss-flex-1 ss-p-l-10"
           v-model="state.accountInfo.userName"
-          placeholder="请输入收款款真名"
+          placeholder="请输入收款真名"
         />
       </view>
       <!-- 提现银行 -->

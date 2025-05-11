@@ -1,6 +1,7 @@
 import AuthUtil from '@/sheep/api/member/auth';
 import SocialApi from '@/sheep/api/member/social';
 import UserApi from '@/sheep/api/member/user';
+import sheep from '@/sheep';
 
 const socialType = 34; // 社交类型 - 微信小程序
 
@@ -126,14 +127,14 @@ async function getInfo() {
 const checkUpdate = async (silence = true) => {
   if (uni.canIUse('getUpdateManager')) {
     const updateManager = uni.getUpdateManager();
-    updateManager.onCheckForUpdate(function(res) {
+    updateManager.onCheckForUpdate(function (res) {
       // 请求完新版本信息的回调
       if (res.hasUpdate) {
-        updateManager.onUpdateReady(function() {
+        updateManager.onUpdateReady(function () {
           uni.showModal({
             title: '更新提示',
             content: '新版本已经准备好，是否重启应用？',
-            success: function(res) {
+            success: function (res) {
               if (res.confirm) {
                 // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
                 updateManager.applyUpdate();
@@ -141,7 +142,7 @@ const checkUpdate = async (silence = true) => {
             },
           });
         });
-        updateManager.onUpdateFailed(function() {
+        updateManager.onUpdateFailed(function () {
           // 新的版本下载失败
           // uni.showModal({
           //   title: '已经有新版本了哟~',
@@ -169,17 +170,17 @@ async function getSubscribeTemplate() {
 }
 
 // 订阅消息
-function subscribeMessage(event, callback= undefined) {
+function subscribeMessage(event, callback = undefined) {
   let tmplIds = [];
   if (typeof event === 'string') {
-    const temp = subscribeEventList.find(item => item.title.includes(event));
+    const temp = subscribeEventList.find((item) => item.title.includes(event));
     if (temp) {
       tmplIds.push(temp.id);
     }
   }
   if (typeof event === 'object') {
     event.forEach((e) => {
-      const temp = subscribeEventList.find(item => item.title.includes(e));
+      const temp = subscribeEventList.find((item) => item.title.includes(e));
       if (temp) {
         tmplIds.push(temp.id);
       }
@@ -189,12 +190,38 @@ function subscribeMessage(event, callback= undefined) {
 
   uni.requestSubscribeMessage({
     tmplIds,
-		success: ()=>{
+    success: () => {
       // 不管是拒绝还是同意都触发
-      callback && callback()
-		},
+      callback && callback();
+    },
     fail: (err) => {
       console.log(err);
+    },
+  });
+}
+
+// 商家转账用户确认模式下，拉起页面请求用户确认收款 Transfer
+function requestMerchantTransfer(mchId, packageInfo, successCallback, failCallback) {
+  if (!wx.canIUse('requestMerchantTransfer')) {
+    wx.showModal({
+      content: '你的微信版本过低，请更新至最新版本。',
+      showCancel: false,
+    });
+    return;
+  }
+  wx.requestMerchantTransfer({
+    mchId: mchId,
+    appId: wx.getAccountInfoSync().miniProgram.appId,
+    package: packageInfo,
+    success: (res) => {
+      // res.err_msg 将在页面展示成功后返回应用时返回 ok，并不代表付款成功
+      console.log('success:', res);
+      successCallback && successCallback(res);
+    },
+    fail: (res) => {
+      console.log('fail:', res);
+      sheep.$helper.toast(res.errMsg);
+      failCallback && failCallback(res);
     },
   });
 }
@@ -210,4 +237,5 @@ export default {
   getOpenid,
   subscribeMessage,
   checkUpdate,
+  requestMerchantTransfer,
 };
