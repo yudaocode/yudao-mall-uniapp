@@ -194,6 +194,7 @@
   import BrokerageApi from '@/sheep/api/trade/brokerage';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
   import { resetPagination } from '@/sheep/helper/utils';
+  import PayTransferApi from '@/sheep/api/pay/transfer';
 
   const headerBg = sheep.$url.css('/static/img/shop/user/wallet_card_bg.png');
 
@@ -322,12 +323,41 @@
     if (code !== 0) {
       return;
     }
+    if (data.status === 11) {
+      sheep.$helper.toast('该提现单已确认收款');
+      item.status = 11;
+      return;
+    }
+    if (!data.transferChannelMchId || !data.transferChannelPackageInfo) {
+      sheep.$helper.toast('提现信息异常，请稍后再试');
+      return;
+    }
     // 调用微信确认收款
+    const payTransferId = data.payTransferId;
     await requestMerchantTransfer(
       data.transferChannelMchId,
       data.transferChannelPackageInfo,
-      (res) => {
-        debugger;
+      async (res) => {
+        if (res.result !== 'success') {
+          sheep.$helper.toast(res.errMsg);
+          return;
+        }
+        // 同步转账单状态
+        try {
+          const syncTransferResult = await PayTransferApi.syncTransfer(payTransferId);
+          console.log('syncTransferResult 结果', syncTransferResult);
+        } catch (e) {
+          console.error('syncTransferResult 异常', e);
+        }
+        // 查询提现单最新状态
+        const { data } = await BrokerageApi.getBrokerageWithdraw(item.id);
+        if (data && data.status !== 11) {
+          sheep.$helper.toast('确认收款成功，但数据存在延迟，请以实际【微信支付】到账为准');
+          return;
+        }
+        sheep.$helper.toast('确认收款成功');
+        // 更新到列表中
+        item.status = 11;
       },
     );
   }

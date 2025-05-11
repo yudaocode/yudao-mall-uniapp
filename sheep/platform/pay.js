@@ -387,3 +387,20 @@ export function goBindWeixin() {
     },
   });
 }
+
+// 获取微信支付渠道码
+export function getWeixinPayChannelCode() {
+  const platform = sheep.$platform.name;
+  switch (platform) {
+    case 'WechatOfficialAccount':
+      return 'wx_pub';
+    case 'WechatMiniProgram':
+      return 'wx_lite';
+    case 'App':
+      return 'wx_app';
+    case 'H5':
+      return 'wx_wap';
+    default:
+      return '';
+  }
+}

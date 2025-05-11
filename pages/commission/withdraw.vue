@@ -172,7 +172,7 @@
   import BrokerageApi from '@/sheep/api/trade/brokerage';
   import DictApi from '@/sheep/api/system/dict';
   import SLayout from '@/sheep/components/s-layout/s-layout.vue';
-  import { goBindWeixin } from '@/sheep/platform/pay';
+  import { getWeixinPayChannelCode, goBindWeixin } from '@/sheep/platform/pay';
 
   const headerBg = sheep.$url.css('/static/img/shop/user/withdraw_bg.png');
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
@@ -236,6 +236,10 @@
     };
     if (state.accountInfo.type === '5') {
       data.userAccount = openid;
+      data.transferChannelCode = getWeixinPayChannelCode();
+    } else {
+      delete data.userAccount;
+      delete data.transferChannelCode;
     }
     let { code } = await BrokerageApi.createBrokerageWithdraw(data);
     if (code !== 0) {
