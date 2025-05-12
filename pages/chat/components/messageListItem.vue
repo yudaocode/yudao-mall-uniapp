@@ -3,7 +3,14 @@
     <!--  消息渲染  -->
     <view class="message-item ss-flex-col scroll-item">
       <view class="ss-flex ss-row-center ss-col-center">
-        <!-- 日期 -->
+        <!-- 系统消息 -->
+        <view
+          v-if="message.contentType === KeFuMessageContentTypeEnum.SYSTEM"
+          class="system-message"
+        >
+          {{ message.content }}
+        </view>
+        <!-- 日期 - 移到消息内容上方显示 -->
         <view
           v-if="
             message.contentType !== KeFuMessageContentTypeEnum.SYSTEM &&
@@ -13,14 +20,8 @@
         >
           {{ formatDate(message.createTime) }}
         </view>
-        <!-- 系统消息 -->
-        <view
-          v-if="message.contentType === KeFuMessageContentTypeEnum.SYSTEM"
-          class="system-message"
-        >
-          {{ message.content }}
-        </view>
       </view>
+      
       <!-- 消息体渲染管理员消息和用户消息并左右展示  -->
       <view
         v-if="message.contentType !== KeFuMessageContentTypeEnum.SYSTEM"
@@ -42,11 +43,12 @@
             sheep.$url.static('/static/img/shop/chat/default.png')
           "
           mode="aspectFill"
+          lazy-load
         ></image>
         <!-- 内容 -->
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.TEXT">
           <view class="message-box" :class="{ admin: message.senderType === UserTypeEnum.ADMIN }">
-            <mp-html :content="replaceEmoji(getMessageContent(message).text || message.content)" />
+            <mp-html :content="processedContent" :domain="sheep.$url.cdn('')" lazy-load />
           </view>
         </template>
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.IMAGE">
@@ -140,7 +142,16 @@
     return false;
   });
 
-  // 处理表情
+  // 缓存表情映射
+  const emojiMap = computed(() => {
+    const map = new Map();
+    emojiList.forEach(emoji => {
+      map.set(emoji.name, emoji.file);
+    });
+    return map;
+  });
+
+  // 处理表情 - 进行缓存优化
   function replaceEmoji(data) {
     let newData = data;
     if (typeof newData !== 'object') {
@@ -148,27 +159,28 @@
       let zhEmojiName = newData.match(reg);
       if (zhEmojiName) {
         zhEmojiName.forEach((item) => {
-          let emojiFile = selEmojiFile(item);
-          newData = newData.replace(
-            item,
-            `<img class="chat-img" style="width: 24px;height: 24px;margin: 0 3px;vertical-align: middle;" src="${sheep.$url.cdn(
-              '/static/img/chat/emoji/' + emojiFile,
-            )}"/>`,
-          );
+          const emojiFile = emojiMap.value.get(item) || '';
+          if (emojiFile) {
+            newData = newData.replace(
+              item,
+              `<img class="chat-img" style="width: 24px;height: 24px;margin: 0 3px;vertical-align: middle;" src="${sheep.$url.cdn(
+                '/static/img/chat/emoji/' + emojiFile,
+              )}"/>`,
+            );
+          }
         });
       }
     }
     return newData;
   }
 
-  function selEmojiFile(name) {
-    for (let index in emojiList) {
-      if (emojiList[index].name === name) {
-        return emojiList[index].file;
-      }
+  // 预处理内容，避免重复计算
+  const processedContent = computed(() => {
+    if (props.message.contentType === KeFuMessageContentTypeEnum.TEXT) {
+      return replaceEmoji(getMessageContent.value(props.message).text || props.message.content);
     }
-    return false;
-  }
+    return props.message.content;
+  });
 </script>
 
 <style scoped lang="scss">
