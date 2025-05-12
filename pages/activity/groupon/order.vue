@@ -149,6 +149,7 @@
 
   //下拉刷新
   onPullDownRefresh(() => {
+    resetPagination(state.pagination);
     getGrouponList();
     setTimeout(function () {
       uni.stopPullDownRefresh();
