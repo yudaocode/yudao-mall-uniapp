@@ -19,13 +19,13 @@
       class="sicon-edit"
       :class="{ 'is-active': toolsMode === 'tools' }"
       @tap.stop="onTools('tools')"
-    ></text>
+    />
     <button
       v-if="message"
       class="ss-reset-button send-btn"
       @tap="sendMessage"
       :disabled="isDisabled || sending"
-      :class="{ 'disabled': isDisabled || sending }"
+      :class="{ disabled: isDisabled || sending }"
     >
       <text v-if="sending">发送中</text>
       <text v-else>发送</text>
@@ -52,18 +52,18 @@
     // 是否自动获取焦点
     autoFocus: {
       type: Boolean,
-      default: false
+      default: false,
     },
     // 最大字数限制
     maxLength: {
       type: Number,
-      default: 500
+      default: 500,
     },
     // 是否显示字数统计
     showCharCount: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   });
 
   const emits = defineEmits(['update:modelValue', 'onTools', 'sendMessage']);
@@ -74,7 +74,7 @@
     },
     set(newValue) {
       emits(`update:modelValue`, newValue);
-    }
+    },
   });
 
   // 控制发送状态

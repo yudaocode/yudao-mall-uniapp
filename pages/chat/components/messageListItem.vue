@@ -21,7 +21,7 @@
           {{ formatDate(message.createTime) }}
         </view>
       </view>
-      
+
       <!-- 消息体渲染管理员消息和用户消息并左右展示  -->
       <view
         v-if="message.contentType !== KeFuMessageContentTypeEnum.SYSTEM"
@@ -44,7 +44,7 @@
           "
           mode="aspectFill"
           lazy-load
-        ></image>
+        />
         <!-- 内容 -->
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.TEXT">
           <view class="message-box" :class="{ admin: message.senderType === UserTypeEnum.ADMIN }">
@@ -66,7 +66,7 @@
               :height="200"
               :width="200"
               mode="aspectFill"
-            ></su-image>
+            />
           </view>
         </template>
         <template v-if="message.contentType === KeFuMessageContentTypeEnum.PRODUCT">
@@ -145,7 +145,7 @@
   // 缓存表情映射
   const emojiMap = computed(() => {
     const map = new Map();
-    emojiList.forEach(emoji => {
+    emojiList.forEach((emoji) => {
       map.set(emoji.name, emoji.file);
     });
     return map;

@@ -1,19 +1,34 @@
 <template>
   <!--  聊天列表使用scroll-view原生组件，整体倒置  -->
-  <scroll-view :scroll-top="scroll.top" class="chat-scroll-view" scroll-y :refresher-enabled="false"
-               @scroll="onScroll" @scrolltolower="loadMoreHistory" style="transform: scaleY(-1);">
+  <scroll-view
+    :scroll-top="scroll.top"
+    class="chat-scroll-view"
+    scroll-y
+    :refresher-enabled="false"
+    @scroll="onScroll"
+    @scrolltolower="loadMoreHistory"
+    style="transform: scaleY(-1)"
+  >
     <!-- 消息列表容器 -->
     <view class="message-container">
       <!-- 加载更多提示 -->
-      <view v-if="isLoading" class="loading-more" style="transform: scaleY(-1);">
+      <view v-if="isLoading" class="loading-more" style="transform: scaleY(-1)">
         <text>加载中...</text>
       </view>
       <!-- 消息列表 -->
       <view class="message-list">
-        <view v-for="(item, index) in messageList" :key="item.id" class="message-item"
-              style="transform: scaleY(-1);">
+        <view
+          v-for="(item, index) in messageList"
+          :key="item.id"
+          class="message-item"
+          style="transform: scaleY(-1)"
+        >
           <!--  消息渲染  -->
-          <MessageListItem :message="item" :message-index="index" :message-list="messageList"></MessageListItem>
+          <MessageListItem
+            :message="item"
+            :message-index="index"
+            :message-list="messageList"
+          ></MessageListItem>
         </view>
       </view>
     </view>
@@ -22,7 +37,9 @@
   <!-- 底部聊天输入框 -->
   <su-fixed bottom>
     <view v-if="showTip" class="back-top ss-flex ss-row-center ss-m-b-10" @tap="scrollToTop">
-      <text class="back-top-item ss-flex ss-row-center">{{ showNewMessageTip ? '有新消息' : '回到底部' }}</text>
+      <text class="back-top-item ss-flex ss-row-center">
+        {{ showNewMessageTip ? '有新消息' : '回到底部' }}
+      </text>
     </view>
     <slot name="bottom"></slot>
   </su-fixed>
@@ -33,7 +50,7 @@
   import { onMounted, reactive, ref, computed } from 'vue';
   import KeFuApi from '@/sheep/api/promotion/kefu';
   import { isEmpty } from '@/sheep/helper/utils';
-  import { formatDate } from '@/sheep/util';
+  import { formatDate } from '@/sheep/helper/utils';
   import sheep from '@/sheep';
 
   const { safeAreaInsets } = sheep.$platform.device;
@@ -95,8 +112,8 @@
         }
 
         // 过滤掉已存在的消息
-        const historyMessages = data.filter(msg =>
-          !messageList.value.some(existing => existing.id === msg.id),
+        const historyMessages = data.filter(
+          (msg) => !messageList.value.some((existing) => existing.id === msg.id),
         );
 
         if (historyMessages.length > 0) {
@@ -187,10 +204,16 @@
     // H5环境
     window.addEventListener('resize', () => {
       // 窗口大小变化可能是由键盘引起的
-      if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+      if (
+        document.activeElement &&
+        (document.activeElement.tagName === 'INPUT' ||
+          document.activeElement.tagName === 'TEXTAREA')
+      ) {
         // 估算键盘高度，实际上是窗口高度变化
         const currentHeight = window.innerHeight;
-        const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        const viewportHeight = window.visualViewport
+          ? window.visualViewport.height
+          : window.innerHeight;
         const keyboardHeight = currentHeight - viewportHeight;
         setKeyboardHeight(keyboardHeight > 0 ? keyboardHeight : 0);
       } else {
@@ -213,7 +236,7 @@
     scroll.value = {
       top: 0,
       oldTop: 0,
-    }
+    };
     getMessageList();
     setupKeyboardListeners();
   });
@@ -259,7 +282,7 @@
   }
 
   .back-top {
-    .back-top-item{
+    .back-top-item {
       height: 30px;
       width: 100px;
       background-color: #fff;
