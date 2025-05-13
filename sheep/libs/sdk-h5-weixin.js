@@ -48,16 +48,20 @@ export default {
         ], // TODO 芋艿：后续可以设置更多权限；
         openTagList: data.openTagList,
       });
+    } else {
+      console.log('请求 JSSDK 配置失败，错误码：', code);
     }
 
     // 监听结果
     configSuccess = true;
     jweixin.error((err) => {
+      debugger;
       configSuccess = false;
       console.error('微信 JSSDK 初始化失败', err);
       // $helper.toast('微信JSSDK:' + err.errMsg);
     });
     jweixin.ready(() => {
+      debugger;
       if (configSuccess) {
         console.log('微信 JSSDK 初始化成功');
       }

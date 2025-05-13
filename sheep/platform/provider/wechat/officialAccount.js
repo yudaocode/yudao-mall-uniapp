@@ -19,7 +19,7 @@ async function login(code = '', state = '') {
       uni.setStorageSync('returnUrl', location.href);
       window.location = loginUrl;
     }
-  // 情况二：有 code 时，使用 code 去自动登录
+    // 情况二：有 code 时，使用 code 去自动登录
   } else {
     // 解密 code 发起登陆
     const loginResult = await AuthUtil.socialLogin(socialType, code, state);
@@ -59,8 +59,7 @@ const unbind = async (openid) => {
 
 // 获取公众号登陆地址
 async function getLoginUrl(event = 'login') {
-  const page = getRootUrl() + 'pages/index/login'
-    + '?event=' + event; // event 目的，区分是 login 还是 bind
+  const page = getRootUrl() + 'pages/index/login' + '?event=' + event; // event 目的，区分是 login 还是 bind
   const { code, data } = await AuthUtil.socialAuthRedirect(socialType, page);
   if (code !== 0) {
     return undefined;
