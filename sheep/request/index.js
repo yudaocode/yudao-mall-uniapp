@@ -204,7 +204,7 @@ http.interceptors.response.use(
     }
 
     if (error && error.config) {
-      if (error.config.custom.showError === false) {
+      if (error.config.custom.showError) {
         uni.showToast({
           title: error.data?.msg || errorMessage,
           icon: 'none',
