@@ -133,7 +133,7 @@
   });
   const state = reactive({
     selectedSku: {}, // 选中的 SKU
-    currentPropertyArray: [], // 当前选中的属性，实际是个 Map。key 是 property 编号，value 是 value 编号
+    currentPropertyArray: {}, // 当前选中的属性，实际是个 Map。key 是 property 编号，value 是 value 编号
     grouponNum: props.grouponNum,
   });
 
@@ -212,7 +212,7 @@
       noChooseValueIds.splice(index, 1);
     } else {
       // 循环去除当前已选择的 value 属性值 id
-      state.currentPropertyArray.forEach((currentPropertyId) => {
+      Object.entries(state.currentPropertyArray).forEach(([propertyId, currentPropertyId]) => {
         if (currentPropertyId.toString() !== '') {
           return;
         }
@@ -229,8 +229,8 @@
     let choosePropertyIds = [];
     if (!isChecked) {
       // 当前已选择的 property
-      state.currentPropertyArray.forEach((currentPropertyId, currentValueId) => {
-        if (currentPropertyId !== '') {
+      Object.entries(state.currentPropertyArray).forEach(([propertyId, currentValueId]) => {
+        if (currentValueId !== '') {
           // currentPropertyId 为空是反选 填充的
           choosePropertyIds.push(currentValueId);
         }
@@ -261,9 +261,9 @@
         continue;
       }
       let isOk = true;
-      state.currentPropertyArray.forEach((propertyId) => {
-        // propertyId 不为空，并且，这个 条 sku 没有被选中，则排除
-        if (propertyId.toString() !== '' && sku.value_id_array.indexOf(propertyId) < 0) {
+      Object.entries(state.currentPropertyArray).forEach(([propertyId, valueId]) => {
+        // valueId 不为空，并且，这个 条 sku 没有被选中，则排除
+        if (valueId.toString() !== '' && sku.value_id_array.indexOf(valueId) < 0) {
           isOk = false;
         }
       });
@@ -292,7 +292,7 @@
 
     // 选中的 property 大类
     let choosePropertyId = [];
-    state.currentPropertyArray.forEach((currentPropertyId) => {
+    Object.entries(state.currentPropertyArray).forEach(([propertyId, currentPropertyId]) => {
       if (currentPropertyId !== '') {
         // currentPropertyId 为空是反选 填充的
         choosePropertyId.push(currentPropertyId);
