@@ -15,7 +15,7 @@
             class="content-img"
             isPreview
             :current="0"
-            :src="state.model?.avatar"
+            :src="state.model?.avatar || sheep.$url.static('/static/img/shop/default_avatar.png')"
             :height="160"
             :width="160"
             :radius="80"

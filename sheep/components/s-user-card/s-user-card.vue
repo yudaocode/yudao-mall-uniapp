@@ -5,7 +5,7 @@
       <view class="left-box ss-flex ss-col-center ss-m-l-36">
         <view class="avatar-box ss-m-r-24">
           <image class="avatar-img" :src="
-              isLogin
+              isLogin && userInfo.avatar
                 ? sheep.$url.cdn(userInfo.avatar)
                 : sheep.$url.static('/static/img/shop/default_avatar.png')"
                  mode="aspectFill" @tap="sheep.$router.go('/pages/user/info')">
