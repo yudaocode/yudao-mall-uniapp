@@ -98,7 +98,7 @@
         <view class="ss-m-t-60 ss-flex ss-flex-wrap ss-row-center">
           <!-- 团长 -->
           <view class="header-avatar ss-m-r-24 ss-m-b-20">
-            <image :src="sheep.$url.cdn(state.data.headRecord.avatar)" class="avatar-img"></image>
+            <image :src="sheep.$url.cdn(state.data.headRecord.avatar) || sheep.$url.static('/static/img/shop/default_avatar.png')" class="avatar-img"></image>
             <view class="header-tag ss-flex ss-col-center ss-row-center">团长</view>
           </view>
           <!-- 团员 -->
@@ -107,7 +107,7 @@
             v-for="item in state.data.memberRecords"
             :key="item.id"
           >
-            <image :src="sheep.$url.cdn(item.avatar)" class="avatar-img"></image>
+            <image :src="sheep.$url.cdn(item.avatar) || sheep.$url.static('/static/img/shop/default_avatar.png')" class="avatar-img"></image>
             <view
               class="header-tag ss-flex ss-col-center ss-row-center"
               v-if="item.is_leader == '1'"
