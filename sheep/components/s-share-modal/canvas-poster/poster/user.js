@@ -1,10 +1,11 @@
 import sheep from '@/sheep';
 import { formatImageUrlProtocol, getWxaQrcode } from './index';
-
+import { measureTextWidth } from '@/utils/textUtils'; // 引入新封装的方法
 const user = async (poster) => {
   const width = poster.width;
   const userInfo = sheep.$store('user').userInfo;
   const wxa_qrcode = await getWxaQrcode(poster.shareInfo.path, poster.shareInfo.query);
+  const widthNickName = measureTextWidth(userInfo.nickname, 14); // 使用新方法
   return [
     {
       type: 'image',
@@ -28,7 +29,7 @@ const user = async (poster) => {
         fontFamily: 'sans-serif',
         position: 'fixed',
         top: width * 0.4,
-        left: width / 2,
+        left: (width-widthNickName) / 2,
       },
     },
     {
