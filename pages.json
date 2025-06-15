@@ -681,6 +681,9 @@
 		"list": [{
 				"pagePath": "pages/index/index"
 			},
+            {
+				"pagePath": "pages/index/category"
+            },
 			{
 				"pagePath": "pages/index/cart"
 			},
