@@ -9,6 +9,7 @@
     :autoplay="data.autoplay"
     :interval="data.interval * 1000"
     :mode="data.type"
+    :height="px2rpx(data.height)"
   />
 </template>
 
@@ -27,6 +28,12 @@
       default: () => ({}),
     },
   });
+
+  function px2rpx(px) {
+    //计算比例
+    let scale = uni.upx2px(100)/100;
+    return px/scale
+  }
 
   const imgList = computed(() =>
       props.data.items.map((item) => {
