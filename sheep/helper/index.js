@@ -631,10 +631,13 @@ function pages() {
 export function getRootUrl() {
   let url = '';
   // #ifdef H5
-  url = location.origin + location.pathname;
+  url = location.origin;
+  // + location.pathname;
 
   if (location.hash !== '') {
     url += '#/';
+  } else {
+    url += '/';
   }
   // #endif
   return url;
