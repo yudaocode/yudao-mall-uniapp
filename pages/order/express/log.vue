@@ -38,7 +38,11 @@
             <!--            <view class="log-msg-title ss-m-b-20">-->
             <!--              {{ item.status_text }}-->
             <!--            </view>-->
-            <view class="log-msg-desc ss-m-b-16">{{ item.content }}</view>
+            <!--            <view class="log-msg-desc ss-m-b-16">{{ item.content }}</view>-->
+            <view class="log-msg-desc ss-m-b-16">
+              <highlight-number :content="item.content" @phone-click="handlePhoneClick" />
+              <!--              <rich-text :nodes="item.content"></rich-text>-->
+            </view>
             <view class="log-msg-date ss-m-b-40">
               {{ sheep.$helper.timeFormat(item.time, 'yyyy-mm-dd hh:MM:ss') }}
             </view>
@@ -54,6 +58,7 @@
   import { onLoad } from '@dcloudio/uni-app';
   import { computed, reactive } from 'vue';
   import OrderApi from '@/sheep/api/trade/order';
+  import HighlightNumber from '@/pages/components/HighlightNumberText.vue';
 
   const state = reactive({
     info: [],
@@ -74,7 +79,7 @@
 
   async function getExpressDetail(id) {
     const { data } = await OrderApi.getOrderExpressTrackList(id);
-    state.tracks = data.reverse();
+    state.tracks = data;
   }
 
   async function getOrderDetail(id) {
@@ -86,53 +91,117 @@
     getExpressDetail(options.id);
     getOrderDetail(options.id);
   });
+
+  function handlePhoneClick(data) {
+    handleClick(data);
+  }
+
+  function handleClick(data) {
+    const phoneNumber = data.phoneNumber;
+
+    if (!phoneNumber) return;
+
+    // 获取当前平台
+    const platform = uni.getSystemInfoSync().platform.toLowerCase();
+
+    if (platform === 'devtools') {
+      uni.showToast({ title: '真机才可拨打电话', icon: 'none' });
+      handleCopy(phoneNumber);
+      return;
+    }
+
+    if (platform === 'wechat') {
+      uni.showToast({ title: '请手动拨打', icon: 'none' });
+      handleCopy(phoneNumber);
+      return;
+    }
+
+    uni.makePhoneCall({
+      phoneNumber: phoneNumber,
+      success: () => {
+        console.log('拨打电话成功');
+      },
+      fail: (err) => {
+        console.error('拨打电话失败', err);
+        uni.showToast({ title: '拨号失败，请手动拨打', icon: 'none' });
+        handleCopy(phoneNumber);
+      },
+    });
+  }
+  function handleCopy(text) {
+    uni.setClipboardData({
+      data: text,
+      success: () => {
+        uni.showToast({ title: '已复制到剪贴板', icon: 'success' });
+      },
+      fail: () => {
+        uni.showToast({ title: '复制失败', icon: 'none' });
+      },
+    });
+  }
 </script>
 
 <style lang="scss" scoped>
+  .highlight {
+    color: red; /* 高亮颜色 */
+    font-weight: bold;
+  }
+
   .swiper-box {
     width: 200rpx;
     height: 200rpx;
   }
+
   .log-card {
     border-top: 2rpx solid rgba(#dfdfdf, 0.5);
     padding: 20rpx;
     background: #fff;
     margin-bottom: 20rpx;
+
     .log-card-img {
       width: 200rpx;
       height: 200rpx;
       margin-right: 20rpx;
     }
+
     .log-card-msg {
       font-size: 28rpx;
       font-weight: 500;
       width: 490rpx;
       color: #333333;
+
       .warning-color {
         color: #999;
       }
     }
   }
+
   .log-content {
     padding: 34rpx 20rpx 0rpx 20rpx;
     background: #fff;
+
     .log-content-box {
       align-items: stretch;
     }
+
     .log-icon {
       height: inherit;
+
       .cicon-title {
         color: #ccc;
         font-size: 40rpx;
       }
+
       .activity-color {
         color: #f0c785;
         font-size: 40rpx;
       }
+
       .info-color {
         color: #ccc;
         font-size: 40rpx;
       }
+
       .line {
         width: 1px;
         height: 100%;
@@ -146,16 +215,18 @@
         font-weight: bold;
         color: #333333;
       }
+
       .log-msg-desc {
         font-size: 24rpx;
         font-weight: 400;
         color: #333333;
         line-height: 36rpx;
       }
+
       .log-msg-date {
         font-size: 24rpx;
         font-weight: 500;
-        color: #999999;
+        color: #000000;
       }
     }
   }
