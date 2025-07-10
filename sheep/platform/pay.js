@@ -93,7 +93,7 @@ export default class SheepPay {
       };
       // 特殊逻辑：微信公众号、小程序支付时，必须传入 openid
       if (['wx_pub', 'wx_lite'].includes(channel)) {
-        const openid = await sheep.$platform.useProvider('wechat').getOpenid();
+        const openid = await sheep.$platform.useProvider('wechat').getOpenid(true);
         // 如果获取不到 openid，微信无法发起支付，此时需要引导
         if (!openid) {
           this.bindWeixin();
