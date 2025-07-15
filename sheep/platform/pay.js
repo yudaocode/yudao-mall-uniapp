@@ -236,6 +236,7 @@ export default class SheepPay {
       return;
     }
 
+    // TODO @芋艿：【可优化】如果是沙箱支付，EnvUtils.setEnv(EnvUtils.EnvEnum.SANDBOX)，相关 https://t.zsxq.com/yjyJQ
     uni.requestPayment({
       provider: 'alipay',
       orderInfo: data.displayContent, // 直接使用返回的支付参数
