@@ -14,9 +14,9 @@
       >
         <template #rightBottom>
           <view class="ss-flex ss-row-between">
-            <view class="commission-num" v-if="item.brokerageMinPrice === undefined"
-              >预计佣金：计算中</view
-            >
+            <view class="commission-num" v-if="item.brokerageMinPrice === undefined">
+              预计佣金：计算中
+            </view>
             <view
               class="commission-num"
               v-else-if="item.brokerageMinPrice === item.brokerageMaxPrice"
