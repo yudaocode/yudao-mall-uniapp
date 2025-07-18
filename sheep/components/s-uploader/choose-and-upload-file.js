@@ -251,7 +251,7 @@ async function uploadFiles(choosePromise, { onChooseFile, onUploadProgress, dire
   } else {
     // 后端上传
     for (let file of files) {
-      const { data } = await FileApi.uploadFile(file.path);
+      const { data } = await FileApi.uploadFile(file.path, directory);
       file.url = data;
     }
 
