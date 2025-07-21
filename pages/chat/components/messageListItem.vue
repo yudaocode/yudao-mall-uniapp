@@ -38,10 +38,7 @@
         <image
           v-show="message.senderType === UserTypeEnum.ADMIN"
           class="chat-avatar ss-m-r-24"
-          :src="
-            sheep.$url.cdn(message.senderAvatar) ||
-            sheep.$url.static('/static/img/shop/chat/default.png')
-          "
+          :src="sheep.$url.cdn(message.senderAvatar) || sheep.$url.static('')"
           mode="aspectFill"
           lazy-load
         />
