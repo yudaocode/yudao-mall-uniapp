@@ -237,7 +237,7 @@
     if (state.accountInfo.type === '5') {
       data.userAccount = openid;
       data.transferChannelCode = getWeixinPayChannelCode();
-    } else if (state.accountInfo.type === '6') {
+    } else if (state.accountInfo.type === '6' || state.accountInfo.type === '2') {
       delete data.transferChannelCode;
     } else {
       delete data.userAccount;
