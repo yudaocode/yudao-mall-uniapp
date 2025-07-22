@@ -26,7 +26,7 @@
       if (props.styles.bgType === 'img')
         return {
           background: `url(${sheep.$url.cdn(
-            props.styles.bgImage,
+            props.styles.bgImg,
           )}) no-repeat top center / 100% auto`,
         };
     }
