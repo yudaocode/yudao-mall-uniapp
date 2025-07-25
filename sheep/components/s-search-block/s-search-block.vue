@@ -12,11 +12,23 @@
     ]"
     :class="[{ 'border-content': navbar }]"
   >
-    <view class="ss-flex ss-col-center" v-if="navbar">
-      <view class="search-icon _icon-search ss-m-l-10" :style="[{ color: props.iconColor }]"></view>
-      <view class="search-input ss-flex-1 ss-line-1" :style="[{ color: fontColor, width: width }]">
+    <view class="ss-flex ss-col-center"
+          :class="[placeholderPosition === 'center' ? 'ss-row-center' : 'ss-row-left']"
+          v-if="navbar" style="width: 100%;"
+    >
+      <view class="search-icon _icon-search" :style="{ color: fontColor, margin: '0 10rpx' }"></view>
+      <view class="search-input ss-line-1" :style="{ color: fontColor }">
         {{ placeholder }}
       </view>
+    </view>
+    <!-- 右侧扫一扫图标 -->
+    <view
+      v-if="showScan"
+      class="scan-icon _icon-add-round-o"
+      :style="{ color: fontColor }"
+      @tap.stop="onScan"
+      style="margin-left: auto;"
+    >
     </view>
     <uni-search-bar
       v-if="!navbar"
@@ -34,8 +46,8 @@
           class="ss-m-r-16"
           :style="[{ color: data.textColor }]"
           @tap.stop="sheep.$router.go('/pages/goods/list', { keyword: item })"
-          >{{ item }}</view
-        >
+        >{{ item }}
+        </view>
       </view>
     </view>
     <view v-if="data.hotKeywords && data.hotKeywords.length && navbar" class="ss-flex">
@@ -55,15 +67,15 @@
   /**
    * 基础组件 - 搜索栏
    *
-   * @property {String} elBackground 			- 输入框背景色
-   * @property {String} iconColor 			- 图标颜色
-   * @property {String} fontColor 		  	- 字体颜色
-   * @property {Number} placeholder 			- 默认placeholder
-   * @property {Number} topRadius 			- 组件上圆角
-   * @property {Number} bottomRadius 			- 组件下圆角
+   * @property {String} elBackground      - 输入框背景色
+   * @property {String} iconColor      - 图标颜色
+   * @property {String} fontColor        - 字体颜色
+   * @property {Number} placeholder      - 默认placeholder
+   * @property {Number} topRadius      - 组件上圆角
+   * @property {Number} bottomRadius      - 组件下圆角
    *
    * @slot keywords							- 关键字
-   * @event {Function} click 					- 点击组件时触发
+   * @event {Function} click          - 点击组件时触发
    */
 
   import { computed, reactive } from 'vue';
@@ -107,6 +119,16 @@
       type: String,
       default: '这是一个搜索框',
     },
+    // placeholder位置（left | center）
+    placeholderPosition: {
+      type: String,
+      default: 'left',
+    },
+    // 是否显示扫一扫图标
+    showScan: {
+      type: Boolean,
+      default: false,
+    },
     radius: {
       type: Number,
       default: 10,
@@ -134,6 +156,41 @@
       }, 100);
     }
   }
+
+  // TODO 后续需完善扫一扫功能
+  /**
+   * 扫一扫
+   */
+  function onScan() {
+    uni.scanCode({
+      onlyFromCamera: false,
+      sound: 'default',
+      scanType: ['qrCode', 'barCode'],
+      success: (res) => {
+        showScanResult(res.result);
+      },
+      fail: (err) => {
+        console.error(err);
+        uni.showToast({
+          title: '扫码失败',
+          icon: 'none',
+        });
+      },
+    });
+  }
+
+  /**
+   * 展示扫码结果
+   * @param text  扫码内容
+   */
+  function showScanResult(text) {
+    uni.showModal({
+      title: '扫描结果',
+      content: text,
+      showCancel: false,
+      confirmText: '知道了',
+    });
+  }
 </script>
 
 <style lang="scss" scoped>
@@ -147,6 +204,11 @@
     position: relative;
 
     .search-icon {
+      font-size: 38rpx;
+      margin-right: 20rpx;
+    }
+
+    .scan-icon {
       font-size: 38rpx;
       margin-right: 20rpx;
     }

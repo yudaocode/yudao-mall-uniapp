@@ -18,7 +18,6 @@
   });
 
   // 组件样式
-
   const elBackground = computed(() => {
     if (props.styles) {
       if (props.styles.bgType === 'color')
@@ -26,7 +25,7 @@
       if (props.styles.bgType === 'img')
         return {
           background: `url(${sheep.$url.cdn(
-            props.styles.bgImage,
+            props.styles.bgImg,
           )}) no-repeat top center / 100% auto`,
         };
     }
