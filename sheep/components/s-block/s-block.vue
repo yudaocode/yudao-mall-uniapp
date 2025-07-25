@@ -18,7 +18,6 @@
   });
 
   // 组件样式
-
   const elBackground = computed(() => {
     if (props.styles) {
       if (props.styles.bgType === 'color')
