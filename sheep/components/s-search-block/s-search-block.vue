@@ -12,23 +12,28 @@
     ]"
     :class="[{ 'border-content': navbar }]"
   >
-    <view class="ss-flex ss-col-center"
-          :class="[placeholderPosition === 'center' ? 'ss-row-center' : 'ss-row-left']"
-          v-if="navbar" style="width: 100%;"
+    <view
+      class="ss-flex ss-col-center"
+      :class="[placeholderPosition === 'center' ? 'ss-row-center' : 'ss-row-left']"
+      v-if="navbar"
+      style="width: 100%"
     >
-      <view class="search-icon _icon-search" :style="{ color: fontColor, margin: '0 10rpx' }"></view>
+      <view
+        class="search-icon _icon-search"
+        :style="{ color: fontColor, margin: '0 10rpx' }"
+      ></view>
       <view class="search-input ss-line-1" :style="{ color: fontColor }">
         {{ placeholder }}
       </view>
-    </view>
-    <!-- 右侧扫一扫图标 -->
-    <view
-      v-if="showScan"
-      class="scan-icon _icon-add-round-o"
-      :style="{ color: fontColor }"
-      @tap.stop="onScan"
-      style="margin-left: auto;"
-    >
+      <!-- 右侧扫一扫图标 -->
+      <view
+        v-if="showScan"
+        class="scan-icon _icon-scan"
+        :style="{ color: fontColor }"
+        @tap.stop="onScan"
+        style="margin-left: auto"
+      >
+      </view>
     </view>
     <uni-search-bar
       v-if="!navbar"
@@ -46,7 +51,8 @@
           class="ss-m-r-16"
           :style="[{ color: data.textColor }]"
           @tap.stop="sheep.$router.go('/pages/goods/list', { keyword: item })"
-        >{{ item }}
+        >
+          {{ item }}
         </view>
       </view>
     </view>
@@ -157,9 +163,8 @@
     }
   }
 
-  // TODO 后续需完善扫一扫功能
   /**
-   * 扫一扫
+   * 扫一扫功能
    */
   function onScan() {
     uni.scanCode({
@@ -172,23 +177,99 @@
       fail: (err) => {
         console.error(err);
         uni.showToast({
-          title: '扫码失败',
-          icon: 'none',
+          title: err.errMsg === 'scanCode:fail cancel' ? '操作已取消' : '扫码失败',
+          icon: 'error',
         });
       },
     });
   }
 
   /**
-   * 展示扫码结果
-   * @param text  扫码内容
+   * 检测是否为有效URL
+   * @param {string} str 待检测字符串
+   * @returns {boolean} 是否为有效URL
+   */
+  function isValidUrl(str) {
+    try {
+      // 微信环境专用验证方式
+      const url = str.trim();
+      return (
+        (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('ftp://')) &&
+        // 简单长度验证
+        url.length >= 10
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * 展示扫码结果并处理用户操作
+   * @param {string} text 扫码得到的内容
    */
   function showScanResult(text) {
+    const isUrl = isValidUrl(text);
+    // 显示结果弹窗
     uni.showModal({
       title: '扫描结果',
       content: text,
-      showCancel: false,
-      confirmText: '知道了',
+      confirmText: isUrl ? '访问' : '复制',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          if (isUrl) {
+            handleUrl(text);
+          } else {
+            handleCopy(text);
+          }
+        }
+      },
+    });
+  }
+
+  /**
+   * 处理URL跳转
+   * @param {string} url 要访问的URL
+   */
+  function handleUrl(url) {
+    // 方案1：跳转到webview页面（推荐）
+    uni.navigateTo({
+      url: `/pages/public/webview?url=${encodeURIComponent(url)}`,
+    });
+
+    // 方案2：直接复制链接（备选方案）
+    /*
+    uni.setClipboardData({
+      data: url,
+      success: () => {
+        uni.showToast({
+          title: '链接已复制，请在浏览器打开',
+          icon: 'success',
+        });
+      },
+    });
+    */
+  }
+
+  /**
+   * 处理文本复制
+   * @param {string} text 要复制的文本
+   */
+  function handleCopy(text) {
+    uni.setClipboardData({
+      data: text,
+      success: () => {
+        uni.showToast({
+          title: '已复制到剪贴板',
+          icon: 'success',
+        });
+      },
+      fail: () => {
+        uni.showToast({
+          title: '复制失败，请重试',
+          icon: 'error',
+        });
+      },
     });
   }
 </script>
