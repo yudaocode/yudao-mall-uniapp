@@ -12,11 +12,16 @@
     ]"
     :class="[{ 'border-content': navbar }]"
   >
-    <view class="ss-flex ss-col-center"
-          :class="[placeholderPosition === 'center' ? 'ss-row-center' : 'ss-row-left']"
-          v-if="navbar" style="width: 100%;"
+    <view
+      class="ss-flex ss-col-center"
+      :class="[placeholderPosition === 'center' ? 'ss-row-center' : 'ss-row-left']"
+      v-if="navbar"
+      style="width: 100%"
     >
-      <view class="search-icon _icon-search" :style="{ color: fontColor, margin: '0 10rpx' }"></view>
+      <view
+        class="search-icon _icon-search"
+        :style="{ color: fontColor, margin: '0 10rpx' }"
+      ></view>
       <view class="search-input ss-line-1" :style="{ color: fontColor }">
         {{ placeholder }}
       </view>
@@ -24,10 +29,10 @@
     <!-- 右侧扫一扫图标 -->
     <view
       v-if="showScan"
-      class="scan-icon _icon-add-round-o"
+      class="scan-icon _icon-scan"
       :style="{ color: fontColor }"
       @tap.stop="onScan"
-      style="margin-left: auto;"
+      style="margin-left: auto"
     >
     </view>
     <uni-search-bar
@@ -46,7 +51,7 @@
           class="ss-m-r-16"
           :style="[{ color: data.textColor }]"
           @tap.stop="sheep.$router.go('/pages/goods/list', { keyword: item })"
-        >{{ item }}
+          >{{ item }}
         </view>
       </view>
     </view>
