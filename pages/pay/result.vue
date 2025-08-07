@@ -137,6 +137,16 @@
         return;
       }
     }
+    // 2.1 情况三一：未支付，且轮询次数小于三次，则继续轮询
+    if (state.counter < 3 && state.result === 'unpaid') {
+      setTimeout(() => {
+        getOrderInfo(id);
+      }, 1500);
+    }
+    // 2.2 情况二：超过三次检测才判断为支付失败
+    if (state.counter >= 3) {
+      state.result = 'failed';
+    }
   }
 
   function onOrder() {
