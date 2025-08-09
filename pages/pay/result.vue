@@ -17,7 +17,7 @@
       <view class="tip-text ss-m-b-30" v-if="payResult === 'success'">支付成功</view>
       <view class="tip-text ss-m-b-30" v-if="payResult === 'failed'">支付失败</view>
       <view class="tip-text ss-m-b-30" v-if="payResult === 'closed'">该订单已关闭</view>
-      <view class="tip-text ss-m-b-30" v-if="payResult === 'waiting'">检测支付结果...</view>
+      <view class="tip-text ss-m-b-30" v-if="payResult === 'waiting'">正在查询支付结果...</view>
       <view class="pay-total-num ss-flex" v-if="payResult === 'success'">
         <view>￥{{ fen2yuan(state.orderInfo.price) }}</view>
       </view>
@@ -101,7 +101,7 @@
   async function getOrderInfo(id) {
     state.counter++;
     // 1. 加载订单信息
-    const { data, code } = await PayOrderApi.getOrder(id);
+    const { data, code } = await PayOrderApi.getOrder(id, true);
     if (code === 0) {
       state.orderInfo = data;
       if (!state.orderInfo || state.orderInfo.status === 30) {
