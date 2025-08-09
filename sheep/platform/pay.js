@@ -264,8 +264,16 @@ export default class SheepPay {
     }
 
     // 解析支付参数
-    const payConfig = JSON.parse(data.displayContent);
-
+    let payConfig = JSON.parse(data.displayContent);
+    if(typeof payConfig.appId === 'undefined'){
+      payConfig.appId = payConfig.appid;
+    }
+    if(typeof payConfig.nonceStr === 'undefined'){
+      payConfig.nonceStr = payConfig.noncestr;
+    }
+    if(typeof payConfig.timeStamp === 'undefined'){
+      payConfig.timeStamp = payConfig.timestamp;
+    }
     // 调用微信支付
     uni.requestPayment({
       provider: 'wxpay',
