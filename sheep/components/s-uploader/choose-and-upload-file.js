@@ -175,7 +175,7 @@ function uploadCloudFiles(files, max = 5, onUploadProgress) {
   });
 }
 
-function uploadFilesFromPath(path, directory) {
+function uploadFilesFromPath(path, directory = '') {
   // 目的：用于微信小程序，选择图片时，只有 path
   return uploadFiles(
     Promise.resolve({
