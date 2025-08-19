@@ -26,7 +26,8 @@ const options = {
   loadingMsg: '加载中',
   // 需要授权才能请求 默认放开
   auth: false,
-  // ...
+  // 是否传递 token
+  isToken: true,
 };
 
 // Loading全局实例
@@ -90,14 +91,14 @@ http.interceptors.request.use(
     }
 
     // 增加 token 令牌、terminal 终端、tenant 租户的请求头
-    const token = getAccessToken();
+    const token = config.custom.isToken ? getAccessToken() : undefined;
     if (token) {
       config.header['Authorization'] = token;
     }
     config.header['terminal'] = getTerminal();
 
     config.header['Accept'] = '*/*';
-    config.header['tenant-id'] = tenantId;
+    config.header['tenant-id'] = getTenantId();
     return config;
   },
   (error) => {
@@ -295,6 +296,11 @@ export const getAccessToken = () => {
 /** 获得刷新令牌 */
 export const getRefreshToken = () => {
   return uni.getStorageSync('refresh-token');
+};
+
+/** 获得租户编号 */
+export const getTenantId = () => {
+  return uni.getStorageSync('tenant-id') || tenantId;
 };
 
 const request = (config) => {
