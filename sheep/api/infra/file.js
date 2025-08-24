@@ -3,7 +3,7 @@ import request, { getAccessToken } from '@/sheep/request';
 
 const FileApi = {
   // 上传文件
-  uploadFile: (file, directory) => {
+  uploadFile: (file, directory = '') => {
     uni.showLoading({
       title: '上传中',
     });
