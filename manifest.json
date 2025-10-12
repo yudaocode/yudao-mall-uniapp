@@ -2,7 +2,7 @@
   "name": "芋道商城",
   "appid": "__UNI__460BC4C",
   "description": "基于 uni-app + Vue3 技术驱动的在线商城系统，内含诸多功能与丰富的活动，期待您的使用和反馈。",
-  "versionName": "2025.09",
+  "versionName": "2025.10",
   "versionCode": "183",
   "transformPx": false,
   "app-plus": {
@@ -68,10 +68,7 @@
         "schemes": "shopro"
       },
       "ios": {
-        "urlschemewhitelist": [
-          "baidumap",
-          "iosamap"
-        ],
+        "urlschemewhitelist": ["baidumap", "iosamap"],
         "dSYMs": false,
         "privacyDescription": {
           "NSPhotoLibraryUsageDescription": "需要同意访问您的相册选取图片才能完善该条目",
@@ -82,9 +79,7 @@
         "urltypes": "shopro",
         "capabilities": {
           "entitlements": {
-            "com.apple.developer.associated-domains": [
-              "applinks:shopro.sheepjs.com"
-            ]
+            "com.apple.developer.associated-domains": ["applinks:shopro.sheepjs.com"]
           }
         },
         "idfa": true
@@ -101,18 +96,12 @@
         },
         "payment": {
           "weixin": {
-            "__platform__": [
-              "ios",
-              "android"
-            ],
+            "__platform__": ["ios", "android"],
             "appid": "wxae7a0c156da9383b",
             "UniversalLinks": "https://shopro.sheepjs.com/uni-universallinks/__UNI__082C0BA/"
           },
           "alipay": {
-            "__platform__": [
-              "ios",
-              "android"
-            ]
+            "__platform__": ["ios", "android"]
           }
         },
         "share": {
@@ -122,9 +111,7 @@
           }
         }
       },
-      "orientation": [
-        "portrait-primary"
-      ],
+      "orientation": ["portrait-primary"],
       "splashscreen": {
         "androidStyle": "common",
         "iosStyle": "common",
@@ -195,9 +182,7 @@
     "lazyCodeLoading": "requiredComponents",
     "usingComponents": {},
     "permission": {},
-    "requiredPrivateInfos": [
-      "chooseAddress"
-    ]
+    "requiredPrivateInfos": ["chooseAddress"]
   },
   "mp-alipay": {
     "usingComponents": true
