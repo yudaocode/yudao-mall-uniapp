@@ -9,3 +9,5 @@ yarn.lock
 package-lock.json
 *.keystore
 pnpm-lock.yaml
+/dist/
+npm-debug.log*  
