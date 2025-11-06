@@ -62,7 +62,7 @@
       open-type="getPhoneNumber"
       @getphonenumber="getPhoneNumber"
     >
-      使用微信手机号
+      手机号快捷登录
     </button>
   </view>
 </template>
