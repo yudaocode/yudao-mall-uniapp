@@ -54,7 +54,7 @@
   import sheep from '@/sheep';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import { reactive } from 'vue';
-  import _ from 'lodash-es';
+  import { concat } from 'lodash-es';
   import BrokerageApi from '@/sheep/api/trade/brokerage';
   import { resetPagination, getWeekTimes, getMonthTimes } from '@/sheep/helper/utils';
 
@@ -94,7 +94,7 @@
     if (code !== 0) {
       return;
     }
-    state.pagination.list = _.concat(state.pagination.list, data.list);
+    state.pagination.list = concat(state.pagination.list, data.list);
     state.pagination.total = data.total;
     state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
   }

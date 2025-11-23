@@ -67,7 +67,7 @@
   import { reactive } from 'vue';
   import { onLoad, onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import _ from 'lodash-es';
+  import { concat } from 'lodash-es';
   import { formatOrderColor } from '@/sheep/hooks/useGoods';
   import { resetPagination } from '@/sheep/helper/utils';
   import CombinationApi from '@/sheep/api/promotion/combination';
@@ -121,7 +121,7 @@
     if (code !== 0) {
       return;
     }
-    state.pagination.list = _.concat(state.pagination.list, data.list);
+    state.pagination.list = concat(state.pagination.list, data.list);
     state.pagination.total = data.total;
     state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
   }

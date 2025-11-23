@@ -128,8 +128,7 @@
     handleOrderButtons,
   } from '@/sheep/hooks/useGoods';
   import sheep from '@/sheep';
-  import _ from 'lodash-es';
-  import { isEmpty } from 'lodash-es';
+  import { concat, isEmpty } from 'lodash-es';
   import OrderApi from '@/sheep/api/trade/order';
   import { resetPagination } from '@/sheep/helper/utils';
 
@@ -331,7 +330,7 @@
       return;
     }
     data.list.forEach((order) => handleOrderButtons(order));
-    state.pagination.list = _.concat(state.pagination.list, data.list);
+    state.pagination.list = concat(state.pagination.list, data.list);
     state.pagination.total = data.total;
     state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
   }

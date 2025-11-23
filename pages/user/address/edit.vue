@@ -96,7 +96,7 @@
   import { ref, reactive, unref } from 'vue';
   import sheep from '@/sheep';
   import { onLoad } from '@dcloudio/uni-app';
-  import _ from 'lodash-es';
+  import { isEmpty } from 'lodash-es';
   import { mobile } from '@/sheep/validate/form';
   import AreaApi from '@/sheep/api/system/area';
   import AddressApi from '@/sheep/api/member/address';
@@ -151,7 +151,7 @@
 
   // 获得地区数据
   const getAreaData = () => {
-    if (_.isEmpty(uni.getStorageSync('areaData'))) {
+    if (isEmpty(uni.getStorageSync('areaData'))) {
       AreaApi.getAreaTree().then((res) => {
         if (res.code === 0) {
           uni.setStorageSync('areaData', res.data);
