@@ -259,7 +259,7 @@
 <script setup>
   import sheep from '@/sheep';
   import { onLoad, onShow } from '@dcloudio/uni-app';
-  import { reactive, ref } from 'vue';
+  import { reactive, ref, watch } from 'vue';
   import { isEmpty } from 'lodash-es';
   import {
     fen2yuan,
@@ -269,6 +269,7 @@
   } from '@/sheep/hooks/useGoods';
   import OrderApi from '@/sheep/api/trade/order';
   import DeliveryApi from '@/sheep/api/trade/delivery';
+  import PayOrderApi from '@/sheep/api/pay/order';
   import PickUpVerify from '@/pages/order/pickUpVerify.vue';
 
   const statusBarHeight = sheep.$platform.device.statusBarHeight * 2;
@@ -429,7 +430,11 @@
 
   onShow(async () => {
     //onShow中获取订单列表,保证跳转后页面为最新状态
-    await getOrderDetail(state.orderInfo.id);
+
+    //options.payOrderNo传值的情况下,onLoad 会去查询支付订单
+    //此时state.orderInfo.id没有值，onShow await getOrderDetail会出现异常
+    //改用watch监听state.orderInfo.id 方式 await getOrderDetail
+    //await getOrderDetail(state.orderInfo.id);
   });
 
   onLoad(async (options) => {
@@ -437,12 +442,29 @@
     if (options.id) {
       id = options.id;
     }
+    if (options.payOrderNo) {
+      // 查询支付订单：根据 payOrderNo 取 merchantOrderId ，merchantOrderId 即 tradeOrderId
+      // 例：小程序商品订单详情path
+      // -- https://developers.weixin.qq.com/miniprogram/dev/platform-capabilities/business-capabilities/order_center/order_center.html
+      // -- 配置参考：pages/order/detail?payOrderNo=${商品订单号}
+      // -- ${商品订单号} out_trade_no 为 payOrderNo，根据 payOrderNo 取 merchantOrderId ，merchantOrderId 即 tradeOrderId
+      const payOrder = await PayOrderApi.getOrder(undefined,undefined, options.payOrderNo);
+      if (payOrder.code === 0) {
+        id = payOrder.data?.merchantOrderId || id;
+      }
+    }
     // TODO 芋艿：【微信物流】下面两个变量，后续接入
     state.comeinType = options.comein_type;
     if (state.comeinType === 'wechat') {
       state.merchantTradeNo = options.merchant_trade_no;
     }
     state.orderInfo.id = id;
+  });
+
+  watch(() => state.orderInfo.id, async (newId) => {
+    if (newId) {
+      await getOrderDetail(newId);
+    }
   });
 </script>
 
