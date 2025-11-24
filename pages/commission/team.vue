@@ -257,7 +257,7 @@
   import sheep from '@/sheep';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import { computed, reactive, ref } from 'vue';
-  import _ from 'lodash-es';
+  import { isNil, concat } from 'lodash-es';
   import { onPageScroll } from '@dcloudio/uni-app';
   import BrokerageApi from '@/sheep/api/trade/brokerage';
   import { fen2yuan } from '../../sheep/hooks/useGoods';
@@ -289,7 +289,7 @@
   });
 
   function filterUserNum(num) {
-    if (_.isNil(num)) {
+    if (isNil(num)) {
       return '';
     }
     return `下级团队${num}人`;
@@ -313,7 +313,7 @@
     if (code !== 0) {
       return;
     }
-    state.pagination.list = _.concat(state.pagination.list, data.list);
+    state.pagination.list = concat(state.pagination.list, data.list);
     state.pagination.total = data.total;
     state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
   }

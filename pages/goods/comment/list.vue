@@ -31,7 +31,7 @@
   import CommentApi from '@/sheep/api/product/comment';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import { reactive } from 'vue';
-  import _ from 'lodash-es';
+  import { concat } from 'lodash-es';
   import commentItem from '../components/detail/comment-item.vue';
 
   const state = reactive({
@@ -75,7 +75,7 @@
       return;
     }
     // 合并列表
-    state.pagination.list = _.concat(state.pagination.list, res.data.list);
+    state.pagination.list = concat(state.pagination.list, res.data.list);
     state.pagination.total = res.data.total;
     state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
   }

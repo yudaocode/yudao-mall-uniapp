@@ -59,7 +59,7 @@
   import { reactive } from 'vue';
   import BrokerageApi from '@/sheep/api/trade/brokerage';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
-  import _ from 'lodash-es';
+  import { concat } from 'lodash-es';
   import { resetPagination, getWeekTimes, getMonthTimes } from '@/sheep/helper/utils';
 
   const tabMaps = ['周排行', '月排行'];
@@ -93,7 +93,7 @@
     if (code !== 0) {
       return;
     }
-    state.pagination.list = _.concat(state.pagination.list, data.list);
+    state.pagination.list = concat(state.pagination.list, data.list);
     state.pagination.total = data.total;
     state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
     if (state.pagination.pageNo === 1) {

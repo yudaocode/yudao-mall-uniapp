@@ -32,7 +32,7 @@
 
 <script setup>
   import { reactive, watch } from 'vue';
-  import _ from 'lodash-es';
+  import { concat } from 'lodash-es';
   import GoodsItem from './goods.vue';
   import OrderItem from './order.vue';
   import OrderApi from '@/sheep/api/trade/order';
@@ -82,7 +82,7 @@
             page,
             list_rows,
           });
-    let orderList = _.concat(state.pagination.data, res.data.list);
+    let orderList = concat(state.pagination.data, res.data.list);
     state.pagination = {
       ...res.data,
       data: orderList,

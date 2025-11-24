@@ -62,7 +62,7 @@
   import SpuApi from '@/sheep/api/product/spu';
   import { onLoad } from '@dcloudio/uni-app';
   import { computed, reactive } from 'vue';
-  import _ from 'lodash-es';
+  import { concat } from 'lodash-es';
   import { handleTree } from '@/sheep/helper/utils';
 
   const state = reactive({
@@ -117,7 +117,7 @@
       return;
     }
     // 合并列表
-    state.pagination.list = _.concat(state.pagination.list, res.data.list);
+    state.pagination.list = concat(state.pagination.list, res.data.list);
     state.pagination.total = res.data.total;
     state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
   }

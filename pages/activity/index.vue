@@ -63,7 +63,7 @@
   import { reactive } from 'vue';
   import { onLoad, onReachBottom } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
-  import _ from 'lodash-es';
+  import { concat } from 'lodash-es';
   import RewardActivityApi from '@/sheep/api/promotion/rewardActivity';
   import SpuApi from '@/sheep/api/product/spu';
   import { appendSettlementProduct } from '@/sheep/hooks/useGoods';
@@ -131,7 +131,7 @@
       }
       appendSettlementProduct(data.list, res.data);
     });
-    state.pagination.list = _.concat(state.pagination.list, data.list);
+    state.pagination.list = concat(state.pagination.list, data.list);
     state.pagination.total = data.total;
     state.loadStatus = state.pagination.list.length < state.pagination.total ? 'more' : 'noMore';
     mountMasonry();
