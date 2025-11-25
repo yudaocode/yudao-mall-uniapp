@@ -428,7 +428,10 @@
 
   onShow(async () => {
     // onShow中获取订单列表,保证跳转后页面为最新状态
-    await getOrderDetail(state.orderInfo.id);
+    // 有几率在onLoad完成state.orderInfo.id赋值前进入onShow
+    if (state.orderInfo.id) {
+      await getOrderDetail(state.orderInfo.id);
+    }
   });
 
   onLoad(async (options) => {
@@ -447,6 +450,8 @@
       }
     }
     state.orderInfo.id = id;
+    // 完成state.orderInfo.id赋值后加载一次detail，但有几率与onShow重复可能导致detail会加载两次。
+    await getOrderDetail(state.orderInfo.id);
   });
 </script>
 
