@@ -427,8 +427,8 @@
   }
 
   onShow(async () => {
-    // onShow中获取订单列表,保证跳转后页面为最新状态
-    // 有几率在onLoad完成state.orderInfo.id赋值前进入onShow
+    // onShow 中获取订单列表,保证跳转后页面为最新状态
+    // 有几率在 onLoad 完成 state.orderInfo.id 赋值前进入 onShow
     if (state.orderInfo.id) {
       await getOrderDetail(state.orderInfo.id);
     }
@@ -450,7 +450,7 @@
       }
     }
     state.orderInfo.id = id;
-    // 完成state.orderInfo.id赋值后加载一次detail，但有几率与onShow重复可能导致detail会加载两次。
+    // 完成 state.orderInfo.id 赋值后加载一次detail，但有几率与 onShow 重复可能导致 detail 会加载两次。
     await getOrderDetail(state.orderInfo.id);
   });
 </script>
