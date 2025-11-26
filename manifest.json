@@ -185,7 +185,9 @@
     "requiredPrivateInfos": ["chooseAddress"]
   },
   "mp-alipay": {
-    "usingComponents": true
+    "usingComponents": true,
+    "styleIsolation": "shared",
+    "mergeVirtualHostAttributes": true
   },
   "mp-baidu": {
     "usingComponents": true

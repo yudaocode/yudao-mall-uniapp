@@ -72,6 +72,18 @@
             :src="sheep.$url.static('/static/img/shop/platform/apple.png')"
           />
         </button>
+
+        <!-- 7.4 支付宝小程序登录 -->
+        <button
+          v-if="sheep.$platform.name === 'alipayMiniProgram'"
+          @tap="thirdLogin('alipay')"
+          class="ss-reset-button auto-login-btn"
+        >
+          <image
+            class="auto-login-img"
+            :src="sheep.$url.static('/static/img/shop/pay/alipay.png')"
+          />
+        </button>
       </view>
 
       <!-- 用户协议的勾选 -->
@@ -85,7 +97,7 @@
         <view class="agreement-options-container">
           <!-- 同意选项 -->
           <view class="agreement-option ss-m-b-20">
-            <label class="radio ss-flex ss-col-center" @tap="onAgree">
+            <view class="radio ss-flex ss-col-center" @tap="onAgree">
               <radio
                 :checked="state.protocol === true"
                 color="var(--ui-BG-Main)"
@@ -98,12 +110,12 @@
                 <view class="agreement-text">与</view>
                 <view class="tcp-text" @tap.stop="onProtocol('隐私协议')"> 《隐私协议》 </view>
               </view>
-            </label>
+            </view>
           </view>
           
           <!-- 拒绝选项 -->
           <view class="agreement-option">
-            <label class="radio ss-flex ss-col-center" @tap="onRefuse">
+            <view class="radio ss-flex ss-col-center" @tap="onRefuse">
               <radio
                 :checked="state.protocol === false"
                 color="#ff4d4f"
@@ -116,7 +128,7 @@
                 <view class="agreement-text">与</view>
                 <view class="tcp-text" @tap.stop="onProtocol('隐私协议')"> 《隐私协议》 </view>
               </view>
-            </label>
+            </view>
           </view>
         </view>
       </view>

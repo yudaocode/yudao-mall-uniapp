@@ -10,6 +10,8 @@ import service from './miniProgram';
 import service from './openPlatform';
 // #endif
 
-const wechat = service;
-
+let wechat = {};
+if (typeof service !== 'undefined') {
+  wechat = service;
+}
 export default wechat;

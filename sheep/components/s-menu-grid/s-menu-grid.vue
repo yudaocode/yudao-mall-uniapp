@@ -2,8 +2,8 @@
 <template>
 	<view :style="[bgStyle, { marginLeft: `${data.space}px` }]">
 		<uni-grid :showBorder="Boolean(data.border)" :column="data.column">
-			<uni-grid-item v-for="(item, index) in data.list" :key="index" @tap="sheep.$router.go(item.url)">
-				<view class="grid-item-box ss-flex ss-flex-col ss-row-center ss-col-center">
+			<uni-grid-item v-for="(item, index) in data.list" :key="index" >
+				<view class="grid-item-box ss-flex ss-flex-col ss-row-center ss-col-center" @tap="sheep.$router.go(item.url)">
 					<view class="img-box">
 						<view class="tag-box" v-if="item.badge.show"
 							:style="[{ background: item.badge.bgColor, color: item.badge.textColor }]">
