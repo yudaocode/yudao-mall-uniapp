@@ -67,8 +67,11 @@ const mobileLogin = async (e) =>{
 // 支付宝小程序绑定
 const bind = () => {
   return new Promise(async (resolve, reject) => {
-    // 1. 获得微信 code
-    const codeResult = await uni.login();
+    // 1. 获得支付宝小程序 code
+    const codeResult = await uni.login({
+      provider: 'alipay',
+      scopes: 'auth_user',
+    });
     if (codeResult.errMsg !== 'login:ok') {
       return resolve(false);
     }
