@@ -675,7 +675,15 @@
 		"navigationBarTitleText": "芋道商城",
 		"navigationBarBackgroundColor": "#FFFFFF",
 		"backgroundColor": "#FFFFFF",
-		"navigationStyle": "custom"
+		"navigationStyle": "custom",
+    "mp-alipay": {
+      "titleImage": "",
+      "gestureBack": "YES",
+      "allowsBounceVertical": "NO",
+      "transparentTitle": "always",
+      "navigationStyle": "custom",
+      "titlePenetrate": "YES"
+    }
 	},
 	"tabBar": {
 		"list": [{

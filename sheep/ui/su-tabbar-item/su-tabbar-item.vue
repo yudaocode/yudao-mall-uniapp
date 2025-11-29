@@ -1,6 +1,6 @@
 <!-- 自定义底部导航项 -->
 <template>
-  <view class="u-tabbar-item" :style="[addStyle(customStyle)]">
+  <view class="u-tabbar-item" :style="[addStyle(customStyle)]" @click="clickHandler">
     <view v-if="isCenter" class="tabbar-center-item">
       <image class="center-image" :src="centerImage" mode="aspectFill"></image>
     </view>

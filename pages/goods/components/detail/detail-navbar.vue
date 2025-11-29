@@ -3,7 +3,10 @@
   <su-fixed alway :bgStyles="{ background: '#fff' }" :val="0" noNav opacity :placeholder="false">
     <su-status-bar />
     <view
-      class="ui-bar ss-flex ss-col-center ss-row-between ss-p-x-20"
+      class="ui-bar ss-flex ss-col-center ss-row-between"
+      :class="[{
+           'ss-p-x-20': sheep.$platform.provider !== 'alipay'
+      }]"
       :style="[{ height: sys_navBar - sys_statusBar + 'px' }]"
     >
       <!-- 左 -->

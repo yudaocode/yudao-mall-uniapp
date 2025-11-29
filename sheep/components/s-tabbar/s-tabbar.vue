@@ -20,7 +20,7 @@
         :badgeStyle="tabbar.badgeStyle"
         :isCenter="getTabbarCenter(index)"
         :centerImage="sheep.$url.cdn(item.iconUrl)"
-        @tap="sheep.$router.go(item.url)"
+        @click="sheep.$router.go(item.url)"
       >
         <template v-slot:active-icon>
           <image class="u-page__item__slot-icon" :src="sheep.$url.cdn(item.activeIconUrl)"></image>

@@ -245,7 +245,7 @@
     isDay: true,
   };
   const isLogin = computed(() => sheep.$store('user').isLogin);
-  const state = reactive({
+  let state = reactive({
     goodsId: 0,
     skeletonLoading: true, // SPU 加载中
     goodsInfo: {}, // SPU 信息

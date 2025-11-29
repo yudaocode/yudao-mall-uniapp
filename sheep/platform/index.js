@@ -14,6 +14,7 @@ import { isEmpty } from 'lodash-es';
 import { isWxBrowser } from '@/sheep/helper/utils';
 // #endif
 import wechat from './provider/wechat/index.js';
+import alipay from './provider/alipay/index';
 import apple from './provider/apple';
 import share from './share';
 import Pay from './pay';
@@ -53,6 +54,19 @@ platform = 'miniProgram';
 provider = 'wechat';
 // #endif
 
+// #ifdef MP-ALIPAY 
+name = 'alipayMiniProgram';
+platform = 'alipayMiniProgram';
+provider = 'alipay';
+if (!device.safeAreaInsets) {
+  device.safeAreaInsets = uni.getSystemInfoSync().safeAreaInsets
+}
+// 兜底一下。还是没有值时候，就给个默认值
+if (!device.safeAreaInsets) {
+  device.safeAreaInsets = {}
+}
+// #endif
+
 if (isEmpty(name)) {
   uni.showToast({
     title: '暂不支持该平台',
@@ -64,6 +78,8 @@ if (isEmpty(name)) {
 const load = () => {
   if (provider === 'wechat') {
     wechat.load();
+  } else if (provider === 'alipay') {
+    alipay.load();
   }
 };
 
@@ -72,6 +88,7 @@ const useProvider = (_provider = '') => {
   if (_provider === '') _provider = provider;
   if (_provider === 'wechat') return wechat;
   if (_provider === 'apple') return apple;
+  if (_provider === 'alipay') return alipay;
 };
 
 // 支付服务转发

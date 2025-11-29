@@ -214,6 +214,11 @@
 
   // 组件中使用 onMounted 监听页面加载，不是页面组件不使用 onShow
   onMounted(()=>{
+    // #ifdef MP-ALIPAY
+    uni.setNavigationBarTitle({
+      title: "",
+    });
+    // #endif
     if (!isEmpty(shareInfo.value)) {
       sheep.$platform.share.updateShareInfo(shareInfo.value);
     }
