@@ -75,7 +75,7 @@ const AuthUtil = {
       },
       custom: {
         showSuccess: true,
-        loadingMsg: '登陆中',
+        loadingMsg: '登录中',
       },
     });
   },
@@ -91,7 +91,7 @@ const AuthUtil = {
       },
       custom: {
         showSuccess: true,
-        loadingMsg: '登陆中',
+        loadingMsg: '登录中',
       },
     });
   },
@@ -107,7 +107,7 @@ const AuthUtil = {
       },
       custom: {
         showSuccess: true,
-        loadingMsg: '登陆中',
+        loadingMsg: '登录中',
         successMsg: '登录成功',
       },
     });

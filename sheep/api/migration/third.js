@@ -11,7 +11,7 @@ export default {
         data,
         custom: {
           showSuccess: true,
-          loadingMsg: '登陆中',
+          loadingMsg: '登录中',
         },
       }),
   },
