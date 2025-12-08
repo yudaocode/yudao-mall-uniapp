@@ -1,7 +1,6 @@
 <script setup>
   import { onLaunch, onShow, onError } from '@dcloudio/uni-app';
-  import { ShoproInit } from './sheep';
-
+  import { sheep, ShoproInit } from '@/sheep';
   onLaunch(() => {
     // 隐藏原生导航栏 使用自定义底部导航
     uni.hideTabBar({
@@ -12,7 +11,7 @@
     ShoproInit();
   });
 
-  onShow(() => {
+  onShow(async () => {
     // #ifdef APP-PLUS
     // 获取urlSchemes参数
     const args = plus.runtime.arguments;
@@ -23,6 +22,13 @@
     uni.getClipboardData({
       success: (res) => {},
     });
+
+    // ios 网络授权后重新加载一次应用初始化
+    if (sheep.$platform.os === 'ios') {
+      if (await sheep.$platform.checkNetwork()) {
+        await sheep.$store('app').init();
+      }
+    }
     // #endif
   });
 </script>
