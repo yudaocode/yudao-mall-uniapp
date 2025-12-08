@@ -83,6 +83,8 @@
     // #ifdef APP-PLUS
     // ios首次授权网络，需要重新加载一次应用初始化
     // 可能需要考虑上uni.onNetworkStatusChange，uni.offNetworkStatusChange组合拳以及主动主动唤起权限申请
+    // 一开始放app.vue，感觉负载太重，搬到这里来了。
+    // 如果你的首页不是这个页面，需要把代码搬过去。
     if (sheep.$platform.os === 'ios') {
       if (await sheep.$platform.checkNetwork()) {
         await sheep.$store('app').init();
