@@ -22,7 +22,7 @@
 
 <script setup>
   import { computed } from 'vue';
-  import { onLoad, onPageScroll, onPullDownRefresh } from '@dcloudio/uni-app';
+  import { onLoad, onShow, onPageScroll, onPullDownRefresh } from '@dcloudio/uni-app';
   import sheep from '@/sheep';
   import $share from '@/sheep/platform/share';
   // 隐藏原生tabBar
@@ -77,6 +77,18 @@
     if (options.page) {
       sheep.$router.go(decodeURIComponent(options.page));
     }
+  });
+
+  onShow(async() => {
+    // #ifdef APP-PLUS
+    // ios首次授权网络，需要重新加载一次应用初始化
+    // 可能需要考虑上uni.onNetworkStatusChange，uni.offNetworkStatusChange组合拳以及主动主动唤起权限申请
+    if (sheep.$platform.os === 'ios') {
+      if (await sheep.$platform.checkNetwork()) {
+        await sheep.$store('app').init();
+      }
+    }
+    // #endif
   });
 
   // 下拉刷新
