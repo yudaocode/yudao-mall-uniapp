@@ -40,7 +40,9 @@
   });
 </script>
 <style lang="scss" scoped>
+  // 修复 https://t.zsxq.com/8v0JG 反馈的问题，richtext height 不自适应的问题
   .richtext {
-    line-height: 0;
+    width: 100%;
+    height: auto;
   }
 </style>
