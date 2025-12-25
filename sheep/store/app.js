@@ -11,6 +11,7 @@ import { baseUrl, h5Url } from '@/sheep/config';
 const app = defineStore({
   id: 'app',
   state: () => ({
+    paramsForTabbar: {}, // 为全局tabbar跳转传参用。原因是 tabbar 无法传参，只能通过全局状态传递
     info: {
       // 应用信息
       name: '', // 商城名称
@@ -113,6 +114,13 @@ const app = defineStore({
         $router.error('InitError', res.msg || '加载失败');
       }
     },
+    // 设置paramsForTabbar
+    setParamsForTabbar(params = {}) {
+      this.paramsForTabbar = params;
+    },
+    clearParamsForTabbar() {
+      this.paramsForTabbar = {};
+    }
   },
   persist: {
     enabled: true,
