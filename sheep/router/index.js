@@ -70,8 +70,13 @@ const _go = (
 
   // 跳转底部导航
   if (TABBAR.includes(page)) {
+    // wx.switchTab: url 不支持 queryString
+    // 设置全局变量
+    const params = queryToParams(query);
+    $store('app').setParamsForTabbar(params);
+    // 请记得在业务代码里使用完后，清理掉全局状态，避免影响下次跳转
     uni.switchTab({
-      url,
+      url: page,
     });
     return;
   }
@@ -107,6 +112,19 @@ function paramsToQuery(params) {
   }
 
   return query.join('&');
+}
+
+function queryToParams(query) {
+  if (isEmpty(query)) {
+    return {};
+  }
+  let params = {};
+  let pairs = query.split('&');
+  for (let i = 0; i < pairs.length; i++) {
+    let pair = pairs[i].split('=');
+    params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+  }
+  return params;
 }
 
 function back() {
