@@ -114,13 +114,13 @@ const app = defineStore({
         $router.error('InitError', res.msg || '加载失败');
       }
     },
-    // 设置paramsForTabbar
+    // 设置 paramsForTabbar
     setParamsForTabbar(params = {}) {
       this.paramsForTabbar = params;
     },
     clearParamsForTabbar() {
       this.paramsForTabbar = {};
-    }
+    },
   },
   persist: {
     enabled: true,

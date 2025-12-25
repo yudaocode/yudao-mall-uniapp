@@ -131,6 +131,7 @@
     getGoodsList();
   }
   function initMenuIndex() {
+    // TODO @AI：可优化：增加一个 params.id 的兼容
     const appStore = sheep.$store('app');
     // 处理 tabbar 传参的情况
     const tabbarParams = appStore.paramsForTabbar || {};
