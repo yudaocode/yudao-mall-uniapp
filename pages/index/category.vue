@@ -141,11 +141,7 @@
     // 如果找到则调用 onMenu 自动勾选相应分类，否则调用 onMenu(0) 勾选第一个分类
     onMenu(foundCategory ? state.categoryList.indexOf(foundCategory) : 0);
   }
-  onShow(() => {
-    // 每次显示页面时都重新初始化菜单选中状态
-    initMenuIndex();
-  });
-  onLoad(async () => {
+  onShow(async () => {
     await getList();
     initMenuIndex();
   });
