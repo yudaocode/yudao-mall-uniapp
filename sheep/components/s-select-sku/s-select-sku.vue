@@ -305,7 +305,8 @@
   }
 
   changeDisabled(false);
-  // TODO 芋艿：待讨论的优化点：1）单规格，要不要默认选中；2）默认要不要选中第一个规格
+  // 初始化默认选中规格中的第一个，如果不需要，注释这段代码即可
+  initDefaultSelect(propertyList, onSelectSku);
 </script>
 
 <style lang="scss" scoped>
