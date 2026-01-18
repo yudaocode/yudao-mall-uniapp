@@ -109,7 +109,7 @@
 <script setup>
   import { computed, reactive, watch } from 'vue';
   import sheep from '@/sheep';
-  import { convertProductPropertyList,initDefaultSelect,  fen2yuan } from '@/sheep/hooks/useGoods';
+  import { convertProductPropertyList, initDefaultSelect, fen2yuan } from '@/sheep/hooks/useGoods';
 
   const headerBg = sheep.$url.css('/static/img/shop/goods/groupon-btn-long.png');
   const emits = defineEmits(['change', 'addCart', 'buy', 'close', 'ladder']);

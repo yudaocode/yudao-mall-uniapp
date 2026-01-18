@@ -498,21 +498,17 @@ export function getRewardActivityRuleItemDescriptions(activity) {
   return result;
 }
 
-// 单规格，要默认选中；
+/** 单规格，要默认选中 */
 export function initDefaultSelect(propertyList, onSelectSku) {
-  if (propertyList.length > 0) {
-    // 遍历每一个属性
-    for (let property of propertyList) {
-      const propertyId = property.id;
-      // 获取当前属性下可用的选项
-      const values = property.values || [];
-      const firstValue = values[0] || {}
-      // 不是禁用直接选中
-      if (!firstValue.disabled) {
-        const valueId = firstValue.id;
-        onSelectSku(propertyId, valueId);
-      }
+  if (propertyList.length === 0) {
+    return;
+  }
+  // 遍历每一个属性
+  for (const property of propertyList) {
+    const firstValue = (property.values || [])[0];
+    // 不是禁用直接选中
+    if (firstValue && !firstValue.disabled) {
+      onSelectSku(property.id, firstValue.id);
     }
-    
   }
 }
