@@ -115,7 +115,7 @@
         >
           <uni-easyinput
             :inputBorder="false"
-            :value="state.accountInfo.bankName"
+            :value="bankNameLabel"
             placeholder="请选择银行"
             suffixIcon="right"
             disabled
@@ -164,7 +164,7 @@
 </template>
 
 <script setup>
-  import { onBeforeMount, reactive } from 'vue';
+  import { onBeforeMount, reactive, computed } from 'vue';
   import sheep from '@/sheep';
   import accountTypeSelect from './components/account-type-select.vue';
   import { fen2yuan } from '@/sheep/hooks/useGoods';
@@ -197,6 +197,14 @@
     withdrawTypes: [], // 提现方式
     bankList: [], // 银行字典数据
     bankListSelectedIndex: '', // 选中银行 bankList 的 index
+  });
+
+  const bankNameLabel = computed(() => {
+    if (!state.accountInfo.bankName || !state.bankList || state.bankList.length === 0) {
+      return '';
+    }
+    const item = state.bankList.find((it) => it.value === state.accountInfo.bankName);
+    return item ? item.label : '';
   });
 
   // 打开提现方式的弹窗
@@ -300,7 +308,8 @@
   function bankChange(e) {
     const value = e.detail.value;
     state.bankListSelectedIndex = value;
-    state.accountInfo.bankName = state.bankList[value].label;
+    const item = state.bankList[value];
+    state.accountInfo.bankName = item ? item.value : undefined;
   }
 
   onBeforeMount(() => {
