@@ -30,8 +30,9 @@ export default {
     }
 
     // 调用后端接口，获得 JSSDK 初始化所需的签名
-    const url = location.origin;
-    const { code, data } = await AuthUtil.createWeixinMpJsapiSignature(url);
+    // 微信要求签名 URL 与当前页面去掉 hash 后完全一致；不能直接用 location.origin（会丢子路径与 query）
+    const signUrl = location.href.split('#')[0];
+    const { code, data } = await AuthUtil.createWeixinMpJsapiSignature(signUrl);
     if (code === 0) {
       jweixin.config({
         debug: false,
@@ -57,7 +58,11 @@ export default {
     configSuccess = true;
     jweixin.error((err) => {
       configSuccess = false;
-      console.error('微信 JSSDK 初始化失败', err);
+      console.error('[wx-jssdk] config error', err, {
+        href: location.href,
+        signUrl,
+        data,
+      });
       $helper.toast('微信JSSDK:' + err.errMsg);
     });
     jweixin.ready(() => {
