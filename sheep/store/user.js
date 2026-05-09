@@ -36,8 +36,7 @@ const defaultNumData = {
   },
 };
 
-const user = defineStore({
-  id: 'user',
+const user = defineStore('user', {
   state: () => ({
     userInfo: clone(defaultUserInfo), // 用户信息
     userWallet: clone(defaultUserWallet), // 用户钱包信息

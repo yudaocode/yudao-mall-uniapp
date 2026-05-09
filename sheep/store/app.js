@@ -8,8 +8,7 @@ import user from './user';
 import sys from './sys';
 import { baseUrl, h5Url } from '@/sheep/config';
 
-const app = defineStore({
-  id: 'app',
+const app = defineStore('app', {
   state: () => ({
     paramsForTabbar: {}, // 为全局tabbar跳转传参用。原因是 tabbar 无法传参，只能通过全局状态传递
     info: {

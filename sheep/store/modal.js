@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 
-const modal = defineStore({
-  id: 'modal',
+const modal = defineStore('modal', {
   state: () => ({
     auth: '', // 授权弹框 accountLogin|smsLogin|resetPassword|changeMobile|changePassword|changeUsername
     share: false, // 分享弹框
