@@ -12,6 +12,7 @@
         :color="color"
         :tools="tools"
         :opacityBgUi="opacityBgUi"
+        :backgroundColor="navbarBackgroundColor"
         @search="(e) => emits('search', e)"
         :defaultSearch="defaultSearch"
       />
@@ -79,6 +80,11 @@
     opacityBgUi: {
       type: String,
       default: 'bg-white',
+    },
+    // 顶部导航栏背景颜色（仅在 navbar === 'normal' 时生效）
+    navbarBackgroundColor: {
+      type: String,
+      default: '',
     },
     color: {
       type: String,
@@ -213,16 +219,16 @@
   // #endif
 
   // 组件中使用 onMounted 监听页面加载，不是页面组件不使用 onShow
-  onMounted(()=>{
+  onMounted(() => {
     // #ifdef MP-ALIPAY
     uni.setNavigationBarTitle({
-      title: "",
+      title: '',
     });
     // #endif
     if (!isEmpty(shareInfo.value)) {
       sheep.$platform.share.updateShareInfo(shareInfo.value);
     }
-  })
+  });
 </script>
 
 <style lang="scss" scoped>
