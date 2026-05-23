@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia';
 import app from './app';
 
-const sys = defineStore({
-  id: 'sys',
+const sys = defineStore('sys', {
   state: () => ({
     theme: '', // 主题,
     mode: 'light', // 明亮模式、暗黑模式（暂未支持）

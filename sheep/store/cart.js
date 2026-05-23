@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia';
 import CartApi from '@/sheep/api/trade/cart';
 
-const cart = defineStore({
-  id: 'cart',
+const cart = defineStore('cart', {
   state: () => ({
     list: [], // 购物车列表（invalidList + validList）
     selectedIds: [], // 已选列表
