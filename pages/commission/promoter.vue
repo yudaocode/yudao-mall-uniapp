@@ -105,7 +105,7 @@
       return;
     }
     state.pagination.pageNo++;
-    getList();
+    getRankList();
   }
 
   // 上拉加载更多
