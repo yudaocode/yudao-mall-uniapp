@@ -1,19 +1,8 @@
 import packageInfo from '@/package.json';
+import { getWxEnvVersion } from '@/sheep/helper/env';
 
 const { version } = packageInfo;
 
-// 获取微信小程序运行环境
-function getWxEnvVersion() {
-  // #ifdef MP-WEIXIN
-  try {
-    const accountInfo = wx.getAccountInfoSync();
-    return accountInfo.miniProgram.envVersion; // develop: 开发版, trial: 体验版, release: 正式版
-  } catch (e) {
-    console.log('获取微信小程序环境失败', e);
-    return 'release';
-  }
-  // #endif
-}
 
 // 开发环境配置
 export let baseUrl;
