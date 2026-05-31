@@ -107,7 +107,7 @@ const buildSpmLink = (query, linkAddress = '') => {
 };
 
 // 解析Spm
-const decryptSpm = (spm) => {
+const decryptSpm = async (spm) => {
   const user = $store('user');
   let shareParamsArray = spm.split('.');
   let shareParams = {
@@ -168,7 +168,7 @@ const decryptSpm = (spm) => {
     uni.setStorageSync('shareId', shareParams.shareId);
     // 已登录 绑定推广员
     if (!!user.isLogin) {
-      bindBrokerageUser(shareParams.shareId);
+      await bindBrokerageUser(shareParams.shareId);
     }
   }
 
