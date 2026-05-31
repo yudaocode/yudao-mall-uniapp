@@ -236,6 +236,7 @@ const refreshToken = async (config) => {
       return handleAuthorized();
     }
     // 只有真正发起刷新时才标记刷新中，避免无刷新令牌时状态一直卡住，后续 401 不再弹登录框
+    // https://github.com/yudaocode/yudao-mall-uniapp/issues/38
     isRefreshToken = true;
     // 2. 进行刷新访问令牌
     try {
