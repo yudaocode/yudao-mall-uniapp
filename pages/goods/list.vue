@@ -171,7 +171,7 @@
       },
       {
         name: '新品优先',
-        value: 'createTime',
+        sort: 'createTime',
         order: false,
       },
     ],
