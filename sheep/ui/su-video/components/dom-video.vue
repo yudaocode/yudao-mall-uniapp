@@ -90,27 +90,40 @@
         // console.log('向父组件传递事件 =>', data)
         this.$emit(data);
       },
+      // 转义 HTML 属性值，避免 src、poster 中的引号、尖括号闭合属性后注入事件或标签
+      escapeHtmlAttr(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+      },
+      // 只允许 uni-app video 支持的 object-fit 取值，其它值回落为默认的 contain
+      getObjectFit() {
+        return ['contain', 'cover', 'fill'].includes(this.objectFit) ? this.objectFit : 'contain';
+      },
       // 初始化视频
       initVideoHtml() {
         this.videoHtml = `<video
-          src="${this.src}"
+          src="${this.escapeHtmlAttr(this.src)}"
           id="dom-html-video_${this.randomNum}"
           class="dom-html-video"
           ${this.autoplay ? 'autoplay' : ''}
           ${this.loop ? 'loop' : ''}
           ${this.controls ? 'controls' : ''}
           ${this.muted ? 'muted' : ''}
-          ${this.poster ? 'poster="' + this.poster + '"' : ''}
+          ${this.poster ? 'poster="' + this.escapeHtmlAttr(this.poster) + '"' : ''}
           preload="auto"
           playsinline
           webkit-playsinline
           width="100%"
           height="100%"
-          style="object-fit: ${this.objectFit};padding:0;"
+          style="object-fit: ${this.getObjectFit()};padding:0;"
         >
-          <source src="${this.src}" type="video/mp4">
-          <source src="${this.src}" type="video/ogg">
-          <source src="${this.src}" type="video/webm">
+          <source src="${this.escapeHtmlAttr(this.src)}" type="video/mp4">
+          <source src="${this.escapeHtmlAttr(this.src)}" type="video/ogg">
+          <source src="${this.escapeHtmlAttr(this.src)}" type="video/webm">
         </video>
       `;
         // console.log('视频html =>', this.videoHtml)
