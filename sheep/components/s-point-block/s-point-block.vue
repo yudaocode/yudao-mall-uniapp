@@ -232,44 +232,47 @@
    * @return {Promise<undefined>} 商品列表
    */
   async function getPointActivityDetailList(ids) {
-    const { data } = await PointApi.getPointActivityListByIds(ids);
-    return data;
+    const { data } = (await PointApi.getPointActivityListByIds(ids)) || {};
+    return data || [];
   }
 
   /**
    * 根据商品编号，获取商品详情
    * @param ids 商品编号列表
-   * @return {Promise<undefined>} 商品列表
+   * @return {Promise<undefined>} 商品详情；商品被删除、下架或查询失败时返回 null
    */
   async function getSpuDetail(ids) {
-    const { data: spu } = await SpuApi.getSpuDetail(ids);
-    return spu;
+    try {
+      const { code, data: spu } = (await SpuApi.getSpuDetail(ids)) || {};
+      return code === 0 && spu ? spu : null;
+    } catch (e) {
+      return null;
+    }
   }
 
   // 初始化
   onMounted(async () => {
     // 加载活动列表
     const activityList = await getPointActivityDetailList(activityIds.join(','));
-    // 循环获取活动商品SPU详情并添加到spuList
+    // 循环获取活动商品SPU详情，补全活动信息后再添加到spuList
+    const spuList = [];
     for (const activity of activityList) {
-      state.spuList.push(await getSpuDetail(activity.spuId));
-    }
-
-    // 循环活动列表
-    activityList.forEach((activity) => {
-      // 查找对应的 spu 并更新价格
-      const spu = state.spuList.find((spu) => activity.spuId === spu.id);
-      if (spu) {
-        spu.pointStock = activity.stock;
-        spu.pointTotalStock = activity.totalStock;
-        spu.point = activity.point;
-        spu.pointPrice = activity.price;
-        // 赋值活动ID，为了点击跳转详情页
-        spu.activityId = activity.id;
-        // 赋值活动类型
-        spu.activityType = PromotionActivityTypeEnum.POINT.type;
+      const spu = await getSpuDetail(activity.spuId);
+      // 跳过无效商品，避免空值中断其它活动的展示 https://t.zsxq.com/vmwro
+      if (!spu) {
+        continue;
       }
-    });
+      spu.pointStock = activity.stock;
+      spu.pointTotalStock = activity.totalStock;
+      spu.point = activity.point;
+      spu.pointPrice = activity.price;
+      // 赋值活动ID，为了点击跳转详情页
+      spu.activityId = activity.id;
+      // 赋值活动类型
+      spu.activityType = PromotionActivityTypeEnum.POINT.type;
+      spuList.push(spu);
+    }
+    state.spuList.push(...spuList);
 
     // 只有双列布局时需要
     if (layoutType === LayoutTypeEnum.TWO_COL) {
