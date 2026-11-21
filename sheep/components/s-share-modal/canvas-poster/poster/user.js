@@ -1,5 +1,5 @@
 import sheep from '@/sheep';
-import { formatImageUrlProtocol, getWxaQrcode } from './index';
+import { formatImageUrlProtocol, getQrcodeCss, getWxaQrcode } from './index';
 import { measureTextWidth } from '@/utils/textUtils'; // 引入新封装的方法
 const user = async (poster) => {
   const width = poster.width;
@@ -16,7 +16,8 @@ const user = async (poster) => {
         'object-fit': 'contain',
         top: '0',
         left: '0',
-        zIndex: -1,
+        // 背景图需要绘制在根节点白底之后：painter 会在根节点背景之前绘制 zIndex < 0 的 fixed 节点，导致被白底覆盖
+        zIndex: 0,
       },
     },
     {
@@ -47,13 +48,7 @@ const user = async (poster) => {
     {
       type: 'qrcode',
       text: poster.shareInfo.link,
-      css: {
-        position: 'fixed',
-        left: width * 0.35,
-        top: width * 0.84,
-        width: width * 0.3,
-        height: width * 0.3,
-      },
+      css: getQrcodeCss(width * 0.35, width * 0.84, width * 0.3),
     },
     // #endif
     // #ifdef MP-WEIXIN

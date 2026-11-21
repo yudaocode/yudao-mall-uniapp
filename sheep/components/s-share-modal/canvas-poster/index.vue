@@ -48,7 +48,10 @@
    */
   import { reactive, ref, unref } from 'vue';
   import sheep from '@/sheep';
-  import { getPosterData } from '@/sheep/components/s-share-modal/canvas-poster/poster';
+  import {
+    getPosterData,
+    getPosterHeight,
+  } from '@/sheep/components/s-share-modal/canvas-poster/poster';
 
   const props = defineProps({
     show: {
@@ -67,6 +70,8 @@
       // 根节点若无尺寸，自动获取父级节点
       width: sheep.$platform.device.windowWidth * 0.9,
       height: 600,
+      // 画布白底：painter 默认不填充画布，导出的 PNG 未覆盖区域为透明，在相册等深色背景下会显示为黑色
+      backgroundColor: '#ffffff',
     },
     views: [],
   });
@@ -115,6 +120,8 @@
       width: poster.css.width,
       shareInfo: props.shareInfo,
     });
+    // 屏幕较宽时增高画布，避免二维码的白色静区被裁切
+    poster.css.height = getPosterHeight(poster.views);
     await renderPoster();
   }
 

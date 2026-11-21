@@ -1,5 +1,5 @@
 import sheep from '@/sheep';
-import { formatImageUrlProtocol, getWxaQrcode } from './index';
+import { formatImageUrlProtocol, getQrcodeCss, getWxaQrcode } from './index';
 
 const goods = async (poster) => {
   const width = poster.width;
@@ -15,7 +15,8 @@ const goods = async (poster) => {
         'object-fit': 'contain',
         top: '0',
         left: '0',
-        zIndex: -1,
+        // 背景图需要绘制在根节点白底之后：painter 会在根节点背景之前绘制 zIndex < 0 的 fixed 节点，导致被白底覆盖
+        zIndex: 0,
       },
     },
     {
@@ -97,13 +98,7 @@ const goods = async (poster) => {
     {
       type: 'qrcode',
       text: poster.shareInfo.link,
-      css: {
-        position: 'fixed',
-        left: width * 0.75,
-        top: width * 1.3,
-        width: width * 0.2,
-        height: width * 0.2,
-      },
+      css: getQrcodeCss(width * 0.75, width * 1.3, width * 0.2),
     },
     // #endif
     // #ifdef MP-WEIXIN
